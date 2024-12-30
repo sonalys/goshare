@@ -25,5 +25,5 @@ func New(dependencies Dependencies) *API {
 }
 
 func (a *API) GetHealthcheck(ctx context.Context, _ handlers.GetHealthcheckRequestObject) (handlers.GetHealthcheckResponseObject, error) {
-	return handlers.GetHealthcheck200JSONResponse{}, nil
+	return handlers.GetHealthcheck200Response{}, nil
 }

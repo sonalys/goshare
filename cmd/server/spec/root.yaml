@@ -11,19 +11,12 @@ paths:
   /healthcheck:
     get:
       summary: Healthcheck
+      description: Check if the service is healthy
       responses:
         default:
           $ref: "#/components/responses/ErrorResponse"
         '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: "OK"
+          description: Service is healthy
 
 components:
   responses:

@@ -219,15 +219,12 @@ type GetHealthcheckResponseObject interface {
 	VisitGetHealthcheckResponse(w http.ResponseWriter) error
 }
 
-type GetHealthcheck200JSONResponse struct {
-	Status *string `json:"status,omitempty"`
+type GetHealthcheck200Response struct {
 }
 
-func (response GetHealthcheck200JSONResponse) VisitGetHealthcheckResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
+func (response GetHealthcheck200Response) VisitGetHealthcheckResponse(w http.ResponseWriter) error {
 	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
+	return nil
 }
 
 type GetHealthcheckdefaultJSONResponse struct {
