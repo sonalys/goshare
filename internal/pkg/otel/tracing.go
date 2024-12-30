@@ -3,9 +3,13 @@ package otel
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
@@ -36,7 +40,7 @@ func Initialize(ctx context.Context) (shutdown func(context.Context) error, err 
 	otel.SetTextMapPropagator(prop)
 
 	// Set up trace provider.
-	tracerProvider, err := newTraceProvider()
+	tracerProvider, err := newTraceProvider(ctx)
 	if err != nil {
 		handleErr(err)
 		return
@@ -54,7 +58,23 @@ func newPropagator() propagation.TextMapPropagator {
 	)
 }
 
-func newTraceProvider() (*trace.TracerProvider, error) {
-	traceProvider := trace.NewTracerProvider()
+func newTraceProvider(ctx context.Context) (*trace.TracerProvider, error) {
+	traceExporter, err := newExporter(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create trace exporter: %w", err)
+	}
+
+	traceProvider := trace.NewTracerProvider(
+		trace.WithBatcher(traceExporter),
+		trace.WithResource(
+			resource.NewWithAttributes("com.goshare",
+				attribute.String("service.name", "goshare"),
+			),
+		),
+	)
 	return traceProvider, nil
+}
+
+func newExporter(ctx context.Context) (trace.SpanExporter, error) {
+	return otlptracegrpc.New(ctx, otlptracegrpc.WithInsecure())
 }

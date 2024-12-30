@@ -3,24 +3,36 @@ package main
 import (
 	"log/slog"
 	"os"
+	"strconv"
 	"time"
 )
 
 type Config struct {
-	ServiceName string
-	AddrPort    string
-	ReadTimeout time.Duration
+	ServiceName     string
+	AddrPort        string
+	ReadTimeout     time.Duration
+	EnableTelemetry bool
 }
 
-func NewConfigFromEnv() Config {
+func loadConfigFromEnv() Config {
 	cfg := Config{
-		ServiceName: "server",
-		AddrPort:    ":8080",
-		ReadTimeout: 10 * time.Second,
+		ServiceName:     "server",
+		AddrPort:        ":8080",
+		ReadTimeout:     10 * time.Second,
+		EnableTelemetry: true,
 	}
 
 	if serviceName, ok := os.LookupEnv("SERVICE_NAME"); ok {
 		cfg.ServiceName = serviceName
+	}
+
+	if enableTelemetry, ok := os.LookupEnv("ENABLE_TELEMETRY"); ok {
+		enableTelemetry, ok := strconv.ParseBool(enableTelemetry)
+		if ok == nil {
+			cfg.EnableTelemetry = enableTelemetry
+		} else {
+			slog.Warn("failed to parse ENABLE_TELEMETRY")
+		}
 	}
 
 	if addrPort, ok := os.LookupEnv("ADDR_PORT"); ok {

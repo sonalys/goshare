@@ -22,10 +22,7 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
-	cfg := Config{
-		AddrPort:    ":8080",
-		ReadTimeout: 10 * time.Second,
-	}
+	cfg := loadConfigFromEnv()
 
 	slog.Info("starting server", slog.String("version", version), slog.String("service_name", cfg.ServiceName))
 
