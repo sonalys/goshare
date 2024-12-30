@@ -18,6 +18,7 @@ import (
 // Defines values for ErrorCode.
 const (
 	InternalError     ErrorCode = "internal_error"
+	InvalidField      ErrorCode = "invalid_field"
 	InvalidParameter  ErrorCode = "invalid_parameter"
 	NotFound          ErrorCode = "not_found"
 	RequiredBody      ErrorCode = "required_body"
@@ -32,12 +33,6 @@ type Error struct {
 	// Message Human readable error message
 	Message  string         `json:"message"`
 	Metadata *ErrorMetadata `json:"metadata,omitempty"`
-
-	// TraceId Unique identifier for the error instance
-	TraceId openapi_types.UUID `json:"trace_id"`
-
-	// Url URL of the failed request
-	Url string `json:"url"`
 }
 
 // ErrorCode defines model for Error.Code.
@@ -51,6 +46,12 @@ type ErrorMetadata struct {
 // ErrorResponse defines model for ErrorResponse.
 type ErrorResponse struct {
 	Errors []Error `json:"errors"`
+
+	// TraceId Unique identifier for the error instance
+	TraceId openapi_types.UUID `json:"trace_id"`
+
+	// Url URL of the failed request
+	Url string `json:"url"`
 }
 
 // RegisterUserJSONBody defines parameters for RegisterUser.
@@ -246,6 +247,12 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 
 type ErrorResponseJSONResponse struct {
 	Errors []Error `json:"errors"`
+
+	// TraceId Unique identifier for the error instance
+	TraceId openapi_types.UUID `json:"trace_id"`
+
+	// Url URL of the failed request
+	Url string `json:"url"`
 }
 
 type GetHealthcheckRequestObject struct {
@@ -266,6 +273,12 @@ func (response GetHealthcheck200Response) VisitGetHealthcheckResponse(w http.Res
 type GetHealthcheckdefaultJSONResponse struct {
 	Body struct {
 		Errors []Error `json:"errors"`
+
+		// TraceId Unique identifier for the error instance
+		TraceId openapi_types.UUID `json:"trace_id"`
+
+		// Url URL of the failed request
+		Url string `json:"url"`
 	}
 	StatusCode int
 }
@@ -296,9 +309,24 @@ func (response RegisterUser200JSONResponse) VisitRegisterUserResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
+type RegisterUser409JSONResponse struct{ ErrorResponseJSONResponse }
+
+func (response RegisterUser409JSONResponse) VisitRegisterUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(409)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type RegisterUserdefaultJSONResponse struct {
 	Body struct {
 		Errors []Error `json:"errors"`
+
+		// TraceId Unique identifier for the error instance
+		TraceId openapi_types.UUID `json:"trace_id"`
+
+		// Url URL of the failed request
+		Url string `json:"url"`
 	}
 	StatusCode int
 }

@@ -22,12 +22,10 @@ func (m metadata) apply(err *handlers.Error) {
 	err.Metadata = (*handlers.ErrorMetadata)(&m)
 }
 
-func newError(r *http.Request, code handlers.ErrorCode, message string, opt ...errOpt) handlers.Error {
+func newError(code handlers.ErrorCode, message string, opt ...errOpt) handlers.Error {
 	err := handlers.Error{
-		TraceId:  types.UUID(trace.SpanContextFromContext(r.Context()).TraceID()),
 		Code:     code,
 		Message:  message,
-		Url:      r.URL.Path,
 		Metadata: &handlers.ErrorMetadata{},
 	}
 
@@ -38,41 +36,45 @@ func newError(r *http.Request, code handlers.ErrorCode, message string, opt ...e
 	return err
 }
 
+func newErrorResponse(r *http.Request, cause []handlers.Error) handlers.ErrorResponse {
+	return handlers.ErrorResponse{
+		TraceId: types.UUID(trace.SpanContextFromContext(r.Context()).TraceID()),
+		Url:     r.URL.Path,
+		Errors:  cause,
+	}
+}
+
 // requestErrorHandler is a handler for the openapi request handling errors.
 // It does not handle application errors, only errors related to the http request itself.
 func requestErrorHandler(w http.ResponseWriter, r *http.Request, err error) {
 	ctx := r.Context()
 	slog.ErrorContext(ctx, "request error", slog.Any("error", err))
 
-	var resp handlers.ErrorResponse
 	var cause handlers.Error
 
 	switch err := err.(type) {
 	case *handlers.RequiredHeaderError:
-		cause = newError(r, handlers.RequiredHeader, fmt.Sprintf("missing required header: %s", err.ParamName), metadata{Field: &err.ParamName})
+		cause = newError(handlers.RequiredHeader, fmt.Sprintf("missing required header: %s", err.ParamName), metadata{Field: &err.ParamName})
 	case *handlers.InvalidParamFormatError:
-		cause = newError(r, handlers.InvalidParameter, fmt.Sprintf("invalid format for parameter: %s", err.ParamName), metadata{Field: &err.ParamName})
+		cause = newError(handlers.InvalidParameter, fmt.Sprintf("invalid format for parameter: %s", err.ParamName), metadata{Field: &err.ParamName})
 	case *handlers.RequiredParamError:
-		cause = newError(r, handlers.RequiredParameter, fmt.Sprintf("missing required parameter: %s", err.ParamName), metadata{Field: &err.ParamName})
+		cause = newError(handlers.RequiredParameter, fmt.Sprintf("missing required parameter: %s", err.ParamName), metadata{Field: &err.ParamName})
 	case *handlers.UnmarshalingParamError:
-		cause = newError(r, handlers.InvalidParameter, fmt.Sprintf("failed to unmarshal parameter: %s", err.ParamName), metadata{Field: &err.ParamName})
+		cause = newError(handlers.InvalidParameter, fmt.Sprintf("failed to unmarshal parameter: %s", err.ParamName), metadata{Field: &err.ParamName})
 	case *handlers.TooManyValuesForParamError:
-		cause = newError(r, handlers.InvalidParameter, fmt.Sprintf("too many values for parameter: %s", err.ParamName), metadata{Field: &err.ParamName})
+		cause = newError(handlers.InvalidParameter, fmt.Sprintf("too many values for parameter: %s", err.ParamName), metadata{Field: &err.ParamName})
 	default:
 		switch {
 		// Special case where the request body reader is nil.
 		// The oapi-codegen handler will not wrap this error.
 		case errors.Is(err, io.EOF):
-			cause = newError(r, handlers.RequiredBody, "missing request body")
+			cause = newError(handlers.RequiredBody, "missing request body")
 		default:
-			cause = newError(r, handlers.InternalError, "internal server error")
+			cause = newError(handlers.InternalError, "internal server error")
 		}
 	}
 
-	cause.TraceId = types.UUID(trace.SpanContextFromContext(ctx).TraceID())
-	resp.Errors = append(resp.Errors, cause)
-
-	writeErrorResponse(ctx, w, http.StatusBadRequest, resp)
+	writeErrorResponse(ctx, w, http.StatusBadRequest, newErrorResponse(r, []handlers.Error{cause}))
 }
 
 // responseErrorHandler is a handler for the openapi response handling errors.
@@ -82,15 +84,12 @@ func responseErrorHandler(w http.ResponseWriter, r *http.Request, err error) {
 	ctx := r.Context()
 	slog.ErrorContext(ctx, "response error", slog.Any("error", err))
 
-	var resp handlers.ErrorResponse
-
-	cause := handlers.Error{
-		TraceId: types.UUID(trace.SpanContextFromContext(ctx).TraceID()),
-		Code:    handlers.InternalError,
-		Message: http.StatusText(http.StatusInternalServerError),
-		Url:     r.URL.Path,
+	errList := []handlers.Error{
+		{
+			Code:    handlers.InternalError,
+			Message: http.StatusText(http.StatusInternalServerError),
+		},
 	}
-	resp.Errors = append(resp.Errors, cause)
 
-	writeErrorResponse(ctx, w, http.StatusInternalServerError, resp)
+	writeErrorResponse(ctx, w, http.StatusInternalServerError, newErrorResponse(r, errList))
 }

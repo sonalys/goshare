@@ -1,13 +1,28 @@
 version: '3'
 
 tasks:
+  build-server:
+    cmd: go build -a -ldflags "-extldflags '-static' -X main.version=$VERSION" -o /app/bin/server /app/cmd/server
+    sources:
+      - ./*.go
+    generates:
+      - bin/server
+
+  build-migration:
+    cmd: go build -a -ldflags "-extldflags '-static' -X main.version=$VERSION" -o /app/bin/migration /app/cmd/migration
+    sources:
+      - ./*.go
+    generates:
+      - bin/migration
+
+  build:
+    deps: [build-server,build-migration]
+
   dev:
-    cmds:
-      - go run ./cmd/server/...
+    cmd: go run ./cmd/server/...
 
   generate-sql:
     cmd: go run github.com/sqlc-dev/sqlc/cmd/sqlc -f .config/.sqlc.yaml generate
 
   generate-openapi:
-    cmds:
-      - go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen --config=.config/.oapi-codegen.yaml cmd/server/spec/root.yaml
+    cmd: go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen --config=.config/.oapi-codegen.yaml cmd/server/spec/root.yaml
