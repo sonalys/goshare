@@ -1,0 +1,82 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Rest API for GoShare
+
+servers:
+  - url: http://localhost:8080
+    description: Development server
+
+paths:
+  /healthcheck:
+    get:
+      summary: Healthcheck
+      responses:
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "OK"
+
+components:
+  responses:
+    ErrorResponse:
+      description: An error has occurred
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - errors
+            properties:
+              errors:
+                type: array
+                minItems: 1
+                items:
+                  $ref: "#/components/schemas/Error"
+  schemas:
+    ErrorMetadata:
+      type: object
+      properties:
+        field:
+          type: string
+          example: "name"
+    Error:
+      type: object
+      required:
+        - message
+        - code
+        - url
+        - trace_id
+      properties:
+        trace_id:
+          type: string
+          format: uuid
+          description: Unique identifier for the error instance
+          example: "b6b7b3b0-1b4d-4f4b-8b3e-1b4d4f4b8b3e"
+        code:
+          type: string
+          enum:
+            - "not_found"
+            - "required_header"
+            - "required_parameter"
+            - "invalid_parameter"
+            - "internal_error"
+            - "required_body"
+        url:
+          type: string
+          description: URL of the failed request
+          example: "/v1/users"
+        message:
+          type: string
+          description: Human readable error message
+          example: "Missing parameter 'name'"
+        metadata:
+          $ref: "#/components/schemas/ErrorMetadata"

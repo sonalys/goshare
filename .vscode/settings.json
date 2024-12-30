@@ -1,0 +1,13 @@
+{
+    "github.copilot.chat.commitMessageGeneration.instructions": [
+        {
+            "text": "Use the format: \"<type>(<scope>): <subject>\", where <type> is one of the following: feat, fix, docs, style, refactor, test, chore, revert, ci.",
+        },
+        {
+            "text": "Avoid commenting on the content of the files, and instead focus on the changes themselves.",
+        },
+        {
+            "text": "If you need to provide more context, use the body of the commit message.",
+        },
+    ],
+}
