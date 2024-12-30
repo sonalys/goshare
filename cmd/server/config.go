@@ -7,14 +7,20 @@ import (
 )
 
 type Config struct {
+	ServiceName string
 	AddrPort    string
 	ReadTimeout time.Duration
 }
 
 func NewConfigFromEnv() Config {
 	cfg := Config{
+		ServiceName: "server",
 		AddrPort:    ":8080",
 		ReadTimeout: 10 * time.Second,
+	}
+
+	if serviceName, ok := os.LookupEnv("SERVICE_NAME"); ok {
+		cfg.ServiceName = serviceName
 	}
 
 	if addrPort, ok := os.LookupEnv("ADDR_PORT"); ok {

@@ -38,7 +38,7 @@ func notFoundHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func InitializeHandler(api *api.API) http.Handler {
+func InitializeHandler(api *api.API, serviceName string) http.Handler {
 	strictHandlerOptions := handlers.StrictHTTPServerOptions{
 		RequestErrorHandlerFunc:  requestErrorHandler,
 		ResponseErrorHandlerFunc: responseErrorHandler,
@@ -58,7 +58,7 @@ func InitializeHandler(api *api.API) http.Handler {
 	handler := handlers.HandlerWithOptions(strictHandler, handlerOptions)
 
 	// Wrap the handler with OpenTelemetry propagation.
-	otelHandler := otelhttp.NewHandler(handler, "/", otelhttp.WithServerName("goshare"))
+	otelHandler := otelhttp.NewHandler(handler, "/", otelhttp.WithServerName(serviceName))
 
 	return otelHandler
 }

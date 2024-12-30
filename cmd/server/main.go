@@ -28,7 +28,7 @@ func main() {
 		ReadTimeout: 10 * time.Second,
 	}
 
-	slog.Info("starting server", slog.String("version", version))
+	slog.Info("starting server", slog.String("version", version), slog.String("service_name", cfg.ServiceName))
 
 	otelShutdown, err := otel.Initialize(ctx)
 	if err != nil {
@@ -37,7 +37,7 @@ func main() {
 	}
 
 	api := api.New(api.Dependencies{})
-	handler := InitializeHandler(api)
+	handler := InitializeHandler(api, cfg.ServiceName)
 
 	server := NewServer(cfg, handler)
 
