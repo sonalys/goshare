@@ -12,11 +12,6 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
-type (
-	Secrets struct {
-	}
-)
-
 func writeErrorResponse(ctx context.Context, w http.ResponseWriter, code int, resp handlers.ErrorResponse) {
 	w.WriteHeader(code)
 	w.Header().Set("Content-Type", "application/problem+json")

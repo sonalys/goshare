@@ -15,7 +15,7 @@ import (
 
 // Initialize bootstraps the OpenTelemetry pipeline.
 // If it does not return an error, make sure to call shutdown for proper cleanup.
-func Initialize(ctx context.Context) (shutdown func(context.Context) error, err error) {
+func Initialize(ctx context.Context, endpoint string) (shutdown func(context.Context) error, err error) {
 	var shutdownFuncs []func(context.Context) error
 
 	// shutdown calls cleanup functions registered via shutdownFuncs.
@@ -40,7 +40,7 @@ func Initialize(ctx context.Context) (shutdown func(context.Context) error, err 
 	otel.SetTextMapPropagator(prop)
 
 	// Set up trace provider.
-	tracerProvider, err := newTraceProvider(ctx)
+	tracerProvider, err := newTraceProvider(ctx, endpoint)
 	if err != nil {
 		handleErr(err)
 		return
@@ -58,8 +58,8 @@ func newPropagator() propagation.TextMapPropagator {
 	)
 }
 
-func newTraceProvider(ctx context.Context) (*trace.TracerProvider, error) {
-	traceExporter, err := newExporter(ctx)
+func newTraceProvider(ctx context.Context, endpoint string) (*trace.TracerProvider, error) {
+	traceExporter, err := newExporter(ctx, endpoint)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create trace exporter: %w", err)
 	}
@@ -75,6 +75,9 @@ func newTraceProvider(ctx context.Context) (*trace.TracerProvider, error) {
 	return traceProvider, nil
 }
 
-func newExporter(ctx context.Context) (trace.SpanExporter, error) {
-	return otlptracegrpc.New(ctx, otlptracegrpc.WithInsecure())
+func newExporter(ctx context.Context, endpoint string) (trace.SpanExporter, error) {
+	return otlptracegrpc.New(ctx,
+		otlptracegrpc.WithInsecure(),
+		otlptracegrpc.WithEndpoint(endpoint),
+	)
 }

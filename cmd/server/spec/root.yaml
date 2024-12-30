@@ -10,6 +10,7 @@ servers:
 paths:
   /healthcheck:
     get:
+      operationId: GetHealthcheck
       summary: Healthcheck
       description: Check if the service is healthy
       responses:
@@ -17,6 +18,55 @@ paths:
           $ref: "#/components/responses/ErrorResponse"
         '200':
           description: Service is healthy
+
+  /users:
+    post:
+      operationId: RegisterUser
+      description: Registers a new user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - first_name
+                - last_name
+                - email
+                - password
+              properties:
+                first_name:
+                  type: string
+                  description: User's first name
+                  example: "John"
+                last_name:
+                  type: string
+                  description: User's last name
+                  example: "Doe"
+                email:
+                  type: string
+                  format: email
+                  description: User's email address
+                  example: "john.doe@example.com"
+                password:
+                  type: string
+                  format: password
+                  description: User's password
+                  example: "P@ssw0rd"
+      responses:
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+        '200':
+          description: User was registered
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                properties:
+                  id:
+                    type: string
+                    format: uuid
 
 components:
   responses:

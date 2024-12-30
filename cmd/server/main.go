@@ -10,6 +10,7 @@ import (
 	"github.com/sonalys/goshare/cmd/server/api"
 	"github.com/sonalys/goshare/internal/pkg/logger"
 	"github.com/sonalys/goshare/internal/pkg/otel"
+	"github.com/sonalys/goshare/internal/pkg/secrets"
 )
 
 var version string = "dev"
@@ -26,13 +27,21 @@ func main() {
 
 	slog.Info("starting server", slog.String("version", version), slog.String("service_name", cfg.ServiceName))
 
-	otelShutdown, err := otel.Initialize(ctx)
+	otelShutdown, err := otel.Initialize(ctx, cfg.TelemetryEndpoint)
 	if err != nil {
 		slog.Error("failed to initialize otel", slog.Any("error", err))
 		return
 	}
 
-	api := api.New(api.Dependencies{})
+	secrets := secrets.LoadSecrets()
+
+	infrastructure := loadInfrastructure(ctx, secrets)
+	repositories := loadRepositories(infrastructure)
+	controllers := loadControllers(repositories)
+
+	api := api.New(api.Dependencies{
+		ParticipantRegister: controllers.participantController,
+	})
 	handler := InitializeHandler(api, cfg.ServiceName)
 
 	server := NewServer(cfg, handler)

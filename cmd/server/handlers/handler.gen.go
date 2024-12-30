@@ -53,11 +53,32 @@ type ErrorResponse struct {
 	Errors []Error `json:"errors"`
 }
 
+// RegisterUserJSONBody defines parameters for RegisterUser.
+type RegisterUserJSONBody struct {
+	// Email User's email address
+	Email openapi_types.Email `json:"email"`
+
+	// FirstName User's first name
+	FirstName string `json:"first_name"`
+
+	// LastName User's last name
+	LastName string `json:"last_name"`
+
+	// Password User's password
+	Password string `json:"password"`
+}
+
+// RegisterUserJSONRequestBody defines body for RegisterUser for application/json ContentType.
+type RegisterUserJSONRequestBody RegisterUserJSONBody
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// Healthcheck
 	// (GET /healthcheck)
 	GetHealthcheck(w http.ResponseWriter, r *http.Request)
+
+	// (POST /users)
+	RegisterUser(w http.ResponseWriter, r *http.Request)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -74,6 +95,20 @@ func (siw *ServerInterfaceWrapper) GetHealthcheck(w http.ResponseWriter, r *http
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetHealthcheck(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// RegisterUser operation middleware
+func (siw *ServerInterfaceWrapper) RegisterUser(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.RegisterUser(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -204,6 +239,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	}
 
 	m.HandleFunc("GET "+options.BaseURL+"/healthcheck", wrapper.GetHealthcheck)
+	m.HandleFunc("POST "+options.BaseURL+"/users", wrapper.RegisterUser)
 
 	return m
 }
@@ -241,11 +277,47 @@ func (response GetHealthcheckdefaultJSONResponse) VisitGetHealthcheckResponse(w 
 	return json.NewEncoder(w).Encode(response.Body)
 }
 
+type RegisterUserRequestObject struct {
+	Body *RegisterUserJSONRequestBody
+}
+
+type RegisterUserResponseObject interface {
+	VisitRegisterUserResponse(w http.ResponseWriter) error
+}
+
+type RegisterUser200JSONResponse struct {
+	Id openapi_types.UUID `json:"id"`
+}
+
+func (response RegisterUser200JSONResponse) VisitRegisterUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type RegisterUserdefaultJSONResponse struct {
+	Body struct {
+		Errors []Error `json:"errors"`
+	}
+	StatusCode int
+}
+
+func (response RegisterUserdefaultJSONResponse) VisitRegisterUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// Healthcheck
 	// (GET /healthcheck)
 	GetHealthcheck(ctx context.Context, request GetHealthcheckRequestObject) (GetHealthcheckResponseObject, error)
+
+	// (POST /users)
+	RegisterUser(ctx context.Context, request RegisterUserRequestObject) (RegisterUserResponseObject, error)
 }
 
 type StrictHandlerFunc = strictnethttp.StrictHTTPHandlerFunc
@@ -294,6 +366,37 @@ func (sh *strictHandler) GetHealthcheck(w http.ResponseWriter, r *http.Request) 
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetHealthcheckResponseObject); ok {
 		if err := validResponse.VisitGetHealthcheckResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// RegisterUser operation middleware
+func (sh *strictHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
+	var request RegisterUserRequestObject
+
+	var body RegisterUserJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.RegisterUser(ctx, request.(RegisterUserRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "RegisterUser")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(RegisterUserResponseObject); ok {
+		if err := validResponse.VisitRegisterUserResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

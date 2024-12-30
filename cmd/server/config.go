@@ -8,18 +8,20 @@ import (
 )
 
 type Config struct {
-	ServiceName     string
-	AddrPort        string
-	ReadTimeout     time.Duration
-	EnableTelemetry bool
+	ServiceName       string
+	AddrPort          string
+	ReadTimeout       time.Duration
+	EnableTelemetry   bool
+	TelemetryEndpoint string
 }
 
 func loadConfigFromEnv() Config {
 	cfg := Config{
-		ServiceName:     "server",
-		AddrPort:        ":8080",
-		ReadTimeout:     10 * time.Second,
-		EnableTelemetry: true,
+		ServiceName:       "server",
+		AddrPort:          ":8080",
+		ReadTimeout:       10 * time.Second,
+		EnableTelemetry:   true,
+		TelemetryEndpoint: "tempo:4318",
 	}
 
 	if serviceName, ok := os.LookupEnv("SERVICE_NAME"); ok {

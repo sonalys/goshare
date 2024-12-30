@@ -5,6 +5,9 @@ tasks:
     cmds:
       - go run ./cmd/server/...
 
+  generate-sql:
+    cmd: go run github.com/sqlc-dev/sqlc/cmd/sqlc -f .config/.sqlc.yaml generate
+
   generate-openapi:
     cmds:
       - go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen --config=.config/.oapi-codegen.yaml cmd/server/spec/root.yaml
