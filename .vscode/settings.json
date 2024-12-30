@@ -1,7 +1,7 @@
 {
     "github.copilot.chat.commitMessageGeneration.instructions": [
         {
-            "text": "Use the format: \"<type>(<scope>): <subject>\", where <type> is one of the following: feat, fix, docs, style, refactor, test, chore, revert, ci.",
+            "text": "Use the format: \"<type>(<scope>): <subject>\", where <type> is one of the following: feat, fix, docs, style, refactor, test, chore, revert, ci. <scope> is the relative path of the package of the main scope of the changes.",
         },
         {
             "text": "Avoid commenting on the content of the files, and instead focus on the changes themselves.",
