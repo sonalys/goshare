@@ -67,9 +67,6 @@ paths:
                   id:
                     type: string
                     format: uuid
-        '409':
-          $ref: "#/components/responses/ErrorResponse"
-
 
 components:
   responses:

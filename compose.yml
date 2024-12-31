@@ -1,5 +1,7 @@
 services:
   goshareInit:
+    depends_on:
+      - postgres
     build:
       context: .
       dockerfile: Dockerfile
@@ -11,6 +13,7 @@ services:
     depends_on:
       - tempo
       - goshareInit
+      - postgres
     build:
       context: .
       dockerfile: Dockerfile

@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type Participant struct {
+type User struct {
 	ID              uuid.UUID
 	FirstName       string
 	LastName        string
@@ -18,5 +18,5 @@ type Participant struct {
 }
 
 var (
-	ErrParticipantEmailAlreadyExists = errors.New("participant with email already exists")
+	ErrEmailAlreadyRegistered = errors.New("email already registered")
 )

@@ -1,29 +1,32 @@
-package participants
+package users
 
 import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"log/slog"
 	"net/mail"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/sonalys/goshare/internal/pkg/otel"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
+	"go.opentelemetry.io/otel/codes"
 )
 
 type (
 	Repository interface {
-		Create(ctx context.Context, participant *v1.Participant) error
+		Create(ctx context.Context, participant *v1.User) error
 	}
 
-	ParticipantController struct {
+	UserController struct {
 		repository Repository
 	}
 )
 
-func NewParticipantController(repository Repository) *ParticipantController {
-	return &ParticipantController{
+func NewParticipantController(repository Repository) *UserController {
+	return &UserController{
 		repository: repository,
 	}
 }
@@ -71,8 +74,11 @@ func hashPassword(password, salt string) string {
 	return hex.EncodeToString(hash.Sum(nil))
 }
 
-func (c *ParticipantController) Register(ctx context.Context, req RegisterRequest) (*RegisterResponse, error) {
-	participant := &v1.Participant{
+func (c *UserController) Register(ctx context.Context, req RegisterRequest) (*RegisterResponse, error) {
+	ctx, span := otel.Tracer.Start(ctx, "user.register")
+	defer span.End()
+
+	user := &v1.User{
 		ID:              uuid.New(),
 		FirstName:       req.FirstName,
 		LastName:        req.LastName,
@@ -82,11 +88,15 @@ func (c *ParticipantController) Register(ctx context.Context, req RegisterReques
 		CreatedAt:       time.Now(),
 	}
 
-	if err := c.repository.Create(ctx, participant); err != nil {
-		return nil, fmt.Errorf("failed to create participant: %w", err)
+	if err := c.repository.Create(ctx, user); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
+	span.SetStatus(codes.Ok, "")
+	slog.InfoContext(ctx, "user registered", slog.String("id", user.ID.String()))
+
 	return &RegisterResponse{
-		ID: participant.ID,
+		ID: user.ID,
 	}, nil
 }

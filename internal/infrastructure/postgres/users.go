@@ -12,12 +12,12 @@ import (
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
-type ParticipantRepository struct {
+type UsersRepository struct {
 	client *Client
 }
 
-func NewParticipantRepository(client *Client) *ParticipantRepository {
-	return &ParticipantRepository{
+func NewUsersRepository(client *Client) *UsersRepository {
+	return &UsersRepository{
 		client: client,
 	}
 }
@@ -36,7 +36,7 @@ func convertTime(from time.Time) pgtype.Timestamp {
 	}
 }
 
-func (r *ParticipantRepository) Create(ctx context.Context, participant *v1.Participant) error {
+func (r *UsersRepository) Create(ctx context.Context, participant *v1.User) error {
 	return mapError(r.client.queries().CreateParticipant(ctx, queries.CreateParticipantParams{
 		ID:           convertUUID(participant.ID),
 		FirstName:    participant.FirstName,
@@ -59,7 +59,7 @@ func mapError(err error) error {
 	case err == nil:
 		return nil
 	case isConstraintError(err, constraintParticipantUniqueEmail):
-		return v1.ErrParticipantEmailAlreadyExists
+		return v1.ErrEmailAlreadyRegistered
 	default:
 		return err
 	}

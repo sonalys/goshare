@@ -21,7 +21,7 @@ func loadConfigFromEnv() Config {
 		AddrPort:          ":8080",
 		ReadTimeout:       10 * time.Second,
 		EnableTelemetry:   true,
-		TelemetryEndpoint: "tempo:4318",
+		TelemetryEndpoint: "http://tempo:4317/v1/traces",
 	}
 
 	if serviceName, ok := os.LookupEnv("SERVICE_NAME"); ok {

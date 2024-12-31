@@ -1,15 +1,15 @@
 package main
 
-import "github.com/sonalys/goshare/internal/application/participants"
+import "github.com/sonalys/goshare/internal/application/users"
 
 type controllers struct {
-	participantController *participants.ParticipantController
+	participantController *users.UserController
 }
 
 func loadControllers(
 	repositories *repositories,
 ) *controllers {
 	return &controllers{
-		participantController: participants.NewParticipantController(repositories.ParticipantRepository),
+		participantController: users.NewParticipantController(repositories.ParticipantRepository),
 	}
 }

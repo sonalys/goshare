@@ -13,6 +13,13 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
+const name = "github.com/sonalys/goshare"
+
+var (
+	Tracer = otel.Tracer(name)
+	Meter  = otel.Meter(name)
+)
+
 // Initialize bootstraps the OpenTelemetry pipeline.
 // If it does not return an error, make sure to call shutdown for proper cleanup.
 func Initialize(ctx context.Context, endpoint string) (shutdown func(context.Context) error, err error) {
@@ -78,6 +85,6 @@ func newTraceProvider(ctx context.Context, endpoint string) (*trace.TracerProvid
 func newExporter(ctx context.Context, endpoint string) (trace.SpanExporter, error) {
 	return otlptracegrpc.New(ctx,
 		otlptracegrpc.WithInsecure(),
-		otlptracegrpc.WithEndpoint(endpoint),
+		otlptracegrpc.WithEndpointURL(endpoint),
 	)
 }

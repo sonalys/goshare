@@ -4,16 +4,16 @@ import (
 	"context"
 
 	"github.com/sonalys/goshare/cmd/server/handlers"
-	"github.com/sonalys/goshare/internal/application/participants"
+	"github.com/sonalys/goshare/internal/application/users"
 )
 
 type (
-	ParticipantRegister interface {
-		Register(ctx context.Context, req participants.RegisterRequest) (*participants.RegisterResponse, error)
+	UserRegister interface {
+		Register(ctx context.Context, req users.RegisterRequest) (*users.RegisterResponse, error)
 	}
 
 	Dependencies struct {
-		ParticipantRegister
+		UserRegister
 	}
 
 	API struct {

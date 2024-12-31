@@ -309,15 +309,6 @@ func (response RegisterUser200JSONResponse) VisitRegisterUserResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
-type RegisterUser409JSONResponse struct{ ErrorResponseJSONResponse }
-
-func (response RegisterUser409JSONResponse) VisitRegisterUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(409)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
 type RegisterUserdefaultJSONResponse struct {
 	Body struct {
 		Errors []Error `json:"errors"`
