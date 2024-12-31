@@ -21,7 +21,7 @@ func loadConfigFromEnv() Config {
 		AddrPort:          ":8080",
 		ReadTimeout:       10 * time.Second,
 		EnableTelemetry:   true,
-		TelemetryEndpoint: "http://jaeger:4317/v1/traces",
+		TelemetryEndpoint: "jaeger:4317",
 	}
 
 	if serviceName, ok := os.LookupEnv("SERVICE_NAME"); ok {

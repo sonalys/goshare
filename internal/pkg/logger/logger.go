@@ -9,56 +9,52 @@ import (
 	"runtime"
 
 	"github.com/lmittmann/tint"
-	"go.opentelemetry.io/otel/trace"
+	slogotel "github.com/remychantenay/slog-otel"
 )
 
-type otelHandler struct {
+type fieldFormatterHandler struct {
 	slog.Handler
 }
 
 func NewLogger() *slog.Logger {
 	handler := tint.NewHandler(os.Stdout, nil)
-
-	internalHandler := &otelHandler{handler}
-
+	otelHandler := slogotel.OtelHandler{
+		Next: handler,
+	}
+	internalHandler := &fieldFormatterHandler{otelHandler}
 	return slog.New(internalHandler)
 }
 
-func (h *otelHandler) Handle(ctx context.Context, record slog.Record) error {
-	span := trace.SpanContextFromContext(ctx)
-
-	if span.HasSpanID() {
-		record.AddAttrs(slog.String("span_id", span.SpanID().String()))
+func generateStack(pc uintptr) string {
+	type StackEntry struct {
+		Function string `json:"function"`
+		File     string `json:"file"`
+		Line     string `json:"line"`
 	}
 
-	if span.HasTraceID() {
-		record.AddAttrs(slog.String("trace_id", span.TraceID().String()))
+	frames := runtime.CallersFrames([]uintptr{pc})
+	stack := make([]StackEntry, 0, 1)
+
+	for {
+		frame, more := frames.Next()
+		stack = append(stack, StackEntry{
+			Function: frame.Function,
+			File:     frame.File,
+			Line:     fmt.Sprint(frame.Line),
+		})
+		if !more {
+			break
+		}
 	}
 
+	stackJSON, _ := json.Marshal(stack)
+
+	return string(stackJSON)
+}
+
+func (h *fieldFormatterHandler) Handle(ctx context.Context, record slog.Record) error {
 	if record.Level >= slog.LevelError {
-		type StackEntry struct {
-			Function string `json:"function"`
-			File     string `json:"file"`
-			Line     string `json:"line"`
-		}
-
-		frames := runtime.CallersFrames([]uintptr{record.PC})
-		var stack []StackEntry
-		for {
-			frame, more := frames.Next()
-			stack = append(stack, StackEntry{
-				Function: frame.Function,
-				File:     frame.File,
-				Line:     fmt.Sprint(frame.Line),
-			})
-			if !more {
-				break
-			}
-		}
-
-		stackJSON, _ := json.Marshal(stack)
-
-		record.AddAttrs(slog.Any("stack", string(stackJSON)))
+		record.AddAttrs(slog.Any("stack", generateStack(record.PC)))
 	}
 
 	return h.Handler.Handle(ctx, record)

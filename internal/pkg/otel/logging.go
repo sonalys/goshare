@@ -11,7 +11,7 @@ import (
 func newLogExporter(ctx context.Context, endpoint string) (log.Exporter, error) {
 	return otlploggrpc.New(ctx,
 		otlploggrpc.WithInsecure(),
-		otlploggrpc.WithEndpointURL(endpoint),
+		otlploggrpc.WithEndpoint(endpoint),
 	)
 }
 

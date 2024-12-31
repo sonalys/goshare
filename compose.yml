@@ -84,6 +84,8 @@ services:
       - "16686:16686" # Web UI
       - "4317:4317" # otlp grpc
       - "4318:4318" # otlp http
+    volumes:
+      - jaeger-data:/data
 
   postgres:
     image: postgres:17
@@ -101,3 +103,4 @@ volumes:
   grafana-data: {}
   tempo-data: {}
   postgres-data: {}
+  jaeger-data: {}

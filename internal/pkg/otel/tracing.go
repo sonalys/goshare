@@ -19,6 +19,7 @@ const name = "github.com/sonalys/goshare"
 var (
 	Tracer = otel.Tracer(name)
 	Meter  = otel.Meter(name)
+	Logger = global.Logger(name)
 )
 
 // Initialize bootstraps the OpenTelemetry pipeline.
@@ -98,7 +99,7 @@ func newTraceProvider(ctx context.Context, endpoint string, res *resource.Resour
 func newTraceExporter(ctx context.Context, endpoint string) (trace.SpanExporter, error) {
 	return otlptracegrpc.New(ctx,
 		otlptracegrpc.WithInsecure(),
-		otlptracegrpc.WithEndpointURL(endpoint),
+		otlptracegrpc.WithEndpoint(endpoint),
 	)
 }
 
