@@ -15,6 +15,10 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+const (
+	CookieAuthScopes = "cookieAuth.Scopes"
+)
+
 // Defines values for ErrorCode.
 const (
 	EmailPasswordMismatch ErrorCode = "email_password_mismatch"
@@ -91,6 +95,9 @@ type ServerInterface interface {
 
 	// (POST /authentication/login)
 	Login(w http.ResponseWriter, r *http.Request)
+
+	// (GET /authentication/whoami)
+	GetIdentity(w http.ResponseWriter, r *http.Request)
 	// Healthcheck
 	// (GET /healthcheck)
 	GetHealthcheck(w http.ResponseWriter, r *http.Request)
@@ -113,6 +120,26 @@ func (siw *ServerInterfaceWrapper) Login(w http.ResponseWriter, r *http.Request)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.Login(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetIdentity operation middleware
+func (siw *ServerInterfaceWrapper) GetIdentity(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, CookieAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetIdentity(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -271,6 +298,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	}
 
 	m.HandleFunc("POST "+options.BaseURL+"/authentication/login", wrapper.Login)
+	m.HandleFunc("GET "+options.BaseURL+"/authentication/whoami", wrapper.GetIdentity)
 	m.HandleFunc("GET "+options.BaseURL+"/healthcheck", wrapper.GetHealthcheck)
 	m.HandleFunc("POST "+options.BaseURL+"/users", wrapper.RegisterUser)
 
@@ -323,6 +351,46 @@ type LogindefaultJSONResponse struct {
 }
 
 func (response LogindefaultJSONResponse) VisitLoginResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
+type GetIdentityRequestObject struct {
+}
+
+type GetIdentityResponseObject interface {
+	VisitGetIdentityResponse(w http.ResponseWriter) error
+}
+
+type GetIdentity200JSONResponse struct {
+	// Email User's email address
+	Email  openapi_types.Email `json:"email"`
+	UserId openapi_types.UUID  `json:"user_id"`
+}
+
+func (response GetIdentity200JSONResponse) VisitGetIdentityResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetIdentitydefaultJSONResponse struct {
+	Body struct {
+		Errors []Error `json:"errors"`
+
+		// TraceId Unique identifier for the error instance
+		TraceId openapi_types.UUID `json:"trace_id"`
+
+		// Url URL of the failed request
+		Url string `json:"url"`
+	}
+	StatusCode int
+}
+
+func (response GetIdentitydefaultJSONResponse) VisitGetIdentityResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(response.StatusCode)
 
@@ -408,6 +476,9 @@ type StrictServerInterface interface {
 
 	// (POST /authentication/login)
 	Login(ctx context.Context, request LoginRequestObject) (LoginResponseObject, error)
+
+	// (GET /authentication/whoami)
+	GetIdentity(ctx context.Context, request GetIdentityRequestObject) (GetIdentityResponseObject, error)
 	// Healthcheck
 	// (GET /healthcheck)
 	GetHealthcheck(ctx context.Context, request GetHealthcheckRequestObject) (GetHealthcheckResponseObject, error)
@@ -469,6 +540,30 @@ func (sh *strictHandler) Login(w http.ResponseWriter, r *http.Request) {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(LoginResponseObject); ok {
 		if err := validResponse.VisitLoginResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetIdentity operation middleware
+func (sh *strictHandler) GetIdentity(w http.ResponseWriter, r *http.Request) {
+	var request GetIdentityRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetIdentity(ctx, request.(GetIdentityRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetIdentity")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetIdentityResponseObject); ok {
+		if err := validResponse.VisitGetIdentityResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

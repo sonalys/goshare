@@ -2,6 +2,7 @@ package logger
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"os"
@@ -55,7 +56,9 @@ func (h *otelHandler) Handle(ctx context.Context, record slog.Record) error {
 			}
 		}
 
-		record.AddAttrs(slog.Any("stack", stack))
+		stackJSON, _ := json.Marshal(stack)
+
+		record.AddAttrs(slog.Any("stack", string(stackJSON)))
 	}
 
 	return h.Handler.Handle(ctx, record)

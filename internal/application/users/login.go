@@ -47,6 +47,7 @@ func (c *Controller) Login(ctx context.Context, req LoginRequest) (*LoginRespons
 		slog.ErrorContext(ctx, "invalid login request", slog.Any("error", err))
 		return nil, err
 	}
+	span.AddEvent("request validated")
 
 	user, err := c.repository.FindByEmail(ctx, req.Email)
 	if err != nil {
@@ -54,6 +55,7 @@ func (c *Controller) Login(ctx context.Context, req LoginRequest) (*LoginRespons
 		slog.ErrorContext(ctx, "could not find user by email", slog.Any("error", err))
 		return nil, v1.ErrEmailPasswordMismatch
 	}
+	span.AddEvent("user found")
 
 	// Use bcrypt to compare the hashed password
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password))
@@ -62,12 +64,15 @@ func (c *Controller) Login(ctx context.Context, req LoginRequest) (*LoginRespons
 		slog.ErrorContext(ctx, "password hash mismatch", slog.Any("error", err))
 		return nil, v1.ErrEmailPasswordMismatch
 	}
+	span.AddEvent("hash compared")
 
 	// Create JWT token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"email": req.Email,
-		"exp":   time.Now().Add(time.Hour * 72).Unix(),
+		"email":  req.Email,
+		"userID": user.ID.String(),
+		"exp":    time.Now().Add(time.Hour * 72).Unix(),
 	})
+	span.AddEvent("jwt generated")
 
 	// Get the secret key from environment variables
 	secretKey := "my-secret-key"
@@ -79,6 +84,7 @@ func (c *Controller) Login(ctx context.Context, req LoginRequest) (*LoginRespons
 		slog.ErrorContext(ctx, "could not sign JWT token", slog.Any("error", err))
 		return nil, fmt.Errorf("failed to sign token: %v", err)
 	}
+	span.AddEvent("jwt signed")
 
 	span.SetStatus(codes.Ok, "")
 	slog.InfoContext(ctx, "user logged in", slog.String("id", user.ID.String()))

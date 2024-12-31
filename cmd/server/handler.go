@@ -49,6 +49,7 @@ func InitializeHandler(client *api.API, serviceName string) http.Handler {
 
 	strictMiddlewares := []handlers.StrictMiddlewareFunc{
 		api.InjectRequestContextDataMiddleware,
+		api.AuthMiddleware,
 	}
 	strictHandler := handlers.NewStrictHandlerWithOptions(client, strictMiddlewares, strictHandlerOptions)
 

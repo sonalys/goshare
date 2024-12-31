@@ -6,11 +6,12 @@ import (
 	"fmt"
 
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/log/global"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 )
 
 const name = "github.com/sonalys/goshare"
@@ -42,12 +43,28 @@ func Initialize(ctx context.Context, endpoint string) (shutdown func(context.Con
 		err = errors.Join(inErr, shutdown(ctx))
 	}
 
+	// Create resource.
+	res, err := newResource()
+	if err != nil {
+		panic(err)
+	}
+
+	// Create a logger provider.
+	// You can pass this instance directly when creating bridges.
+	loggerProvider, err := newLoggerProvider(ctx, endpoint, res)
+	if err != nil {
+		panic(err)
+	}
+	global.SetLoggerProvider(loggerProvider)
+
+	shutdownFuncs = append(shutdownFuncs, loggerProvider.Shutdown)
+
 	// Set up propagator.
 	prop := newPropagator()
 	otel.SetTextMapPropagator(prop)
 
 	// Set up trace provider.
-	tracerProvider, err := newTraceProvider(ctx, endpoint)
+	tracerProvider, err := newTraceProvider(ctx, endpoint, res)
 	if err != nil {
 		handleErr(err)
 		return
@@ -65,26 +82,30 @@ func newPropagator() propagation.TextMapPropagator {
 	)
 }
 
-func newTraceProvider(ctx context.Context, endpoint string) (*trace.TracerProvider, error) {
-	traceExporter, err := newExporter(ctx, endpoint)
+func newTraceProvider(ctx context.Context, endpoint string, res *resource.Resource) (*trace.TracerProvider, error) {
+	traceExporter, err := newTraceExporter(ctx, endpoint)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create trace exporter: %w", err)
 	}
 
 	traceProvider := trace.NewTracerProvider(
 		trace.WithBatcher(traceExporter),
-		trace.WithResource(
-			resource.NewWithAttributes("com.goshare",
-				attribute.String("service.name", "goshare"),
-			),
-		),
+		trace.WithResource(res),
 	)
 	return traceProvider, nil
 }
 
-func newExporter(ctx context.Context, endpoint string) (trace.SpanExporter, error) {
+func newTraceExporter(ctx context.Context, endpoint string) (trace.SpanExporter, error) {
 	return otlptracegrpc.New(ctx,
 		otlptracegrpc.WithInsecure(),
 		otlptracegrpc.WithEndpointURL(endpoint),
 	)
+}
+
+func newResource() (*resource.Resource, error) {
+	return resource.Merge(resource.Default(),
+		resource.NewWithAttributes(semconv.SchemaURL,
+			semconv.ServiceName("goshare"),
+			semconv.ServiceVersion("0.1.0"),
+		))
 }
