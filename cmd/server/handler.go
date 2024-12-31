@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"net/http"
-	"path"
 
 	"github.com/sonalys/goshare/cmd/server/api"
 	"github.com/sonalys/goshare/cmd/server/handlers"
@@ -68,10 +68,10 @@ func InitializeHandler(client *api.API, serviceName string) http.Handler {
 	handler := handlers.HandlerWithOptions(strictHandler, handlerOptions)
 
 	// Wrap the handler with OpenTelemetry propagation.
-	otelHandler := otelhttp.NewHandler(handler, "/",
+	otelHandler := otelhttp.NewHandler(handler, "HTTP",
 		otelhttp.WithServerName(serviceName),
 		otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string {
-			return path.Join(operation, r.URL.Path)
+			return fmt.Sprintf("%s %s", operation, r.URL.Path)
 		}),
 	)
 

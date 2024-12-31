@@ -90,6 +90,7 @@ func (c *UserController) Register(ctx context.Context, req RegisterRequest) (*Re
 
 	if err := c.repository.Create(ctx, user); err != nil {
 		span.SetStatus(codes.Error, err.Error())
+		slog.ErrorContext(ctx, err.Error())
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
