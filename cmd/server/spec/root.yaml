@@ -19,6 +19,40 @@ paths:
         '200':
           description: Service is healthy
 
+  /authentication/login:
+    post:
+      operationId: Login
+      description: Authenticate as the specified identity
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: User's email address
+                  example: "john.doe@example.com"
+                password:
+                  type: string
+                  format: password
+                  description: User's password
+                  example: "P@ssw0rd"
+      responses:
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+        '200':
+          description: Successfully authenticated
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: SESSIONID=abcde12345; Path=/; HttpOnly
+
   /users:
     post:
       operationId: RegisterUser
@@ -69,6 +103,11 @@ paths:
                     format: uuid
 
 components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: SESSIONID
   responses:
     ErrorResponse:
       description: An error has occurred
@@ -118,6 +157,8 @@ components:
             - "internal_error"
             - "required_body"
             - "invalid_field"
+            - "required_field"
+            - "email_password_mismatch"
         message:
           type: string
           description: Human readable error message

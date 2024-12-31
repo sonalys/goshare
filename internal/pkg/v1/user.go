@@ -18,5 +18,7 @@ type User struct {
 }
 
 var (
+	ErrEmailPasswordMismatch  = errors.New("email and/or password mismatch")
 	ErrEmailAlreadyRegistered = errors.New("email already registered")
+	ErrNotFound               = errors.New("not found")
 )

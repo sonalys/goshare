@@ -35,6 +35,12 @@ func (a *API) RegisterUser(ctx context.Context, request handlers.RegisterUserReq
 			StatusCode: http.StatusConflict,
 		}, nil
 	default:
+		if errList := new(v1.FieldErrorList); errors.As(err, errList) {
+			return handlers.RegisterUserdefaultJSONResponse{
+				Body:       newErrorResponse(ctx, getCausesFromFieldErrors(*errList)),
+				StatusCode: http.StatusBadRequest,
+			}, nil
+		}
 		return nil, err
 	}
 }

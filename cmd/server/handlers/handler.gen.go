@@ -17,13 +17,15 @@ import (
 
 // Defines values for ErrorCode.
 const (
-	InternalError     ErrorCode = "internal_error"
-	InvalidField      ErrorCode = "invalid_field"
-	InvalidParameter  ErrorCode = "invalid_parameter"
-	NotFound          ErrorCode = "not_found"
-	RequiredBody      ErrorCode = "required_body"
-	RequiredHeader    ErrorCode = "required_header"
-	RequiredParameter ErrorCode = "required_parameter"
+	EmailPasswordMismatch ErrorCode = "email_password_mismatch"
+	InternalError         ErrorCode = "internal_error"
+	InvalidField          ErrorCode = "invalid_field"
+	InvalidParameter      ErrorCode = "invalid_parameter"
+	NotFound              ErrorCode = "not_found"
+	RequiredBody          ErrorCode = "required_body"
+	RequiredField         ErrorCode = "required_field"
+	RequiredHeader        ErrorCode = "required_header"
+	RequiredParameter     ErrorCode = "required_parameter"
 )
 
 // Error defines model for Error.
@@ -54,6 +56,15 @@ type ErrorResponse struct {
 	Url string `json:"url"`
 }
 
+// LoginJSONBody defines parameters for Login.
+type LoginJSONBody struct {
+	// Email User's email address
+	Email openapi_types.Email `json:"email"`
+
+	// Password User's password
+	Password string `json:"password"`
+}
+
 // RegisterUserJSONBody defines parameters for RegisterUser.
 type RegisterUserJSONBody struct {
 	// Email User's email address
@@ -69,11 +80,17 @@ type RegisterUserJSONBody struct {
 	Password string `json:"password"`
 }
 
+// LoginJSONRequestBody defines body for Login for application/json ContentType.
+type LoginJSONRequestBody LoginJSONBody
+
 // RegisterUserJSONRequestBody defines body for RegisterUser for application/json ContentType.
 type RegisterUserJSONRequestBody RegisterUserJSONBody
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+
+	// (POST /authentication/login)
+	Login(w http.ResponseWriter, r *http.Request)
 	// Healthcheck
 	// (GET /healthcheck)
 	GetHealthcheck(w http.ResponseWriter, r *http.Request)
@@ -90,6 +107,20 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(http.Handler) http.Handler
+
+// Login operation middleware
+func (siw *ServerInterfaceWrapper) Login(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.Login(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
 
 // GetHealthcheck operation middleware
 func (siw *ServerInterfaceWrapper) GetHealthcheck(w http.ResponseWriter, r *http.Request) {
@@ -239,6 +270,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 		ErrorHandlerFunc:   options.ErrorHandlerFunc,
 	}
 
+	m.HandleFunc("POST "+options.BaseURL+"/authentication/login", wrapper.Login)
 	m.HandleFunc("GET "+options.BaseURL+"/healthcheck", wrapper.GetHealthcheck)
 	m.HandleFunc("POST "+options.BaseURL+"/users", wrapper.RegisterUser)
 
@@ -253,6 +285,48 @@ type ErrorResponseJSONResponse struct {
 
 	// Url URL of the failed request
 	Url string `json:"url"`
+}
+
+type LoginRequestObject struct {
+	Body *LoginJSONRequestBody
+}
+
+type LoginResponseObject interface {
+	VisitLoginResponse(w http.ResponseWriter) error
+}
+
+type Login200ResponseHeaders struct {
+	SetCookie string
+}
+
+type Login200Response struct {
+	Headers Login200ResponseHeaders
+}
+
+func (response Login200Response) VisitLoginResponse(w http.ResponseWriter) error {
+	w.Header().Set("Set-Cookie", fmt.Sprint(response.Headers.SetCookie))
+	w.WriteHeader(200)
+	return nil
+}
+
+type LogindefaultJSONResponse struct {
+	Body struct {
+		Errors []Error `json:"errors"`
+
+		// TraceId Unique identifier for the error instance
+		TraceId openapi_types.UUID `json:"trace_id"`
+
+		// Url URL of the failed request
+		Url string `json:"url"`
+	}
+	StatusCode int
+}
+
+func (response LogindefaultJSONResponse) VisitLoginResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
 }
 
 type GetHealthcheckRequestObject struct {
@@ -331,6 +405,9 @@ func (response RegisterUserdefaultJSONResponse) VisitRegisterUserResponse(w http
 
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
+
+	// (POST /authentication/login)
+	Login(ctx context.Context, request LoginRequestObject) (LoginResponseObject, error)
 	// Healthcheck
 	// (GET /healthcheck)
 	GetHealthcheck(ctx context.Context, request GetHealthcheckRequestObject) (GetHealthcheckResponseObject, error)
@@ -366,6 +443,37 @@ type strictHandler struct {
 	ssi         StrictServerInterface
 	middlewares []StrictMiddlewareFunc
 	options     StrictHTTPServerOptions
+}
+
+// Login operation middleware
+func (sh *strictHandler) Login(w http.ResponseWriter, r *http.Request) {
+	var request LoginRequestObject
+
+	var body LoginJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.Login(ctx, request.(LoginRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "Login")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(LoginResponseObject); ok {
+		if err := validResponse.VisitLoginResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
 }
 
 // GetHealthcheck operation middleware

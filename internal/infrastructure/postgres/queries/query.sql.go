@@ -11,11 +11,11 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createParticipant = `-- name: CreateParticipant :exec
-INSERT INTO participant (id,first_name,last_name,email,password_hash,created_at) VALUES ($1,$2,$3,$4,$5,$6)
+const createUser = `-- name: CreateUser :exec
+INSERT INTO users (id,first_name,last_name,email,password_hash,created_at) VALUES ($1,$2,$3,$4,$5,$6)
 `
 
-type CreateParticipantParams struct {
+type CreateUserParams struct {
 	ID           pgtype.UUID
 	FirstName    string
 	LastName     string
@@ -24,8 +24,8 @@ type CreateParticipantParams struct {
 	CreatedAt    pgtype.Timestamp
 }
 
-func (q *Queries) CreateParticipant(ctx context.Context, arg CreateParticipantParams) error {
-	_, err := q.db.Exec(ctx, createParticipant,
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
+	_, err := q.db.Exec(ctx, createUser,
 		arg.ID,
 		arg.FirstName,
 		arg.LastName,
@@ -34,4 +34,22 @@ func (q *Queries) CreateParticipant(ctx context.Context, arg CreateParticipantPa
 		arg.CreatedAt,
 	)
 	return err
+}
+
+const findUserByEmail = `-- name: FindUserByEmail :one
+SELECT id, first_name, last_name, email, password_hash, created_at FROM users WHERE email = $1
+`
+
+func (q *Queries) FindUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRow(ctx, findUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.PasswordHash,
+		&i.CreatedAt,
+	)
+	return i, err
 }

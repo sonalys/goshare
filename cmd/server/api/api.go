@@ -12,8 +12,13 @@ type (
 		Register(ctx context.Context, req users.RegisterRequest) (*users.RegisterResponse, error)
 	}
 
+	UserAuthentication interface {
+		Login(ctx context.Context, req users.LoginRequest) (*users.LoginResponse, error)
+	}
+
 	Dependencies struct {
 		UserRegister
+		UserAuthentication
 	}
 
 	API struct {

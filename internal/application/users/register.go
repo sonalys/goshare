@@ -2,8 +2,6 @@ package users
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
 	"log/slog"
 	"net/mail"
@@ -13,23 +11,8 @@ import (
 	"github.com/sonalys/goshare/internal/pkg/otel"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 	"go.opentelemetry.io/otel/codes"
+	"golang.org/x/crypto/bcrypt"
 )
-
-type (
-	Repository interface {
-		Create(ctx context.Context, participant *v1.User) error
-	}
-
-	UserController struct {
-		repository Repository
-	}
-)
-
-func NewParticipantController(repository Repository) *UserController {
-	return &UserController{
-		repository: repository,
-	}
-}
 
 type RegisterRequest struct {
 	FirstName string
@@ -68,22 +51,23 @@ type RegisterResponse struct {
 	ID uuid.UUID
 }
 
-func hashPassword(password, salt string) string {
-	hash := sha256.New()
-	hash.Write([]byte(salt + password))
-	return hex.EncodeToString(hash.Sum(nil))
-}
-
-func (c *UserController) Register(ctx context.Context, req RegisterRequest) (*RegisterResponse, error) {
+func (c *Controller) Register(ctx context.Context, req RegisterRequest) (*RegisterResponse, error) {
 	ctx, span := otel.Tracer.Start(ctx, "user.register")
 	defer span.End()
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		slog.ErrorContext(ctx, "failed to hash password", slog.Any("error", err))
+		return nil, err
+	}
 
 	user := &v1.User{
 		ID:              uuid.New(),
 		FirstName:       req.FirstName,
 		LastName:        req.LastName,
 		Email:           req.Email,
-		PasswordHash:    hashPassword(req.Password, req.Email),
+		PasswordHash:    string(hashedPassword),
 		IsEmailVerified: false,
 		CreatedAt:       time.Now(),
 	}

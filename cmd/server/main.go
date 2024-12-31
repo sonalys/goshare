@@ -40,7 +40,8 @@ func main() {
 	controllers := loadControllers(repositories)
 
 	api := api.New(api.Dependencies{
-		UserRegister: controllers.participantController,
+		UserRegister:       controllers.userController,
+		UserAuthentication: controllers.userController,
 	})
 	handler := InitializeHandler(api, cfg.ServiceName)
 

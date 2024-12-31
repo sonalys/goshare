@@ -26,3 +26,6 @@ tasks:
 
   generate-openapi:
     cmd: go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen --config=.config/.oapi-codegen.yaml cmd/server/spec/root.yaml
+
+  compose:
+    cmd: docker compose -f compose.yml up -d --build && docker compose -f compose.yml logs -f goshareInit goshare

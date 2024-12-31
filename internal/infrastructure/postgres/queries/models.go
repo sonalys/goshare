@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type Participant struct {
+type User struct {
 	ID           pgtype.UUID
 	FirstName    string
 	LastName     string
