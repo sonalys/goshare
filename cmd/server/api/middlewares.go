@@ -41,34 +41,36 @@ func GetIdentity(ctx context.Context) (*Identity, error) {
 	return identity, nil
 }
 
-func AuthMiddleware(handler nethttp.StrictHTTPHandlerFunc, operationID string) nethttp.StrictHTTPHandlerFunc {
-	return func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (response interface{}, err error) {
-		if _, authenticated := ctx.Value(handlers.CookieAuthScopes).([]string); !authenticated {
+func AuthMiddleware(jwtSignKey []byte) func(handler nethttp.StrictHTTPHandlerFunc, operationID string) nethttp.StrictHTTPHandlerFunc {
+	return func(handler nethttp.StrictHTTPHandlerFunc, operationID string) nethttp.StrictHTTPHandlerFunc {
+		return func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (response interface{}, err error) {
+			if _, authenticated := ctx.Value(handlers.CookieAuthScopes).([]string); !authenticated {
+				return handler(ctx, w, r, request)
+			}
+
+			cookie, err := r.Cookie("SESSIONID")
+			if err != nil {
+				slog.ErrorContext(ctx, "could not retrieve cookie", slog.String("cookieName", "SESSIONID"))
+				return nil, err
+			}
+
+			var claims jwt.MapClaims
+			token, err := jwt.ParseWithClaims(cookie.Value, &claims, func(token *jwt.Token) (interface{}, error) {
+				return jwtSignKey, nil
+			})
+
+			if err != nil || !token.Valid {
+				slog.ErrorContext(ctx, "token is not valid", slog.Any("error", err), slog.Bool("isValid", token.Valid))
+				return nil, err
+			}
+
+			identity := &Identity{
+				Email:  claims["email"].(string),
+				UserID: uuid.MustParse(claims["userID"].(string)),
+			}
+
+			ctx = context.WithValue(ctx, userCtxKey, identity)
 			return handler(ctx, w, r, request)
 		}
-
-		cookie, err := r.Cookie("SESSIONID")
-		if err != nil {
-			slog.ErrorContext(ctx, "could not retrieve cookie", slog.String("cookieName", "SESSIONID"))
-			return nil, err
-		}
-
-		var claims jwt.MapClaims
-		token, err := jwt.ParseWithClaims(cookie.Value, &claims, func(token *jwt.Token) (interface{}, error) {
-			return []byte("my-secret-key"), nil
-		})
-
-		if err != nil || !token.Valid {
-			slog.ErrorContext(ctx, "token is not valid", slog.Any("error", err), slog.Bool("isValid", token.Valid))
-			return nil, err
-		}
-
-		identity := &Identity{
-			Email:  claims["email"].(string),
-			UserID: uuid.MustParse(claims["userID"].(string)),
-		}
-
-		ctx = context.WithValue(ctx, userCtxKey, identity)
-		return handler(ctx, w, r, request)
 	}
 }

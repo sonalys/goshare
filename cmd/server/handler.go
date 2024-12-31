@@ -9,6 +9,7 @@ import (
 
 	"github.com/sonalys/goshare/cmd/server/api"
 	"github.com/sonalys/goshare/cmd/server/handlers"
+	"github.com/sonalys/goshare/internal/pkg/secrets"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
@@ -41,7 +42,7 @@ func recoverMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func InitializeHandler(client *api.API, serviceName string) http.Handler {
+func InitializeHandler(client *api.API, secret secrets.Secrets, serviceName string) http.Handler {
 	strictHandlerOptions := handlers.StrictHTTPServerOptions{
 		RequestErrorHandlerFunc:  requestErrorHandler,
 		ResponseErrorHandlerFunc: responseErrorHandler,
@@ -49,7 +50,7 @@ func InitializeHandler(client *api.API, serviceName string) http.Handler {
 
 	strictMiddlewares := []handlers.StrictMiddlewareFunc{
 		api.InjectRequestContextDataMiddleware,
-		api.AuthMiddleware,
+		api.AuthMiddleware(secret.JWTSignKey),
 	}
 	strictHandler := handlers.NewStrictHandlerWithOptions(client, strictMiddlewares, strictHandlerOptions)
 

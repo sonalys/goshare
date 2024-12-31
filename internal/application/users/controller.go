@@ -13,12 +13,17 @@ type (
 	}
 
 	Controller struct {
+		jwtSignKey []byte
 		repository Repository
 	}
 )
 
-func NewController(repository Repository) *Controller {
+func NewController(
+	repository Repository,
+	jwtSignKey []byte,
+) *Controller {
 	return &Controller{
 		repository: repository,
+		jwtSignKey: jwtSignKey,
 	}
 }

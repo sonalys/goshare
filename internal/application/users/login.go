@@ -47,7 +47,6 @@ func (c *Controller) Login(ctx context.Context, req LoginRequest) (*LoginRespons
 		slog.ErrorContext(ctx, "invalid login request", slog.Any("error", err))
 		return nil, err
 	}
-	span.AddEvent("request validated")
 
 	user, err := c.repository.FindByEmail(ctx, req.Email)
 	if err != nil {
@@ -66,28 +65,30 @@ func (c *Controller) Login(ctx context.Context, req LoginRequest) (*LoginRespons
 	}
 	span.AddEvent("hash compared")
 
-	// Create JWT token
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"email":  req.Email,
-		"userID": user.ID.String(),
-		"exp":    time.Now().Add(time.Hour * 72).Unix(),
-	})
-	span.AddEvent("jwt generated")
-
-	// Get the secret key from environment variables
-	secretKey := "my-secret-key"
-
-	// Sign the token with the secret key
-	tokenString, err := token.SignedString([]byte(secretKey))
+	token, err := c.createJWT(user)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		slog.ErrorContext(ctx, "could not sign JWT token", slog.Any("error", err))
 		return nil, fmt.Errorf("failed to sign token: %v", err)
 	}
-	span.AddEvent("jwt signed")
 
 	span.SetStatus(codes.Ok, "")
 	slog.InfoContext(ctx, "user logged in", slog.String("id", user.ID.String()))
 
-	return &LoginResponse{Token: tokenString}, nil
+	return &LoginResponse{Token: token}, nil
+}
+
+func (c *Controller) createJWT(user *v1.User) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"email":  user.Email,
+		"userID": user.ID.String(),
+		"exp":    time.Now().Add(time.Hour * 72).Unix(),
+	})
+
+	tokenString, err := token.SignedString(c.jwtSignKey)
+	if err != nil {
+		return "", fmt.Errorf("failed to sign token: %v", err)
+	}
+
+	return tokenString, nil
 }
