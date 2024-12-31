@@ -6,8 +6,10 @@ import (
 )
 
 type (
+	FieldErrorList []FieldError
+
 	FormError struct {
-		Fields []FieldError
+		Fields FieldErrorList
 	}
 
 	FieldError struct {
@@ -30,33 +32,6 @@ var (
 	ErrRequiredValue = errors.New("cannot be empty")
 	ErrInvalidValue  = errors.New("invalid value")
 )
-
-func (e *FieldError) Error() string {
-	return fmt.Sprintf("field %s: %v", e.Field, e.Cause)
-}
-
-func (e *FieldError) Unwrap() error {
-	return e.Cause
-}
-
-func (e *FormError) Error() string {
-	return fmt.Sprintf("form error: %v", e.Fields)
-}
-
-func (e *FormError) Unwrap() []error {
-	errs := make([]error, 0, len(e.Fields))
-	for _, f := range e.Fields {
-		errs = append(errs, f.Cause)
-	}
-	return errs
-}
-
-func (e *FormError) Validate() error {
-	if len(e.Fields) == 0 {
-		return nil
-	}
-	return e
-}
 
 func NewRequiredFieldError(field string) FieldError {
 	return FieldError{
@@ -84,6 +59,33 @@ func NewFieldLengthError(field string, min, max int) FieldError {
 		Field: field,
 		Cause: &ValueLengthError{Min: min, Max: max},
 	}
+}
+
+func (e *FieldError) Error() string {
+	return fmt.Sprintf("field %s: %v", e.Field, e.Cause)
+}
+
+func (e *FieldError) Unwrap() error {
+	return e.Cause
+}
+
+func (el FieldErrorList) Unwrap() []error {
+	errs := make([]error, 0, len(el))
+	for _, f := range el {
+		errs = append(errs, f.Cause)
+	}
+	return errs
+}
+
+func (el FieldErrorList) Error() string {
+	return fmt.Sprintf("%v", []FieldError(el))
+}
+
+func (e *FormError) Validate() error {
+	if len(e.Fields) == 0 {
+		return nil
+	}
+	return e.Fields
 }
 
 func (e *ValueRangeError) Error() string {
