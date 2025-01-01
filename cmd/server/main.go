@@ -42,6 +42,8 @@ func main() {
 	api := api.New(api.Dependencies{
 		UserRegister:       controllers.userController,
 		UserAuthentication: controllers.userController,
+		LedgerCreater:      controllers.ledgerController,
+		UserLedgerLister:   controllers.ledgerController,
 	})
 	handler := InitializeHandler(api, repositories, cfg.ServiceName)
 

@@ -13,7 +13,7 @@ func (a *API) ListLedgers(ctx context.Context, request handlers.ListLedgersReque
 		return nil, err
 	}
 
-	ledgers, err := a.dependencies.UserLedgerLister.ListLedgers(ctx, identity.UserID)
+	ledgers, err := a.dependencies.UserLedgerLister.ListByUser(ctx, identity.UserID)
 	if err != nil {
 		return nil, err
 	}

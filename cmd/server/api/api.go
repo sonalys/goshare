@@ -20,11 +20,11 @@ type (
 	}
 
 	LedgerCreater interface {
-		CreateLedger(ctx context.Context, req ledgers.CreateRequest) (*ledgers.CreateResponse, error)
+		Create(ctx context.Context, req ledgers.CreateRequest) (*ledgers.CreateResponse, error)
 	}
 
 	UserLedgerLister interface {
-		ListLedgers(ctx context.Context, userID uuid.UUID) ([]v1.Ledger, error)
+		ListByUser(ctx context.Context, userID uuid.UUID) ([]v1.Ledger, error)
 	}
 
 	Dependencies struct {

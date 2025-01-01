@@ -10,7 +10,7 @@ import (
 type (
 	Repository interface {
 		Create(ctx context.Context, ledger *v1.Ledger) error
-		ListByUser(ctx context.Context, userID uuid.UUID) ([]v1.Ledger, error)
+		GetByUser(ctx context.Context, userID uuid.UUID) ([]v1.Ledger, error)
 	}
 
 	Controller struct {

@@ -21,7 +21,7 @@ func (a *API) CreateLedger(ctx context.Context, request handlers.CreateLedgerReq
 		Name:   request.Body.Name,
 	}
 
-	switch resp, err := a.dependencies.LedgerCreater.CreateLedger(ctx, req); {
+	switch resp, err := a.dependencies.LedgerCreater.Create(ctx, req); {
 	case err != nil:
 		return handlers.CreateLedger200JSONResponse{Id: resp.ID}, nil
 	default:
