@@ -448,12 +448,12 @@ func (q *Queries) GetLedgerParticipants(ctx context.Context, ledgerID pgtype.UUI
 	return items, nil
 }
 
-const getLedgerParticipantsBalances = `-- name: GetLedgerParticipantsBalances :many
+const GetLedgerBalances = `-- name: GetLedgerBalances :many
 SELECT id, ledger_id, user_id, last_timestamp, balance FROM ledger_participant_balances WHERE ledger_id = $1
 `
 
-func (q *Queries) GetLedgerParticipantsBalances(ctx context.Context, ledgerID pgtype.UUID) ([]LedgerParticipantBalance, error) {
-	rows, err := q.db.Query(ctx, getLedgerParticipantsBalances, ledgerID)
+func (q *Queries) GetLedgerBalances(ctx context.Context, ledgerID pgtype.UUID) ([]LedgerParticipantBalance, error) {
+	rows, err := q.db.Query(ctx, GetLedgerBalances, ledgerID)
 	if err != nil {
 		return nil, err
 	}

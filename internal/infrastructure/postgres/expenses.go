@@ -19,18 +19,7 @@ func NewExpensesRepository(client *Client) *ExpensesRepository {
 }
 
 func (r *ExpensesRepository) Create(ctx context.Context, expense *v1.Expense) error {
-	return mapError(r.client.queries().CreateExpense(ctx, queries.CreateExpenseParams{
-		ID:          convertUUID(expense.ID),
-		Amount:      expense.Amount,
-		CategoryID:  convertUUID(expense.CategoryID),
-		LedgerID:    convertUUID(expense.LedgerID),
-		Name:        expense.Name,
-		ExpenseDate: convertTime(expense.ExpenseDate),
-		CreatedAt:   convertTime(expense.CreatedAt),
-		CreatedBy:   convertUUID(expense.CreatedBy),
-		UpdatedAt:   convertTime(expense.UpdatedAt),
-		UpdatedBy:   convertUUID(expense.UpdatedBy),
-	}))
+	return mapError(r.client.transaction(ctx, func(tx *queries.Queries) error { return createExpense(ctx, tx, expense) }))
 }
 
 func (r *ExpensesRepository) Find(ctx context.Context, id uuid.UUID) (*v1.Expense, error) {

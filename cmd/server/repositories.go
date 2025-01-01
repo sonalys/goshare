@@ -9,6 +9,7 @@ import (
 type repositories struct {
 	ParticipantRepository *postgres.UsersRepository
 	LedgerRepository      *postgres.LedgerRepository
+	ExpensesRepository    *postgres.ExpensesRepository
 	JWTRepository         *jwt.Client
 }
 

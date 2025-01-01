@@ -79,7 +79,7 @@ func (c *Controller) Register(ctx context.Context, req RegisterRequest) (*Regist
 	}
 
 	span.SetStatus(codes.Ok, "")
-	slog.InfoContext(ctx, "user registered", slog.String("id", user.ID.String()))
+	slog.InfoContext(ctx, "user registered", slog.String("user_id", user.ID.String()))
 
 	return &RegisterResponse{
 		ID: user.ID,

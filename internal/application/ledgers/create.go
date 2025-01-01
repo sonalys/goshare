@@ -55,13 +55,13 @@ func (c *Controller) Create(ctx context.Context, req CreateRequest) (*CreateResp
 		CreatedBy: req.UserID,
 	}
 
-	if err := c.repository.Create(ctx, ledger); err != nil {
+	if err := c.ledgerRepository.Create(ctx, ledger); err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		slog.ErrorContext(ctx, "failed to create ledger", slog.Any("error", err))
 		return nil, err
 	}
 
-	slog.InfoContext(ctx, "ledger created", slog.String("ledger", ledger.ID.String()))
+	slog.InfoContext(ctx, "ledger created", slog.String("ledger_id", ledger.ID.String()))
 
 	return &CreateResponse{
 		ID: ledger.ID,

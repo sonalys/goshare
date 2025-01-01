@@ -15,7 +15,7 @@ func (c *Controller) GetByUser(ctx context.Context, userID uuid.UUID) ([]v1.Ledg
 	ctx, span := otel.Tracer.Start(ctx, "ledgers.ListByUser")
 	defer span.End()
 
-	ledgers, err := c.repository.GetByUser(ctx, userID)
+	ledgers, err := c.ledgerRepository.GetByUser(ctx, userID)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		slog.ErrorContext(ctx, "failed to list ledgers", slog.Any("error", err))

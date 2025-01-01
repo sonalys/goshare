@@ -15,6 +15,6 @@ func loadControllers(
 ) *controllers {
 	return &controllers{
 		userController:   users.NewController(repositories.ParticipantRepository, repositories.JWTRepository),
-		ledgerController: ledgers.NewController(repositories.LedgerRepository),
+		ledgerController: ledgers.NewController(repositories.LedgerRepository, repositories.ExpensesRepository),
 	}
 }

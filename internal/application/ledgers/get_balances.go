@@ -15,7 +15,7 @@ func (c *Controller) GetBalances(ctx context.Context, ledgerID uuid.UUID) ([]v1.
 	ctx, span := otel.Tracer.Start(ctx, "ledgers.GetBalances")
 	defer span.End()
 
-	balances, err := c.repository.GetLedgerParticipantsBalances(ctx, ledgerID)
+	balances, err := c.ledgerRepository.GetLedgerBalance(ctx, ledgerID)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		slog.ErrorContext(ctx, "failed to get ledger participants balances", slog.Any("error", err))

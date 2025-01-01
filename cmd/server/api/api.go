@@ -31,12 +31,17 @@ type (
 		GetByUser(ctx context.Context, userID uuid.UUID) ([]v1.Ledger, error)
 	}
 
+	ExpenseCreater interface {
+		CreateExpense(ctx context.Context, req ledgers.CreateExpenseRequest) (*ledgers.CreateExpenseResponse, error)
+	}
+
 	Dependencies struct {
 		UserRegister
 		UserAuthentication
 		LedgerCreater
 		UserLedgerLister
 		LedgerBalancesLister
+		ExpenseCreater
 	}
 
 	API struct {

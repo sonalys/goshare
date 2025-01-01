@@ -8,21 +8,28 @@ import (
 )
 
 type (
-	Repository interface {
+	LedgerRepository interface {
 		Create(ctx context.Context, ledger *v1.Ledger) error
 		GetByUser(ctx context.Context, userID uuid.UUID) ([]v1.Ledger, error)
-		GetLedgerParticipantsBalances(ctx context.Context, ledgerID uuid.UUID) ([]v1.LedgerParticipantBalance, error)
+		GetLedgerBalance(ctx context.Context, ledgerID uuid.UUID) ([]v1.LedgerParticipantBalance, error)
+	}
+
+	ExpenseRepository interface {
+		Create(ctx context.Context, expense *v1.Expense) error
 	}
 
 	Controller struct {
-		repository Repository
+		ledgerRepository  LedgerRepository
+		expenseRepository ExpenseRepository
 	}
 )
 
 func NewController(
-	repository Repository,
+	ledgerRepository LedgerRepository,
+	expenseRepository ExpenseRepository,
 ) *Controller {
 	return &Controller{
-		repository: repository,
+		ledgerRepository:  ledgerRepository,
+		expenseRepository: expenseRepository,
 	}
 }

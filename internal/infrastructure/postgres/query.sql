@@ -70,7 +70,7 @@ INSERT INTO ledger_participant_balances (id,ledger_id,user_id,last_timestamp,bal
 -- name: UpdateLedgerParticipantBalance :exec
 UPDATE ledger_participant_balances SET last_timestamp = $1, balance = $2 WHERE ledger_id = $3 AND user_id = $4;
 
--- name: GetLedgerParticipantsBalances :many
+-- name: GetLedgerBalances :many
 SELECT * FROM ledger_participant_balances WHERE ledger_id = $1;
 
 -- name: GetUserLedgers :many

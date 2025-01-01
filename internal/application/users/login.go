@@ -77,7 +77,7 @@ func (c *Controller) Login(ctx context.Context, req LoginRequest) (*LoginRespons
 	}
 
 	span.SetStatus(codes.Ok, "")
-	slog.InfoContext(ctx, "user logged in", slog.String("id", user.ID.String()))
+	slog.InfoContext(ctx, "user logged in", slog.String("user_id", user.ID.String()))
 
 	return &LoginResponse{Token: token}, nil
 }

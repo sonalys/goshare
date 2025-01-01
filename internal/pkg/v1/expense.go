@@ -6,13 +6,19 @@ import (
 	"github.com/google/uuid"
 )
 
+type ExpenseUserBalance struct {
+	UserID  uuid.UUID
+	Balance int32
+}
+
 type Expense struct {
-	ID          uuid.UUID
-	CategoryID  uuid.UUID
-	LedgerID    uuid.UUID
-	Amount      int32
-	Name        string
-	ExpenseDate time.Time
+	ID           uuid.UUID
+	CategoryID   uuid.UUID
+	LedgerID     uuid.UUID
+	Amount       int32
+	Name         string
+	ExpenseDate  time.Time
+	UserBalances []ExpenseUserBalance
 
 	CreatedAt time.Time
 	CreatedBy uuid.UUID
