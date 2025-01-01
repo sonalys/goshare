@@ -12,18 +12,22 @@ type (
 		FindByEmail(ctx context.Context, email string) (*v1.User, error)
 	}
 
+	IdentityEncoder interface {
+		Encode(identity *v1.Identity) (string, error)
+	}
+
 	Controller struct {
-		jwtSignKey []byte
-		repository Repository
+		identityEncoder IdentityEncoder
+		repository      Repository
 	}
 )
 
 func NewController(
 	repository Repository,
-	jwtSignKey []byte,
+	identityEncoder IdentityEncoder,
 ) *Controller {
 	return &Controller{
-		repository: repository,
-		jwtSignKey: jwtSignKey,
+		repository:      repository,
+		identityEncoder: identityEncoder,
 	}
 }

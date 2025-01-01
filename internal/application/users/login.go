@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/sonalys/goshare/internal/pkg/otel"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 	"go.opentelemetry.io/otel/codes"
@@ -65,7 +64,12 @@ func (c *Controller) Login(ctx context.Context, req LoginRequest) (*LoginRespons
 	}
 	span.AddEvent("hash compared")
 
-	token, err := c.createJWT(user)
+	identity := &v1.Identity{
+		Email:  user.Email,
+		UserID: user.ID,
+		Exp:    time.Now().Add(72 * time.Hour).Unix(),
+	}
+	token, err := c.identityEncoder.Encode(identity)
 	if err != nil {
 		span.SetStatus(codes.Error, err.Error())
 		slog.ErrorContext(ctx, "could not sign JWT token", slog.Any("error", err))
@@ -76,19 +80,4 @@ func (c *Controller) Login(ctx context.Context, req LoginRequest) (*LoginRespons
 	slog.InfoContext(ctx, "user logged in", slog.String("id", user.ID.String()))
 
 	return &LoginResponse{Token: token}, nil
-}
-
-func (c *Controller) createJWT(user *v1.User) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"email":  user.Email,
-		"userID": user.ID.String(),
-		"exp":    time.Now().Add(time.Hour * 72).Unix(),
-	})
-
-	tokenString, err := token.SignedString(c.jwtSignKey)
-	if err != nil {
-		return "", fmt.Errorf("failed to sign token: %v", err)
-	}
-
-	return tokenString, nil
 }

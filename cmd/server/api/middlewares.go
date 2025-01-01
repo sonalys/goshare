@@ -2,20 +2,20 @@ package api
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
 
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 	"github.com/oapi-codegen/runtime/strictmiddleware/nethttp"
 	"github.com/sonalys/goshare/cmd/server/handlers"
+	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
 const urlKey = "url-key"
 
 func InjectRequestContextDataMiddleware(handler nethttp.StrictHTTPHandlerFunc, operationID string) nethttp.StrictHTTPHandlerFunc {
-	return func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (response interface{}, err error) {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request, request any) (response any, err error) {
 		ctx = context.WithValue(ctx, urlKey, r.URL.Path)
 		return handler(ctx, w, r, request)
 	}
@@ -28,22 +28,42 @@ func getURL(ctx context.Context) string {
 
 const userCtxKey = "user-key"
 
-type Identity struct {
-	Email  string
-	UserID uuid.UUID
-}
-
-func GetIdentity(ctx context.Context) (*Identity, error) {
-	identity, ok := ctx.Value(userCtxKey).(*Identity)
+func GetIdentity(ctx context.Context) (*v1.Identity, error) {
+	identity, ok := ctx.Value(userCtxKey).(*v1.Identity)
 	if !ok {
 		return nil, fmt.Errorf("unauthorized")
 	}
 	return identity, nil
 }
 
-func AuthMiddleware(jwtSignKey []byte) func(handler nethttp.StrictHTTPHandlerFunc, operationID string) nethttp.StrictHTTPHandlerFunc {
+var UnauthorizedResp = []handlers.Error{
+	{
+		Code:    handlers.Unauthorized,
+		Message: "The request authentication failed",
+	},
+}
+
+var AuthorizationExpiredResp = []handlers.Error{
+	{
+		Code:    handlers.Unauthorized,
+		Message: "The request authentication is expired",
+	},
+}
+
+var ForbiddenResp = []handlers.Error{
+	{
+		Code:    handlers.Forbidden,
+		Message: "The provided authentication is not authorized to access this resource",
+	},
+}
+
+func AuthMiddleware(
+	identityDecoder interface {
+		Decode(string) (*v1.Identity, error)
+	},
+) func(handler nethttp.StrictHTTPHandlerFunc, operationID string) nethttp.StrictHTTPHandlerFunc {
 	return func(handler nethttp.StrictHTTPHandlerFunc, operationID string) nethttp.StrictHTTPHandlerFunc {
-		return func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (response interface{}, err error) {
+		return func(ctx context.Context, w http.ResponseWriter, r *http.Request, request any) (response any, err error) {
 			if _, authenticated := ctx.Value(handlers.CookieAuthScopes).([]string); !authenticated {
 				return handler(ctx, w, r, request)
 			}
@@ -51,22 +71,19 @@ func AuthMiddleware(jwtSignKey []byte) func(handler nethttp.StrictHTTPHandlerFun
 			cookie, err := r.Cookie("SESSIONID")
 			if err != nil {
 				slog.ErrorContext(ctx, "could not retrieve cookie", slog.String("cookieName", "SESSIONID"))
-				return nil, err
+				WriteErrorResponse(ctx, w, http.StatusUnauthorized, newErrorResponse(ctx, UnauthorizedResp))
+				return nil, nil
 			}
 
-			var claims jwt.MapClaims
-			token, err := jwt.ParseWithClaims(cookie.Value, &claims, func(token *jwt.Token) (interface{}, error) {
-				return jwtSignKey, nil
-			})
-
-			if err != nil || !token.Valid {
-				slog.ErrorContext(ctx, "token is not valid", slog.Any("error", err), slog.Bool("isValid", token.Valid))
-				return nil, err
-			}
-
-			identity := &Identity{
-				Email:  claims["email"].(string),
-				UserID: uuid.MustParse(claims["userID"].(string)),
+			identity, err := identityDecoder.Decode(cookie.Value)
+			if err != nil {
+				if errors.Is(err, v1.ErrAuthorizationExpired) {
+					WriteErrorResponse(ctx, w, http.StatusUnauthorized, newErrorResponse(ctx, AuthorizationExpiredResp))
+					return nil, nil
+				}
+				slog.ErrorContext(ctx, "could not decode identity", slog.Any("error", err))
+				WriteErrorResponse(ctx, w, http.StatusForbidden, newErrorResponse(ctx, ForbiddenResp))
+				return nil, nil
 			}
 
 			ctx = context.WithValue(ctx, userCtxKey, identity)

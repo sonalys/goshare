@@ -22,6 +22,7 @@ const (
 // Defines values for ErrorCode.
 const (
 	EmailPasswordMismatch ErrorCode = "email_password_mismatch"
+	Forbidden             ErrorCode = "forbidden"
 	InternalError         ErrorCode = "internal_error"
 	InvalidField          ErrorCode = "invalid_field"
 	InvalidParameter      ErrorCode = "invalid_parameter"
@@ -30,6 +31,7 @@ const (
 	RequiredField         ErrorCode = "required_field"
 	RequiredHeader        ErrorCode = "required_header"
 	RequiredParameter     ErrorCode = "required_parameter"
+	Unauthorized          ErrorCode = "unauthorized"
 )
 
 // Error defines model for Error.

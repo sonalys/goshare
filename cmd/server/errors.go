@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/oapi-codegen/runtime/types"
+	"github.com/sonalys/goshare/cmd/server/api"
 	"github.com/sonalys/goshare/cmd/server/handlers"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -74,7 +75,7 @@ func requestErrorHandler(w http.ResponseWriter, r *http.Request, err error) {
 		}
 	}
 
-	writeErrorResponse(ctx, w, http.StatusBadRequest, newErrorResponse(r, []handlers.Error{cause}))
+	api.WriteErrorResponse(ctx, w, http.StatusBadRequest, newErrorResponse(r, []handlers.Error{cause}))
 }
 
 // responseErrorHandler is a handler for the openapi response handling errors.
@@ -91,5 +92,5 @@ func responseErrorHandler(w http.ResponseWriter, r *http.Request, err error) {
 		},
 	}
 
-	writeErrorResponse(ctx, w, http.StatusInternalServerError, newErrorResponse(r, errList))
+	api.WriteErrorResponse(ctx, w, http.StatusInternalServerError, newErrorResponse(r, errList))
 }

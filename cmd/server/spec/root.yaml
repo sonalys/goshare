@@ -187,6 +187,8 @@ components:
             - "invalid_field"
             - "required_field"
             - "email_password_mismatch"
+            - "forbidden"
+            - "unauthorized"
         message:
           type: string
           description: Human readable error message

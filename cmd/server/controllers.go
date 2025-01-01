@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/sonalys/goshare/internal/application/users"
-	"github.com/sonalys/goshare/internal/pkg/secrets"
 )
 
 type controllers struct {
@@ -10,10 +9,9 @@ type controllers struct {
 }
 
 func loadControllers(
-	secrets secrets.Secrets,
 	repositories *repositories,
 ) *controllers {
 	return &controllers{
-		userController: users.NewController(repositories.ParticipantRepository, secrets.JWTSignKey),
+		userController: users.NewController(repositories.ParticipantRepository, repositories.JWTRepository),
 	}
 }

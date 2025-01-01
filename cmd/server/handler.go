@@ -1,31 +1,19 @@
 package main
 
 import (
-	"context"
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"net/http"
 
 	"github.com/sonalys/goshare/cmd/server/api"
 	"github.com/sonalys/goshare/cmd/server/handlers"
-	"github.com/sonalys/goshare/internal/pkg/secrets"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
-
-func writeErrorResponse(ctx context.Context, w http.ResponseWriter, code int, resp handlers.ErrorResponse) {
-	w.WriteHeader(code)
-	w.Header().Set("Content-Type", "application/problem+json")
-
-	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		slog.ErrorContext(ctx, "failed to write response", slog.Any("error", err))
-	}
-}
 
 func notFoundHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	writeErrorResponse(ctx, w, http.StatusNotFound, newErrorResponse(r, []handlers.Error{
+	api.WriteErrorResponse(ctx, w, http.StatusNotFound, newErrorResponse(r, []handlers.Error{
 		newError(handlers.NotFound, "url not found"),
 	}))
 }
@@ -42,15 +30,15 @@ func recoverMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func InitializeHandler(client *api.API, secret secrets.Secrets, serviceName string) http.Handler {
+func InitializeHandler(client *api.API, repositories *repositories, serviceName string) http.Handler {
 	strictHandlerOptions := handlers.StrictHTTPServerOptions{
 		RequestErrorHandlerFunc:  requestErrorHandler,
 		ResponseErrorHandlerFunc: responseErrorHandler,
 	}
 
 	strictMiddlewares := []handlers.StrictMiddlewareFunc{
-		api.InjectRequestContextDataMiddleware,
-		api.AuthMiddleware(secret.JWTSignKey),
+		api.AuthMiddleware(repositories.JWTRepository),
+		api.InjectRequestContextDataMiddleware, // Should be the last middleware, so all other middlewares can access the context data.
 	}
 	strictHandler := handlers.NewStrictHandlerWithOptions(client, strictMiddlewares, strictHandlerOptions)
 

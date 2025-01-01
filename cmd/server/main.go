@@ -36,14 +36,14 @@ func main() {
 	secrets := secrets.LoadSecrets()
 
 	infrastructure := loadInfrastructure(ctx, secrets)
-	repositories := loadRepositories(infrastructure)
-	controllers := loadControllers(secrets, repositories)
+	repositories := loadRepositories(secrets, infrastructure)
+	controllers := loadControllers(repositories)
 
 	api := api.New(api.Dependencies{
 		UserRegister:       controllers.userController,
 		UserAuthentication: controllers.userController,
 	})
-	handler := InitializeHandler(api, secrets, cfg.ServiceName)
+	handler := InitializeHandler(api, repositories, cfg.ServiceName)
 
 	server := NewServer(cfg, handler)
 
