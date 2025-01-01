@@ -54,7 +54,18 @@ func generateStack(pc uintptr) string {
 
 func (h *fieldFormatterHandler) Handle(ctx context.Context, record slog.Record) error {
 	if record.Level >= slog.LevelError {
-		record.AddAttrs(slog.Any("stack", generateStack(record.PC)))
+		var hasStack bool
+		record.Attrs(func(a slog.Attr) bool {
+			if a.Key == "stack" {
+				hasStack = true
+				return false
+			}
+			return true
+		})
+
+		if !hasStack {
+			record.AddAttrs(slog.Any("stack", generateStack(record.PC)))
+		}
 	}
 
 	return h.Handler.Handle(ctx, record)
