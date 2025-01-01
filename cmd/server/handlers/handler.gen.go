@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	strictnethttp "github.com/oapi-codegen/runtime/strictmiddleware/nethttp"
 	openapi_types "github.com/oapi-codegen/runtime/types"
@@ -51,6 +52,19 @@ type ErrorMetadata struct {
 	Field *string `json:"field,omitempty"`
 }
 
+// Ledger defines model for Ledger.
+type Ledger struct {
+	// CreatedAt Date and time the ledger was created
+	CreatedAt time.Time `json:"created_at"`
+
+	// CreatedBy User ID of the creator
+	CreatedBy openapi_types.UUID `json:"created_by"`
+	Id        openapi_types.UUID `json:"id"`
+
+	// Name Ledger's name
+	Name string `json:"name"`
+}
+
 // ErrorResponse defines model for ErrorResponse.
 type ErrorResponse struct {
 	Errors []Error `json:"errors"`
@@ -71,6 +85,12 @@ type LoginJSONBody struct {
 	Password string `json:"password"`
 }
 
+// CreateLedgerJSONBody defines parameters for CreateLedger.
+type CreateLedgerJSONBody struct {
+	// Name Ledger's name
+	Name string `json:"name"`
+}
+
 // RegisterUserJSONBody defines parameters for RegisterUser.
 type RegisterUserJSONBody struct {
 	// Email User's email address
@@ -89,6 +109,9 @@ type RegisterUserJSONBody struct {
 // LoginJSONRequestBody defines body for Login for application/json ContentType.
 type LoginJSONRequestBody LoginJSONBody
 
+// CreateLedgerJSONRequestBody defines body for CreateLedger for application/json ContentType.
+type CreateLedgerJSONRequestBody CreateLedgerJSONBody
+
 // RegisterUserJSONRequestBody defines body for RegisterUser for application/json ContentType.
 type RegisterUserJSONRequestBody RegisterUserJSONBody
 
@@ -103,6 +126,12 @@ type ServerInterface interface {
 	// Healthcheck
 	// (GET /healthcheck)
 	GetHealthcheck(w http.ResponseWriter, r *http.Request)
+
+	// (GET /ledgers)
+	ListLedgers(w http.ResponseWriter, r *http.Request)
+
+	// (POST /ledgers)
+	CreateLedger(w http.ResponseWriter, r *http.Request)
 
 	// (POST /users)
 	RegisterUser(w http.ResponseWriter, r *http.Request)
@@ -156,6 +185,46 @@ func (siw *ServerInterfaceWrapper) GetHealthcheck(w http.ResponseWriter, r *http
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetHealthcheck(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListLedgers operation middleware
+func (siw *ServerInterfaceWrapper) ListLedgers(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, CookieAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListLedgers(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateLedger operation middleware
+func (siw *ServerInterfaceWrapper) CreateLedger(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, CookieAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateLedger(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -302,6 +371,8 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc("POST "+options.BaseURL+"/authentication/login", wrapper.Login)
 	m.HandleFunc("GET "+options.BaseURL+"/authentication/whoami", wrapper.GetIdentity)
 	m.HandleFunc("GET "+options.BaseURL+"/healthcheck", wrapper.GetHealthcheck)
+	m.HandleFunc("GET "+options.BaseURL+"/ledgers", wrapper.ListLedgers)
+	m.HandleFunc("POST "+options.BaseURL+"/ledgers", wrapper.CreateLedger)
 	m.HandleFunc("POST "+options.BaseURL+"/users", wrapper.RegisterUser)
 
 	return m
@@ -434,6 +505,83 @@ func (response GetHealthcheckdefaultJSONResponse) VisitGetHealthcheckResponse(w 
 	return json.NewEncoder(w).Encode(response.Body)
 }
 
+type ListLedgersRequestObject struct {
+}
+
+type ListLedgersResponseObject interface {
+	VisitListLedgersResponse(w http.ResponseWriter) error
+}
+
+type ListLedgers200JSONResponse struct {
+	Ledgers []Ledger `json:"ledgers"`
+}
+
+func (response ListLedgers200JSONResponse) VisitListLedgersResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListLedgersdefaultJSONResponse struct {
+	Body struct {
+		Errors []Error `json:"errors"`
+
+		// TraceId Unique identifier for the error instance
+		TraceId openapi_types.UUID `json:"trace_id"`
+
+		// Url URL of the failed request
+		Url string `json:"url"`
+	}
+	StatusCode int
+}
+
+func (response ListLedgersdefaultJSONResponse) VisitListLedgersResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
+type CreateLedgerRequestObject struct {
+	Body *CreateLedgerJSONRequestBody
+}
+
+type CreateLedgerResponseObject interface {
+	VisitCreateLedgerResponse(w http.ResponseWriter) error
+}
+
+type CreateLedger200JSONResponse struct {
+	Id openapi_types.UUID `json:"id"`
+}
+
+func (response CreateLedger200JSONResponse) VisitCreateLedgerResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreateLedgerdefaultJSONResponse struct {
+	Body struct {
+		Errors []Error `json:"errors"`
+
+		// TraceId Unique identifier for the error instance
+		TraceId openapi_types.UUID `json:"trace_id"`
+
+		// Url URL of the failed request
+		Url string `json:"url"`
+	}
+	StatusCode int
+}
+
+func (response CreateLedgerdefaultJSONResponse) VisitCreateLedgerResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
 type RegisterUserRequestObject struct {
 	Body *RegisterUserJSONRequestBody
 }
@@ -484,6 +632,12 @@ type StrictServerInterface interface {
 	// Healthcheck
 	// (GET /healthcheck)
 	GetHealthcheck(ctx context.Context, request GetHealthcheckRequestObject) (GetHealthcheckResponseObject, error)
+
+	// (GET /ledgers)
+	ListLedgers(ctx context.Context, request ListLedgersRequestObject) (ListLedgersResponseObject, error)
+
+	// (POST /ledgers)
+	CreateLedger(ctx context.Context, request CreateLedgerRequestObject) (CreateLedgerResponseObject, error)
 
 	// (POST /users)
 	RegisterUser(ctx context.Context, request RegisterUserRequestObject) (RegisterUserResponseObject, error)
@@ -590,6 +744,61 @@ func (sh *strictHandler) GetHealthcheck(w http.ResponseWriter, r *http.Request) 
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetHealthcheckResponseObject); ok {
 		if err := validResponse.VisitGetHealthcheckResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListLedgers operation middleware
+func (sh *strictHandler) ListLedgers(w http.ResponseWriter, r *http.Request) {
+	var request ListLedgersRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListLedgers(ctx, request.(ListLedgersRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListLedgers")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListLedgersResponseObject); ok {
+		if err := validResponse.VisitListLedgersResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateLedger operation middleware
+func (sh *strictHandler) CreateLedger(w http.ResponseWriter, r *http.Request) {
+	var request CreateLedgerRequestObject
+
+	var body CreateLedgerJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateLedger(ctx, request.(CreateLedgerRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateLedger")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateLedgerResponseObject); ok {
+		if err := validResponse.VisitCreateLedgerResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

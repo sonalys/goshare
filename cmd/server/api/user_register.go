@@ -12,13 +12,14 @@ import (
 )
 
 func (a *API) RegisterUser(ctx context.Context, request handlers.RegisterUserRequestObject) (handlers.RegisterUserResponseObject, error) {
-	resp, err := a.dependencies.UserRegister.Register(ctx, users.RegisterRequest{
+	req := users.RegisterRequest{
 		FirstName: request.Body.FirstName,
 		LastName:  request.Body.LastName,
 		Email:     string(request.Body.Email),
 		Password:  request.Body.Password,
-	})
-	switch {
+	}
+
+	switch resp, err := a.dependencies.UserRegister.Register(ctx, req); {
 	case err == nil:
 		return handlers.RegisterUser200JSONResponse{Id: resp.ID}, nil
 	case errors.Is(err, v1.ErrEmailAlreadyRegistered):

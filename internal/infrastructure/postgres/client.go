@@ -37,3 +37,18 @@ func (c *Client) Shutdown() {
 func (c *Client) queries() *queries.Queries {
 	return queries.New(c.connPool)
 }
+
+func (c *Client) transaction(ctx context.Context, f func(tx *queries.Queries) error) error {
+	tx, err := c.connPool.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to start transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	err = f(queries.New(tx))
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit(ctx)
+}

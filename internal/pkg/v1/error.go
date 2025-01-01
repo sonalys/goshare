@@ -63,11 +63,11 @@ func NewFieldLengthError(field string, min, max int) FieldError {
 	}
 }
 
-func (e *FieldError) Error() string {
+func (e FieldError) Error() string {
 	return fmt.Sprintf("field %s: %v", e.Field, e.Cause)
 }
 
-func (e *FieldError) Unwrap() error {
+func (e FieldError) Unwrap() error {
 	return e.Cause
 }
 

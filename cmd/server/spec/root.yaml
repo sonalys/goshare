@@ -130,6 +130,61 @@ paths:
                     type: string
                     format: uuid
 
+  /ledgers:
+    get:
+      operationId: ListLedgers
+      description: Lists all ledgers
+      security:
+        - cookieAuth: []
+      responses:
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+        '200':
+          description: List of ledgers
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - ledgers
+                properties:
+                  ledgers:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Ledger"
+    post:
+      operationId: CreateLedger
+      description: Creates a new ledger
+      security:
+        - cookieAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  description: Ledger's name
+                  example: "My Ledger"
+      responses:
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+        '200':
+          description: Ledger was created
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+
 components:
   securitySchemes:
     cookieAuth:
@@ -163,6 +218,31 @@ components:
                 items:
                   $ref: "#/components/schemas/Error"
   schemas:
+    Ledger:
+      type: object
+      required:
+        - id
+        - name
+        - created_at
+        - created_by
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          description: Ledger's name
+          example: "My Ledger"
+        created_at:
+          type: string
+          format: date-time
+          description: Date and time the ledger was created
+          example: "2020-01-01T00:00:00Z"
+        created_by:
+          type: string
+          format: uuid
+          description: User ID of the creator
+          example: "123e4567-e89b-12d3-a456-426614174000"
     ErrorMetadata:
       type: object
       properties:

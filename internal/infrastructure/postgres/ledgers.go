@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/queries"
@@ -19,11 +20,31 @@ func NewLedgerRepository(client *Client) *LedgerRepository {
 }
 
 func (r *LedgerRepository) Create(ctx context.Context, ledger *v1.Ledger) error {
-	return mapLedgerError(r.client.queries().CreateLedger(ctx, queries.CreateLedgerParams{
-		ID:        convertUUID(ledger.ID),
-		Name:      ledger.Name,
-		CreatedAt: convertTime(ledger.CreatedAt),
-		CreatedBy: convertUUID(ledger.CreatedBy),
+	return mapLedgerError(r.client.transaction(ctx, func(tx *queries.Queries) error {
+		createLedgerReq := queries.CreateLedgerParams{
+			ID:        convertUUID(ledger.ID),
+			Name:      ledger.Name,
+			CreatedAt: convertTime(ledger.CreatedAt),
+			CreatedBy: convertUUID(ledger.CreatedBy),
+		}
+
+		if err := tx.CreateLedger(ctx, createLedgerReq); err != nil {
+			return fmt.Errorf("failed to create ledger: %w", err)
+		}
+
+		addUserReq := queries.AddUserToLedgerParams{
+			ID:        convertUUID(uuid.New()),
+			LedgerID:  convertUUID(ledger.ID),
+			UserID:    convertUUID(ledger.CreatedBy),
+			CreatedBy: convertUUID(ledger.CreatedBy),
+			CreatedAt: convertTime(ledger.CreatedAt),
+		}
+
+		if err := tx.AddUserToLedger(ctx, addUserReq); err != nil {
+			return fmt.Errorf("failed to add user to ledger: %w", err)
+		}
+
+		return nil
 	}))
 }
 
