@@ -2,6 +2,8 @@ package api
 
 import (
 	"context"
+	"errors"
+	"net/http"
 
 	"github.com/sonalys/goshare/cmd/server/handlers"
 	"github.com/sonalys/goshare/internal/application/ledgers"
@@ -30,6 +32,12 @@ func (a *API) CreateExpense(ctx context.Context, request handlers.CreateExpenseR
 			Id: resp.ID,
 		}, nil
 	default:
+		if errList := new(v1.FieldErrorList); errors.As(err, errList) {
+			return handlers.CreateExpensedefaultJSONResponse{
+				Body:       newErrorResponse(ctx, getCausesFromFieldErrors(*errList)),
+				StatusCode: http.StatusBadRequest,
+			}, nil
+		}
 		return nil, err
 	}
 }

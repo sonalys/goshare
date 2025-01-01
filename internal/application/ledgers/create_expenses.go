@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"math"
 	"time"
 
 	"github.com/google/uuid"
@@ -28,9 +29,61 @@ type (
 	}
 )
 
+func (r CreateExpenseRequest) Validate() error {
+	var errs v1.FormError
+
+	if r.LedgerID == uuid.Nil {
+		errs.Fields = append(errs.Fields, v1.NewRequiredFieldError("ledger_id"))
+	}
+
+	if r.Amount <= 0 {
+		errs.Fields = append(errs.Fields, v1.NewFieldRangeError("amount", 0, math.MaxInt32))
+	}
+
+	if r.Name == "" {
+		errs.Fields = append(errs.Fields, v1.NewRequiredFieldError("name"))
+	}
+
+	if r.ExpenseDate.IsZero() {
+		errs.Fields = append(errs.Fields, v1.NewRequiredFieldError("expense_date"))
+	}
+
+	if len(r.UserBalances) == 0 {
+		errs.Fields = append(errs.Fields, v1.NewRequiredFieldError("user_balances"))
+	}
+
+	var balanceSum int32
+	for i, ub := range r.UserBalances {
+		balanceSum += ub.Balance
+
+		if ub.UserID == uuid.Nil {
+			errs.Fields = append(errs.Fields, v1.NewRequiredFieldError("user_balances["+fmt.Sprint(i)+"].user_id"))
+		}
+
+		if ub.Balance >= 0 {
+			errs.Fields = append(errs.Fields, v1.NewFieldRangeError("user_balances["+fmt.Sprint(i)+"].balance", math.MinInt32, -1))
+		}
+	}
+
+	if balanceSum+r.Amount != 0 {
+		errs.Fields = append(errs.Fields, v1.FieldError{
+			Field: "user_balances",
+			Cause: fmt.Errorf("%w: sum of user balances should equal to the expense amount. difference of %s", v1.ErrInvalidValue, v1.NewMoney(balanceSum+r.Amount, 2, "$")),
+		})
+	}
+
+	return errs.Validate()
+}
+
 func (c *Controller) CreateExpense(ctx context.Context, req CreateExpenseRequest) (*CreateExpenseResponse, error) {
 	ctx, span := otel.Tracer.Start(ctx, "ledgers.CreateExpense")
 	defer span.End()
+
+	if err := req.Validate(); err != nil {
+		span.SetStatus(codes.Error, err.Error())
+		slog.ErrorContext(ctx, "invalid request", slog.Any("error", err))
+		return nil, fmt.Errorf("invalid request: %w", err)
+	}
 
 	expense := &v1.Expense{
 		ID:           uuid.New(),
