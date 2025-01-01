@@ -16,7 +16,7 @@ type (
 	CreateExpenseRequest struct {
 		UserID       uuid.UUID
 		LedgerID     uuid.UUID
-		CategoryID   uuid.UUID
+		CategoryID   *uuid.UUID
 		Amount       int32
 		Name         string
 		ExpenseDate  time.Time

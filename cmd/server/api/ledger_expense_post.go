@@ -8,19 +8,17 @@ import (
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
-// CreateExpense implements handlers.StrictServerInterface.
 func (a *API) CreateExpense(ctx context.Context, request handlers.CreateExpenseRequestObject) (handlers.CreateExpenseResponseObject, error) {
 	identity, err := GetIdentity(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	// CreateExpenseRequest is a struct that contains the request parameters.
 	req := ledgers.CreateExpenseRequest{
 		UserID:       identity.UserID,
 		LedgerID:     request.LedgerID,
 		CategoryID:   request.Body.CategoryId,
-		Amount:       int32(request.Body.Amount),
+		Amount:       request.Body.Amount,
 		Name:         request.Body.Name,
 		ExpenseDate:  request.Body.ExpenseDate,
 		UserBalances: convertUserBalances(request.Body.UserBalances),
@@ -37,11 +35,11 @@ func (a *API) CreateExpense(ctx context.Context, request handlers.CreateExpenseR
 }
 
 func convertUserBalances(userBalances []handlers.ExpenseUserBalance) []v1.ExpenseUserBalance {
-	var balances []v1.ExpenseUserBalance
+	balances := make([]v1.ExpenseUserBalance, 0, len(userBalances))
 	for _, ub := range userBalances {
 		balances = append(balances, v1.ExpenseUserBalance{
 			UserID:  ub.UserId,
-			Balance: int32(ub.Balance),
+			Balance: ub.Balance,
 		})
 	}
 	return balances

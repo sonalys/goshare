@@ -55,7 +55,7 @@ type ErrorMetadata struct {
 
 // ExpenseUserBalance defines model for ExpenseUserBalance.
 type ExpenseUserBalance struct {
-	Balance float32            `json:"balance"`
+	Balance int32              `json:"balance"`
 	UserId  openapi_types.UUID `json:"user_id"`
 }
 
@@ -74,7 +74,7 @@ type Ledger struct {
 
 // LedgerParticipantBalance defines model for LedgerParticipantBalance.
 type LedgerParticipantBalance struct {
-	Balance float32            `json:"balance"`
+	Balance int32              `json:"balance"`
 	UserId  openapi_types.UUID `json:"user_id"`
 }
 
@@ -107,16 +107,13 @@ type CreateLedgerJSONBody struct {
 // CreateExpenseJSONBody defines parameters for CreateExpense.
 type CreateExpenseJSONBody struct {
 	// Amount Expense amount
-	Amount float32 `json:"amount"`
+	Amount int32 `json:"amount"`
 
 	// CategoryId Category ID
-	CategoryId openapi_types.UUID `json:"category_id"`
+	CategoryId *openapi_types.UUID `json:"category_id,omitempty"`
 
 	// ExpenseDate Date and time the expense was made
 	ExpenseDate time.Time `json:"expense_date"`
-
-	// LedgerId Ledger ID
-	LedgerId openapi_types.UUID `json:"ledger_id"`
 
 	// Name Expense name
 	Name         string               `json:"name"`

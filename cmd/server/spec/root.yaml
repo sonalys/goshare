@@ -206,22 +206,15 @@ paths:
               type: object
               required:
                 - amount
-                - ledger_id
-                - category_id
                 - name
                 - expense_date
                 - user_balances
               properties:
                 amount:
-                  type: number
-                  format: float
+                  type: integer
+                  format: int32
                   description: Expense amount
-                  example: 100.00
-                ledger_id:
-                  type: string
-                  format: uuid
-                  description: Ledger ID
-                  example: "123e4567-e89b-12d3-a456-426614174000"
+                  example: 10000
                 category_id:
                   type: string
                   format: uuid
@@ -330,8 +323,8 @@ components:
           type: string
           format: uuid
         balance:
-          type: number
-          format: float
+          type: integer
+          format: int32
     LedgerParticipantBalance:
       type: object
       required:
@@ -342,8 +335,8 @@ components:
           type: string
           format: uuid
         balance:
-          type: number
-          format: float
+          type: integer
+          format: int32
     Ledger:
       type: object
       required:

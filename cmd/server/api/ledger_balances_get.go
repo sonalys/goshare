@@ -23,7 +23,7 @@ func mapLedgerParticipantBalanceToResponseObject(balance []v1.LedgerParticipantB
 	for _, b := range balance {
 		balances = append(balances, handlers.LedgerParticipantBalance{
 			UserId:  b.UserID,
-			Balance: float32(b.Balance),
+			Balance: b.Balance,
 		})
 	}
 

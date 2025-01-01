@@ -14,8 +14,26 @@ func convertUUID(from uuid.UUID) pgtype.UUID {
 	}
 }
 
+func convertUUIDPtr(from *uuid.UUID) pgtype.UUID {
+	if from == nil {
+		return pgtype.UUID{}
+	}
+	return pgtype.UUID{
+		Bytes: *from,
+		Valid: true,
+	}
+}
+
 func newUUID(from pgtype.UUID) uuid.UUID {
 	return uuid.UUID(from.Bytes)
+}
+
+func newUUIDPtr(from pgtype.UUID) *uuid.UUID {
+	if !from.Valid {
+		return nil
+	}
+	uuid := newUUID(from)
+	return &uuid
 }
 
 func convertTime(from time.Time) pgtype.Timestamp {

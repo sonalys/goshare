@@ -13,7 +13,7 @@ type ExpenseUserBalance struct {
 
 type Expense struct {
 	ID           uuid.UUID
-	CategoryID   uuid.UUID
+	CategoryID   *uuid.UUID
 	LedgerID     uuid.UUID
 	Amount       int32
 	Name         string

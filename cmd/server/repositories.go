@@ -20,6 +20,7 @@ func loadRepositories(
 	return &repositories{
 		ParticipantRepository: postgres.NewUsersRepository(infrastructure.postgres),
 		LedgerRepository:      postgres.NewLedgerRepository(infrastructure.postgres),
+		ExpensesRepository:    postgres.NewExpensesRepository(infrastructure.postgres),
 		JWTRepository:         jwt.NewClient(secrets.JWTSignKey),
 	}
 }

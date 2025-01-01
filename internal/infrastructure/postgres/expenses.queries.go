@@ -13,7 +13,7 @@ func createExpense(ctx context.Context, tx *queries.Queries, expense *v1.Expense
 	createExpenseReq := queries.CreateExpenseParams{
 		ID:          convertUUID(expense.ID),
 		Amount:      expense.Amount,
-		CategoryID:  convertUUID(expense.CategoryID),
+		CategoryID:  convertUUIDPtr(expense.CategoryID),
 		LedgerID:    convertUUID(expense.LedgerID),
 		Name:        expense.Name,
 		ExpenseDate: convertTime(expense.ExpenseDate),

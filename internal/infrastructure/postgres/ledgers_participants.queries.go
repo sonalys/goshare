@@ -69,7 +69,8 @@ func updateLedgerParticipantsBalance(ctx context.Context, tx *queries.Queries, l
 	}
 
 	for _, record := range records {
-		for _, balance := range balances {
+		for i := range balances {
+			balance := &balances[i]
 			if record.UserID == balance.UserID && record.CreatedAt.Time.After(balance.LastTimestamp.Time) {
 				balance.Balance += record.Amount
 				balance.LastTimestamp = record.CreatedAt
@@ -77,7 +78,8 @@ func updateLedgerParticipantsBalance(ctx context.Context, tx *queries.Queries, l
 		}
 	}
 
-	for _, balance := range balances {
+	for i := range balances {
+		balance := &balances[i]
 		updateReq := queries.UpdateLedgerParticipantBalanceParams{
 			UserID:        balance.UserID,
 			LedgerID:      balance.LedgerID,

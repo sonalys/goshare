@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"runtime/debug"
 
 	"github.com/sonalys/goshare/cmd/server/api"
 	"github.com/sonalys/goshare/cmd/server/handlers"
@@ -22,7 +23,7 @@ func recoverMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if r := recover(); r != nil {
-				slog.Error("panic recovered", slog.Any("error", r))
+				slog.Error("panic recovered", slog.Any("error", r), slog.String("stack", string(debug.Stack())))
 				w.WriteHeader(http.StatusInternalServerError)
 			}
 		}()
