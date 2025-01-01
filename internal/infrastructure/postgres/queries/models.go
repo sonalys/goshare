@@ -23,7 +23,7 @@ type Expense struct {
 	LedgerID    pgtype.UUID
 	Amount      int32
 	Name        string
-	ExpenseDate pgtype.Date
+	ExpenseDate pgtype.Timestamp
 	CreatedAt   pgtype.Timestamp
 	CreatedBy   pgtype.UUID
 	UpdatedAt   pgtype.Timestamp
@@ -34,8 +34,9 @@ type ExpensePayment struct {
 	ID          pgtype.UUID
 	ExpenseID   pgtype.UUID
 	UserID      pgtype.UUID
+	LedgerID    pgtype.UUID
 	Amount      int32
-	PaymentDate pgtype.Date
+	PaymentDate pgtype.Timestamp
 	CreatedAt   pgtype.Timestamp
 	CreatedBy   pgtype.UUID
 	UpdatedAt   pgtype.Timestamp

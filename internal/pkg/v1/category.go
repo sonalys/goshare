@@ -1,11 +1,16 @@
 package v1
 
-import "github.com/google/uuid"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Category struct {
 	ID        uuid.UUID
+	LedgerID  uuid.UUID
 	ParentID  uuid.UUID
 	Name      string
-	CreatedAt string
+	CreatedAt time.Time
 	CreatedBy uuid.UUID
 }

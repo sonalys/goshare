@@ -98,7 +98,7 @@ type CreateExpenseParams struct {
 	LedgerID    pgtype.UUID
 	Amount      int32
 	Name        string
-	ExpenseDate pgtype.Date
+	ExpenseDate pgtype.Timestamp
 	CreatedAt   pgtype.Timestamp
 	CreatedBy   pgtype.UUID
 	UpdatedAt   pgtype.Timestamp
@@ -130,7 +130,7 @@ type CreateExpensePaymentParams struct {
 	ExpenseID   pgtype.UUID
 	UserID      pgtype.UUID
 	Amount      int32
-	PaymentDate pgtype.Date
+	PaymentDate pgtype.Timestamp
 	CreatedAt   pgtype.Timestamp
 	CreatedBy   pgtype.UUID
 	UpdatedAt   pgtype.Timestamp
@@ -262,7 +262,7 @@ func (q *Queries) FindExpenseById(ctx context.Context, id pgtype.UUID) (Expense,
 }
 
 const findExpensePaymentById = `-- name: FindExpensePaymentById :one
-SELECT id, expense_id, user_id, amount, payment_date, created_at, created_by, updated_at, updated_by FROM expense_payments WHERE id = $1
+SELECT id, expense_id, user_id, ledger_id, amount, payment_date, created_at, created_by, updated_at, updated_by FROM expense_payments WHERE id = $1
 `
 
 func (q *Queries) FindExpensePaymentById(ctx context.Context, id pgtype.UUID) (ExpensePayment, error) {
@@ -272,6 +272,7 @@ func (q *Queries) FindExpensePaymentById(ctx context.Context, id pgtype.UUID) (E
 		&i.ID,
 		&i.ExpenseID,
 		&i.UserID,
+		&i.LedgerID,
 		&i.Amount,
 		&i.PaymentDate,
 		&i.CreatedAt,
@@ -317,7 +318,7 @@ func (q *Queries) FindUserByEmail(ctx context.Context, email string) (User, erro
 }
 
 const getExpensePayments = `-- name: GetExpensePayments :many
-SELECT id, expense_id, user_id, amount, payment_date, created_at, created_by, updated_at, updated_by FROM expense_payments WHERE expense_id = $1
+SELECT id, expense_id, user_id, ledger_id, amount, payment_date, created_at, created_by, updated_at, updated_by FROM expense_payments WHERE expense_id = $1
 `
 
 func (q *Queries) GetExpensePayments(ctx context.Context, expenseID pgtype.UUID) ([]ExpensePayment, error) {
@@ -333,6 +334,7 @@ func (q *Queries) GetExpensePayments(ctx context.Context, expenseID pgtype.UUID)
 			&i.ID,
 			&i.ExpenseID,
 			&i.UserID,
+			&i.LedgerID,
 			&i.Amount,
 			&i.PaymentDate,
 			&i.CreatedAt,
@@ -554,7 +556,7 @@ type UpdateExpenseParams struct {
 	CategoryID  pgtype.UUID
 	Amount      int32
 	Name        string
-	ExpenseDate pgtype.Date
+	ExpenseDate pgtype.Timestamp
 	UpdatedAt   pgtype.Timestamp
 	UpdatedBy   pgtype.UUID
 	ID          pgtype.UUID
@@ -580,7 +582,7 @@ UPDATE expense_payments SET user_id = $1, amount = $2, payment_date = $3, update
 type UpdateExpensePaymentParams struct {
 	UserID      pgtype.UUID
 	Amount      int32
-	PaymentDate pgtype.Date
+	PaymentDate pgtype.Timestamp
 	UpdatedAt   pgtype.Timestamp
 	UpdatedBy   pgtype.UUID
 	ID          pgtype.UUID

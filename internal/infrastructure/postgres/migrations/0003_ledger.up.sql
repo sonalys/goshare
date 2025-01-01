@@ -41,7 +41,7 @@ CREATE TABLE expenses (
     ledger_id UUID NOT NULL,
     amount INTEGER NOT NULL,
     name TEXT NOT NULL,
-    expense_date DATE NOT NULL,
+    expense_date TIMESTAMP NOT NULL,
     created_at TIMESTAMP NOT NULL,
     created_by UUID NOT NULL,
     updated_at TIMESTAMP NOT NULL,
@@ -59,8 +59,9 @@ CREATE TABLE expense_payments (
     id UUID PRIMARY KEY,
     expense_id UUID NOT NULL,
     user_id UUID NOT NULL,
+    ledger_id UUID NOT NULL,
     amount INTEGER NOT NULL,
-    payment_date DATE NOT NULL,
+    payment_date TIMESTAMP NOT NULL,
     created_at TIMESTAMP NOT NULL,
     created_by UUID NOT NULL,
     updated_at TIMESTAMP NOT NULL,
@@ -69,7 +70,8 @@ CREATE TABLE expense_payments (
     FOREIGN KEY (expense_id) REFERENCES expenses (id),
     FOREIGN KEY (user_id) REFERENCES users (id),
     FOREIGN KEY (created_by) REFERENCES users (id),
-    FOREIGN KEY (updated_by) REFERENCES users (id)
+    FOREIGN KEY (updated_by) REFERENCES users (id),
+    FOREIGN KEY (ledger_id) REFERENCES ledgers (id)
 );
 
 CREATE TABLE ledger_records (

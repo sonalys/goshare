@@ -3,12 +3,8 @@ package postgres
 import (
 	"context"
 	"errors"
-	"time"
 
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/queries"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
@@ -20,24 +16,6 @@ type UsersRepository struct {
 func NewUsersRepository(client *Client) *UsersRepository {
 	return &UsersRepository{
 		client: client,
-	}
-}
-
-func convertUUID(from uuid.UUID) pgtype.UUID {
-	return pgtype.UUID{
-		Bytes: from,
-		Valid: true,
-	}
-}
-
-func newUUID(from pgtype.UUID) uuid.UUID {
-	return uuid.UUID(from.Bytes)
-}
-
-func convertTime(from time.Time) pgtype.Timestamp {
-	return pgtype.Timestamp{
-		Time:  from,
-		Valid: true,
 	}
 }
 
@@ -69,22 +47,20 @@ func (r *UsersRepository) FindByEmail(ctx context.Context, email string) (*v1.Us
 	}, nil
 }
 
-func isConstraintError(err error, constraintName string) bool {
+func isViolatingConstraint(err error, constraintName string) bool {
 	if pgErr := new(pgconn.PgError); errors.As(err, &pgErr) {
 		return pgErr.ConstraintName == constraintName
 	}
 	return false
 }
 
-func mapError(err error) error {
+func mapUserError(err error) error {
 	switch {
 	case err == nil:
 		return nil
-	case errors.Is(err, pgx.ErrNoRows):
-		return v1.ErrNotFound
-	case isConstraintError(err, constraintParticipantUniqueEmail):
+	case isViolatingConstraint(err, constraintParticipantUniqueEmail):
 		return v1.ErrEmailAlreadyRegistered
 	default:
-		return err
+		return mapError(err)
 	}
 }

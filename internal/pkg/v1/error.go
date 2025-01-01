@@ -31,6 +31,8 @@ type (
 var (
 	ErrRequiredValue = errors.New("cannot be empty")
 	ErrInvalidValue  = errors.New("invalid value")
+	ErrConflict      = errors.New("conflict")
+	ErrNotFound      = errors.New("not found")
 )
 
 func NewRequiredFieldError(field string) FieldError {
