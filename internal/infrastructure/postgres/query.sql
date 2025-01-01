@@ -58,6 +58,9 @@ INSERT INTO ledger_records (id,ledger_id,expense_id,user_id,amount,created_at,cr
 -- name: GetLedgerRecords :many
 SELECT * FROM ledger_records WHERE ledger_id = $1 ORDER BY created_at DESC;
 
+-- name: GetLedgerRecordsFromTimestamp :many
+SELECT * FROM ledger_records WHERE ledger_id = $1 AND created_at > $2 ORDER BY created_at ASC;
+
 -- name: GetLedgerUserRecords :many
 SELECT * FROM ledger_records WHERE ledger_id = $1 AND user_id = $2 ORDER BY created_at DESC;
 
@@ -66,6 +69,9 @@ INSERT INTO ledger_participant_balances (id,ledger_id,user_id,last_timestamp,bal
 
 -- name: UpdateLedgerParticipantBalance :exec
 UPDATE ledger_participant_balances SET last_timestamp = $1, balance = $2 WHERE ledger_id = $3 AND user_id = $4;
+
+-- name: GetLedgerParticipantsBalances :many
+SELECT * FROM ledger_participant_balances WHERE ledger_id = $1;
 
 -- name: GetUserLedgers :many
 SELECT ledgers.* FROM ledgers JOIN ledger_participants ON ledgers.id = ledger_participants.ledger_id WHERE ledger_participants.user_id = $1;

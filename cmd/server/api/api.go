@@ -23,8 +23,12 @@ type (
 		Create(ctx context.Context, req ledgers.CreateRequest) (*ledgers.CreateResponse, error)
 	}
 
+	LedgerBalancesLister interface {
+		GetBalances(ctx context.Context, ledgerID uuid.UUID) ([]v1.LedgerParticipantBalance, error)
+	}
+
 	UserLedgerLister interface {
-		ListByUser(ctx context.Context, userID uuid.UUID) ([]v1.Ledger, error)
+		GetByUser(ctx context.Context, userID uuid.UUID) ([]v1.Ledger, error)
 	}
 
 	Dependencies struct {
@@ -32,6 +36,7 @@ type (
 		UserAuthentication
 		LedgerCreater
 		UserLedgerLister
+		LedgerBalancesLister
 	}
 
 	API struct {

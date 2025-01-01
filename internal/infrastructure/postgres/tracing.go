@@ -9,21 +9,70 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-type queryTracer struct{}
+type tracer struct{}
 
-var _ pgx.QueryTracer = queryTracer{}
+var (
+	_ pgx.QueryTracer    = tracer{}
+	_ pgx.PrepareTracer  = tracer{}
+	_ pgx.CopyFromTracer = tracer{}
+	_ pgx.ConnectTracer  = tracer{}
+	_ pgx.BatchTracer    = tracer{}
+)
 
-// TraceQueryEnd implements pgx.QueryTracer.
-func (t queryTracer) TraceQueryEnd(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryEndData) {
+func endContextSpan(ctx context.Context, err error) {
 	span := trace.SpanFromContext(ctx)
-	if data.Err != nil {
-		span.SetStatus(codes.Error, data.Err.Error())
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
 	}
 	span.End()
 }
 
-// TraceQueryStart implements pgx.QueryTracer.
-func (t queryTracer) TraceQueryStart(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryStartData) context.Context {
-	ctx, _ = otel.Tracer.Start(ctx, "postgres.query")
+func (t tracer) TraceQueryEnd(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryEndData) {
+	endContextSpan(ctx, data.Err)
+}
+
+func (t tracer) TraceQueryStart(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryStartData) context.Context {
+	ctx, _ = otel.Tracer.Start(ctx, data.SQL)
+	return ctx
+}
+
+func (t tracer) TracePrepareEnd(ctx context.Context, conn *pgx.Conn, data pgx.TracePrepareEndData) {
+	endContextSpan(ctx, data.Err)
+}
+
+func (t tracer) TracePrepareStart(ctx context.Context, conn *pgx.Conn, data pgx.TracePrepareStartData) context.Context {
+	ctx, _ = otel.Tracer.Start(ctx, data.Name)
+	return ctx
+}
+
+func (t tracer) TraceCopyFromEnd(ctx context.Context, conn *pgx.Conn, data pgx.TraceCopyFromEndData) {
+	endContextSpan(ctx, data.Err)
+}
+
+func (t tracer) TraceCopyFromStart(ctx context.Context, conn *pgx.Conn, data pgx.TraceCopyFromStartData) context.Context {
+	ctx, _ = otel.Tracer.Start(ctx, data.TableName.Sanitize())
+	return ctx
+}
+
+func (t tracer) TraceConnectEnd(ctx context.Context, data pgx.TraceConnectEndData) {
+	endContextSpan(ctx, data.Err)
+}
+
+func (t tracer) TraceConnectStart(ctx context.Context, data pgx.TraceConnectStartData) context.Context {
+	ctx, _ = otel.Tracer.Start(ctx, "connect")
+	return ctx
+}
+
+func (t tracer) TraceBatchEnd(ctx context.Context, conn *pgx.Conn, data pgx.TraceBatchEndData) {
+	endContextSpan(ctx, data.Err)
+}
+
+func (t tracer) TraceBatchQuery(ctx context.Context, conn *pgx.Conn, data pgx.TraceBatchQueryData) {
+	span := trace.SpanFromContext(ctx)
+	span.AddEvent(data.SQL)
+}
+
+func (t tracer) TraceBatchStart(ctx context.Context, conn *pgx.Conn, data pgx.TraceBatchStartData) context.Context {
+	ctx, _ = otel.Tracer.Start(ctx, "batch")
 	return ctx
 }

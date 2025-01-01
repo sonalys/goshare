@@ -185,6 +185,37 @@ paths:
                     type: string
                     format: uuid
 
+  /ledgers/{ledgerID}/balances:
+    get:
+      operationId: ListLedgerBalances
+      description: Lists all ledger balances
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: ledgerID
+          in: path
+          required: true
+          description: Ledger ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+        '200':
+          description: List of ledger balances
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - balances
+                properties:
+                  balances:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/LedgerParticipantBalance"
+
 components:
   securitySchemes:
     cookieAuth:
@@ -218,6 +249,18 @@ components:
                 items:
                   $ref: "#/components/schemas/Error"
   schemas:
+    LedgerParticipantBalance:
+      type: object
+      required:
+        - user_id
+        - balance
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        balance:
+          type: number
+          format: float
     Ledger:
       type: object
       required:

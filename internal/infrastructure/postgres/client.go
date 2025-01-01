@@ -18,7 +18,7 @@ func NewClient(ctx context.Context, connStr string) (*Client, error) {
 		return nil, fmt.Errorf("failed to parse connStr: %w", err)
 	}
 
-	cfg.ConnConfig.Tracer = queryTracer{}
+	cfg.ConnConfig.Tracer = tracer{}
 
 	dbpool, err := pgxpool.NewWithConfig(ctx, cfg)
 	if err != nil {

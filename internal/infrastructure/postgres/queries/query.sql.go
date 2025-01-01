@@ -448,12 +448,80 @@ func (q *Queries) GetLedgerParticipants(ctx context.Context, ledgerID pgtype.UUI
 	return items, nil
 }
 
+const getLedgerParticipantsBalances = `-- name: GetLedgerParticipantsBalances :many
+SELECT id, ledger_id, user_id, last_timestamp, balance FROM ledger_participant_balances WHERE ledger_id = $1
+`
+
+func (q *Queries) GetLedgerParticipantsBalances(ctx context.Context, ledgerID pgtype.UUID) ([]LedgerParticipantBalance, error) {
+	rows, err := q.db.Query(ctx, getLedgerParticipantsBalances, ledgerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []LedgerParticipantBalance
+	for rows.Next() {
+		var i LedgerParticipantBalance
+		if err := rows.Scan(
+			&i.ID,
+			&i.LedgerID,
+			&i.UserID,
+			&i.LastTimestamp,
+			&i.Balance,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getLedgerRecords = `-- name: GetLedgerRecords :many
 SELECT id, ledger_id, expense_id, user_id, amount, created_at, created_by, description FROM ledger_records WHERE ledger_id = $1 ORDER BY created_at DESC
 `
 
 func (q *Queries) GetLedgerRecords(ctx context.Context, ledgerID pgtype.UUID) ([]LedgerRecord, error) {
 	rows, err := q.db.Query(ctx, getLedgerRecords, ledgerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []LedgerRecord
+	for rows.Next() {
+		var i LedgerRecord
+		if err := rows.Scan(
+			&i.ID,
+			&i.LedgerID,
+			&i.ExpenseID,
+			&i.UserID,
+			&i.Amount,
+			&i.CreatedAt,
+			&i.CreatedBy,
+			&i.Description,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getLedgerRecordsFromTimestamp = `-- name: GetLedgerRecordsFromTimestamp :many
+SELECT id, ledger_id, expense_id, user_id, amount, created_at, created_by, description FROM ledger_records WHERE ledger_id = $1 AND created_at > $2 ORDER BY created_at ASC
+`
+
+type GetLedgerRecordsFromTimestampParams struct {
+	LedgerID  pgtype.UUID
+	CreatedAt pgtype.Timestamp
+}
+
+func (q *Queries) GetLedgerRecordsFromTimestamp(ctx context.Context, arg GetLedgerRecordsFromTimestampParams) ([]LedgerRecord, error) {
+	rows, err := q.db.Query(ctx, getLedgerRecordsFromTimestamp, arg.LedgerID, arg.CreatedAt)
 	if err != nil {
 		return nil, err
 	}

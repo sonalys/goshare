@@ -11,6 +11,7 @@ type (
 	Repository interface {
 		Create(ctx context.Context, ledger *v1.Ledger) error
 		GetByUser(ctx context.Context, userID uuid.UUID) ([]v1.Ledger, error)
+		GetLedgerParticipantsBalances(ctx context.Context, ledgerID uuid.UUID) ([]v1.LedgerParticipantBalance, error)
 	}
 
 	Controller struct {

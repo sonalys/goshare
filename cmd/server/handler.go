@@ -61,7 +61,7 @@ func InitializeHandler(client *api.API, repositories *repositories, serviceName 
 	otelHandler := otelhttp.NewHandler(handler, "HTTP",
 		otelhttp.WithServerName(serviceName),
 		otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string {
-			return fmt.Sprintf("%s %s", operation, r.URL.Path)
+			return fmt.Sprintf("%s %s %s", operation, r.Method, r.URL.Path)
 		}),
 	)
 

@@ -32,3 +32,6 @@ tasks:
 
   compose-down:
     cmd: docker compose -f compose.yml down
+
+  enter-db:
+    cmd: docker exec -it postgres psql -U user goshare

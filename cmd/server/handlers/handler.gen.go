@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/oapi-codegen/runtime"
 	strictnethttp "github.com/oapi-codegen/runtime/strictmiddleware/nethttp"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
@@ -63,6 +64,12 @@ type Ledger struct {
 
 	// Name Ledger's name
 	Name string `json:"name"`
+}
+
+// LedgerParticipantBalance defines model for LedgerParticipantBalance.
+type LedgerParticipantBalance struct {
+	Balance float32            `json:"balance"`
+	UserId  openapi_types.UUID `json:"user_id"`
 }
 
 // ErrorResponse defines model for ErrorResponse.
@@ -132,6 +139,9 @@ type ServerInterface interface {
 
 	// (POST /ledgers)
 	CreateLedger(w http.ResponseWriter, r *http.Request)
+
+	// (GET /ledgers/{ledgerID}/balances)
+	ListLedgerBalances(w http.ResponseWriter, r *http.Request, ledgerID openapi_types.UUID)
 
 	// (POST /users)
 	RegisterUser(w http.ResponseWriter, r *http.Request)
@@ -225,6 +235,37 @@ func (siw *ServerInterfaceWrapper) CreateLedger(w http.ResponseWriter, r *http.R
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.CreateLedger(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListLedgerBalances operation middleware
+func (siw *ServerInterfaceWrapper) ListLedgerBalances(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "ledgerID" -------------
+	var ledgerID openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ledgerID", r.PathValue("ledgerID"), &ledgerID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ledgerID", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, CookieAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListLedgerBalances(w, r, ledgerID)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -373,6 +414,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc("GET "+options.BaseURL+"/healthcheck", wrapper.GetHealthcheck)
 	m.HandleFunc("GET "+options.BaseURL+"/ledgers", wrapper.ListLedgers)
 	m.HandleFunc("POST "+options.BaseURL+"/ledgers", wrapper.CreateLedger)
+	m.HandleFunc("GET "+options.BaseURL+"/ledgers/{ledgerID}/balances", wrapper.ListLedgerBalances)
 	m.HandleFunc("POST "+options.BaseURL+"/users", wrapper.RegisterUser)
 
 	return m
@@ -582,6 +624,45 @@ func (response CreateLedgerdefaultJSONResponse) VisitCreateLedgerResponse(w http
 	return json.NewEncoder(w).Encode(response.Body)
 }
 
+type ListLedgerBalancesRequestObject struct {
+	LedgerID openapi_types.UUID `json:"ledgerID"`
+}
+
+type ListLedgerBalancesResponseObject interface {
+	VisitListLedgerBalancesResponse(w http.ResponseWriter) error
+}
+
+type ListLedgerBalances200JSONResponse struct {
+	Balances []LedgerParticipantBalance `json:"balances"`
+}
+
+func (response ListLedgerBalances200JSONResponse) VisitListLedgerBalancesResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListLedgerBalancesdefaultJSONResponse struct {
+	Body struct {
+		Errors []Error `json:"errors"`
+
+		// TraceId Unique identifier for the error instance
+		TraceId openapi_types.UUID `json:"trace_id"`
+
+		// Url URL of the failed request
+		Url string `json:"url"`
+	}
+	StatusCode int
+}
+
+func (response ListLedgerBalancesdefaultJSONResponse) VisitListLedgerBalancesResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
 type RegisterUserRequestObject struct {
 	Body *RegisterUserJSONRequestBody
 }
@@ -638,6 +719,9 @@ type StrictServerInterface interface {
 
 	// (POST /ledgers)
 	CreateLedger(ctx context.Context, request CreateLedgerRequestObject) (CreateLedgerResponseObject, error)
+
+	// (GET /ledgers/{ledgerID}/balances)
+	ListLedgerBalances(ctx context.Context, request ListLedgerBalancesRequestObject) (ListLedgerBalancesResponseObject, error)
 
 	// (POST /users)
 	RegisterUser(ctx context.Context, request RegisterUserRequestObject) (RegisterUserResponseObject, error)
@@ -799,6 +883,32 @@ func (sh *strictHandler) CreateLedger(w http.ResponseWriter, r *http.Request) {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(CreateLedgerResponseObject); ok {
 		if err := validResponse.VisitCreateLedgerResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListLedgerBalances operation middleware
+func (sh *strictHandler) ListLedgerBalances(w http.ResponseWriter, r *http.Request, ledgerID openapi_types.UUID) {
+	var request ListLedgerBalancesRequestObject
+
+	request.LedgerID = ledgerID
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListLedgerBalances(ctx, request.(ListLedgerBalancesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListLedgerBalances")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListLedgerBalancesResponseObject); ok {
+		if err := validResponse.VisitListLedgerBalancesResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
