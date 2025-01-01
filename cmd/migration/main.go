@@ -40,7 +40,11 @@ func main() {
 
 	slog.Info("migrate driver loaded", slog.Uint64("currentVersion", uint64(version)), slog.Bool("isDirty", dirty))
 
-	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+	if err := m.Up(); err != nil {
+		if err == migrate.ErrNoChange {
+			slog.Info("no changes to migrate")
+			return
+		}
 		panic(err)
 	}
 
