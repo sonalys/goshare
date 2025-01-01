@@ -8,6 +8,74 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Category struct {
+	ID        pgtype.UUID
+	LedgerID  pgtype.UUID
+	Name      string
+	ParentID  pgtype.UUID
+	CreatedAt pgtype.Timestamp
+	CreatedBy pgtype.UUID
+}
+
+type Expense struct {
+	ID          pgtype.UUID
+	CategoryID  pgtype.UUID
+	LedgerID    pgtype.UUID
+	Amount      int32
+	Name        string
+	ExpenseDate pgtype.Date
+	CreatedAt   pgtype.Timestamp
+	CreatedBy   pgtype.UUID
+	UpdatedAt   pgtype.Timestamp
+	UpdatedBy   pgtype.UUID
+}
+
+type ExpensePayment struct {
+	ID          pgtype.UUID
+	ExpenseID   pgtype.UUID
+	UserID      pgtype.UUID
+	Amount      int32
+	PaymentDate pgtype.Date
+	CreatedAt   pgtype.Timestamp
+	CreatedBy   pgtype.UUID
+	UpdatedAt   pgtype.Timestamp
+	UpdatedBy   pgtype.UUID
+}
+
+type Ledger struct {
+	ID        pgtype.UUID
+	Name      string
+	CreatedAt pgtype.Timestamp
+	CreatedBy pgtype.UUID
+}
+
+type LedgerParticipant struct {
+	ID        pgtype.UUID
+	LedgerID  pgtype.UUID
+	UserID    pgtype.UUID
+	CreatedAt pgtype.Timestamp
+	CreatedBy pgtype.UUID
+}
+
+type LedgerParticipantBalance struct {
+	ID            pgtype.UUID
+	LedgerID      pgtype.UUID
+	UserID        pgtype.UUID
+	LastTimestamp pgtype.Timestamp
+	Balance       int32
+}
+
+type LedgerRecord struct {
+	ID          pgtype.UUID
+	LedgerID    pgtype.UUID
+	ExpenseID   pgtype.UUID
+	UserID      pgtype.UUID
+	Amount      int32
+	CreatedAt   pgtype.Timestamp
+	CreatedBy   pgtype.UUID
+	Description string
+}
+
 type User struct {
 	ID           pgtype.UUID
 	FirstName    string

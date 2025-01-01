@@ -13,10 +13,11 @@ type Expense struct {
 	Amount      int
 	Name        string
 	ExpenseDate time.Time
-	CreatedAt   string
-	CreatedBy   uuid.UUID
-	UpdatedAt   string
-	UpdatedBy   uuid.UUID
+
+	CreatedAt string
+	CreatedBy uuid.UUID
+	UpdatedAt string
+	UpdatedBy uuid.UUID
 }
 
 type ExpensePayment struct {
@@ -25,4 +26,9 @@ type ExpensePayment struct {
 	LedgerID  uuid.UUID
 	PaidByID  uuid.UUID
 	Amount    int
+
+	CreatedAt string
+	CreatedBy uuid.UUID
+	UpdatedAt string
+	UpdatedBy uuid.UUID
 }
