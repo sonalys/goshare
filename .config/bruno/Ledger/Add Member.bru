@@ -1,0 +1,19 @@
+meta {
+  name: Add Member
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:8080/api/v1/ledgers/members
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "emails": [
+      "joana.doe@example.com"
+    ]
+  }
+}
