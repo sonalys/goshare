@@ -8,7 +8,7 @@ import (
 )
 
 func (a *API) ListLedgers(ctx context.Context, request handlers.ListLedgersRequestObject) (handlers.ListLedgersResponseObject, error) {
-	identity, err := GetIdentity(ctx)
+	identity, err := getIdentity(ctx)
 	if err != nil {
 		return nil, err
 	}

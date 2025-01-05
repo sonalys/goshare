@@ -10,11 +10,9 @@ type controllers struct {
 	ledgerController *ledgers.Controller
 }
 
-func loadControllers(
-	repositories *repositories,
-) *controllers {
+func loadControllers(repositories *repositories) *controllers {
 	return &controllers{
-		userController:   users.NewController(repositories.ParticipantRepository, repositories.JWTRepository),
-		ledgerController: ledgers.NewController(repositories.LedgerRepository, repositories.ExpensesRepository),
+		userController:   users.NewController(repositories.UserRepository, repositories.JWTRepository),
+		ledgerController: ledgers.NewController(repositories.LedgerRepository, repositories.ExpensesRepository, repositories.UserRepository),
 	}
 }

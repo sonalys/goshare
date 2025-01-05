@@ -70,9 +70,11 @@ func newLedger(ledger *sqlc.Ledger) *v1.Ledger {
 }
 
 func mapLedgerError(err error) error {
-	switch err {
-	case nil:
+	switch {
+	case err == nil:
 		return nil
+	case isViolatingConstraint(err, constraintLedgerUniqueParticipant):
+		return v1.ErrUserAlreadyMember
 	default:
 		return mapError(err)
 	}

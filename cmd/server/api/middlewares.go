@@ -28,7 +28,7 @@ func getURL(ctx context.Context) string {
 
 const userCtxKey = "user-key"
 
-func GetIdentity(ctx context.Context) (*v1.Identity, error) {
+func getIdentity(ctx context.Context) (*v1.Identity, error) {
 	identity, ok := ctx.Value(userCtxKey).(*v1.Identity)
 	if !ok {
 		return nil, fmt.Errorf("unauthorized")

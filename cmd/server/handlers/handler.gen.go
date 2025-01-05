@@ -120,6 +120,11 @@ type CreateExpenseJSONBody struct {
 	UserBalances []ExpenseUserBalance `json:"user_balances"`
 }
 
+// AddLedgerMemberJSONBody defines parameters for AddLedgerMember.
+type AddLedgerMemberJSONBody struct {
+	Emails []openapi_types.Email `json:"emails"`
+}
+
 // RegisterUserJSONBody defines parameters for RegisterUser.
 type RegisterUserJSONBody struct {
 	// Email User's email address
@@ -143,6 +148,9 @@ type CreateLedgerJSONRequestBody CreateLedgerJSONBody
 
 // CreateExpenseJSONRequestBody defines body for CreateExpense for application/json ContentType.
 type CreateExpenseJSONRequestBody CreateExpenseJSONBody
+
+// AddLedgerMemberJSONRequestBody defines body for AddLedgerMember for application/json ContentType.
+type AddLedgerMemberJSONRequestBody AddLedgerMemberJSONBody
 
 // RegisterUserJSONRequestBody defines body for RegisterUser for application/json ContentType.
 type RegisterUserJSONRequestBody RegisterUserJSONBody
@@ -170,6 +178,9 @@ type ServerInterface interface {
 
 	// (POST /ledgers/{ledgerID}/expenses)
 	CreateExpense(w http.ResponseWriter, r *http.Request, ledgerID openapi_types.UUID)
+
+	// (POST /ledgers/{ledgerID}/members)
+	AddLedgerMember(w http.ResponseWriter, r *http.Request, ledgerID openapi_types.UUID)
 
 	// (POST /users)
 	RegisterUser(w http.ResponseWriter, r *http.Request)
@@ -334,6 +345,37 @@ func (siw *ServerInterfaceWrapper) CreateExpense(w http.ResponseWriter, r *http.
 	handler.ServeHTTP(w, r)
 }
 
+// AddLedgerMember operation middleware
+func (siw *ServerInterfaceWrapper) AddLedgerMember(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "ledgerID" -------------
+	var ledgerID openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ledgerID", r.PathValue("ledgerID"), &ledgerID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ledgerID", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, CookieAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AddLedgerMember(w, r, ledgerID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // RegisterUser operation middleware
 func (siw *ServerInterfaceWrapper) RegisterUser(w http.ResponseWriter, r *http.Request) {
 
@@ -475,6 +517,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc("POST "+options.BaseURL+"/ledgers", wrapper.CreateLedger)
 	m.HandleFunc("GET "+options.BaseURL+"/ledgers/{ledgerID}/balances", wrapper.ListLedgerBalances)
 	m.HandleFunc("POST "+options.BaseURL+"/ledgers/{ledgerID}/expenses", wrapper.CreateExpense)
+	m.HandleFunc("POST "+options.BaseURL+"/ledgers/{ledgerID}/members", wrapper.AddLedgerMember)
 	m.HandleFunc("POST "+options.BaseURL+"/users", wrapper.RegisterUser)
 
 	return m
@@ -763,6 +806,43 @@ func (response CreateExpensedefaultJSONResponse) VisitCreateExpenseResponse(w ht
 	return json.NewEncoder(w).Encode(response.Body)
 }
 
+type AddLedgerMemberRequestObject struct {
+	LedgerID openapi_types.UUID `json:"ledgerID"`
+	Body     *AddLedgerMemberJSONRequestBody
+}
+
+type AddLedgerMemberResponseObject interface {
+	VisitAddLedgerMemberResponse(w http.ResponseWriter) error
+}
+
+type AddLedgerMember202Response struct {
+}
+
+func (response AddLedgerMember202Response) VisitAddLedgerMemberResponse(w http.ResponseWriter) error {
+	w.WriteHeader(202)
+	return nil
+}
+
+type AddLedgerMemberdefaultJSONResponse struct {
+	Body struct {
+		Errors []Error `json:"errors"`
+
+		// TraceId Unique identifier for the error instance
+		TraceId openapi_types.UUID `json:"trace_id"`
+
+		// Url URL of the failed request
+		Url string `json:"url"`
+	}
+	StatusCode int
+}
+
+func (response AddLedgerMemberdefaultJSONResponse) VisitAddLedgerMemberResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
 type RegisterUserRequestObject struct {
 	Body *RegisterUserJSONRequestBody
 }
@@ -825,6 +905,9 @@ type StrictServerInterface interface {
 
 	// (POST /ledgers/{ledgerID}/expenses)
 	CreateExpense(ctx context.Context, request CreateExpenseRequestObject) (CreateExpenseResponseObject, error)
+
+	// (POST /ledgers/{ledgerID}/members)
+	AddLedgerMember(ctx context.Context, request AddLedgerMemberRequestObject) (AddLedgerMemberResponseObject, error)
 
 	// (POST /users)
 	RegisterUser(ctx context.Context, request RegisterUserRequestObject) (RegisterUserResponseObject, error)
@@ -1045,6 +1128,39 @@ func (sh *strictHandler) CreateExpense(w http.ResponseWriter, r *http.Request, l
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(CreateExpenseResponseObject); ok {
 		if err := validResponse.VisitCreateExpenseResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// AddLedgerMember operation middleware
+func (sh *strictHandler) AddLedgerMember(w http.ResponseWriter, r *http.Request, ledgerID openapi_types.UUID) {
+	var request AddLedgerMemberRequestObject
+
+	request.LedgerID = ledgerID
+
+	var body AddLedgerMemberJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.AddLedgerMember(ctx, request.(AddLedgerMemberRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AddLedgerMember")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(AddLedgerMemberResponseObject); ok {
+		if err := validResponse.VisitAddLedgerMemberResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

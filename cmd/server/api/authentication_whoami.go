@@ -10,7 +10,7 @@ import (
 
 // GetIdentity implements handlers.StrictServerInterface.
 func (a *API) GetIdentity(ctx context.Context, request handlers.GetIdentityRequestObject) (handlers.GetIdentityResponseObject, error) {
-	identity, err := GetIdentity(ctx)
+	identity, err := getIdentity(ctx)
 	if err != nil {
 		slog.ErrorContext(ctx, "could not retrieve identity", slog.Any("error", err))
 		return nil, err

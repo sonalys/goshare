@@ -3,3 +3,6 @@ INSERT INTO users (id,first_name,last_name,email,password_hash,created_at) VALUE
 
 -- name: FindUserByEmail :one
 SELECT * FROM users WHERE email = $1;
+
+-- name: GetByEmail :many
+SELECT * FROM users WHERE email = ANY(@emails::text[]);

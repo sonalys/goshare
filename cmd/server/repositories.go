@@ -7,10 +7,10 @@ import (
 )
 
 type repositories struct {
-	ParticipantRepository *postgres.UsersRepository
-	LedgerRepository      *postgres.LedgerRepository
-	ExpensesRepository    *postgres.ExpensesRepository
-	JWTRepository         *jwt.Client
+	UserRepository     *postgres.UsersRepository
+	LedgerRepository   *postgres.LedgerRepository
+	ExpensesRepository *postgres.ExpensesRepository
+	JWTRepository      *jwt.Client
 }
 
 func loadRepositories(
@@ -18,9 +18,9 @@ func loadRepositories(
 	infrastructure *infrastructure,
 ) *repositories {
 	return &repositories{
-		ParticipantRepository: postgres.NewUsersRepository(infrastructure.postgres),
-		LedgerRepository:      postgres.NewLedgerRepository(infrastructure.postgres),
-		ExpensesRepository:    postgres.NewExpensesRepository(infrastructure.postgres),
-		JWTRepository:         jwt.NewClient(secrets.JWTSignKey),
+		UserRepository:     postgres.NewUsersRepository(infrastructure.postgres),
+		LedgerRepository:   postgres.NewLedgerRepository(infrastructure.postgres),
+		ExpensesRepository: postgres.NewExpensesRepository(infrastructure.postgres),
+		JWTRepository:      jwt.NewClient(secrets.JWTSignKey),
 	}
 }

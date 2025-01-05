@@ -11,7 +11,7 @@ import (
 )
 
 func (a *API) CreateLedger(ctx context.Context, request handlers.CreateLedgerRequestObject) (handlers.CreateLedgerResponseObject, error) {
-	identity, err := GetIdentity(ctx)
+	identity, err := getIdentity(ctx)
 	if err != nil {
 		return nil, err
 	}

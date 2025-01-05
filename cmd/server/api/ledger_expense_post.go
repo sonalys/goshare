@@ -11,7 +11,7 @@ import (
 )
 
 func (a *API) CreateExpense(ctx context.Context, request handlers.CreateExpenseRequestObject) (handlers.CreateExpenseResponseObject, error) {
-	identity, err := GetIdentity(ctx)
+	identity, err := getIdentity(ctx)
 	if err != nil {
 		return nil, err
 	}

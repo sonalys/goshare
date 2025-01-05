@@ -46,6 +46,7 @@ func main() {
 		UserLedgerLister:     controllers.ledgerController,
 		LedgerBalancesLister: controllers.ledgerController,
 		ExpenseCreater:       controllers.ledgerController,
+		LedgerMemberCreater:  controllers.ledgerController,
 	})
 	handler := InitializeHandler(api, repositories, cfg.ServiceName)
 

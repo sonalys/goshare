@@ -280,6 +280,38 @@ paths:
                     items:
                       $ref: "#/components/schemas/LedgerParticipantBalance"
 
+  /ledgers/{ledgerID}/members:
+    post:
+      operationId: AddLedgerMember
+      description: Adds a new member to the Ledger
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: ledgerID
+          in: path
+          required: true
+          description: Ledger ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - emails
+              properties:
+                emails:
+                  type: array
+                  items:
+                    type: string
+                    format: email
+      responses:
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+        '202':
+          description: All users were added to the ledger
 components:
   securitySchemes:
     cookieAuth:

@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"errors"
+	"slices"
 
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
@@ -36,6 +37,10 @@ func (r *UsersRepository) FindByEmail(ctx context.Context, email string) (*v1.Us
 		return nil, mapError(err)
 	}
 
+	return convertUser(user), nil
+}
+
+func convertUser(user sqlc.User) *v1.User {
 	return &v1.User{
 		ID:              newUUID(user.ID),
 		FirstName:       user.FirstName,
@@ -44,7 +49,27 @@ func (r *UsersRepository) FindByEmail(ctx context.Context, email string) (*v1.Us
 		IsEmailVerified: false,
 		PasswordHash:    user.PasswordHash,
 		CreatedAt:       user.CreatedAt.Time,
-	}, nil
+	}
+}
+
+func convertUsers(from []sqlc.User) []v1.User {
+	to := make([]v1.User, 0, len(from))
+
+	for i := range from {
+		to = append(to, *convertUser(from[i]))
+	}
+
+	return to
+}
+
+func (r *UsersRepository) GetByEmail(ctx context.Context, emails []string) ([]v1.User, error) {
+	emails = slices.Compact(emails)
+	users, err := r.client.queries().GetByEmail(ctx, emails)
+	if err != nil {
+		return nil, mapError(err)
+	}
+
+	return convertUsers(users), nil
 }
 
 func isViolatingConstraint(err error, constraintName string) bool {

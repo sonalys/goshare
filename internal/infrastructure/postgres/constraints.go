@@ -7,7 +7,8 @@ import (
 )
 
 const (
-	constraintParticipantUniqueEmail = "participant_unique_email"
+	constraintParticipantUniqueEmail  = "participant_unique_email"
+	constraintLedgerUniqueParticipant = "ledger_participant_unique"
 )
 
 func isConstraintError(err error) bool {
