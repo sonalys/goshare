@@ -1,0 +1,20 @@
+meta {
+  name: Register
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:8080/api/v1/users
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "first_name": "Joana",
+    "last_name": "Doe",
+    "email": "joana.doe@example.com",
+    "password": "SuperP@ssword!1"
+  }
+}
