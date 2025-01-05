@@ -21,7 +21,7 @@ func NewMoney(value int32, precision uint8, currency string) Money {
 
 func (m Money) String() string {
 	dec, cents := splitValue(m.Value, m.Precision)
-	return fmt.Sprintf("%s%d.%d", m.Currency, dec, cents)
+	return fmt.Sprintf("%s%d.%."+fmt.Sprint(m.Precision)+"d", m.Currency, dec, cents)
 }
 
 func splitValue(value int32, precision uint8) (wholePart, fractionalPart int32) {

@@ -53,22 +53,30 @@ func (r CreateExpenseRequest) Validate() error {
 	}
 
 	var balanceSum int32
+	var totalPaid int32
 	for i, ub := range r.UserBalances {
 		balanceSum += ub.Balance
+
+		if ub.Balance > 0 {
+			totalPaid += ub.Balance
+		}
 
 		if ub.UserID == uuid.Nil {
 			errs.Fields = append(errs.Fields, v1.NewRequiredFieldError("user_balances["+fmt.Sprint(i)+"].user_id"))
 		}
-
-		if ub.Balance >= 0 {
-			errs.Fields = append(errs.Fields, v1.NewFieldRangeError("user_balances["+fmt.Sprint(i)+"].balance", math.MinInt32, -1))
-		}
 	}
 
-	if balanceSum+r.Amount != 0 {
+	if balanceSum != 0 {
 		errs.Fields = append(errs.Fields, v1.FieldError{
 			Field: "user_balances",
-			Cause: fmt.Errorf("%w: sum of user balances should equal to the expense amount. difference of %s", v1.ErrInvalidValue, v1.NewMoney(balanceSum+r.Amount, 2, "$")),
+			Cause: fmt.Errorf("%w: sum should be equal to 0. got %s", v1.ErrInvalidValue, v1.NewMoney(balanceSum, 2, "$")),
+		})
+	}
+
+	if totalPaid != r.Amount {
+		errs.Fields = append(errs.Fields, v1.FieldError{
+			Field: "user_balances",
+			Cause: fmt.Errorf("%w: total paid balance should match expense amount. expected %s, got %s", v1.ErrInvalidValue, v1.NewMoney(r.Amount, 2, "$"), v1.NewMoney(totalPaid, 2, "$")),
 		})
 	}
 

@@ -14,7 +14,7 @@ CREATE TABLE ledger_participants (
     created_at TIMESTAMP NOT NULL,
     created_by UUID NOT NULL,
 
-    FOREIGN KEY (ledger_id) REFERENCES ledgers (id),
+    FOREIGN KEY (ledger_id) REFERENCES ledgers (id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users (id),
     FOREIGN KEY (created_by) REFERENCES users (id),
 
@@ -30,7 +30,7 @@ CREATE TABLE categories (
     created_by UUID NOT NULL,
 
     FOREIGN KEY (parent_id) REFERENCES categories (id),
-    FOREIGN KEY (ledger_id) REFERENCES ledgers (id),
+    FOREIGN KEY (ledger_id) REFERENCES ledgers (id) ON DELETE CASCADE,
 
     CONSTRAINT category_name_unique UNIQUE (id, name)
 );
@@ -47,7 +47,7 @@ CREATE TABLE expenses (
     updated_at TIMESTAMP NOT NULL,
     updated_by UUID NOT NULL,
 
-    FOREIGN KEY (ledger_id) REFERENCES ledgers (id),
+    FOREIGN KEY (ledger_id) REFERENCES ledgers (id) ON DELETE CASCADE,
     FOREIGN KEY (category_id) REFERENCES categories (id),
     FOREIGN KEY (created_by) REFERENCES users (id),
     FOREIGN KEY (updated_by) REFERENCES users (id)
@@ -71,7 +71,7 @@ CREATE TABLE expense_payments (
     FOREIGN KEY (user_id) REFERENCES users (id),
     FOREIGN KEY (created_by) REFERENCES users (id),
     FOREIGN KEY (updated_by) REFERENCES users (id),
-    FOREIGN KEY (ledger_id) REFERENCES ledgers (id)
+    FOREIGN KEY (ledger_id) REFERENCES ledgers (id) ON DELETE CASCADE
 );
 
 CREATE TABLE ledger_records (
@@ -84,7 +84,7 @@ CREATE TABLE ledger_records (
     created_by UUID NOT NULL,
     description TEXT NOT NULL,
 
-    FOREIGN KEY (ledger_id) REFERENCES ledgers (id),
+    FOREIGN KEY (ledger_id) REFERENCES ledgers (id) ON DELETE CASCADE,
     FOREIGN KEY (created_by) REFERENCES users (id),
     FOREIGN KEY (expense_id) REFERENCES expenses (id),
     FOREIGN KEY (user_id) REFERENCES users (id)
@@ -99,7 +99,7 @@ CREATE TABLE ledger_participant_balances (
     last_timestamp TIMESTAMP NOT NULL,
     balance INTEGER NOT NULL,
 
-    FOREIGN KEY (ledger_id) REFERENCES ledgers (id),
+    FOREIGN KEY (ledger_id) REFERENCES ledgers (id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users (id),
     
     CONSTRAINT ledger_participant_balance_unique UNIQUE (ledger_id, user_id)

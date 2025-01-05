@@ -33,9 +33,7 @@ type LedgerRecord struct {
 }
 
 type LedgerParticipantBalance struct {
-	ID            uuid.UUID
-	LedgerID      uuid.UUID
-	UserID        uuid.UUID
-	LastTimestamp time.Time
-	Balance       int32
+	LedgerID uuid.UUID
+	UserID   uuid.UUID
+	Balance  int32
 }

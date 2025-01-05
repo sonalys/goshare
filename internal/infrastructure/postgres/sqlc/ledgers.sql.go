@@ -183,6 +183,61 @@ func (q *Queries) GetLedgerParticipants(ctx context.Context, ledgerID pgtype.UUI
 	return items, nil
 }
 
+const getLedgerParticipantsWithBalance = `-- name: GetLedgerParticipantsWithBalance :many
+SELECT 
+    lp.ledger_id,
+    lp.user_id,
+    lp.created_by,
+    MAX(lr.created_at)::TIMESTAMP AS last_timestamp,
+    COALESCE(lpb.balance, 0) + COALESCE(SUM(lr.amount), 0) AS balance
+FROM 
+    ledger_participants lp
+LEFT JOIN 
+    ledger_participant_balances lpb ON lp.ledger_id = lpb.ledger_id AND lp.user_id = lpb.user_id
+LEFT JOIN 
+    ledger_records lr ON lp.ledger_id = lr.ledger_id AND lp.user_id = lr.user_id AND lr.created_at > lpb.last_timestamp
+WHERE 
+    lp.ledger_id = $1
+GROUP BY 
+    lp.ledger_id, lp.user_id, lp.created_at, lp.created_by, lpb.balance
+ORDER BY
+    lp.user_id
+`
+
+type GetLedgerParticipantsWithBalanceRow struct {
+	LedgerID      pgtype.UUID
+	UserID        pgtype.UUID
+	CreatedBy     pgtype.UUID
+	LastTimestamp pgtype.Timestamp
+	Balance       int32
+}
+
+func (q *Queries) GetLedgerParticipantsWithBalance(ctx context.Context, ledgerID pgtype.UUID) ([]GetLedgerParticipantsWithBalanceRow, error) {
+	rows, err := q.db.Query(ctx, getLedgerParticipantsWithBalance, ledgerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetLedgerParticipantsWithBalanceRow
+	for rows.Next() {
+		var i GetLedgerParticipantsWithBalanceRow
+		if err := rows.Scan(
+			&i.LedgerID,
+			&i.UserID,
+			&i.CreatedBy,
+			&i.LastTimestamp,
+			&i.Balance,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getLedgerRecords = `-- name: GetLedgerRecords :many
 SELECT id, ledger_id, expense_id, user_id, amount, created_at, created_by, description FROM ledger_records WHERE ledger_id = $1 ORDER BY created_at DESC
 `
@@ -293,7 +348,7 @@ func (q *Queries) GetLedgerUserRecords(ctx context.Context, arg GetLedgerUserRec
 }
 
 const getUserLedgers = `-- name: GetUserLedgers :many
-SELECT ledgers.id, ledgers.name, ledgers.created_at, ledgers.created_by FROM ledgers JOIN ledger_participants ON ledgers.id = ledger_participants.ledger_id WHERE ledger_participants.user_id = $1
+SELECT ledgers.id, ledgers.name, ledgers.created_at, ledgers.created_by FROM ledgers JOIN ledger_participants ON ledgers.id = ledger_participants.ledger_id WHERE ledger_participants.user_id = $1 ORDER BY ledgers.created_at DESC
 `
 
 func (q *Queries) GetUserLedgers(ctx context.Context, userID pgtype.UUID) ([]Ledger, error) {
@@ -338,6 +393,34 @@ func (q *Queries) UpdateLedgerParticipantBalance(ctx context.Context, arg Update
 		arg.Balance,
 		arg.LedgerID,
 		arg.UserID,
+	)
+	return err
+}
+
+const upsertLedgerParticipantBalance = `-- name: UpsertLedgerParticipantBalance :exec
+INSERT INTO ledger_participant_balances (id, ledger_id, user_id, last_timestamp, balance)
+VALUES ($1, $2, $3, $4, $5)
+ON CONFLICT (ledger_id, user_id) 
+DO UPDATE SET 
+    last_timestamp = EXCLUDED.last_timestamp,
+    balance = EXCLUDED.balance
+`
+
+type UpsertLedgerParticipantBalanceParams struct {
+	ID            pgtype.UUID
+	LedgerID      pgtype.UUID
+	UserID        pgtype.UUID
+	LastTimestamp pgtype.Timestamp
+	Balance       int32
+}
+
+func (q *Queries) UpsertLedgerParticipantBalance(ctx context.Context, arg UpsertLedgerParticipantBalanceParams) error {
+	_, err := q.db.Exec(ctx, upsertLedgerParticipantBalance,
+		arg.ID,
+		arg.LedgerID,
+		arg.UserID,
+		arg.LastTimestamp,
+		arg.Balance,
 	)
 	return err
 }

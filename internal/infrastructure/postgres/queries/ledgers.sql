@@ -28,8 +28,36 @@ INSERT INTO ledger_participant_balances (id,ledger_id,user_id,last_timestamp,bal
 -- name: UpdateLedgerParticipantBalance :exec
 UPDATE ledger_participant_balances SET last_timestamp = $1, balance = $2 WHERE ledger_id = $3 AND user_id = $4;
 
+-- name: UpsertLedgerParticipantBalance :exec
+INSERT INTO ledger_participant_balances (id, ledger_id, user_id, last_timestamp, balance)
+VALUES ($1, $2, $3, $4, $5)
+ON CONFLICT (ledger_id, user_id) 
+DO UPDATE SET 
+    last_timestamp = EXCLUDED.last_timestamp,
+    balance = EXCLUDED.balance;
+
 -- name: GetLedgerBalances :many
 SELECT * FROM ledger_participant_balances WHERE ledger_id = $1;
 
 -- name: GetUserLedgers :many
-SELECT ledgers.* FROM ledgers JOIN ledger_participants ON ledgers.id = ledger_participants.ledger_id WHERE ledger_participants.user_id = $1;
+SELECT ledgers.* FROM ledgers JOIN ledger_participants ON ledgers.id = ledger_participants.ledger_id WHERE ledger_participants.user_id = $1 ORDER BY ledgers.created_at DESC;
+
+-- name: GetLedgerParticipantsWithBalance :many
+SELECT 
+    lp.ledger_id,
+    lp.user_id,
+    lp.created_by,
+    MAX(lr.created_at)::TIMESTAMP AS last_timestamp,
+    COALESCE(lpb.balance, 0) + COALESCE(SUM(lr.amount), 0) AS balance
+FROM 
+    ledger_participants lp
+LEFT JOIN 
+    ledger_participant_balances lpb ON lp.ledger_id = lpb.ledger_id AND lp.user_id = lpb.user_id
+LEFT JOIN 
+    ledger_records lr ON lp.ledger_id = lr.ledger_id AND lp.user_id = lr.user_id AND lr.created_at > lpb.last_timestamp
+WHERE 
+    lp.ledger_id = $1
+GROUP BY 
+    lp.ledger_id, lp.user_id, lp.created_at, lp.created_by, lpb.balance
+ORDER BY
+    lp.user_id;

@@ -44,5 +44,5 @@ func createExpense(ctx context.Context, tx *sqlc.Queries, expense *v1.Expense) e
 		}
 	}
 
-	return updateLedgerParticipantsBalance(ctx, tx, expense.LedgerID)
+	return nil
 }
