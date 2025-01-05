@@ -37,6 +37,8 @@ func getFieldErrorCode(from v1.FieldError) handlers.ErrorCode {
 		return handlers.InvalidField
 	case errors.Is(cause, v1.ErrRequiredValue):
 		return handlers.RequiredField
+	case errors.Is(cause, v1.ErrUserAlreadyMember):
+		return handlers.UserAlreadyMember
 	default:
 		return handlers.ErrorCode("")
 	}

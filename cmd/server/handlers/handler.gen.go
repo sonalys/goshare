@@ -36,6 +36,7 @@ const (
 	RequiredHeader        ErrorCode = "required_header"
 	RequiredParameter     ErrorCode = "required_parameter"
 	Unauthorized          ErrorCode = "unauthorized"
+	UserAlreadyMember     ErrorCode = "user_already_member"
 	UserMaxLedgers        ErrorCode = "user_max_ledgers"
 )
 

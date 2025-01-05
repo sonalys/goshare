@@ -426,6 +426,7 @@ components:
             - "ledger_max_users"
             - "user_max_ledgers"
             - "authentication_expired"
+            - "user_already_member"
         message:
           type: string
           description: Human readable error message
