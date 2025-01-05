@@ -81,7 +81,7 @@ func InitializeHandler(client *api.API, repositories *repositories, serviceName 
 	handlerOptions := handlers.StdHTTPServerOptions{
 		BaseRouter:       otelMux,
 		BaseURL:          "/api/v1",
-		ErrorHandlerFunc: responseErrorHandler,
+		ErrorHandlerFunc: requestErrorHandler,
 		Middlewares: []handlers.MiddlewareFunc{
 			recoverMiddleware,
 		},
