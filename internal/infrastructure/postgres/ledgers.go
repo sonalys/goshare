@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/queries"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
@@ -20,8 +20,8 @@ func NewLedgerRepository(client *Client) *LedgerRepository {
 }
 
 func (r *LedgerRepository) Create(ctx context.Context, ledger *v1.Ledger) error {
-	return mapLedgerError(r.client.transaction(ctx, func(tx *queries.Queries) error {
-		createLedgerReq := queries.CreateLedgerParams{
+	return mapLedgerError(r.client.transaction(ctx, func(tx *sqlc.Queries) error {
+		createLedgerReq := sqlc.CreateLedgerParams{
 			ID:        convertUUID(ledger.ID),
 			Name:      ledger.Name,
 			CreatedAt: convertTime(ledger.CreatedAt),
@@ -60,7 +60,7 @@ func (r *LedgerRepository) GetByUser(ctx context.Context, userID uuid.UUID) ([]v
 	return result, nil
 }
 
-func newLedger(ledger *queries.Ledger) *v1.Ledger {
+func newLedger(ledger *sqlc.Ledger) *v1.Ledger {
 	return &v1.Ledger{
 		ID:        newUUID(ledger.ID),
 		Name:      ledger.Name,

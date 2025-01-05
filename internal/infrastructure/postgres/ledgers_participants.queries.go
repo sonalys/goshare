@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/queries"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 )
 
-func addLedgerParticipant(ctx context.Context, tx *queries.Queries, ledgerID, userID, invitedUserID uuid.UUID) error {
-	addReq := queries.AddUserToLedgerParams{
+func addLedgerParticipant(ctx context.Context, tx *sqlc.Queries, ledgerID, userID, invitedUserID uuid.UUID) error {
+	addReq := sqlc.AddUserToLedgerParams{
 		LedgerID:  convertUUID(ledgerID),
 		UserID:    convertUUID(invitedUserID),
 		ID:        convertUUID(uuid.New()),
@@ -29,8 +29,8 @@ func addLedgerParticipant(ctx context.Context, tx *queries.Queries, ledgerID, us
 	return nil
 }
 
-func createLedgerParticipantBalance(ctx context.Context, tx *queries.Queries, ledgerID, userID uuid.UUID) error {
-	return tx.CreateLedgerParticipantBalance(ctx, queries.CreateLedgerParticipantBalanceParams{
+func createLedgerParticipantBalance(ctx context.Context, tx *sqlc.Queries, ledgerID, userID uuid.UUID) error {
+	return tx.CreateLedgerParticipantBalance(ctx, sqlc.CreateLedgerParticipantBalanceParams{
 		ID:            convertUUID(uuid.New()),
 		LedgerID:      convertUUID(ledgerID),
 		UserID:        convertUUID(userID),
@@ -39,7 +39,7 @@ func createLedgerParticipantBalance(ctx context.Context, tx *queries.Queries, le
 	})
 }
 
-func getOldestTimestamp(balances []queries.LedgerParticipantBalance) time.Time {
+func getOldestTimestamp(balances []sqlc.LedgerParticipantBalance) time.Time {
 	var oldestTimestamp time.Time
 
 	for _, balance := range balances {
@@ -51,7 +51,7 @@ func getOldestTimestamp(balances []queries.LedgerParticipantBalance) time.Time {
 	return oldestTimestamp
 }
 
-func updateLedgerParticipantsBalance(ctx context.Context, tx *queries.Queries, ledgerID uuid.UUID) error {
+func updateLedgerParticipantsBalance(ctx context.Context, tx *sqlc.Queries, ledgerID uuid.UUID) error {
 	balances, err := tx.GetLedgerBalances(ctx, convertUUID(ledgerID))
 	if err != nil {
 		return fmt.Errorf("failed to get ledger participants balances: %w", err)
@@ -60,7 +60,7 @@ func updateLedgerParticipantsBalance(ctx context.Context, tx *queries.Queries, l
 	oldestTimestamp := getOldestTimestamp(balances)
 
 	// records are sorted by created_at in ascending order.
-	records, err := tx.GetLedgerRecordsFromTimestamp(ctx, queries.GetLedgerRecordsFromTimestampParams{
+	records, err := tx.GetLedgerRecordsFromTimestamp(ctx, sqlc.GetLedgerRecordsFromTimestampParams{
 		LedgerID:  convertUUID(ledgerID),
 		CreatedAt: convertTime(oldestTimestamp),
 	})
@@ -80,7 +80,7 @@ func updateLedgerParticipantsBalance(ctx context.Context, tx *queries.Queries, l
 
 	for i := range balances {
 		balance := &balances[i]
-		updateReq := queries.UpdateLedgerParticipantBalanceParams{
+		updateReq := sqlc.UpdateLedgerParticipantBalanceParams{
 			UserID:        balance.UserID,
 			LedgerID:      balance.LedgerID,
 			LastTimestamp: balance.LastTimestamp,

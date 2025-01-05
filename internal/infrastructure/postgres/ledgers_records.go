@@ -4,12 +4,12 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/queries"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
 func (r *LedgerRepository) AppendRecord(ctx context.Context, ledgerID uuid.UUID, record *v1.LedgerRecord) error {
-	return mapLedgerError(r.client.queries().AppendLedgerRecord(ctx, queries.AppendLedgerRecordParams{
+	return mapLedgerError(r.client.queries().AppendLedgerRecord(ctx, sqlc.AppendLedgerRecordParams{
 		ID:          convertUUID(record.ID),
 		LedgerID:    convertUUID(ledgerID),
 		ExpenseID:   convertUUID(record.ExpenseID),
@@ -33,7 +33,7 @@ func (r *LedgerRepository) GetRecords(ctx context.Context, ledgerID uuid.UUID) (
 	return result, nil
 }
 
-func newLedgerRecord(record *queries.LedgerRecord) *v1.LedgerRecord {
+func newLedgerRecord(record *sqlc.LedgerRecord) *v1.LedgerRecord {
 	return &v1.LedgerRecord{
 		ID:          newUUID(record.ID),
 		ExpenseID:   newUUID(record.ExpenseID),

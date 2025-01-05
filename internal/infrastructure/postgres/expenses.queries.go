@@ -5,12 +5,12 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/queries"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
-func createExpense(ctx context.Context, tx *queries.Queries, expense *v1.Expense) error {
-	createExpenseReq := queries.CreateExpenseParams{
+func createExpense(ctx context.Context, tx *sqlc.Queries, expense *v1.Expense) error {
+	createExpenseReq := sqlc.CreateExpenseParams{
 		ID:          convertUUID(expense.ID),
 		Amount:      expense.Amount,
 		CategoryID:  convertUUIDPtr(expense.CategoryID),
@@ -28,7 +28,7 @@ func createExpense(ctx context.Context, tx *queries.Queries, expense *v1.Expense
 	}
 
 	for i, balance := range expense.UserBalances {
-		ledgerRecord := queries.AppendLedgerRecordParams{
+		ledgerRecord := sqlc.AppendLedgerRecordParams{
 			ID:          convertUUID(uuid.New()),
 			LedgerID:    convertUUID(expense.LedgerID),
 			ExpenseID:   convertUUID(expense.ID),

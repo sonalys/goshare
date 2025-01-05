@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/queries"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
@@ -20,7 +20,7 @@ func (r *LedgerRepository) GetLedgerBalance(ctx context.Context, ledgerID uuid.U
 	return result, nil
 }
 
-func newLedgerParticipantBalance(balance *queries.LedgerParticipantBalance) *v1.LedgerParticipantBalance {
+func newLedgerParticipantBalance(balance *sqlc.LedgerParticipantBalance) *v1.LedgerParticipantBalance {
 	return &v1.LedgerParticipantBalance{
 		ID:            newUUID(balance.ID),
 		LedgerID:      newUUID(balance.LedgerID),

@@ -4,12 +4,12 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/queries"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
 func (r *ExpensesRepository) CreatePayment(ctx context.Context, payment *v1.ExpensePayment) error {
-	return mapError(r.client.queries().CreateExpensePayment(ctx, queries.CreateExpensePaymentParams{
+	return mapError(r.client.queries().CreateExpensePayment(ctx, sqlc.CreateExpensePaymentParams{
 		ID:          convertUUID(payment.ID),
 		UserID:      convertUUID(payment.PaidByID),
 		ExpenseID:   convertUUID(payment.ExpenseID),
@@ -23,7 +23,7 @@ func (r *ExpensesRepository) CreatePayment(ctx context.Context, payment *v1.Expe
 }
 
 func (r *ExpensesRepository) UpdatePayment(ctx context.Context, payment *v1.ExpensePayment) error {
-	return mapError(r.client.queries().UpdateExpensePayment(ctx, queries.UpdateExpensePaymentParams{
+	return mapError(r.client.queries().UpdateExpensePayment(ctx, sqlc.UpdateExpensePaymentParams{
 		ID:          convertUUID(payment.ID),
 		UserID:      convertUUID(payment.PaidByID),
 		PaymentDate: convertTime(payment.PaymentDate),
@@ -51,7 +51,7 @@ func (r *ExpensesRepository) GetPayments(ctx context.Context, expenseID uuid.UUI
 	return result, nil
 }
 
-func newExpensePayment(payment *queries.ExpensePayment) *v1.ExpensePayment {
+func newExpensePayment(payment *sqlc.ExpensePayment) *v1.ExpensePayment {
 	return &v1.ExpensePayment{
 		ID:          newUUID(payment.ID),
 		ExpenseID:   newUUID(payment.ExpenseID),

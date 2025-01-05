@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/queries"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
@@ -19,7 +19,7 @@ func NewExpensesRepository(client *Client) *ExpensesRepository {
 }
 
 func (r *ExpensesRepository) Create(ctx context.Context, expense *v1.Expense) error {
-	return mapError(r.client.transaction(ctx, func(tx *queries.Queries) error {
+	return mapError(r.client.transaction(ctx, func(tx *sqlc.Queries) error {
 		return createExpense(ctx, tx, expense)
 	}))
 }
@@ -34,7 +34,7 @@ func (r *ExpensesRepository) Find(ctx context.Context, id uuid.UUID) (*v1.Expens
 }
 
 func (r *ExpensesRepository) Update(ctx context.Context, expense *v1.Expense) error {
-	return mapError(r.client.queries().UpdateExpense(ctx, queries.UpdateExpenseParams{
+	return mapError(r.client.queries().UpdateExpense(ctx, sqlc.UpdateExpenseParams{
 		ID:          convertUUID(expense.ID),
 		Amount:      expense.Amount,
 		CategoryID:  convertUUIDPtr(expense.CategoryID),
@@ -49,7 +49,7 @@ func (r *ExpensesRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	return mapError(r.client.queries().DeleteExpense(ctx, convertUUID(id)))
 }
 
-func newExpense(expense *queries.Expense) *v1.Expense {
+func newExpense(expense *sqlc.Expense) *v1.Expense {
 	return &v1.Expense{
 		ID:          newUUID(expense.ID),
 		Amount:      expense.Amount,

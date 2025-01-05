@@ -4,12 +4,12 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/queries"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
 func (r *LedgerRepository) CreateCategory(ctx context.Context, ledgerID uuid.UUID, category *v1.Category) error {
-	return mapLedgerError(r.client.queries().CreateCategory(ctx, queries.CreateCategoryParams{
+	return mapLedgerError(r.client.queries().CreateCategory(ctx, sqlc.CreateCategoryParams{
 		ID:        convertUUID(category.ID),
 		LedgerID:  convertUUID(ledgerID),
 		ParentID:  convertUUID(category.ParentID),
@@ -31,7 +31,7 @@ func (r *LedgerRepository) GetCategories(ctx context.Context, ledgerID uuid.UUID
 	return result, nil
 }
 
-func newCategory(category *queries.Category) *v1.Category {
+func newCategory(category *sqlc.Category) *v1.Category {
 	return &v1.Category{
 		ID:        newUUID(category.ID),
 		LedgerID:  newUUID(category.LedgerID),

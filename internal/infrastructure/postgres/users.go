@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/queries"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
@@ -20,7 +20,7 @@ func NewUsersRepository(client *Client) *UsersRepository {
 }
 
 func (r *UsersRepository) Create(ctx context.Context, participant *v1.User) error {
-	return mapError(r.client.queries().CreateUser(ctx, queries.CreateUserParams{
+	return mapError(r.client.queries().CreateUser(ctx, sqlc.CreateUserParams{
 		ID:           convertUUID(participant.ID),
 		FirstName:    participant.FirstName,
 		LastName:     participant.LastName,

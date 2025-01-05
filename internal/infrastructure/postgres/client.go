@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/queries"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 )
 
 type Client struct {
@@ -34,18 +34,18 @@ func (c *Client) Shutdown() {
 	c.connPool.Close()
 }
 
-func (c *Client) queries() *queries.Queries {
-	return queries.New(c.connPool)
+func (c *Client) queries() *sqlc.Queries {
+	return sqlc.New(c.connPool)
 }
 
-func (c *Client) transaction(ctx context.Context, f func(tx *queries.Queries) error) error {
+func (c *Client) transaction(ctx context.Context, f func(tx *sqlc.Queries) error) error {
 	tx, err := c.connPool.Begin(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to start transaction: %w", err)
 	}
 	defer tx.Rollback(ctx)
 
-	err = f(queries.New(tx))
+	err = f(sqlc.New(tx))
 	if err != nil {
 		return err
 	}

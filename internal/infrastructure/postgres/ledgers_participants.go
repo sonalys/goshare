@@ -4,12 +4,12 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/queries"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
 func (r *LedgerRepository) AddParticipant(ctx context.Context, ledgerID, userID, invitedUserID uuid.UUID) error {
-	return mapLedgerError(r.client.transaction(ctx, func(tx *queries.Queries) error {
+	return mapLedgerError(r.client.transaction(ctx, func(tx *sqlc.Queries) error {
 		return addLedgerParticipant(ctx, tx, ledgerID, userID, invitedUserID)
 	}))
 }
@@ -26,7 +26,7 @@ func (r *LedgerRepository) GetParticipants(ctx context.Context, ledgerID uuid.UU
 	return result, nil
 }
 
-func newLedgerParticipant(user *queries.LedgerParticipant) *v1.LedgerParticipant {
+func newLedgerParticipant(user *sqlc.LedgerParticipant) *v1.LedgerParticipant {
 	return &v1.LedgerParticipant{
 		ID:        newUUID(user.ID),
 		LedgerID:  newUUID(user.LedgerID),
