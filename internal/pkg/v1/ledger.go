@@ -8,6 +8,7 @@ import (
 
 const (
 	LedgerMaxUsers = 100
+	UserMaxLedgers = 5
 )
 
 type (
@@ -46,5 +47,6 @@ type (
 
 var (
 	ErrUserAlreadyMember = errors.New("user is already a member")
-	ErrLedgerMaxUsers    = fmt.Errorf("ledger has maximum number of users: %d", LedgerMaxUsers)
+	ErrLedgerMaxUsers    = fmt.Errorf("ledger reached maximum number of users: %d", LedgerMaxUsers)
+	ErrUserMaxLedgers    = fmt.Errorf("user reached the maximum number of ledgers: %d", UserMaxLedgers)
 )

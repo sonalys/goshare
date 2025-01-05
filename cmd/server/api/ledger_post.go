@@ -24,6 +24,16 @@ func (a *API) CreateLedger(ctx context.Context, request handlers.CreateLedgerReq
 	switch resp, err := a.dependencies.LedgerCreater.Create(ctx, req); {
 	case err == nil:
 		return handlers.CreateLedger200JSONResponse{Id: resp.ID.UUID()}, nil
+	case errors.Is(err, v1.ErrUserMaxLedgers):
+		return handlers.CreateLedgerdefaultJSONResponse{
+			Body: newErrorResponse(ctx, []handlers.Error{
+				{
+					Code:    handlers.UserMaxLedgers,
+					Message: err.Error(),
+				},
+			}),
+			StatusCode: http.StatusBadRequest,
+		}, nil
 	default:
 		if errList := new(v1.FieldErrorList); errors.As(err, errList) {
 			return handlers.CreateLedgerdefaultJSONResponse{

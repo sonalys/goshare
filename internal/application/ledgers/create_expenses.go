@@ -32,23 +32,23 @@ func (r CreateExpenseRequest) Validate() error {
 	var errs v1.FormError
 
 	if r.LedgerID.IsEmpty() {
-		errs.Fields = append(errs.Fields, v1.NewRequiredFieldError("ledger_id"))
+		errs = append(errs, v1.NewRequiredFieldError("ledger_id"))
 	}
 
 	if r.Amount <= 0 {
-		errs.Fields = append(errs.Fields, v1.NewFieldRangeError("amount", 0, math.MaxInt32))
+		errs = append(errs, v1.NewFieldRangeError("amount", 0, math.MaxInt32))
 	}
 
 	if r.Name == "" {
-		errs.Fields = append(errs.Fields, v1.NewRequiredFieldError("name"))
+		errs = append(errs, v1.NewRequiredFieldError("name"))
 	}
 
 	if r.ExpenseDate.IsZero() {
-		errs.Fields = append(errs.Fields, v1.NewRequiredFieldError("expense_date"))
+		errs = append(errs, v1.NewRequiredFieldError("expense_date"))
 	}
 
 	if len(r.UserBalances) == 0 {
-		errs.Fields = append(errs.Fields, v1.NewRequiredFieldError("user_balances"))
+		errs = append(errs, v1.NewRequiredFieldError("user_balances"))
 	}
 
 	var balanceSum int32
@@ -61,19 +61,19 @@ func (r CreateExpenseRequest) Validate() error {
 		}
 
 		if ub.UserID.IsEmpty() {
-			errs.Fields = append(errs.Fields, v1.NewRequiredFieldError("user_balances["+fmt.Sprint(i)+"].user_id"))
+			errs = append(errs, v1.NewRequiredFieldError("user_balances["+fmt.Sprint(i)+"].user_id"))
 		}
 	}
 
 	if balanceSum != 0 {
-		errs.Fields = append(errs.Fields, v1.FieldError{
+		errs = append(errs, v1.FieldError{
 			Field: "user_balances",
 			Cause: fmt.Errorf("%w: sum should be equal to 0. got %s", v1.ErrInvalidValue, v1.NewMoney(balanceSum, 2, "$")),
 		})
 	}
 
 	if totalPaid != r.Amount {
-		errs.Fields = append(errs.Fields, v1.FieldError{
+		errs = append(errs, v1.FieldError{
 			Field: "user_balances",
 			Cause: fmt.Errorf("%w: total paid balance should match expense amount. expected %s, got %s", v1.ErrInvalidValue, v1.NewMoney(r.Amount, 2, "$"), v1.NewMoney(totalPaid, 2, "$")),
 		})

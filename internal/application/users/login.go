@@ -27,11 +27,11 @@ func (r LoginRequest) Validate() error {
 	var errs v1.FormError
 
 	if r.Email == "" {
-		errs.Fields = append(errs.Fields, v1.NewRequiredFieldError("email"))
+		errs = append(errs, v1.NewRequiredFieldError("email"))
 	}
 
 	if r.Password == "" {
-		errs.Fields = append(errs.Fields, v1.NewRequiredFieldError("password"))
+		errs = append(errs, v1.NewRequiredFieldError("password"))
 	}
 
 	return errs.Validate()

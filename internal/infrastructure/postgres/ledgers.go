@@ -21,14 +21,27 @@ func NewLedgerRepository(client *Client) *LedgerRepository {
 
 func (r *LedgerRepository) Create(ctx context.Context, ledger *v1.Ledger) error {
 	return mapLedgerError(r.client.transaction(ctx, func(tx pgx.Tx) error {
+		queries := r.client.queries().WithTx(tx)
+
+		if err := queries.LockUserForUpdate(ctx, convertUUID(ledger.CreatedBy)); err != nil {
+			return fmt.Errorf("failed to acquire user lock for updating ledger")
+		}
+
+		userLedgersCount, err := queries.CountUserLedgers(ctx, convertUUID(ledger.CreatedBy))
+		if err != nil {
+			return fmt.Errorf("failed to count user ledgers")
+		}
+
+		if userLedgersCount+1 > v1.UserMaxLedgers {
+			return v1.ErrUserMaxLedgers
+		}
+
 		createLedgerReq := sqlc.CreateLedgerParams{
 			ID:        convertUUID(ledger.ID),
 			Name:      ledger.Name,
 			CreatedAt: convertTime(ledger.CreatedAt),
 			CreatedBy: convertUUID(ledger.CreatedBy),
 		}
-
-		queries := r.client.queries().WithTx(tx)
 
 		if err := queries.CreateLedger(ctx, createLedgerReq); err != nil {
 			return fmt.Errorf("failed to create ledger: %w", err)

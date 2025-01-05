@@ -154,7 +154,7 @@ paths:
                       $ref: "#/components/schemas/Ledger"
     post:
       operationId: CreateLedger
-      description: Creates a new ledger
+      description: Creates a new ledger. A user can have a maximum of 5 ledgers.
       security:
         - cookieAuth: []
       requestBody:
@@ -304,6 +304,9 @@ paths:
               properties:
                 emails:
                   type: array
+                  description: Invite up to 99 other users. The limit is by Ledger.
+                  minItems: 1
+                  maxItems: 99
                   items:
                     type: string
                     format: email
@@ -420,6 +423,8 @@ components:
             - "email_password_mismatch"
             - "forbidden"
             - "unauthorized"
+            - "ledger_max_users"
+            - "user_max_ledgers"
         message:
           type: string
           description: Human readable error message

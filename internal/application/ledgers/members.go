@@ -19,6 +19,28 @@ type (
 	}
 )
 
+func (r *AddMembersRequest) Validate() error {
+	var errs v1.FormError
+
+	if r.UserID.IsEmpty() {
+		errs = append(errs, v1.NewRequiredFieldError("user_id"))
+	}
+
+	if r.LedgerID.IsEmpty() {
+		errs = append(errs, v1.NewRequiredFieldError("ledger_id"))
+	}
+
+	r.Emails = slices.Compact(r.Emails)
+	switch lenEmails := len(r.Emails); {
+	case lenEmails == 0:
+		errs = append(errs, v1.NewRequiredFieldError("emails"))
+	case lenEmails > v1.LedgerMaxUsers-1:
+		errs = append(errs, v1.NewFieldLengthError("emails", 1, v1.LedgerMaxUsers))
+	}
+
+	return errs.Validate()
+}
+
 // TODO(invitations): Here it's a simplification of the user membership process.
 // We can always invert the flow and create invitation links, so the users click themselves
 // We can also send invites through the system and they accept the invite through the API.
@@ -33,7 +55,7 @@ func (c *Controller) AddMembers(ctx context.Context, req AddMembersRequest) erro
 		return fmt.Errorf("failed to get users by email: %w", err)
 	}
 
-	var errList v1.FormError
+	var errs v1.FormError
 
 	for i := range users {
 		req.Emails = slices.DeleteFunc(req.Emails, func(email string) bool {
@@ -55,20 +77,20 @@ func (c *Controller) AddMembers(ctx context.Context, req AddMembersRequest) erro
 			slog.Any("error", err),
 		)...)
 
-		errList.Fields = append(errList.Fields, v1.FieldError{
+		errs = append(errs, v1.FieldError{
 			Field: fmt.Sprintf("emails.%d", i),
 			Cause: err,
 		})
 	}
 
 	for i := range req.Emails {
-		errList.Fields = append(errList.Fields, v1.FieldError{
+		errs = append(errs, v1.FieldError{
 			Field: fmt.Sprintf("emails.%d", i),
 			Cause: v1.ErrNotFound,
 		})
 	}
 
-	if err := errList.Validate(); err != nil {
+	if err := errs.Validate(); err != nil {
 		span.SetStatus(codes.Error, "failed to add users to ledger")
 		return err
 	}

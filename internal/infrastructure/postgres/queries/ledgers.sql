@@ -66,4 +66,10 @@ ORDER BY
 SELECT * FROM ledgers WHERE id = $1 FOR UPDATE;
 
 -- name: CountLedgerUsers :one
-SELECT COUNT(*) FROM ledgers WHERE ID = $1;
+SELECT COUNT(*) FROM ledgers WHERE id = $1;
+
+-- name: LockUserForUpdate :exec
+SELECT * FROM users WHERE id = $1 FOR UPDATE;
+
+-- name: CountUserLedgers :one
+SELECT COUNT(*) FROM ledgers WHERE created_by = $1;

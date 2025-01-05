@@ -28,12 +28,14 @@ const (
 	InternalError         ErrorCode = "internal_error"
 	InvalidField          ErrorCode = "invalid_field"
 	InvalidParameter      ErrorCode = "invalid_parameter"
+	LedgerMaxUsers        ErrorCode = "ledger_max_users"
 	NotFound              ErrorCode = "not_found"
 	RequiredBody          ErrorCode = "required_body"
 	RequiredField         ErrorCode = "required_field"
 	RequiredHeader        ErrorCode = "required_header"
 	RequiredParameter     ErrorCode = "required_parameter"
 	Unauthorized          ErrorCode = "unauthorized"
+	UserMaxLedgers        ErrorCode = "user_max_ledgers"
 )
 
 // Error defines model for Error.
@@ -122,6 +124,7 @@ type CreateExpenseJSONBody struct {
 
 // AddLedgerMemberJSONBody defines parameters for AddLedgerMember.
 type AddLedgerMemberJSONBody struct {
+	// Emails Invite up to 99 other users. The limit is by Ledger.
 	Emails []openapi_types.Email `json:"emails"`
 }
 

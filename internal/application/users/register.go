@@ -24,23 +24,23 @@ func (r RegisterRequest) Validate() error {
 	var errs v1.FormError
 
 	if r.FirstName == "" {
-		errs.Fields = append(errs.Fields, v1.NewRequiredFieldError("first_name"))
+		errs = append(errs, v1.NewRequiredFieldError("first_name"))
 	}
 
 	if r.LastName == "" {
-		errs.Fields = append(errs.Fields, v1.NewRequiredFieldError("last_name"))
+		errs = append(errs, v1.NewRequiredFieldError("last_name"))
 	}
 
 	if r.Email == "" {
-		errs.Fields = append(errs.Fields, v1.NewRequiredFieldError("email"))
+		errs = append(errs, v1.NewRequiredFieldError("email"))
 	} else if _, err := mail.ParseAddress(r.Email); err == nil {
-		errs.Fields = append(errs.Fields, v1.NewInvalidFieldError("email"))
+		errs = append(errs, v1.NewInvalidFieldError("email"))
 	}
 
 	if r.Password == "" {
-		errs.Fields = append(errs.Fields, v1.NewRequiredFieldError("password"))
+		errs = append(errs, v1.NewRequiredFieldError("password"))
 	} else if passwordLength := len(r.Password); passwordLength < 8 || passwordLength > 64 {
-		errs.Fields = append(errs.Fields, v1.NewFieldLengthError("password", 8, 64))
+		errs = append(errs, v1.NewFieldLengthError("password", 8, 64))
 	}
 
 	return errs.Validate()

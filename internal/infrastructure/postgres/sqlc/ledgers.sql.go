@@ -64,11 +64,22 @@ func (q *Queries) AppendLedgerRecord(ctx context.Context, arg AppendLedgerRecord
 }
 
 const countLedgerUsers = `-- name: CountLedgerUsers :one
-SELECT COUNT(*) FROM ledgers WHERE ID = $1
+SELECT COUNT(*) FROM ledgers WHERE id = $1
 `
 
 func (q *Queries) CountLedgerUsers(ctx context.Context, id pgtype.UUID) (int64, error) {
 	row := q.db.QueryRow(ctx, countLedgerUsers, id)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const countUserLedgers = `-- name: CountUserLedgers :one
+SELECT COUNT(*) FROM ledgers WHERE created_by = $1
+`
+
+func (q *Queries) CountUserLedgers(ctx context.Context, createdBy pgtype.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, countUserLedgers, createdBy)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
@@ -393,6 +404,15 @@ SELECT id, name, created_at, created_by FROM ledgers WHERE id = $1 FOR UPDATE
 
 func (q *Queries) LockLedgerForUpdate(ctx context.Context, id pgtype.UUID) error {
 	_, err := q.db.Exec(ctx, lockLedgerForUpdate, id)
+	return err
+}
+
+const lockUserForUpdate = `-- name: LockUserForUpdate :exec
+SELECT id, first_name, last_name, email, password_hash, created_at FROM users WHERE id = $1 FOR UPDATE
+`
+
+func (q *Queries) LockUserForUpdate(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, lockUserForUpdate, id)
 	return err
 }
 

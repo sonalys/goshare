@@ -25,13 +25,13 @@ func (r CreateRequest) Validate() error {
 	var errs v1.FormError
 
 	if r.UserID.IsEmpty() {
-		errs.Fields = append(errs.Fields, v1.NewRequiredFieldError("user_id"))
+		errs = append(errs, v1.NewRequiredFieldError("user_id"))
 	}
 
 	if r.Name == "" {
-		errs.Fields = append(errs.Fields, v1.NewRequiredFieldError("name"))
+		errs = append(errs, v1.NewRequiredFieldError("name"))
 	} else if nameLength := len(r.Name); nameLength < 3 || nameLength > 255 {
-		errs.Fields = append(errs.Fields, v1.NewFieldLengthError("name", 3, 255))
+		errs = append(errs, v1.NewFieldLengthError("name", 3, 255))
 	}
 
 	return errs.Validate()

@@ -8,9 +8,7 @@ import (
 type (
 	FieldErrorList []FieldError
 
-	FormError struct {
-		Fields FieldErrorList
-	}
+	FormError FieldErrorList
 
 	FieldError struct {
 		Field string
@@ -84,10 +82,10 @@ func (el FieldErrorList) Error() string {
 }
 
 func (e *FormError) Validate() error {
-	if len(e.Fields) == 0 {
+	if len(*e) == 0 {
 		return nil
 	}
-	return e.Fields
+	return FieldErrorList(*e)
 }
 
 func (e *ValueRangeError) Error() string {
