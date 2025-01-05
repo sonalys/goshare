@@ -4,7 +4,7 @@ services:
       - postgres
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
     entrypoint: /usr/local/bin/migration
     image: ghcr.io/sonalys/goshare:latest
     container_name: goshare_migrate
@@ -16,7 +16,7 @@ services:
       - postgres
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
     entrypoint: /usr/local/bin/server
     image: ghcr.io/sonalys/goshare:latest
     container_name: goshare
