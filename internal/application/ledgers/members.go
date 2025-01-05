@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"slices"
 
 	"github.com/google/uuid"
 	"github.com/sonalys/goshare/internal/pkg/otel"
@@ -36,6 +37,10 @@ func (c *Controller) AddMembers(ctx context.Context, req AddMembersRequest) erro
 	var errList v1.FormError
 
 	for i := range users {
+		req.Emails = slices.DeleteFunc(req.Emails, func(email string) bool {
+			return email == users[i].Email
+		})
+
 		attrs := []any{
 			slog.String("user_id", users[i].ID.String()),
 			slog.String("ledger_id", req.LedgerID.String()),
@@ -54,6 +59,13 @@ func (c *Controller) AddMembers(ctx context.Context, req AddMembersRequest) erro
 		errList.Fields = append(errList.Fields, v1.FieldError{
 			Field: fmt.Sprintf("emails.%d", i),
 			Cause: err,
+		})
+	}
+
+	for i := range req.Emails {
+		errList.Fields = append(errList.Fields, v1.FieldError{
+			Field: fmt.Sprintf("emails.%d", i),
+			Cause: v1.ErrNotFound,
 		})
 	}
 

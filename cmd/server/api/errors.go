@@ -32,10 +32,10 @@ func newErrorResponse(ctx context.Context, cause []handlers.Error) handlers.Erro
 }
 
 func getFieldErrorCode(from v1.FieldError) handlers.ErrorCode {
-	switch {
-	case errors.Is(from.Cause, v1.ErrInvalidValue):
+	switch cause := from.Cause; {
+	case errors.Is(cause, v1.ErrInvalidValue), errors.Is(cause, v1.ErrNotFound):
 		return handlers.InvalidField
-	case errors.Is(from.Cause, v1.ErrRequiredValue):
+	case errors.Is(cause, v1.ErrRequiredValue):
 		return handlers.RequiredField
 	default:
 		return handlers.ErrorCode("")

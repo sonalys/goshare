@@ -2,10 +2,13 @@ package api
 
 import (
 	"context"
+	"errors"
+	"net/http"
 
 	openapi_types "github.com/oapi-codegen/runtime/types"
 	"github.com/sonalys/goshare/cmd/server/handlers"
 	"github.com/sonalys/goshare/internal/application/ledgers"
+	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
 func collectEmails(from []openapi_types.Email) []string {
@@ -33,6 +36,12 @@ func (a *API) AddLedgerMember(ctx context.Context, request handlers.AddLedgerMem
 	case err == nil:
 		return handlers.AddLedgerMember202Response{}, nil
 	default:
+		if errList := new(v1.FieldErrorList); errors.As(err, errList) {
+			return handlers.AddLedgerMemberdefaultJSONResponse{
+				Body:       newErrorResponse(ctx, getCausesFromFieldErrors(*errList)),
+				StatusCode: http.StatusBadRequest,
+			}, nil
+		}
 		return nil, err
 	}
 }
