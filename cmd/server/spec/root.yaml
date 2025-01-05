@@ -425,6 +425,7 @@ components:
             - "unauthorized"
             - "ledger_max_users"
             - "user_max_ledgers"
+            - "authentication_expired"
         message:
           type: string
           description: Human readable error message

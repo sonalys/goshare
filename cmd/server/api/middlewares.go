@@ -45,8 +45,8 @@ var UnauthorizedResp = []handlers.Error{
 
 var AuthorizationExpiredResp = []handlers.Error{
 	{
-		Code:    handlers.Unauthorized,
-		Message: "The request authentication is expired",
+		Code:    handlers.AuthenticationExpired,
+		Message: "The request authentication has expired",
 	},
 }
 
@@ -77,7 +77,7 @@ func AuthMiddleware(
 
 			identity, err := identityDecoder.Decode(cookie.Value)
 			if err != nil {
-				if errors.Is(err, v1.ErrAuthorizationExpired) {
+				if errors.Is(err, v1.ErrAuthenticationExpired) {
 					WriteErrorResponse(ctx, w, http.StatusUnauthorized, newErrorResponse(ctx, AuthorizationExpiredResp))
 					return nil, nil
 				}

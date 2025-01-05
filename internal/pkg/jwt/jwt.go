@@ -29,7 +29,7 @@ func (c *Client) Decode(tokenString string) (*v1.Identity, error) {
 	}
 
 	if !token.Valid {
-		return nil, v1.ErrAuthorizationExpired
+		return nil, v1.ErrAuthenticationExpired
 	}
 
 	email, ok := claims["email"].(string)

@@ -23,6 +23,7 @@ const (
 
 // Defines values for ErrorCode.
 const (
+	AuthenticationExpired ErrorCode = "authentication_expired"
 	EmailPasswordMismatch ErrorCode = "email_password_mismatch"
 	Forbidden             ErrorCode = "forbidden"
 	InternalError         ErrorCode = "internal_error"

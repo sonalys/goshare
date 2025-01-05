@@ -11,5 +11,5 @@ type Identity struct {
 }
 
 var (
-	ErrAuthorizationExpired = errors.New("authorization expired")
+	ErrAuthenticationExpired = errors.New("authentication expired")
 )
