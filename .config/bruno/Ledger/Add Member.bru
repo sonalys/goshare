@@ -5,9 +5,13 @@ meta {
 }
 
 post {
-  url: http://localhost:8080/api/v1/ledgers/members
+  url: http://localhost:8080/api/v1/ledgers/:ledger_id/members
   body: json
   auth: none
+}
+
+params:path {
+  ledger_id: {{ledger_id}}
 }
 
 body:json {
