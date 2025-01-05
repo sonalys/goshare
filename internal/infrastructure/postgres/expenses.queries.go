@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
@@ -29,7 +28,7 @@ func createExpense(ctx context.Context, tx *sqlc.Queries, expense *v1.Expense) e
 
 	for i, balance := range expense.UserBalances {
 		ledgerRecord := sqlc.AppendLedgerRecordParams{
-			ID:          convertUUID(uuid.New()),
+			ID:          convertUUID(v1.NewID()),
 			LedgerID:    convertUUID(expense.LedgerID),
 			ExpenseID:   convertUUID(expense.ID),
 			UserID:      convertUUID(balance.UserID),

@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"slices"
 
-	"github.com/google/uuid"
 	"github.com/sonalys/goshare/internal/pkg/otel"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 	"go.opentelemetry.io/otel/codes"
@@ -14,8 +13,8 @@ import (
 
 type (
 	AddMembersRequest struct {
-		UserID   uuid.UUID
-		LedgerID uuid.UUID
+		UserID   v1.ID
+		LedgerID v1.ID
 		Emails   []string
 	}
 )

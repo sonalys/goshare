@@ -2,40 +2,38 @@ package v1
 
 import (
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type ExpenseUserBalance struct {
-	UserID  uuid.UUID
+	UserID  ID
 	Balance int32
 }
 
 type Expense struct {
-	ID           uuid.UUID
-	CategoryID   *uuid.UUID
-	LedgerID     uuid.UUID
+	ID           ID
+	CategoryID   *ID
+	LedgerID     ID
 	Amount       int32
 	Name         string
 	ExpenseDate  time.Time
 	UserBalances []ExpenseUserBalance
 
 	CreatedAt time.Time
-	CreatedBy uuid.UUID
+	CreatedBy ID
 	UpdatedAt time.Time
-	UpdatedBy uuid.UUID
+	UpdatedBy ID
 }
 
 type ExpensePayment struct {
-	ID          uuid.UUID
-	ExpenseID   uuid.UUID
-	LedgerID    uuid.UUID
-	PaidByID    uuid.UUID
+	ID          ID
+	ExpenseID   ID
+	LedgerID    ID
+	PaidByID    ID
 	Amount      int32
 	PaymentDate time.Time
 
 	CreatedAt time.Time
-	CreatedBy uuid.UUID
+	CreatedBy ID
 	UpdatedAt time.Time
-	UpdatedBy uuid.UUID
+	UpdatedBy ID
 }

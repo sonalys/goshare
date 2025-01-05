@@ -7,7 +7,6 @@ import (
 	"net/mail"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/sonalys/goshare/internal/pkg/otel"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 	"go.opentelemetry.io/otel/codes"
@@ -48,7 +47,7 @@ func (r RegisterRequest) Validate() error {
 }
 
 type RegisterResponse struct {
-	ID uuid.UUID
+	ID v1.ID
 }
 
 func (c *Controller) Register(ctx context.Context, req RegisterRequest) (*RegisterResponse, error) {
@@ -63,7 +62,7 @@ func (c *Controller) Register(ctx context.Context, req RegisterRequest) (*Regist
 	}
 
 	user := &v1.User{
-		ID:              uuid.New(),
+		ID:              v1.NewID(),
 		FirstName:       req.FirstName,
 		LastName:        req.LastName,
 		Email:           req.Email,

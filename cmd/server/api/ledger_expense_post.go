@@ -7,6 +7,7 @@ import (
 
 	"github.com/sonalys/goshare/cmd/server/handlers"
 	"github.com/sonalys/goshare/internal/application/ledgers"
+	"github.com/sonalys/goshare/internal/pkg/pointers"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
@@ -16,10 +17,15 @@ func (a *API) CreateExpense(ctx context.Context, request handlers.CreateExpenseR
 		return nil, err
 	}
 
+	var categoryID *v1.ID
+	if request.Body.CategoryId != nil {
+		categoryID = pointers.From(v1.ConvertID(*request.Body.CategoryId))
+	}
+
 	req := ledgers.CreateExpenseRequest{
 		UserID:       identity.UserID,
-		LedgerID:     request.LedgerID,
-		CategoryID:   request.Body.CategoryId,
+		LedgerID:     v1.ConvertID(request.LedgerID),
+		CategoryID:   categoryID,
 		Amount:       request.Body.Amount,
 		Name:         request.Body.Name,
 		ExpenseDate:  request.Body.ExpenseDate,
@@ -29,7 +35,7 @@ func (a *API) CreateExpense(ctx context.Context, request handlers.CreateExpenseR
 	switch resp, err := a.dependencies.ExpenseCreater.CreateExpense(ctx, req); {
 	case err == nil:
 		return handlers.CreateExpense200JSONResponse{
-			Id: resp.ID,
+			Id: resp.ID.UUID(),
 		}, nil
 	default:
 		if errList := new(v1.FieldErrorList); errors.As(err, errList) {
@@ -46,7 +52,7 @@ func convertUserBalances(userBalances []handlers.ExpenseUserBalance) []v1.Expens
 	balances := make([]v1.ExpenseUserBalance, 0, len(userBalances))
 	for _, ub := range userBalances {
 		balances = append(balances, v1.ExpenseUserBalance{
-			UserID:  ub.UserId,
+			UserID:  v1.ConvertID(ub.UserId),
 			Balance: ub.Balance,
 		})
 	}

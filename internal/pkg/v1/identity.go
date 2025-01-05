@@ -2,13 +2,11 @@ package v1
 
 import (
 	"errors"
-
-	"github.com/google/uuid"
 )
 
 type Identity struct {
 	Email  string
-	UserID uuid.UUID
+	UserID ID
 	Exp    int64
 }
 

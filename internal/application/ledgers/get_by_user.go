@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/google/uuid"
 	"github.com/sonalys/goshare/internal/pkg/otel"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 	"go.opentelemetry.io/otel/codes"
 )
 
-func (c *Controller) GetByUser(ctx context.Context, userID uuid.UUID) ([]v1.Ledger, error) {
+func (c *Controller) GetByUser(ctx context.Context, userID v1.ID) ([]v1.Ledger, error) {
 	ctx, span := otel.Tracer.Start(ctx, "ledgers.ListByUser")
 	defer span.End()
 

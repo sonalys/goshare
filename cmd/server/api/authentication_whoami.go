@@ -18,6 +18,6 @@ func (a *API) GetIdentity(ctx context.Context, request handlers.GetIdentityReque
 
 	return handlers.GetIdentity200JSONResponse{
 		Email:  types.Email(identity.Email),
-		UserId: identity.UserID,
+		UserId: identity.UserID.UUID(),
 	}, nil
 }

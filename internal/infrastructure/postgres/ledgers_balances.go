@@ -4,12 +4,11 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/google/uuid"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
-func (r *LedgerRepository) GetLedgerBalance(ctx context.Context, ledgerID uuid.UUID) ([]v1.LedgerParticipantBalance, error) {
+func (r *LedgerRepository) GetLedgerBalance(ctx context.Context, ledgerID v1.ID) ([]v1.LedgerParticipantBalance, error) {
 	balances, err := r.client.queries().GetLedgerParticipantsWithBalance(ctx, convertUUID(ledgerID))
 	if err != nil {
 		return nil, mapLedgerError(err)
@@ -23,7 +22,7 @@ func (r *LedgerRepository) GetLedgerBalance(ctx context.Context, ledgerID uuid.U
 	return result, nil
 }
 
-func (r *LedgerRepository) updateBalanceSnapshot(ledgerID uuid.UUID, balances []sqlc.GetLedgerParticipantsWithBalanceRow) {
+func (r *LedgerRepository) updateBalanceSnapshot(ledgerID v1.ID, balances []sqlc.GetLedgerParticipantsWithBalanceRow) {
 	ctx := context.Background()
 
 	fields := []any{
@@ -39,7 +38,7 @@ func (r *LedgerRepository) updateBalanceSnapshot(ledgerID uuid.UUID, balances []
 			continue
 		}
 		err := r.client.queries().UpsertLedgerParticipantBalance(ctx, sqlc.UpsertLedgerParticipantBalanceParams{
-			ID:            convertUUID(uuid.New()),
+			ID:            convertUUID(v1.NewID()),
 			LedgerID:      balance.LedgerID,
 			UserID:        balance.UserID,
 			LastTimestamp: balance.LastTimestamp,

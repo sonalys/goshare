@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
@@ -43,7 +42,7 @@ func (c *Client) Decode(tokenString string) (*v1.Identity, error) {
 		return nil, fmt.Errorf("missing user_id claim")
 	}
 
-	userUUID, err := uuid.Parse(userID)
+	userUUID, err := v1.ParseID(userID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse user_id: %v", err)
 	}

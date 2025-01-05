@@ -29,7 +29,7 @@ func (a *API) AddLedgerMember(ctx context.Context, request handlers.AddLedgerMem
 
 	req := ledgers.AddMembersRequest{
 		UserID:   identity.UserID,
-		LedgerID: request.LedgerID,
+		LedgerID: v1.ConvertID(request.LedgerID),
 		Emails:   collectEmails(request.Body.Emails),
 	}
 	switch err := a.dependencies.LedgerMemberCreater.AddMembers(ctx, req); {

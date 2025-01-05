@@ -8,7 +8,7 @@ import (
 )
 
 func (a *API) ListLedgerBalances(ctx context.Context, request handlers.ListLedgerBalancesRequestObject) (handlers.ListLedgerBalancesResponseObject, error) {
-	balances, err := a.dependencies.LedgerBalancesLister.GetBalances(ctx, request.LedgerID)
+	balances, err := a.dependencies.LedgerBalancesLister.GetBalances(ctx, v1.ConvertID(request.LedgerID))
 	if err != nil {
 		return nil, err
 	}
@@ -22,7 +22,7 @@ func mapLedgerParticipantBalanceToResponseObject(balance []v1.LedgerParticipantB
 	var balances []handlers.LedgerParticipantBalance
 	for _, b := range balance {
 		balances = append(balances, handlers.LedgerParticipantBalance{
-			UserId:  b.UserID,
+			UserId:  b.UserID.UUID(),
 			Balance: b.Balance,
 		})
 	}

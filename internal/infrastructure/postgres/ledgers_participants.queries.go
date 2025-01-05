@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
+	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
-func addLedgerParticipant(ctx context.Context, tx *sqlc.Queries, ledgerID, userID, invitedUserID uuid.UUID) error {
+func addLedgerParticipant(ctx context.Context, tx *sqlc.Queries, ledgerID, userID, invitedUserID v1.ID) error {
 	addReq := sqlc.AddUserToLedgerParams{
 		LedgerID:  convertUUID(ledgerID),
 		UserID:    convertUUID(invitedUserID),
-		ID:        convertUUID(uuid.New()),
+		ID:        convertUUID(v1.NewID()),
 		CreatedAt: convertTime(time.Now()),
 		CreatedBy: convertUUID(userID),
 	}
@@ -29,9 +29,9 @@ func addLedgerParticipant(ctx context.Context, tx *sqlc.Queries, ledgerID, userI
 	return nil
 }
 
-func createLedgerParticipantBalance(ctx context.Context, tx *sqlc.Queries, ledgerID, userID uuid.UUID) error {
+func createLedgerParticipantBalance(ctx context.Context, tx *sqlc.Queries, ledgerID, userID v1.ID) error {
 	return tx.CreateLedgerParticipantBalance(ctx, sqlc.CreateLedgerParticipantBalanceParams{
-		ID:            convertUUID(uuid.New()),
+		ID:            convertUUID(v1.NewID()),
 		LedgerID:      convertUUID(ledgerID),
 		UserID:        convertUUID(userID),
 		LastTimestamp: convertTime(time.Now()),

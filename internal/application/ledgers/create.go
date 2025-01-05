@@ -5,7 +5,6 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/sonalys/goshare/internal/pkg/otel"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 	"go.opentelemetry.io/otel/codes"
@@ -13,19 +12,19 @@ import (
 
 type (
 	CreateRequest struct {
-		UserID uuid.UUID
+		UserID v1.ID
 		Name   string
 	}
 
 	CreateResponse struct {
-		ID uuid.UUID
+		ID v1.ID
 	}
 )
 
 func (r CreateRequest) Validate() error {
 	var errs v1.FormError
 
-	if r.UserID == uuid.Nil {
+	if r.UserID.IsEmpty() {
 		errs.Fields = append(errs.Fields, v1.NewRequiredFieldError("user_id"))
 	}
 
@@ -49,7 +48,7 @@ func (c *Controller) Create(ctx context.Context, req CreateRequest) (*CreateResp
 	}
 
 	ledger := &v1.Ledger{
-		ID:        uuid.New(),
+		ID:        v1.NewID(),
 		Name:      req.Name,
 		CreatedAt: time.Now(),
 		CreatedBy: req.UserID,

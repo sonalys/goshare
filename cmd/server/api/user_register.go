@@ -21,7 +21,7 @@ func (a *API) RegisterUser(ctx context.Context, request handlers.RegisterUserReq
 
 	switch resp, err := a.dependencies.UserRegister.Register(ctx, req); {
 	case err == nil:
-		return handlers.RegisterUser200JSONResponse{Id: resp.ID}, nil
+		return handlers.RegisterUser200JSONResponse{Id: resp.ID.UUID()}, nil
 	case errors.Is(err, v1.ErrEmailAlreadyRegistered):
 		return handlers.RegisterUserdefaultJSONResponse{
 			Body: newErrorResponse(ctx, []handlers.Error{

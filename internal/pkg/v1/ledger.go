@@ -3,40 +3,38 @@ package v1
 import (
 	"errors"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type (
 	Ledger struct {
-		ID        uuid.UUID
+		ID        ID
 		Name      string
 		CreatedAt time.Time
-		CreatedBy uuid.UUID
+		CreatedBy ID
 	}
 
 	LedgerParticipant struct {
-		ID        uuid.UUID
-		LedgerID  uuid.UUID
-		UserID    uuid.UUID
+		ID        ID
+		LedgerID  ID
+		UserID    ID
 		CreatedAt time.Time
-		CreatedBy uuid.UUID
+		CreatedBy ID
 	}
 
 	LedgerRecord struct {
-		ID          uuid.UUID
-		LedgerID    uuid.UUID
-		ExpenseID   uuid.UUID
-		UserID      uuid.UUID
+		ID          ID
+		LedgerID    ID
+		ExpenseID   ID
+		UserID      ID
 		Amount      int32
 		Description string
 		CreatedAt   time.Time
-		CreatedBy   uuid.UUID
+		CreatedBy   ID
 	}
 
 	LedgerParticipantBalance struct {
-		LedgerID uuid.UUID
-		UserID   uuid.UUID
+		LedgerID ID
+		UserID   ID
 		Balance  int32
 	}
 )

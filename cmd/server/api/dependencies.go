@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"github.com/sonalys/goshare/internal/application/ledgers"
 	"github.com/sonalys/goshare/internal/application/users"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
@@ -23,7 +22,7 @@ type (
 	}
 
 	LedgerBalancesLister interface {
-		GetBalances(ctx context.Context, ledgerID uuid.UUID) ([]v1.LedgerParticipantBalance, error)
+		GetBalances(ctx context.Context, ledgerID v1.ID) ([]v1.LedgerParticipantBalance, error)
 	}
 
 	LedgerMemberCreater interface {
@@ -31,7 +30,7 @@ type (
 	}
 
 	UserLedgerLister interface {
-		GetByUser(ctx context.Context, userID uuid.UUID) ([]v1.Ledger, error)
+		GetByUser(ctx context.Context, userID v1.ID) ([]v1.Ledger, error)
 	}
 
 	ExpenseCreater interface {

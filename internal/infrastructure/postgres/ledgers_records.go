@@ -3,12 +3,11 @@ package postgres
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
-func (r *LedgerRepository) AppendRecord(ctx context.Context, ledgerID uuid.UUID, record *v1.LedgerRecord) error {
+func (r *LedgerRepository) AppendRecord(ctx context.Context, ledgerID v1.ID, record *v1.LedgerRecord) error {
 	return mapLedgerError(r.client.queries().AppendLedgerRecord(ctx, sqlc.AppendLedgerRecordParams{
 		ID:          convertUUID(record.ID),
 		LedgerID:    convertUUID(ledgerID),
@@ -21,7 +20,7 @@ func (r *LedgerRepository) AppendRecord(ctx context.Context, ledgerID uuid.UUID,
 	}))
 }
 
-func (r *LedgerRepository) GetRecords(ctx context.Context, ledgerID uuid.UUID) ([]v1.LedgerRecord, error) {
+func (r *LedgerRepository) GetRecords(ctx context.Context, ledgerID v1.ID) ([]v1.LedgerRecord, error) {
 	records, err := r.client.queries().GetLedgerRecords(ctx, convertUUID(ledgerID))
 	if err != nil {
 		return nil, mapLedgerError(err)

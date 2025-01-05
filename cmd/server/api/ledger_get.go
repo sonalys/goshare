@@ -27,10 +27,10 @@ func convertLedgers(ledgers []v1.Ledger) []handlers.Ledger {
 	result := make([]handlers.Ledger, 0, len(ledgers))
 	for _, ledger := range ledgers {
 		result = append(result, handlers.Ledger{
-			Id:        ledger.ID,
+			Id:        ledger.ID.UUID(),
 			Name:      ledger.Name,
 			CreatedAt: ledger.CreatedAt,
-			CreatedBy: ledger.CreatedBy,
+			CreatedBy: ledger.CreatedBy.UUID(),
 		})
 	}
 	return result

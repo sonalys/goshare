@@ -1,8 +1,6 @@
 package v1
 
-import "github.com/google/uuid"
-
 type Tag struct {
-	ID   uuid.UUID
+	ID   ID
 	Name string
 }

@@ -3,7 +3,6 @@ package postgres
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
@@ -24,7 +23,7 @@ func (r *ExpensesRepository) Create(ctx context.Context, expense *v1.Expense) er
 	}))
 }
 
-func (r *ExpensesRepository) Find(ctx context.Context, id uuid.UUID) (*v1.Expense, error) {
+func (r *ExpensesRepository) Find(ctx context.Context, id v1.ID) (*v1.Expense, error) {
 	expense, err := r.client.queries().FindExpenseById(ctx, convertUUID(id))
 	if err != nil {
 		return nil, mapError(err)
@@ -45,7 +44,7 @@ func (r *ExpensesRepository) Update(ctx context.Context, expense *v1.Expense) er
 	}))
 }
 
-func (r *ExpensesRepository) Delete(ctx context.Context, id uuid.UUID) error {
+func (r *ExpensesRepository) Delete(ctx context.Context, id v1.ID) error {
 	return mapError(r.client.queries().DeleteExpense(ctx, convertUUID(id)))
 }
 

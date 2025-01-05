@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
@@ -40,7 +39,7 @@ func (r *LedgerRepository) Create(ctx context.Context, ledger *v1.Ledger) error 
 	}))
 }
 
-func (r *LedgerRepository) Find(ctx context.Context, id uuid.UUID) (*v1.Ledger, error) {
+func (r *LedgerRepository) Find(ctx context.Context, id v1.ID) (*v1.Ledger, error) {
 	ledger, err := r.client.queries().FindLedgerById(ctx, convertUUID(id))
 	if err != nil {
 		return nil, mapLedgerError(err)
@@ -48,7 +47,7 @@ func (r *LedgerRepository) Find(ctx context.Context, id uuid.UUID) (*v1.Ledger, 
 	return newLedger(&ledger), nil
 }
 
-func (r *LedgerRepository) GetByUser(ctx context.Context, userID uuid.UUID) ([]v1.Ledger, error) {
+func (r *LedgerRepository) GetByUser(ctx context.Context, userID v1.ID) ([]v1.Ledger, error) {
 	ledgers, err := r.client.queries().GetUserLedgers(ctx, convertUUID(userID))
 	if err != nil {
 		return nil, mapLedgerError(err)

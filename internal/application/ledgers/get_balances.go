@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/google/uuid"
 	"github.com/sonalys/goshare/internal/pkg/otel"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 	"go.opentelemetry.io/otel/codes"
 )
 
-func (c *Controller) GetBalances(ctx context.Context, ledgerID uuid.UUID) ([]v1.LedgerParticipantBalance, error) {
+func (c *Controller) GetBalances(ctx context.Context, ledgerID v1.ID) ([]v1.LedgerParticipantBalance, error) {
 	ctx, span := otel.Tracer.Start(ctx, "ledgers.GetBalances")
 	defer span.End()
 

@@ -23,7 +23,7 @@ func (a *API) CreateLedger(ctx context.Context, request handlers.CreateLedgerReq
 
 	switch resp, err := a.dependencies.LedgerCreater.Create(ctx, req); {
 	case err == nil:
-		return handlers.CreateLedger200JSONResponse{Id: resp.ID}, nil
+		return handlers.CreateLedger200JSONResponse{Id: resp.ID.UUID()}, nil
 	default:
 		if errList := new(v1.FieldErrorList); errors.As(err, errList) {
 			return handlers.CreateLedgerdefaultJSONResponse{

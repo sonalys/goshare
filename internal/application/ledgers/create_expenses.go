@@ -7,7 +7,6 @@ import (
 	"math"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/sonalys/goshare/internal/pkg/otel"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 	"go.opentelemetry.io/otel/codes"
@@ -15,9 +14,9 @@ import (
 
 type (
 	CreateExpenseRequest struct {
-		UserID       uuid.UUID
-		LedgerID     uuid.UUID
-		CategoryID   *uuid.UUID
+		UserID       v1.ID
+		LedgerID     v1.ID
+		CategoryID   *v1.ID
 		Amount       int32
 		Name         string
 		ExpenseDate  time.Time
@@ -25,14 +24,14 @@ type (
 	}
 
 	CreateExpenseResponse struct {
-		ID uuid.UUID
+		ID v1.ID
 	}
 )
 
 func (r CreateExpenseRequest) Validate() error {
 	var errs v1.FormError
 
-	if r.LedgerID == uuid.Nil {
+	if r.LedgerID.IsEmpty() {
 		errs.Fields = append(errs.Fields, v1.NewRequiredFieldError("ledger_id"))
 	}
 
@@ -61,7 +60,7 @@ func (r CreateExpenseRequest) Validate() error {
 			totalPaid += ub.Balance
 		}
 
-		if ub.UserID == uuid.Nil {
+		if ub.UserID.IsEmpty() {
 			errs.Fields = append(errs.Fields, v1.NewRequiredFieldError("user_balances["+fmt.Sprint(i)+"].user_id"))
 		}
 	}
@@ -94,7 +93,7 @@ func (c *Controller) CreateExpense(ctx context.Context, req CreateExpenseRequest
 	}
 
 	expense := &v1.Expense{
-		ID:           uuid.New(),
+		ID:           v1.NewID(),
 		CategoryID:   req.CategoryID,
 		LedgerID:     req.LedgerID,
 		Amount:       req.Amount,

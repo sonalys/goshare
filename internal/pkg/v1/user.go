@@ -3,12 +3,10 @@ package v1
 import (
 	"errors"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type User struct {
-	ID              uuid.UUID
+	ID              ID
 	FirstName       string
 	LastName        string
 	Email           string
