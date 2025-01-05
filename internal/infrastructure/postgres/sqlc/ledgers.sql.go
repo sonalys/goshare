@@ -63,6 +63,17 @@ func (q *Queries) AppendLedgerRecord(ctx context.Context, arg AppendLedgerRecord
 	return err
 }
 
+const countLedgerUsers = `-- name: CountLedgerUsers :one
+SELECT COUNT(*) FROM ledgers WHERE ID = $1
+`
+
+func (q *Queries) CountLedgerUsers(ctx context.Context, id pgtype.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, countLedgerUsers, id)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createLedger = `-- name: CreateLedger :exec
 INSERT INTO ledgers (id,name,created_at,created_by) VALUES ($1,$2,$3,$4)
 `
@@ -374,6 +385,15 @@ func (q *Queries) GetUserLedgers(ctx context.Context, userID pgtype.UUID) ([]Led
 		return nil, err
 	}
 	return items, nil
+}
+
+const lockLedgerForUpdate = `-- name: LockLedgerForUpdate :exec
+SELECT id, name, created_at, created_by FROM ledgers WHERE id = $1 FOR UPDATE
+`
+
+func (q *Queries) LockLedgerForUpdate(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, lockLedgerForUpdate, id)
+	return err
 }
 
 const updateLedgerParticipantBalance = `-- name: UpdateLedgerParticipantBalance :exec

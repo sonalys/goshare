@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
@@ -18,8 +19,8 @@ func NewExpensesRepository(client *Client) *ExpensesRepository {
 }
 
 func (r *ExpensesRepository) Create(ctx context.Context, expense *v1.Expense) error {
-	return mapError(r.client.transaction(ctx, func(tx *sqlc.Queries) error {
-		return createExpense(ctx, tx, expense)
+	return mapError(r.client.transaction(ctx, func(tx pgx.Tx) error {
+		return r.createExpense(ctx, tx, expense)
 	}))
 }
 

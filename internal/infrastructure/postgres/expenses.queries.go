@@ -4,11 +4,12 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
-func createExpense(ctx context.Context, tx *sqlc.Queries, expense *v1.Expense) error {
+func (r *ExpensesRepository) createExpense(ctx context.Context, tx pgx.Tx, expense *v1.Expense) error {
 	createExpenseReq := sqlc.CreateExpenseParams{
 		ID:          convertUUID(expense.ID),
 		Amount:      expense.Amount,
@@ -22,7 +23,9 @@ func createExpense(ctx context.Context, tx *sqlc.Queries, expense *v1.Expense) e
 		UpdatedBy:   convertUUID(expense.UpdatedBy),
 	}
 
-	if err := tx.CreateExpense(ctx, createExpenseReq); err != nil {
+	queries := r.client.queries().WithTx(tx)
+
+	if err := queries.CreateExpense(ctx, createExpenseReq); err != nil {
 		return fmt.Errorf("failed to create expense: %w", err)
 	}
 
@@ -38,7 +41,7 @@ func createExpense(ctx context.Context, tx *sqlc.Queries, expense *v1.Expense) e
 			CreatedBy:   convertUUID(expense.CreatedBy),
 		}
 
-		if err := tx.AppendLedgerRecord(ctx, ledgerRecord); err != nil {
+		if err := queries.AppendLedgerRecord(ctx, ledgerRecord); err != nil {
 			return fmt.Errorf("failed to append ledger record %d: %w", i, err)
 		}
 	}

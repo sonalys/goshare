@@ -3,13 +3,14 @@ package postgres
 import (
 	"context"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
 func (r *LedgerRepository) AddParticipant(ctx context.Context, ledgerID, userID, invitedUserID v1.ID) error {
-	return mapLedgerError(r.client.transaction(ctx, func(tx *sqlc.Queries) error {
-		return addLedgerParticipant(ctx, tx, ledgerID, userID, invitedUserID)
+	return mapLedgerError(r.client.transaction(ctx, func(tx pgx.Tx) error {
+		return r.addLedgerParticipant(ctx, tx, ledgerID, userID, invitedUserID)
 	}))
 }
 

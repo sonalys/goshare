@@ -2,7 +2,12 @@ package v1
 
 import (
 	"errors"
+	"fmt"
 	"time"
+)
+
+const (
+	LedgerMaxUsers = 100
 )
 
 type (
@@ -41,4 +46,5 @@ type (
 
 var (
 	ErrUserAlreadyMember = errors.New("user is already a member")
+	ErrLedgerMaxUsers    = fmt.Errorf("ledger has maximum number of users: %d", LedgerMaxUsers)
 )

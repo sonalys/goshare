@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 )
@@ -38,14 +39,14 @@ func (c *Client) queries() *sqlc.Queries {
 	return sqlc.New(c.connPool)
 }
 
-func (c *Client) transaction(ctx context.Context, f func(tx *sqlc.Queries) error) error {
+func (c *Client) transaction(ctx context.Context, f func(tx pgx.Tx) error) error {
 	tx, err := c.connPool.Begin(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to start transaction: %w", err)
 	}
 	defer tx.Rollback(ctx)
 
-	err = f(sqlc.New(tx))
+	err = f(tx)
 	if err != nil {
 		return err
 	}

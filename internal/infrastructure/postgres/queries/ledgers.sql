@@ -61,3 +61,9 @@ GROUP BY
     lp.ledger_id, lp.user_id, lp.created_at, lp.created_by, lpb.balance
 ORDER BY
     lp.user_id;
+
+-- name: LockLedgerForUpdate :exec
+SELECT * FROM ledgers WHERE id = $1 FOR UPDATE;
+
+-- name: CountLedgerUsers :one
+SELECT COUNT(*) FROM ledgers WHERE ID = $1;
