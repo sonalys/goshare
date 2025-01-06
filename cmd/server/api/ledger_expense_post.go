@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"errors"
 	"net/http"
 
 	"github.com/oapi-codegen/runtime/types"
@@ -34,9 +33,9 @@ func (a *API) CreateExpense(ctx context.Context, request handlers.CreateExpenseR
 			Id: resp.ID.UUID(),
 		}, nil
 	default:
-		if errList := new(v1.FieldErrorList); errors.As(err, errList) {
+		if causes, ok := extractErrorCauses(err); ok {
 			return handlers.CreateExpensedefaultJSONResponse{
-				Body:       newErrorResponse(ctx, getCausesFromFieldErrors(*errList)),
+				Body:       newErrorResponse(ctx, getCausesFromFieldErrors(causes)),
 				StatusCode: http.StatusBadRequest,
 			}, nil
 		}

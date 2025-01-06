@@ -10,9 +10,14 @@ type (
 
 	FormError FieldErrorList
 
+	FieldErrorMetadata struct {
+		Index int
+	}
+
 	FieldError struct {
-		Field string
-		Cause error
+		Field    string
+		Cause    error
+		Metadata FieldErrorMetadata
 	}
 
 	ValueRangeError struct {

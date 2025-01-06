@@ -2,6 +2,7 @@ package ledgers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"math"
@@ -106,16 +107,26 @@ func (c *Controller) CreateExpense(ctx context.Context, req CreateExpenseRequest
 		UpdatedBy:    req.UserID,
 	}
 
-	if err := c.expenseRepository.Create(ctx, expense); err != nil {
+	switch err := c.expenseRepository.Create(ctx, expense); {
+	case errors.Is(err, v1.ErrUserNotAMember):
+		if fieldErr := new(v1.FieldError); errors.As(err, fieldErr) {
+			return nil, v1.FieldError{
+				Cause:    v1.ErrUserNotAMember,
+				Field:    fmt.Sprintf("user_balances.%d.user_id", fieldErr.Metadata.Index),
+				Metadata: fieldErr.Metadata,
+			}
+		}
+		return nil, err
+	case err != nil:
 		span.SetStatus(codes.Error, err.Error())
 		slog.ErrorContext(ctx, "failed to create expense", slog.Any("error", err))
 		return nil, fmt.Errorf("failed to create expense: %w", err)
+	default:
+		span.SetStatus(codes.Ok, "")
+		slog.InfoContext(ctx, "expense created", slog.String("expense_id", expense.ID.String()))
+
+		return &CreateExpenseResponse{
+			ID: expense.ID,
+		}, nil
 	}
-
-	span.SetStatus(codes.Ok, "")
-	slog.InfoContext(ctx, "expense created", slog.String("expense_id", expense.ID.String()))
-
-	return &CreateExpenseResponse{
-		ID: expense.ID,
-	}, nil
 }

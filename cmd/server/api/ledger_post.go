@@ -35,9 +35,9 @@ func (a *API) CreateLedger(ctx context.Context, request handlers.CreateLedgerReq
 			StatusCode: http.StatusBadRequest,
 		}, nil
 	default:
-		if errList := new(v1.FieldErrorList); errors.As(err, errList) {
+		if causes, ok := extractErrorCauses(err); ok {
 			return handlers.CreateLedgerdefaultJSONResponse{
-				Body:       newErrorResponse(ctx, getCausesFromFieldErrors(*errList)),
+				Body:       newErrorResponse(ctx, getCausesFromFieldErrors(causes)),
 				StatusCode: http.StatusBadRequest,
 			}, nil
 		}

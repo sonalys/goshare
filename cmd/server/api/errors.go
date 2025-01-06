@@ -14,6 +14,18 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
+func extractErrorCauses(err error) ([]v1.FieldError, bool) {
+	var resp []v1.FieldError
+
+	if fieldErr := new(v1.FieldError); errors.As(err, fieldErr) {
+		resp = []v1.FieldError{*fieldErr}
+	} else if errList := new(v1.FieldErrorList); errors.As(err, errList) {
+		resp = *errList
+	}
+
+	return resp, len(resp) > 0
+}
+
 func WriteErrorResponse(ctx context.Context, w http.ResponseWriter, code int, resp handlers.ErrorResponse) {
 	w.WriteHeader(code)
 	w.Header().Set("Content-Type", "application/problem+json")
@@ -39,6 +51,8 @@ func getFieldErrorCode(from v1.FieldError) handlers.ErrorCode {
 		return handlers.RequiredField
 	case errors.Is(cause, v1.ErrUserAlreadyMember):
 		return handlers.UserAlreadyMember
+	case errors.Is(cause, v1.ErrUserNotAMember):
+		return handlers.UserNotMember
 	default:
 		return handlers.ErrorCode("")
 	}

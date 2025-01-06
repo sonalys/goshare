@@ -42,7 +42,12 @@ func (r *ExpensesRepository) createExpense(ctx context.Context, tx pgx.Tx, expen
 		}
 
 		if err := queries.AppendLedgerRecord(ctx, ledgerRecord); err != nil {
-			return fmt.Errorf("failed to append ledger record %d: %w", i, err)
+			return v1.FieldError{
+				Cause: err,
+				Metadata: v1.FieldErrorMetadata{
+					Index: i,
+				},
+			}
 		}
 	}
 

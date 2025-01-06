@@ -38,6 +38,7 @@ const (
 	Unauthorized          ErrorCode = "unauthorized"
 	UserAlreadyMember     ErrorCode = "user_already_member"
 	UserMaxLedgers        ErrorCode = "user_max_ledgers"
+	UserNotMember         ErrorCode = "user_not_member"
 )
 
 // Error defines model for Error.

@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -22,13 +23,13 @@ func NewExpensesRepository(client *Client) *ExpensesRepository {
 }
 
 func (r *ExpensesRepository) Create(ctx context.Context, expense *v1.Expense) error {
-	return mapError(r.client.transaction(ctx, func(tx pgx.Tx) error {
+	return mapExpenseError(r.client.transaction(ctx, func(tx pgx.Tx) error {
 		return r.createExpense(ctx, tx, expense)
 	}))
 }
 
 func (r *ExpensesRepository) Update(ctx context.Context, expense *v1.Expense) error {
-	return mapError(r.client.queries().UpdateExpense(ctx, sqlc.UpdateExpenseParams{
+	return mapExpenseError(r.client.queries().UpdateExpense(ctx, sqlc.UpdateExpenseParams{
 		ID:          convertUUID(expense.ID),
 		Amount:      expense.Amount,
 		CategoryID:  convertUUIDPtr(expense.CategoryID),
@@ -40,7 +41,7 @@ func (r *ExpensesRepository) Update(ctx context.Context, expense *v1.Expense) er
 }
 
 func (r *ExpensesRepository) Delete(ctx context.Context, id v1.ID) error {
-	return mapError(r.client.queries().DeleteExpense(ctx, convertUUID(id)))
+	return mapExpenseError(r.client.queries().DeleteExpense(ctx, convertUUID(id)))
 }
 
 func (r *ExpensesRepository) GetByLedger(ctx context.Context, ledgerID v1.ID, cursor time.Time, limit int32) ([]v1.Expense, error) {
@@ -52,7 +53,7 @@ func (r *ExpensesRepository) GetByLedger(ctx context.Context, ledgerID v1.ID, cu
 
 	expenses, err := r.client.queries().GetLedgerExpenses(ctx, params)
 	if err != nil {
-		return nil, mapError(err)
+		return nil, mapExpenseError(err)
 	}
 
 	ids := monoids.Map(expenses, func(from sqlc.Expense) pgtype.UUID {
@@ -61,7 +62,7 @@ func (r *ExpensesRepository) GetByLedger(ctx context.Context, ledgerID v1.ID, cu
 
 	ledgerRecords, err := r.client.queries().GetExpensesRecords(ctx, ids)
 	if err != nil {
-		return nil, mapError(err)
+		return nil, mapExpenseError(err)
 	}
 
 	return convertExpenses(expenses, ledgerRecords), nil
@@ -111,4 +112,22 @@ func convertExpenses(from []sqlc.Expense, records []sqlc.LedgerRecord) []v1.Expe
 	}
 
 	return to
+}
+
+func mapExpenseError(err error) error {
+	switch {
+	case err == nil:
+		return nil
+	case isViolatingConstraint(err, constraintLedgerRecordsUser):
+		if fieldErr := new(v1.FieldError); errors.As(err, fieldErr) {
+			return v1.FieldError{
+				Cause:    v1.ErrUserNotAMember,
+				Field:    fieldErr.Field,
+				Metadata: fieldErr.Metadata,
+			}
+		}
+		return v1.ErrUserNotAMember
+	default:
+		return mapError(err)
+	}
 }

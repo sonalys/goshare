@@ -9,6 +9,7 @@ import (
 const (
 	constraintParticipantUniqueEmail  = "participant_unique_email"
 	constraintLedgerUniqueParticipant = "ledger_participant_unique"
+	constraintLedgerRecordsUser       = "ledger_records_user_id_fkey"
 )
 
 func isConstraintError(err error) bool {
