@@ -1,15 +1,21 @@
 version: '3'
 
+env:
+  CWD: "{{ .USER_WORKING_DIR }}"
+  DOCKERFILE: ./dockerfile
+  COMPOSE_FILE: .config/deployment/local/compose.yml
+  GO_VERSION: 1.23
+
 tasks:
   build-server:
-    cmd: go build -a -ldflags "-extldflags '-static' -X main.version=$VERSION" -o /app/bin/server /app/cmd/server
+    cmd: go build -gcflags "all=-N -l" -a -ldflags "-extldflags '-static' -X main.version=$VERSION" -o /app/bin/server /app/cmd/server
     sources:
       - ./*.go
     generates:
       - bin/server
 
   build-migration:
-    cmd: go build -a -ldflags "-extldflags '-static' -X main.version=$VERSION" -o /app/bin/migration /app/cmd/migration
+    cmd: go build -gcflags "all=-N -l" -a -ldflags "-extldflags '-static' -X main.version=$VERSION" -o /app/bin/migration /app/cmd/migration
     sources:
       - ./*.go
     generates:
@@ -27,11 +33,21 @@ tasks:
   generate-openapi:
     cmd: go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen --config=.config/.oapi-codegen.yaml cmd/server/spec/root.yaml
 
+  compose-server:
+    cmd: docker compose -f {{ .COMPOSE_FILE }} up -d --build goshare && docker compose -f {{ .COMPOSE_FILE }} logs -f goshare_migrate goshare
+
   compose:
-    cmd: docker compose -f compose.yml up -d --build && docker compose -f compose.yml logs -f goshareInit goshare
+    cmd: docker compose -f {{ .COMPOSE_FILE }} up -d --build && docker compose -f {{ .COMPOSE_FILE }} logs -f goshare_migrate goshare
 
   compose-down:
-    cmd: docker compose -f compose.yml down
+    cmd: docker compose -f {{ .COMPOSE_FILE }} down
 
   enter-db:
     cmd: docker exec -it postgres psql -U user goshare
+
+  debug-server:
+    cmd: dlv debug /app/cmd/server --headless --listen=:2345 --api-version=2 --accept-multiclient
+    sources:
+      - ./*.go
+    generates:
+      - bin/server

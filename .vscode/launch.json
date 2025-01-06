@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+		"name": "Connect to external session",
+		"type": "go",
+		"debugAdapter": "dlv-dap", // `legacy` by default
+		"request": "attach",
+		"mode": "remote",
+		"port": 2345,
+		"host": "127.0.0.1", // can skip for localhost
+		"substitutePath": [
+		  { "from": "${workspaceFolder}", "to": "/app" },
+	 	]
+	},
+  ]
+}

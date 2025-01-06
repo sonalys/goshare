@@ -1,27 +1,32 @@
 services:
-  goshareInit:
+  goshare_migrate:
     depends_on:
       - postgres
     build:
-      context: .
-      dockerfile: dockerfile
-    entrypoint: /usr/local/bin/migration
+      context: ${CWD}
+      dockerfile: ${DOCKERFILE}
+      args:
+        GO_VERSION: ${GO_VERSION}
+    entrypoint: /app/bin/migration
     image: ghcr.io/sonalys/goshare:latest
     container_name: goshare_migrate
   
   goshare:
     depends_on:
       - jaeger
-      - goshareInit
+      - goshare_migrate
       - postgres
     build:
-      context: .
-      dockerfile: dockerfile
-    entrypoint: /usr/local/bin/server
+      context: ${CWD}
+      dockerfile: ${DOCKERFILE}
+      args:
+        GO_VERSION: ${GO_VERSION}
+    entrypoint: ["dlv", "exec", "/app/bin/server", "--headless=true", "--listen=:2345", "--api-version=2", "--accept-multiclient"]
     image: ghcr.io/sonalys/goshare:latest
     container_name: goshare
     ports:
       - "8080:8080"
+      - "2345:2345"
 
   grafana:
     image: grafana/grafana:latest
