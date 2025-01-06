@@ -1,5 +1,5 @@
 meta {
-  name: Create Expense
+  name: Create
   type: http
   seq: 1
 }
@@ -16,17 +16,17 @@ params:path {
 
 body:json {
   {
-      "amount": 100,
+      "amount": 90,
       "name": "dinner",
       "expense_date": "2020-01-01T00:00:00Z",
       "user_balances": [
           {
               "user_id": "{{user_id}}",
-              "balance": 100
+              "balance": -90
           },
           {
               "user_id": "a9614b0f-79f4-4ea6-b634-5ac7586440aa",
-              "balance": -100
+              "balance": 91
           }
       ]
   }

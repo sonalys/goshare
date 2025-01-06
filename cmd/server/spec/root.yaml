@@ -186,6 +186,53 @@ paths:
                     format: uuid
 
   /ledgers/{ledgerID}/expenses:
+    get:
+      operationId: ListLedgerExpenses
+      description: Lists the expenses of the Ledger
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: ledgerID
+          in: path
+          required: true
+          description: Ledger ID
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          required: false
+          description: The number of documents returned
+          schema:
+            type: integer
+            format: int32
+        - name: cursor
+          in: query
+          required: false
+          description: The identifier of the last document returned on the previous pagination
+          schema:
+            type: string
+            format: date-time
+      responses:
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+        '200':
+          description: The list of expenses for the Ledger
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - expenses
+                properties:
+                  cursor:
+                    type: string
+                    format: date-time
+                  expenses:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/LedgerExpense"
+
     post:
       operationId: CreateExpense
       description: Creates a new expense
@@ -348,6 +395,66 @@ components:
                 items:
                   $ref: "#/components/schemas/Error"
   schemas:
+    LedgerExpense:
+      type: object
+      required:
+        - id
+        - amount
+        - name
+        - expense_date
+        - user_balances
+        - createdAt
+        - createdBy
+        - updatedAt
+        - updatedBy
+      properties:
+        id:
+          type: string
+          format: uuid
+        amount:
+          type: integer
+          format: int32
+          description: Expense amount
+          example: 10000
+        category_id:
+          type: string
+          format: uuid
+          description: Category ID
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          description: Expense name
+          example: "Dinner"
+        expense_date:
+          type: string
+          format: date-time
+          description: Date and time the expense was made
+          example: "2020-01-01T00:00:00Z"
+        user_balances:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/ExpenseUserBalance"
+        createdAt:
+          type: string
+          format: date-time
+          description: Date and time the expense was created
+          example: "2020-01-01T00:00:00Z"
+        createdBy:
+          type: string
+          format: uuid
+          description: User ID of the creator
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Date and time the expense was last updated
+          example: "2020-01-01T00:00:00Z"
+        updatedBy:
+          type: string
+          format: uuid
+          description: User ID of the last updater
+          example: "123e4567-e89b-12d3-a456-426614174000"
     ExpenseUserBalance:
       type: object
       required:

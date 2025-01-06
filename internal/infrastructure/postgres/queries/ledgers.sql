@@ -73,3 +73,6 @@ SELECT * FROM users WHERE id = $1 FOR UPDATE;
 
 -- name: CountUserLedgers :one
 SELECT COUNT(*) FROM ledgers WHERE created_by = $1;
+
+-- name: GetExpensesRecords :many
+SELECT * FROM ledger_records WHERE expense_id IN (SELECT unnest($1::uuid[]));

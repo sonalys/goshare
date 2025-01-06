@@ -49,7 +49,7 @@ func newCauseFromFieldError(from v1.FieldError) handlers.Error {
 		Message: from.Error(),
 		Code:    getFieldErrorCode(from),
 		Metadata: &handlers.ErrorMetadata{
-			Field: pointers.From(from.Field),
+			Field: pointers.New(from.Field),
 		},
 	}
 }

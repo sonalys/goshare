@@ -10,6 +10,8 @@ type privateUUID = uuid.UUID
 
 type ID struct{ privateUUID }
 
+var EmptyID = ID{uuid.Nil}
+
 func NewID() ID {
 	id, err := uuid.NewV7()
 	if err != nil {
@@ -20,6 +22,16 @@ func NewID() ID {
 
 func ConvertID(id uuid.UUID) ID {
 	return ID{id}
+}
+
+func ConvertPointerID(id *uuid.UUID) *ID {
+	if id == nil {
+		return nil
+	}
+
+	uid := ConvertID(*id)
+
+	return &uid
 }
 
 func ParseID(from string) (ID, error) {

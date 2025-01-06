@@ -1,5 +1,5 @@
 package pointers
 
-func From[T any](value T) *T {
+func New[T any](value T) *T {
 	return &value
 }

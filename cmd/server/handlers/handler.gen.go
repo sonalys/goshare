@@ -76,6 +76,35 @@ type Ledger struct {
 	Name string `json:"name"`
 }
 
+// LedgerExpense defines model for LedgerExpense.
+type LedgerExpense struct {
+	// Amount Expense amount
+	Amount int32 `json:"amount"`
+
+	// CategoryId Category ID
+	CategoryId *openapi_types.UUID `json:"category_id,omitempty"`
+
+	// CreatedAt Date and time the expense was created
+	CreatedAt time.Time `json:"createdAt"`
+
+	// CreatedBy User ID of the creator
+	CreatedBy openapi_types.UUID `json:"createdBy"`
+
+	// ExpenseDate Date and time the expense was made
+	ExpenseDate time.Time          `json:"expense_date"`
+	Id          openapi_types.UUID `json:"id"`
+
+	// Name Expense name
+	Name string `json:"name"`
+
+	// UpdatedAt Date and time the expense was last updated
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	// UpdatedBy User ID of the last updater
+	UpdatedBy    openapi_types.UUID   `json:"updatedBy"`
+	UserBalances []ExpenseUserBalance `json:"user_balances"`
+}
+
 // LedgerParticipantBalance defines model for LedgerParticipantBalance.
 type LedgerParticipantBalance struct {
 	Balance int32              `json:"balance"`
@@ -106,6 +135,15 @@ type LoginJSONBody struct {
 type CreateLedgerJSONBody struct {
 	// Name Ledger's name
 	Name string `json:"name"`
+}
+
+// ListLedgerExpensesParams defines parameters for ListLedgerExpenses.
+type ListLedgerExpensesParams struct {
+	// Limit The number of documents returned
+	Limit *int32 `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Cursor The identifier of the last document returned on the previous pagination
+	Cursor *time.Time `form:"cursor,omitempty" json:"cursor,omitempty"`
 }
 
 // CreateExpenseJSONBody defines parameters for CreateExpense.
@@ -180,6 +218,9 @@ type ServerInterface interface {
 
 	// (GET /ledgers/{ledgerID}/balances)
 	ListLedgerBalances(w http.ResponseWriter, r *http.Request, ledgerID openapi_types.UUID)
+
+	// (GET /ledgers/{ledgerID}/expenses)
+	ListLedgerExpenses(w http.ResponseWriter, r *http.Request, ledgerID openapi_types.UUID, params ListLedgerExpensesParams)
 
 	// (POST /ledgers/{ledgerID}/expenses)
 	CreateExpense(w http.ResponseWriter, r *http.Request, ledgerID openapi_types.UUID)
@@ -310,6 +351,56 @@ func (siw *ServerInterfaceWrapper) ListLedgerBalances(w http.ResponseWriter, r *
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.ListLedgerBalances(w, r, ledgerID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListLedgerExpenses operation middleware
+func (siw *ServerInterfaceWrapper) ListLedgerExpenses(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "ledgerID" -------------
+	var ledgerID openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ledgerID", r.PathValue("ledgerID"), &ledgerID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ledgerID", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, CookieAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListLedgerExpensesParams
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", r.URL.Query(), &params.Limit)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "cursor" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "cursor", r.URL.Query(), &params.Cursor)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "cursor", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListLedgerExpenses(w, r, ledgerID, params)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -521,6 +612,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc("GET "+options.BaseURL+"/ledgers", wrapper.ListLedgers)
 	m.HandleFunc("POST "+options.BaseURL+"/ledgers", wrapper.CreateLedger)
 	m.HandleFunc("GET "+options.BaseURL+"/ledgers/{ledgerID}/balances", wrapper.ListLedgerBalances)
+	m.HandleFunc("GET "+options.BaseURL+"/ledgers/{ledgerID}/expenses", wrapper.ListLedgerExpenses)
 	m.HandleFunc("POST "+options.BaseURL+"/ledgers/{ledgerID}/expenses", wrapper.CreateExpense)
 	m.HandleFunc("POST "+options.BaseURL+"/ledgers/{ledgerID}/members", wrapper.AddLedgerMember)
 	m.HandleFunc("POST "+options.BaseURL+"/users", wrapper.RegisterUser)
@@ -771,6 +863,47 @@ func (response ListLedgerBalancesdefaultJSONResponse) VisitListLedgerBalancesRes
 	return json.NewEncoder(w).Encode(response.Body)
 }
 
+type ListLedgerExpensesRequestObject struct {
+	LedgerID openapi_types.UUID `json:"ledgerID"`
+	Params   ListLedgerExpensesParams
+}
+
+type ListLedgerExpensesResponseObject interface {
+	VisitListLedgerExpensesResponse(w http.ResponseWriter) error
+}
+
+type ListLedgerExpenses200JSONResponse struct {
+	Cursor   *time.Time      `json:"cursor,omitempty"`
+	Expenses []LedgerExpense `json:"expenses"`
+}
+
+func (response ListLedgerExpenses200JSONResponse) VisitListLedgerExpensesResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListLedgerExpensesdefaultJSONResponse struct {
+	Body struct {
+		Errors []Error `json:"errors"`
+
+		// TraceId Unique identifier for the error instance
+		TraceId openapi_types.UUID `json:"trace_id"`
+
+		// Url URL of the failed request
+		Url string `json:"url"`
+	}
+	StatusCode int
+}
+
+func (response ListLedgerExpensesdefaultJSONResponse) VisitListLedgerExpensesResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(response.StatusCode)
+
+	return json.NewEncoder(w).Encode(response.Body)
+}
+
 type CreateExpenseRequestObject struct {
 	LedgerID openapi_types.UUID `json:"ledgerID"`
 	Body     *CreateExpenseJSONRequestBody
@@ -907,6 +1040,9 @@ type StrictServerInterface interface {
 
 	// (GET /ledgers/{ledgerID}/balances)
 	ListLedgerBalances(ctx context.Context, request ListLedgerBalancesRequestObject) (ListLedgerBalancesResponseObject, error)
+
+	// (GET /ledgers/{ledgerID}/expenses)
+	ListLedgerExpenses(ctx context.Context, request ListLedgerExpensesRequestObject) (ListLedgerExpensesResponseObject, error)
 
 	// (POST /ledgers/{ledgerID}/expenses)
 	CreateExpense(ctx context.Context, request CreateExpenseRequestObject) (CreateExpenseResponseObject, error)
@@ -1100,6 +1236,33 @@ func (sh *strictHandler) ListLedgerBalances(w http.ResponseWriter, r *http.Reque
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(ListLedgerBalancesResponseObject); ok {
 		if err := validResponse.VisitListLedgerBalancesResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListLedgerExpenses operation middleware
+func (sh *strictHandler) ListLedgerExpenses(w http.ResponseWriter, r *http.Request, ledgerID openapi_types.UUID, params ListLedgerExpensesParams) {
+	var request ListLedgerExpensesRequestObject
+
+	request.LedgerID = ledgerID
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListLedgerExpenses(ctx, request.(ListLedgerExpensesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListLedgerExpenses")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListLedgerExpensesResponseObject); ok {
+		if err := validResponse.VisitListLedgerExpensesResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

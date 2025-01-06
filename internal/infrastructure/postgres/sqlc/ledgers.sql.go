@@ -145,6 +145,39 @@ func (q *Queries) FindLedgerById(ctx context.Context, id pgtype.UUID) (Ledger, e
 	return i, err
 }
 
+const getExpensesRecords = `-- name: GetExpensesRecords :many
+SELECT id, ledger_id, expense_id, user_id, amount, created_at, created_by, description FROM ledger_records WHERE expense_id IN (SELECT unnest($1::uuid[]))
+`
+
+func (q *Queries) GetExpensesRecords(ctx context.Context, dollar_1 []pgtype.UUID) ([]LedgerRecord, error) {
+	rows, err := q.db.Query(ctx, getExpensesRecords, dollar_1)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []LedgerRecord
+	for rows.Next() {
+		var i LedgerRecord
+		if err := rows.Scan(
+			&i.ID,
+			&i.LedgerID,
+			&i.ExpenseID,
+			&i.UserID,
+			&i.Amount,
+			&i.CreatedAt,
+			&i.CreatedBy,
+			&i.Description,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getLedgerBalances = `-- name: GetLedgerBalances :many
 SELECT id, ledger_id, user_id, last_timestamp, balance FROM ledger_participant_balances WHERE ledger_id = $1
 `

@@ -37,6 +37,10 @@ type (
 		CreateExpense(ctx context.Context, req ledgers.CreateExpenseRequest) (*ledgers.CreateExpenseResponse, error)
 	}
 
+	ExpensesLister interface {
+		ListExpensesByLedger(ctx context.Context, params ledgers.ListByLedgerParams) (*ledgers.ListByLedgerResponse, error)
+	}
+
 	Dependencies struct {
 		ExpenseCreater
 		LedgerBalancesLister
@@ -45,5 +49,6 @@ type (
 		UserAuthentication
 		UserLedgerLister
 		UserRegister
+		ExpensesLister
 	}
 )

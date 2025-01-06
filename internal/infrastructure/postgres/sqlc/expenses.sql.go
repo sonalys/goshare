@@ -173,11 +173,17 @@ func (q *Queries) GetExpensePayments(ctx context.Context, expenseID pgtype.UUID)
 }
 
 const getLedgerExpenses = `-- name: GetLedgerExpenses :many
-SELECT id, category_id, ledger_id, amount, name, expense_date, created_at, created_by, updated_at, updated_by FROM expenses WHERE ledger_id = $1 ORDER BY expense_date DESC
+SELECT id, category_id, ledger_id, amount, name, expense_date, created_at, created_by, updated_at, updated_by FROM expenses WHERE ledger_id = $1 AND created_at > $2 ORDER BY created_at DESC LIMIT $3
 `
 
-func (q *Queries) GetLedgerExpenses(ctx context.Context, ledgerID pgtype.UUID) ([]Expense, error) {
-	rows, err := q.db.Query(ctx, getLedgerExpenses, ledgerID)
+type GetLedgerExpensesParams struct {
+	LedgerID  pgtype.UUID
+	CreatedAt pgtype.Timestamp
+	Limit     int32
+}
+
+func (q *Queries) GetLedgerExpenses(ctx context.Context, arg GetLedgerExpensesParams) ([]Expense, error) {
+	rows, err := q.db.Query(ctx, getLedgerExpenses, arg.LedgerID, arg.CreatedAt, arg.Limit)
 	if err != nil {
 		return nil, err
 	}

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/oapi-codegen/runtime/types"
 	"github.com/sonalys/goshare/cmd/server/handlers"
 	"github.com/sonalys/goshare/internal/application/ledgers"
 	"github.com/sonalys/goshare/internal/pkg/pointers"
@@ -17,15 +18,10 @@ func (a *API) CreateExpense(ctx context.Context, request handlers.CreateExpenseR
 		return nil, err
 	}
 
-	var categoryID *v1.ID
-	if request.Body.CategoryId != nil {
-		categoryID = pointers.From(v1.ConvertID(*request.Body.CategoryId))
-	}
-
 	req := ledgers.CreateExpenseRequest{
 		UserID:       identity.UserID,
 		LedgerID:     v1.ConvertID(request.LedgerID),
-		CategoryID:   categoryID,
+		CategoryID:   pointers.Convert(request.Body.CategoryId, func(from types.UUID) v1.ID { return v1.ConvertID(from) }),
 		Amount:       request.Body.Amount,
 		Name:         request.Body.Name,
 		ExpenseDate:  request.Body.ExpenseDate,

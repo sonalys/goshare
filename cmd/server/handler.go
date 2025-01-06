@@ -54,7 +54,7 @@ func recoverMiddleware(next http.Handler) http.Handler {
 		defer func() {
 			if rec := recover(); rec != nil {
 				slog.Error("panic recovered", slog.Any("error", rec), slog.String("stack", generateStructuredStack()))
-				w.WriteHeader(http.StatusInternalServerError)
+				responseErrorHandler(w, r, fmt.Errorf("panic recovered: %v", rec))
 			}
 		}()
 		next.ServeHTTP(w, r)

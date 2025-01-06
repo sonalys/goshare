@@ -29,7 +29,7 @@ func (a *API) RegisterUser(ctx context.Context, request handlers.RegisterUserReq
 					Code:    handlers.InvalidField,
 					Message: err.Error(),
 					Metadata: &handlers.ErrorMetadata{
-						Field: pointers.From("email"),
+						Field: pointers.New("email"),
 					},
 				},
 			}),
