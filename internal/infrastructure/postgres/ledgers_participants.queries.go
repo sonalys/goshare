@@ -41,7 +41,7 @@ func (r *LedgerRepository) addLedgerParticipant(ctx context.Context, tx pgx.Tx, 
 	createLedgerBalanceReq := sqlc.CreateLedgerParticipantBalanceParams{
 		ID:            convertUUID(v1.NewID()),
 		LedgerID:      convertUUID(ledgerID),
-		UserID:        convertUUID(userID),
+		UserID:        convertUUID(invitedUserID),
 		LastTimestamp: convertTime(time.Now()),
 		Balance:       0,
 	}

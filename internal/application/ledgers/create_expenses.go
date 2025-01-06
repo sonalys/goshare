@@ -72,7 +72,7 @@ func (r CreateExpenseRequest) Validate() error {
 		})
 	}
 
-	if totalPaid <= r.Amount {
+	if totalPaid > r.Amount {
 		errs = append(errs, v1.FieldError{
 			Field: "user_balances",
 			Cause: fmt.Errorf("%w: total payment should be less or equal to the expense value. got %s", v1.ErrInvalidValue, v1.NewMoney(totalPaid, 2, "$")),

@@ -1,0 +1,27 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "start-local-server",
+      "type": "shell",
+      "command": "go-task compose-server",
+      "isBackground": true,
+      "problemMatcher": [],
+      "hide": true,
+      "presentation": {
+        "reveal": "silent",
+    }
+    },
+    {
+        "label": "stop-local-server",
+        "type": "shell",
+        "command": "go-task compose-down-server",
+        "isBackground": true,
+        "problemMatcher": [],
+        "hide": true,
+        "presentation": {
+            "reveal": "silent",
+        }
+    }
+  ]
+}

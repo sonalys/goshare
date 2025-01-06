@@ -36,6 +36,9 @@ tasks:
   compose-server:
     cmd: docker compose -f {{ .COMPOSE_FILE }} up -d --build goshare && docker compose -f {{ .COMPOSE_FILE }} logs -f goshare_migrate goshare
 
+  compose-down-server:
+    cmd: docker compose -f {{ .COMPOSE_FILE }} down goshare
+
   compose:
     cmd: docker compose -f {{ .COMPOSE_FILE }} up -d --build && docker compose -f {{ .COMPOSE_FILE }} logs -f goshare_migrate goshare
 

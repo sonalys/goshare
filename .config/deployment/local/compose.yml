@@ -21,9 +21,25 @@ services:
       dockerfile: ${DOCKERFILE}
       args:
         GO_VERSION: ${GO_VERSION}
-    entrypoint: ["dlv", "exec", "/app/bin/server", "--headless=true", "--listen=:2345", "--api-version=2", "--accept-multiclient"]
+    entrypoint: "/app/bin/server"
     image: ghcr.io/sonalys/goshare:latest
     container_name: goshare
+    ports:
+      - "8080:8080"
+
+  goshare_debug:
+    depends_on:
+      - jaeger
+      - goshare_migrate
+      - postgres
+    build:
+      context: ${CWD}
+      dockerfile: ${DOCKERFILE}
+      args:
+        GO_VERSION: ${GO_VERSION}
+    entrypoint: ["dlv", "exec", "/app/bin/server", "--headless=true", "--listen=:2345", "--api-version=2", "--accept-multiclient"]
+    image: ghcr.io/sonalys/goshare:latest
+    container_name: goshare_debug
     ports:
       - "8080:8080"
       - "2345:2345"
