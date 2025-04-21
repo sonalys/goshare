@@ -2,14 +2,13 @@ package logger
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"log/slog"
 	"os"
-	"runtime"
 
 	"github.com/lmittmann/tint"
 	slogotel "github.com/remychantenay/slog-otel"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type fieldFormatterHandler struct {
@@ -25,33 +24,11 @@ func NewLogger() *slog.Logger {
 	return slog.New(internalHandler)
 }
 
-func generateStack(pc uintptr) string {
-	type StackEntry struct {
-		Function string `json:"function"`
-		File     string `json:"file"`
-		Line     string `json:"line"`
-	}
-
-	frames := runtime.CallersFrames([]uintptr{pc})
-	stack := make([]StackEntry, 0, 1)
-
-	for {
-		frame, more := frames.Next()
-		stack = append(stack, StackEntry{
-			Function: frame.Function,
-			File:     frame.File,
-			Line:     fmt.Sprint(frame.Line),
-		})
-		if !more {
-			break
+func (h *fieldFormatterHandler) Handle(ctx context.Context, record slog.Record) error {
+	if record.Level >= slog.LevelError {
+		if span := trace.SpanFromContext(ctx); span != nil {
+			span.SetStatus(codes.Error, record.Message)
 		}
 	}
-
-	stackJSON, _ := json.Marshal(stack)
-
-	return string(stackJSON)
-}
-
-func (h *fieldFormatterHandler) Handle(ctx context.Context, record slog.Record) error {
 	return h.Handler.Handle(ctx, record)
 }

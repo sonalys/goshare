@@ -8,7 +8,6 @@ import (
 
 	"github.com/sonalys/goshare/internal/pkg/otel"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
-	"go.opentelemetry.io/otel/codes"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -42,14 +41,12 @@ func (c *Controller) Login(ctx context.Context, req LoginRequest) (*LoginRespons
 	defer span.End()
 
 	if err := req.Validate(); err != nil {
-		span.SetStatus(codes.Error, err.Error())
 		slog.ErrorContext(ctx, "invalid login request", slog.Any("error", err))
 		return nil, err
 	}
 
 	user, err := c.repository.FindByEmail(ctx, req.Email)
 	if err != nil {
-		span.SetStatus(codes.Error, err.Error())
 		slog.ErrorContext(ctx, "could not find user by email", slog.Any("error", err))
 		return nil, v1.ErrEmailPasswordMismatch
 	}
@@ -58,7 +55,6 @@ func (c *Controller) Login(ctx context.Context, req LoginRequest) (*LoginRespons
 	// Use bcrypt to compare the hashed password
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password))
 	if err != nil {
-		span.SetStatus(codes.Error, err.Error())
 		slog.ErrorContext(ctx, "password hash mismatch", slog.Any("error", err))
 		return nil, v1.ErrEmailPasswordMismatch
 	}
@@ -71,12 +67,10 @@ func (c *Controller) Login(ctx context.Context, req LoginRequest) (*LoginRespons
 	}
 	token, err := c.identityEncoder.Encode(identity)
 	if err != nil {
-		span.SetStatus(codes.Error, err.Error())
 		slog.ErrorContext(ctx, "could not sign JWT token", slog.Any("error", err))
 		return nil, fmt.Errorf("failed to sign token: %v", err)
 	}
 
-	span.SetStatus(codes.Ok, "")
 	slog.InfoContext(ctx, "user logged in", slog.String("user_id", user.ID.String()))
 
 	return &LoginResponse{Token: token}, nil

@@ -10,7 +10,6 @@ import (
 
 	"github.com/sonalys/goshare/internal/pkg/otel"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
-	"go.opentelemetry.io/otel/codes"
 )
 
 type (
@@ -88,7 +87,6 @@ func (c *Controller) CreateExpense(ctx context.Context, req CreateExpenseRequest
 	defer span.End()
 
 	if err := req.Validate(); err != nil {
-		span.SetStatus(codes.Error, err.Error())
 		slog.ErrorContext(ctx, "invalid request", slog.Any("error", err))
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
@@ -118,11 +116,9 @@ func (c *Controller) CreateExpense(ctx context.Context, req CreateExpenseRequest
 		}
 		return nil, err
 	case err != nil:
-		span.SetStatus(codes.Error, err.Error())
 		slog.ErrorContext(ctx, "failed to create expense", slog.Any("error", err))
 		return nil, fmt.Errorf("failed to create expense: %w", err)
 	default:
-		span.SetStatus(codes.Ok, "")
 		slog.InfoContext(ctx, "expense created", slog.String("expense_id", expense.ID.String()))
 
 		return &CreateExpenseResponse{

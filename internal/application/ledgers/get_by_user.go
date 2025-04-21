@@ -7,7 +7,6 @@ import (
 
 	"github.com/sonalys/goshare/internal/pkg/otel"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
-	"go.opentelemetry.io/otel/codes"
 )
 
 func (c *Controller) GetByUser(ctx context.Context, userID v1.ID) ([]v1.Ledger, error) {
@@ -16,7 +15,6 @@ func (c *Controller) GetByUser(ctx context.Context, userID v1.ID) ([]v1.Ledger, 
 
 	ledgers, err := c.ledgerRepository.GetByUser(ctx, userID)
 	if err != nil {
-		span.SetStatus(codes.Error, err.Error())
 		slog.ErrorContext(ctx, "failed to list ledgers", slog.Any("error", err))
 		return nil, fmt.Errorf("failed to list ledgers: %w", err)
 	}

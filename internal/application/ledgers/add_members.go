@@ -9,7 +9,6 @@ import (
 
 	"github.com/sonalys/goshare/internal/pkg/otel"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
-	"go.opentelemetry.io/otel/codes"
 )
 
 type (
@@ -51,7 +50,6 @@ func (c *Controller) AddMembers(ctx context.Context, req AddMembersRequest) erro
 
 	users, err := c.userRepository.GetByEmail(ctx, req.Emails)
 	if err != nil {
-		span.SetStatus(codes.Error, err.Error())
 		slog.ErrorContext(ctx, "failed to get users by email")
 		return fmt.Errorf("failed to get users by email: %w", err)
 	}
@@ -96,7 +94,6 @@ func (c *Controller) AddMembers(ctx context.Context, req AddMembersRequest) erro
 	}
 
 	if err := errs.Validate(); err != nil {
-		span.SetStatus(codes.Error, "failed to add users to ledger")
 		slog.ErrorContext(ctx, "failed to add users to ledger", slog.Any("error", err))
 		return err
 	}

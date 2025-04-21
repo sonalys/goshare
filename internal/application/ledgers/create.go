@@ -7,7 +7,6 @@ import (
 
 	"github.com/sonalys/goshare/internal/pkg/otel"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
-	"go.opentelemetry.io/otel/codes"
 )
 
 type (
@@ -42,7 +41,6 @@ func (c *Controller) Create(ctx context.Context, req CreateRequest) (*CreateResp
 	defer span.End()
 
 	if err := req.Validate(); err != nil {
-		span.SetStatus(codes.Error, "invalid request")
 		slog.ErrorContext(ctx, "invalid request", slog.Any("error", err))
 		return nil, err
 	}
@@ -55,7 +53,6 @@ func (c *Controller) Create(ctx context.Context, req CreateRequest) (*CreateResp
 	}
 
 	if err := c.ledgerRepository.Create(ctx, ledger); err != nil {
-		span.SetStatus(codes.Error, err.Error())
 		slog.ErrorContext(ctx, "failed to create ledger", slog.Any("error", err))
 		return nil, err
 	}

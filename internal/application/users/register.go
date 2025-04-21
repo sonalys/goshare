@@ -9,7 +9,6 @@ import (
 
 	"github.com/sonalys/goshare/internal/pkg/otel"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
-	"go.opentelemetry.io/otel/codes"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -56,7 +55,6 @@ func (c *Controller) Register(ctx context.Context, req RegisterRequest) (*Regist
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		span.SetStatus(codes.Error, err.Error())
 		slog.ErrorContext(ctx, "failed to hash password", slog.Any("error", err))
 		return nil, err
 	}
@@ -72,12 +70,10 @@ func (c *Controller) Register(ctx context.Context, req RegisterRequest) (*Regist
 	}
 
 	if err := c.repository.Create(ctx, user); err != nil {
-		span.SetStatus(codes.Error, err.Error())
 		slog.ErrorContext(ctx, err.Error())
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
-	span.SetStatus(codes.Ok, "")
 	slog.InfoContext(ctx, "user registered", slog.String("user_id", user.ID.String()))
 
 	return &RegisterResponse{
