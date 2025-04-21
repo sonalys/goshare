@@ -27,6 +27,8 @@ func (c *Controller) ListExpensesByLedger(ctx context.Context, params ListByLedg
 	ctx, span := otel.Tracer.Start(ctx, "ledgers.ListExpensesByLedger")
 	defer span.End()
 
+	params.Limit = max(params.Limit, 1)
+
 	expenses, err := c.expenseRepository.GetByLedger(ctx, params.LedgerID, pointers.Coalesce(params.Cursor, time.Time{}), params.Limit)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list expenses: %w", err)

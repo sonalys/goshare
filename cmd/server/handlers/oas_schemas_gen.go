@@ -344,16 +344,9 @@ func (s *ErrorMetadata) SetField(val OptString) {
 }
 
 type ErrorResponse struct {
-	// URL of the failed request.
-	URL string `json:"url"`
 	// Unique identifier for the error instance.
 	TraceID uuid.UUID `json:"trace_id"`
 	Errors  []Error   `json:"errors"`
-}
-
-// GetURL returns the value of URL.
-func (s *ErrorResponse) GetURL() string {
-	return s.URL
 }
 
 // GetTraceID returns the value of TraceID.
@@ -364,11 +357,6 @@ func (s *ErrorResponse) GetTraceID() uuid.UUID {
 // GetErrors returns the value of Errors.
 func (s *ErrorResponse) GetErrors() []Error {
 	return s.Errors
-}
-
-// SetURL sets the value of URL.
-func (s *ErrorResponse) SetURL(val string) {
-	s.URL = val
 }
 
 // SetTraceID sets the value of TraceID.

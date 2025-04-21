@@ -118,6 +118,7 @@ paths:
                   format: password
                   description: User's password
                   example: "P@ssw0rd"
+                  minLength: 8
       responses:
         default:
           $ref: "#/components/responses/ErrorResponse"
@@ -385,12 +386,7 @@ components:
             required:
               - trace_id
               - errors
-              - url
             properties:
-              url:
-                type: string
-                description: URL of the failed request
-                example: "/v1/users"
               trace_id:
                 type: string
                 format: uuid

@@ -75,7 +75,8 @@ func (c *Controller) AddMembers(ctx context.Context, req AddMembersRequest) erro
 
 		slog.ErrorContext(ctx, "failed to add user to ledger", append(attrs,
 			slog.Any("error", err),
-		)...)
+		)...,
+		)
 
 		errs = append(errs, v1.FieldError{
 			Field: fmt.Sprintf("emails.%d", i),

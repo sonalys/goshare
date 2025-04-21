@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 
 	"github.com/sonalys/goshare/cmd/server/handlers"
 	"github.com/sonalys/goshare/internal/application/users"
@@ -22,7 +23,10 @@ func (a *API) Login(ctx context.Context, req *handlers.LoginReq) (*handlers.Logi
 			SetCookie: handlers.NewOptString(fmt.Sprintf("SESSIONID=%s; Path=/; HttpOnly; SameSite=Strict", resp.Token)),
 		}, nil
 	case errors.Is(err, v1.ErrEmailPasswordMismatch):
-		return nil, err
+		return nil, newErrorResponse(ctx, http.StatusUnauthorized, handlers.Error{
+			Code:    handlers.ErrorCodeEmailPasswordMismatch,
+			Message: "invalid credentials",
+		})
 	default:
 		return nil, err
 	}

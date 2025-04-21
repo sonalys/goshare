@@ -22,9 +22,13 @@ func (a *API) ListLedgerExpenses(ctx context.Context, params handlers.ListLedger
 
 	switch resp, err := a.dependencies.ExpensesLister.ListExpensesByLedger(ctx, apiParams); {
 	case err == nil:
+		var cursor handlers.OptDateTime
+		if resp.Cursor != nil {
+			cursor = handlers.NewOptDateTime(*resp.Cursor)
+		}
 		return &handlers.ListLedgerExpensesOK{
 			Expenses: convertExpenses(resp.Expenses),
-			Cursor:   params.Cursor,
+			Cursor:   cursor,
 		}, nil
 	default:
 		return nil, err
@@ -50,9 +54,14 @@ func convertExpenses(from []v1.Expense) []handlers.LedgerExpense {
 	for i := range from {
 		cur := &from[i]
 
+		var categoryID handlers.OptUUID
+		if cur.CategoryID != nil {
+			categoryID = handlers.NewOptUUID(cur.CategoryID.UUID())
+		}
+
 		to = append(to, handlers.LedgerExpense{
 			ID:           cur.ID.UUID(),
-			CategoryID:   handlers.NewOptUUID(cur.CategoryID.UUID()),
+			CategoryID:   categoryID,
 			ExpenseDate:  cur.ExpenseDate,
 			Name:         cur.Name,
 			UserBalances: convertExpenseUserBalances(cur.UserBalances),

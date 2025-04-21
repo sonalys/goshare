@@ -9,6 +9,7 @@ import (
 
 	"github.com/sonalys/goshare/cmd/server/api"
 	"github.com/sonalys/goshare/internal/pkg/logger"
+	"github.com/sonalys/goshare/internal/pkg/otel"
 	"github.com/sonalys/goshare/internal/pkg/secrets"
 )
 
@@ -26,6 +27,12 @@ func main() {
 
 	slog.Info("starting server", slog.String("version", version), slog.String("service_name", cfg.ServiceName))
 
+	shutdown, err := otel.Initialize(ctx, cfg.TelemetryEndpoint)
+	if err != nil {
+		slog.Error("failed to initialize telemetry", slog.Any("error", err))
+		os.Exit(1)
+	}
+
 	secrets := secrets.LoadSecrets()
 
 	infrastructure := loadInfrastructure(ctx, secrets)
@@ -42,7 +49,7 @@ func main() {
 		LedgerMemberCreater:  controllers.ledgerController,
 		ExpensesLister:       controllers.ledgerController,
 	})
-	handler := InitializeHandler(api, repositories, cfg.ServiceName)
+	handler := NewHandler(api, repositories, cfg.ServiceName)
 
 	server := NewServer(cfg, handler)
 
@@ -54,6 +61,9 @@ func main() {
 	defer cancel()
 
 	server.Shutdown(ctx)
+	if err := shutdown(ctx); err != nil {
+		slog.Error("failed to shutdown telemetry", slog.Any("error", err))
+	}
 
 	slog.Info("shutting down server")
 }
