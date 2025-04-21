@@ -13,6 +13,7 @@ type (
 		GetByUser(ctx context.Context, userID v1.ID) ([]v1.Ledger, error)
 		GetLedgerBalance(ctx context.Context, ledgerID v1.ID) ([]v1.LedgerParticipantBalance, error)
 		AddParticipant(ctx context.Context, ledgerID, userID, invitedUserID v1.ID) error
+		AddParticipants(ctx context.Context, ledgerID, userID v1.ID, ids ...v1.ID) error
 	}
 
 	UserRepository interface {

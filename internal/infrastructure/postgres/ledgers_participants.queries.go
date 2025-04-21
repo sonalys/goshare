@@ -5,27 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
-func (r *LedgerRepository) addLedgerParticipant(ctx context.Context, tx pgx.Tx, ledgerID, userID, invitedUserID v1.ID) error {
-	queries := r.client.queries().WithTx(tx)
-
-	if err := queries.LockLedgerForUpdate(ctx, convertUUID(ledgerID)); err != nil {
-		return fmt.Errorf("could not acquire lock for updating ledger: %w", err)
-	}
-
-	usersCount, err := queries.CountLedgerUsers(ctx, convertUUID(ledgerID))
-	if err != nil {
-		return fmt.Errorf("could not acquire lock for updating ledger: %w", err)
-	}
-
-	if usersCount+1 > v1.LedgerMaxUsers {
-		return v1.ErrLedgerMaxUsers
-	}
-
+func (r *LedgerRepository) addLedgerParticipant(ctx context.Context, queries *sqlc.Queries, ledgerID, userID, invitedUserID v1.ID) error {
 	addReq := sqlc.AddUserToLedgerParams{
 		LedgerID:  convertUUID(ledgerID),
 		UserID:    convertUUID(invitedUserID),

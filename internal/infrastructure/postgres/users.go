@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"errors"
+	"fmt"
 	"slices"
 
 	"github.com/jackc/pgx/v5/pgconn"
@@ -67,6 +68,22 @@ func (r *UsersRepository) GetByEmail(ctx context.Context, emails []string) ([]v1
 	users, err := r.client.queries().GetByEmail(ctx, emails)
 	if err != nil {
 		return nil, mapError(err)
+	}
+
+	var errs v1.FormError
+	for idx, email := range emails {
+		if !slices.ContainsFunc(users, func(user sqlc.User) bool {
+			return user.Email == email
+		}) {
+			errs = append(errs, v1.FieldError{
+				Field: fmt.Sprintf("emails.%d", idx),
+				Cause: v1.ErrNotFound,
+			})
+		}
+	}
+
+	if err := errs.Validate(); err != nil {
+		return nil, fmt.Errorf("failed to get users by email: %w", err)
 	}
 
 	return convertUsers(users), nil

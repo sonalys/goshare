@@ -54,48 +54,23 @@ func (c *Controller) AddMembers(ctx context.Context, req AddMembersRequest) erro
 		return fmt.Errorf("failed to get users by email: %w", err)
 	}
 
-	var errs v1.FormError
-
-	for i := range users {
-		req.Emails = slices.DeleteFunc(req.Emails, func(email string) bool {
-			return email == users[i].Email
-		})
-
-		attrs := []any{
-			slog.String("user_id", users[i].ID.String()),
-			slog.String("ledger_id", req.LedgerID.String()),
-			slog.String("req_user_id", req.UserID.String()),
-		}
-		err := c.ledgerRepository.AddParticipant(ctx, req.LedgerID, req.UserID, users[i].ID)
-		if err == nil {
-			slog.InfoContext(ctx, "added user to ledger", attrs...)
+	ids := make([]v1.ID, 0, len(users))
+	for _, user := range users {
+		if user.ID == req.UserID {
 			continue
 		}
-
-		if errors.Is(err, v1.ErrNotFound) {
-			errs = append(errs, v1.FieldError{
-				Field: "ledger_id",
-				Cause: v1.ErrNotFound,
-			})
-			break
-		}
-
-		errs = append(errs, v1.FieldError{
-			Field: fmt.Sprintf("emails.%d", i),
-			Cause: err,
-		})
+		ids = append(ids, user.ID)
 	}
 
-	for i := range req.Emails {
-		errs = append(errs, v1.FieldError{
-			Field: fmt.Sprintf("emails.%d", i),
+	err = c.ledgerRepository.AddParticipants(ctx, req.LedgerID, req.UserID, ids...)
+	switch {
+	case err == nil:
+		// no error, do nothing
+	case errors.Is(err, v1.ErrNotFound):
+		return v1.FieldError{
+			Field: "ledger_id",
 			Cause: v1.ErrNotFound,
-		})
-	}
-
-	if err := errs.Validate(); err != nil {
-		slog.ErrorContext(ctx, "failed to add users to ledger", slog.Any("error", err))
-		return err
+		}
 	}
 
 	slog.InfoContext(ctx, "added users to ledger", slog.String("ledger_id", req.LedgerID.String()))
