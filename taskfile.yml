@@ -4,7 +4,7 @@ env:
   CWD: "{{ .USER_WORKING_DIR }}"
   DOCKERFILE: ./dockerfile
   COMPOSE_FILE: .config/deployment/local/compose.yml
-  GO_VERSION: 1.23
+  GO_VERSION: 1.24
 
 tasks:
   build-server:
@@ -31,7 +31,9 @@ tasks:
     cmd: go run github.com/sqlc-dev/sqlc/cmd/sqlc -f .config/.sqlc.yaml generate
 
   generate-openapi:
-    cmd: go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen --config=.config/.oapi-codegen.yaml cmd/server/spec/root.yaml
+    cmd: go tool ogen -package handlers --target cmd/server/handlers --clean cmd/server/spec/root.yaml
+    # sources:
+    #   - cmd/server/spec/root.yaml
 
   compose-server:
     cmd: docker compose -f {{ .COMPOSE_FILE }} up -d --build goshare && docker compose -f {{ .COMPOSE_FILE }} logs -f goshare_migrate goshare

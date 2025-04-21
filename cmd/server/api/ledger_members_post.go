@@ -2,56 +2,27 @@ package api
 
 import (
 	"context"
-	"errors"
-	"net/http"
 
-	openapi_types "github.com/oapi-codegen/runtime/types"
 	"github.com/sonalys/goshare/cmd/server/handlers"
 	"github.com/sonalys/goshare/internal/application/ledgers"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
-func collectEmails(from []openapi_types.Email) []string {
-	to := make([]string, 0, len(from))
-
-	for i := range from {
-		to = append(to, string(from[i]))
-	}
-
-	return to
-}
-
-func (a *API) AddLedgerMember(ctx context.Context, request handlers.AddLedgerMemberRequestObject) (handlers.AddLedgerMemberResponseObject, error) {
+func (a *API) AddLedgerMember(ctx context.Context, req *handlers.AddLedgerMemberReq, params handlers.AddLedgerMemberParams) error {
 	identity, err := getIdentity(ctx)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	req := ledgers.AddMembersRequest{
+	apiParams := ledgers.AddMembersRequest{
 		UserID:   identity.UserID,
-		LedgerID: v1.ConvertID(request.LedgerID),
-		Emails:   collectEmails(request.Body.Emails),
+		LedgerID: v1.ConvertID(params.LedgerID),
+		Emails:   req.Emails,
 	}
-	switch err := a.dependencies.LedgerMemberCreater.AddMembers(ctx, req); {
+	switch err := a.dependencies.LedgerMemberCreater.AddMembers(ctx, apiParams); {
 	case err == nil:
-		return handlers.AddLedgerMember202Response{}, nil
-	case errors.Is(err, v1.ErrLedgerMaxUsers):
-		return handlers.AddLedgerMemberdefaultJSONResponse{
-			Body: newErrorResponse(ctx, []handlers.Error{
-				{
-					Code:    handlers.LedgerMaxUsers,
-					Message: err.Error(),
-				},
-			}),
-			StatusCode: http.StatusBadRequest,
-		}, nil
+		return nil
 	default:
-		if causes, ok := extractErrorCauses(err); ok {
-			return handlers.AddLedgerMemberdefaultJSONResponse{
-				Body:       newErrorResponse(ctx, getCausesFromFieldErrors(causes)),
-				StatusCode: http.StatusBadRequest,
-			}, nil
-		}
-		return nil, err
+		return err
 	}
 }

@@ -2,26 +2,29 @@ package api
 
 import (
 	"context"
+	"time"
 
-	"github.com/oapi-codegen/runtime/types"
 	"github.com/sonalys/goshare/cmd/server/handlers"
 	"github.com/sonalys/goshare/internal/application/ledgers"
-	"github.com/sonalys/goshare/internal/pkg/pointers"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
-func (a *API) ListLedgerExpenses(ctx context.Context, request handlers.ListLedgerExpensesRequestObject) (handlers.ListLedgerExpensesResponseObject, error) {
-	params := ledgers.ListByLedgerParams{
-		LedgerID: v1.ConvertID(request.LedgerID),
-		Cursor:   request.Params.Cursor,
-		Limit:    pointers.Coalesce(request.Params.Limit, 50),
+func (a *API) ListLedgerExpenses(ctx context.Context, params handlers.ListLedgerExpensesParams) (r *handlers.ListLedgerExpensesOK, _ error) {
+	var cursor *time.Time
+	if t, ok := params.Cursor.Get(); ok {
+		cursor = &t
+	}
+	apiParams := ledgers.ListByLedgerParams{
+		LedgerID: v1.ConvertID(params.LedgerID),
+		Cursor:   cursor,
+		Limit:    params.Limit.Value,
 	}
 
-	switch resp, err := a.dependencies.ExpensesLister.ListExpensesByLedger(ctx, params); {
+	switch resp, err := a.dependencies.ExpensesLister.ListExpensesByLedger(ctx, apiParams); {
 	case err == nil:
-		return handlers.ListLedgerExpenses200JSONResponse{
+		return &handlers.ListLedgerExpensesOK{
 			Expenses: convertExpenses(resp.Expenses),
-			Cursor:   resp.Cursor,
+			Cursor:   params.Cursor,
 		}, nil
 	default:
 		return nil, err
@@ -34,7 +37,7 @@ func convertExpenseUserBalances(from []v1.ExpenseUserBalance) []handlers.Expense
 	for i := range from {
 		to = append(to, handlers.ExpenseUserBalance{
 			Balance: from[i].Balance,
-			UserId:  from[i].UserID.UUID(),
+			UserID:  from[i].UserID.UUID(),
 		})
 	}
 
@@ -48,8 +51,8 @@ func convertExpenses(from []v1.Expense) []handlers.LedgerExpense {
 		cur := &from[i]
 
 		to = append(to, handlers.LedgerExpense{
-			Id:           cur.ID.UUID(),
-			CategoryId:   pointers.Convert(cur.CategoryID, func(from v1.ID) types.UUID { return from.UUID() }),
+			ID:           cur.ID.UUID(),
+			CategoryID:   handlers.NewOptUUID(cur.CategoryID.UUID()),
 			ExpenseDate:  cur.ExpenseDate,
 			Name:         cur.Name,
 			UserBalances: convertExpenseUserBalances(cur.UserBalances),

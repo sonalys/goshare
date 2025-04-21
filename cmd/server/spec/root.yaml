@@ -52,6 +52,7 @@ paths:
       operationId: Login
       description: Authenticate as the specified identity
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -70,6 +71,8 @@ paths:
                   format: password
                   description: User's password
                   example: "P@ssw0rd"
+                  minLength: 8
+                  maxLength: 64
       responses:
         default:
           $ref: "#/components/responses/ErrorResponse"
@@ -86,6 +89,7 @@ paths:
       operationId: RegisterUser
       description: Registers a new user
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -158,6 +162,7 @@ paths:
       security:
         - cookieAuth: []
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -247,6 +252,7 @@ paths:
             type: string
             format: uuid
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -342,6 +348,7 @@ paths:
             type: string
             format: uuid
       requestBody:
+        required: true
         content:
           application/json:
             schema:

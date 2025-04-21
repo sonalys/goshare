@@ -2,43 +2,40 @@ package api
 
 import (
 	"context"
-	"net/http"
 
-	"github.com/oapi-codegen/runtime/types"
 	"github.com/sonalys/goshare/cmd/server/handlers"
 	"github.com/sonalys/goshare/internal/application/ledgers"
 	"github.com/sonalys/goshare/internal/pkg/pointers"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
-func (a *API) CreateExpense(ctx context.Context, request handlers.CreateExpenseRequestObject) (handlers.CreateExpenseResponseObject, error) {
+func (a *API) CreateExpense(ctx context.Context, req *handlers.CreateExpenseReq, params handlers.CreateExpenseParams) (r *handlers.CreateExpenseOK, _ error) {
 	identity, err := getIdentity(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	req := ledgers.CreateExpenseRequest{
-		UserID:       identity.UserID,
-		LedgerID:     v1.ConvertID(request.LedgerID),
-		CategoryID:   pointers.Convert(request.Body.CategoryId, func(from types.UUID) v1.ID { return v1.ConvertID(from) }),
-		Amount:       request.Body.Amount,
-		Name:         request.Body.Name,
-		ExpenseDate:  request.Body.ExpenseDate,
-		UserBalances: convertUserBalances(request.Body.UserBalances),
+	var categoryID *v1.ID
+	if id, ok := req.CategoryID.Get(); ok {
+		categoryID = pointers.New(v1.ConvertID(id))
 	}
 
-	switch resp, err := a.dependencies.ExpenseCreater.CreateExpense(ctx, req); {
+	apiReq := ledgers.CreateExpenseRequest{
+		UserID:       identity.UserID,
+		LedgerID:     v1.ConvertID(params.LedgerID),
+		CategoryID:   categoryID,
+		Amount:       req.Amount,
+		Name:         req.Name,
+		ExpenseDate:  req.ExpenseDate,
+		UserBalances: convertUserBalances(req.UserBalances),
+	}
+
+	switch resp, err := a.dependencies.ExpenseCreater.CreateExpense(ctx, apiReq); {
 	case err == nil:
-		return handlers.CreateExpense200JSONResponse{
-			Id: resp.ID.UUID(),
+		return &handlers.CreateExpenseOK{
+			ID: resp.ID.UUID(),
 		}, nil
 	default:
-		if causes, ok := extractErrorCauses(err); ok {
-			return handlers.CreateExpensedefaultJSONResponse{
-				Body:       newErrorResponse(ctx, getCausesFromFieldErrors(causes)),
-				StatusCode: http.StatusBadRequest,
-			}, nil
-		}
 		return nil, err
 	}
 }
@@ -47,7 +44,7 @@ func convertUserBalances(userBalances []handlers.ExpenseUserBalance) []v1.Expens
 	balances := make([]v1.ExpenseUserBalance, 0, len(userBalances))
 	for _, ub := range userBalances {
 		balances = append(balances, v1.ExpenseUserBalance{
-			UserID:  v1.ConvertID(ub.UserId),
+			UserID:  v1.ConvertID(ub.UserID),
 			Balance: ub.Balance,
 		})
 	}

@@ -2,46 +2,25 @@ package api
 
 import (
 	"context"
-	"errors"
-	"net/http"
 
 	"github.com/sonalys/goshare/cmd/server/handlers"
 	"github.com/sonalys/goshare/internal/application/users"
-	"github.com/sonalys/goshare/internal/pkg/pointers"
-	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
-func (a *API) RegisterUser(ctx context.Context, request handlers.RegisterUserRequestObject) (handlers.RegisterUserResponseObject, error) {
-	req := users.RegisterRequest{
-		FirstName: request.Body.FirstName,
-		LastName:  request.Body.LastName,
-		Email:     string(request.Body.Email),
-		Password:  request.Body.Password,
+func (a *API) RegisterUser(ctx context.Context, req *handlers.RegisterUserReq) (r *handlers.RegisterUserOK, _ error) {
+	apiParams := users.RegisterRequest{
+		FirstName: req.FirstName,
+		LastName:  req.LastName,
+		Email:     string(req.Email),
+		Password:  req.Password,
 	}
 
-	switch resp, err := a.dependencies.UserRegister.Register(ctx, req); {
+	switch resp, err := a.dependencies.UserRegister.Register(ctx, apiParams); {
 	case err == nil:
-		return handlers.RegisterUser200JSONResponse{Id: resp.ID.UUID()}, nil
-	case errors.Is(err, v1.ErrEmailAlreadyRegistered):
-		return handlers.RegisterUserdefaultJSONResponse{
-			Body: newErrorResponse(ctx, []handlers.Error{
-				{
-					Code:    handlers.InvalidField,
-					Message: err.Error(),
-					Metadata: &handlers.ErrorMetadata{
-						Field: pointers.New("email"),
-					},
-				},
-			}),
-			StatusCode: http.StatusConflict,
+		return &handlers.RegisterUserOK{
+			ID: resp.ID.UUID(),
 		}, nil
 	default:
-		if causes, ok := extractErrorCauses(err); ok {
-			return handlers.RegisterUserdefaultJSONResponse{
-				Body:       newErrorResponse(ctx, getCausesFromFieldErrors(causes)),
-				StatusCode: http.StatusBadRequest,
-			}, nil
-		}
 		return nil, err
 	}
 }

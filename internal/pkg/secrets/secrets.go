@@ -7,7 +7,7 @@ type Secrets struct {
 
 func LoadSecrets() Secrets {
 	secrets := Secrets{
-		PostgresConn: "postgresql://user:password@postgres:5432/goshare?sslmode=disable",
+		PostgresConn: "postgresql://user:password@localhost:5432/goshare?sslmode=disable",
 		JWTSignKey:   []byte("my-super-secret-key"),
 	}
 

@@ -6,12 +6,9 @@ import (
 
 type (
 	API struct {
+		handlers.UnimplementedHandler
 		dependencies Dependencies
 	}
-)
-
-var (
-	_ handlers.StrictServerInterface = (*API)(nil)
 )
 
 func New(dependencies Dependencies) *API {

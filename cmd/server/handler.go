@@ -2,23 +2,15 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log/slog"
 	"net/http"
 	"runtime"
 
 	"github.com/sonalys/goshare/cmd/server/api"
 	"github.com/sonalys/goshare/cmd/server/handlers"
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"github.com/sonalys/goshare/cmd/server/middlewares"
+	"github.com/sonalys/goshare/internal/pkg/otel"
 )
-
-func notFoundHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	api.WriteErrorResponse(ctx, w, http.StatusNotFound, newErrorResponse(r, []handlers.Error{
-		newError(handlers.NotFound, "url not found"),
-	}))
-}
 
 func generateStructuredStack() string {
 	type StackEntry struct {
@@ -54,7 +46,7 @@ func recoverMiddleware(next http.Handler) http.Handler {
 		defer func() {
 			if rec := recover(); rec != nil {
 				slog.Error("panic recovered", slog.Any("error", rec), slog.String("stack", generateStructuredStack()))
-				responseErrorHandler(w, r, fmt.Errorf("panic recovered: %v", rec))
+				w.WriteHeader(http.StatusInternalServerError)
 			}
 		}()
 		next.ServeHTTP(w, r)
@@ -62,39 +54,14 @@ func recoverMiddleware(next http.Handler) http.Handler {
 }
 
 func InitializeHandler(client *api.API, repositories *repositories, serviceName string) http.Handler {
-	strictHandlerOptions := handlers.StrictHTTPServerOptions{
-		RequestErrorHandlerFunc:  requestErrorHandler,
-		ResponseErrorHandlerFunc: responseErrorHandler,
-	}
+	securityHandler := api.NewSecurityHandler(repositories.JWTRepository)
 
-	strictMiddlewares := []handlers.StrictMiddlewareFunc{
-		api.AuthMiddleware(repositories.JWTRepository),
-		api.InjectRequestContextDataMiddleware, // Should be the last middleware, so all other middlewares can access the context data.
-	}
-	strictHandler := handlers.NewStrictHandlerWithOptions(client, strictMiddlewares, strictHandlerOptions)
-
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", notFoundHandler)
-
-	otelMux := &OTELMux{mux}
-
-	handlerOptions := handlers.StdHTTPServerOptions{
-		BaseRouter:       otelMux,
-		BaseURL:          "/api/v1",
-		ErrorHandlerFunc: requestErrorHandler,
-		Middlewares: []handlers.MiddlewareFunc{
-			recoverMiddleware,
-		},
-	}
-	handler := handlers.HandlerWithOptions(strictHandler, handlerOptions)
-
-	// Wrap the handler with OpenTelemetry propagation.
-	otelHandler := otelhttp.NewHandler(handler, "HTTP",
-		otelhttp.WithServerName(serviceName),
-		otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string {
-			return fmt.Sprintf("%s %s %s", operation, r.Method, r.URL.Path)
-		}),
+	handler, _ := handlers.NewServer(client, securityHandler,
+		handlers.WithPathPrefix("/api/v1"),
 	)
 
-	return otelHandler
+	return middlewares.Wrap(handler,
+		recoverMiddleware,
+		middlewares.Instrument(serviceName, middlewares.MakeRouteFinder(handler), &otel.Provider{}),
+	)
 }
