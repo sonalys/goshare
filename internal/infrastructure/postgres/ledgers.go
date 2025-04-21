@@ -90,6 +90,8 @@ func mapLedgerError(err error) error {
 		return nil
 	case isViolatingConstraint(err, constraintLedgerUniqueParticipant):
 		return v1.ErrUserAlreadyMember
+	case isViolatingConstraint(err, constraintLedgerParticipantsFK):
+		return v1.ErrNotFound
 	default:
 		return mapError(err)
 	}

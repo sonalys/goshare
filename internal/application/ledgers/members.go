@@ -2,6 +2,7 @@ package ledgers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"slices"
@@ -73,10 +74,13 @@ func (c *Controller) AddMembers(ctx context.Context, req AddMembersRequest) erro
 			continue
 		}
 
-		slog.ErrorContext(ctx, "failed to add user to ledger", append(attrs,
-			slog.Any("error", err),
-		)...,
-		)
+		if errors.Is(err, v1.ErrNotFound) {
+			errs = append(errs, v1.FieldError{
+				Field: "ledger_id",
+				Cause: v1.ErrNotFound,
+			})
+			break
+		}
 
 		errs = append(errs, v1.FieldError{
 			Field: fmt.Sprintf("emails.%d", i),
@@ -93,8 +97,11 @@ func (c *Controller) AddMembers(ctx context.Context, req AddMembersRequest) erro
 
 	if err := errs.Validate(); err != nil {
 		span.SetStatus(codes.Error, "failed to add users to ledger")
+		slog.ErrorContext(ctx, "failed to add users to ledger", slog.Any("error", err))
 		return err
 	}
+
+	slog.InfoContext(ctx, "added users to ledger", slog.String("ledger_id", req.LedgerID.String()))
 
 	return nil
 }

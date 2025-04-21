@@ -74,6 +74,13 @@ func (a *API) NewError(ctx context.Context, err error) *handlers.ErrorResponseSt
 		return newErrorResponse(ctx, http.StatusBadRequest, errs...)
 	}
 
+	if errors.Is(err, v1.ErrNotFound) {
+		return newErrorResponse(ctx, http.StatusNotFound, handlers.Error{
+			Code:    handlers.ErrorCodeNotFound,
+			Message: err.Error(),
+		})
+	}
+
 	if target := new(v1.FieldError); errors.As(err, target) {
 		return newErrorResponse(ctx, http.StatusBadRequest, handlers.Error{
 			Code:    handlers.ErrorCodeInvalidField,
