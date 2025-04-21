@@ -95,14 +95,3 @@ func isViolatingConstraint(err error, constraintName string) bool {
 	}
 	return false
 }
-
-func mapUserError(err error) error {
-	switch {
-	case err == nil:
-		return nil
-	case isViolatingConstraint(err, constraintParticipantUniqueEmail):
-		return v1.ErrEmailAlreadyRegistered
-	default:
-		return mapError(err)
-	}
-}

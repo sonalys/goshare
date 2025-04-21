@@ -18,7 +18,7 @@ func (a *API) CreateLedger(ctx context.Context, req *handlers.CreateLedgerReq) (
 		Name:   req.Name,
 	}
 
-	switch resp, err := a.dependencies.LedgerCreater.Create(ctx, apiParams); {
+	switch resp, err := a.dependencies.LedgerController.Create(ctx, apiParams); {
 	case err == nil:
 		return &handlers.CreateLedgerOK{
 			ID: resp.ID.UUID(),

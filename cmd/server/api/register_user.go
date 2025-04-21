@@ -18,7 +18,7 @@ func (a *API) RegisterUser(ctx context.Context, req *handlers.RegisterUserReq) (
 		Password:  req.Password,
 	}
 
-	switch resp, err := a.dependencies.UserRegister.Register(ctx, apiParams); {
+	switch resp, err := a.dependencies.UserController.Register(ctx, apiParams); {
 	case err == nil:
 		return &handlers.RegisterUserOK{
 			ID: resp.ID.UUID(),

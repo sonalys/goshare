@@ -20,7 +20,7 @@ func (a *API) ListLedgerExpenses(ctx context.Context, params handlers.ListLedger
 		Limit:    params.Limit.Value,
 	}
 
-	switch resp, err := a.dependencies.ExpensesLister.ListExpensesByLedger(ctx, apiParams); {
+	switch resp, err := a.dependencies.LedgerController.ListExpensesByLedger(ctx, apiParams); {
 	case err == nil:
 		var cursor handlers.OptDateTime
 		if resp.Cursor != nil {

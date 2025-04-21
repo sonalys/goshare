@@ -10,14 +10,16 @@ import (
 )
 
 func (r *LedgerRepository) AddParticipant(ctx context.Context, ledgerID, userID, invitedUserID v1.ID) error {
+	ledgerUUID := convertUUID(ledgerID)
+
 	return mapLedgerError(r.client.transaction(ctx, func(tx pgx.Tx) error {
 		query := r.client.queries().WithTx(tx)
 
-		if err := query.LockLedgerForUpdate(ctx, convertUUID(ledgerID)); err != nil {
+		if err := query.LockLedgerForUpdate(ctx, ledgerUUID); err != nil {
 			return fmt.Errorf("could not acquire lock for updating ledger: %w", err)
 		}
 
-		usersCount, err := query.CountLedgerUsers(ctx, convertUUID(ledgerID))
+		usersCount, err := query.CountLedgerUsers(ctx, ledgerUUID)
 		if err != nil {
 			return fmt.Errorf("could not acquire lock for updating ledger: %w", err)
 		}
@@ -31,25 +33,34 @@ func (r *LedgerRepository) AddParticipant(ctx context.Context, ledgerID, userID,
 }
 
 func (r *LedgerRepository) AddParticipants(ctx context.Context, ledgerID, userID v1.ID, ids ...v1.ID) error {
+	ledgerUUID := convertUUID(ledgerID)
+
 	return mapLedgerError(r.client.transaction(ctx, func(tx pgx.Tx) error {
 		query := r.client.queries().WithTx(tx)
 
-		if err := query.LockLedgerForUpdate(ctx, convertUUID(ledgerID)); err != nil {
-			return fmt.Errorf("could not acquire lock for updating ledger: %w", err)
+		if err := query.LockLedgerForUpdate(ctx, ledgerUUID); err != nil {
+			return fmt.Errorf("locking ledger for update: %w", err)
 		}
 
-		usersCount, err := query.CountLedgerUsers(ctx, convertUUID(ledgerID))
+		usersCount, err := query.CountLedgerUsers(ctx, ledgerUUID)
 		if err != nil {
-			return fmt.Errorf("could not acquire lock for updating ledger: %w", err)
+			return fmt.Errorf("counting ledger participants: %w", err)
 		}
 
-		if usersCount+1 > v1.LedgerMaxUsers {
+		if usersCount+int64(len(ids)) > v1.LedgerMaxUsers {
 			return v1.ErrLedgerMaxUsers
 		}
 
 		for _, invitedUserID := range ids {
-			if err := r.addLedgerParticipant(ctx, query, ledgerID, userID, invitedUserID); err != nil {
-				return fmt.Errorf("could not add user to ledger: %w", err)
+			err := r.addLedgerParticipant(ctx, query, ledgerID, userID, invitedUserID)
+			switch {
+			case isViolatingConstraint(err, constraintLedgerUniqueParticipant):
+				return v1.FieldError{
+					Field: "user_id",
+					Cause: fmt.Errorf("user '%s' is already a participant of the ledger '%s'", invitedUserID, ledgerID),
+				}
+			default:
+				return fmt.Errorf("adding participant: %w", err)
 			}
 		}
 

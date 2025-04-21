@@ -19,10 +19,6 @@ func (a *API) AddLedgerMember(ctx context.Context, req *handlers.AddLedgerMember
 		LedgerID: v1.ConvertID(params.LedgerID),
 		Emails:   req.Emails,
 	}
-	switch err := a.dependencies.LedgerMemberCreater.AddMembers(ctx, apiParams); {
-	case err == nil:
-		return nil
-	default:
-		return err
-	}
+
+	return a.dependencies.LedgerController.AddParticipants(ctx, apiParams)
 }

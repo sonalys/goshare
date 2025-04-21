@@ -30,7 +30,7 @@ func (a *API) CreateExpense(ctx context.Context, req *handlers.CreateExpenseReq,
 		UserBalances: convertUserBalances(req.UserBalances),
 	}
 
-	switch resp, err := a.dependencies.ExpenseCreater.CreateExpense(ctx, apiReq); {
+	switch resp, err := a.dependencies.LedgerController.CreateExpense(ctx, apiReq); {
 	case err == nil:
 		return &handlers.CreateExpenseOK{
 			ID: resp.ID.UUID(),

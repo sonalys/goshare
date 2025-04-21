@@ -8,7 +8,7 @@ import (
 )
 
 func (a *API) ListLedgerBalances(ctx context.Context, params handlers.ListLedgerBalancesParams) (r *handlers.ListLedgerBalancesOK, _ error) {
-	balances, err := a.dependencies.LedgerBalancesLister.GetBalances(ctx, v1.ConvertID(params.LedgerID))
+	balances, err := a.dependencies.LedgerController.GetBalances(ctx, v1.ConvertID(params.LedgerID))
 	if err != nil {
 		return nil, err
 	}

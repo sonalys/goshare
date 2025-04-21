@@ -13,7 +13,7 @@ import (
 
 // Login implements handlers.StrictServerInterface.
 func (a *API) Login(ctx context.Context, req *handlers.LoginReq) (*handlers.LoginOK, error) {
-	resp, err := a.dependencies.UserAuthentication.Login(ctx, users.LoginRequest{
+	resp, err := a.dependencies.UserController.Login(ctx, users.LoginRequest{
 		Email:    string(req.Email),
 		Password: req.Password,
 	})
