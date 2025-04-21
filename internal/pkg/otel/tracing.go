@@ -26,15 +26,15 @@ var (
 
 type Provider struct{}
 
-func (tp *Provider) TracerProvider() trace.TracerProvider {
+func (tp Provider) TracerProvider() trace.TracerProvider {
 	return otel.GetTracerProvider()
 }
 
-func (tp *Provider) MeterProvider() metric.MeterProvider {
+func (tp Provider) MeterProvider() metric.MeterProvider {
 	return otel.GetMeterProvider()
 }
 
-func (tp *Provider) TextMapPropagator() propagation.TextMapPropagator {
+func (tp Provider) TextMapPropagator() propagation.TextMapPropagator {
 	return otel.GetTextMapPropagator()
 }
 
