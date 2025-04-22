@@ -22,16 +22,5 @@ func (r *LedgerRepository) addLedgerParticipant(ctx context.Context, queries *sq
 		return fmt.Errorf("failed to add user to ledger: %w", err)
 	}
 
-	createLedgerBalanceReq := sqlc.CreateLedgerParticipantBalanceParams{
-		ID:            convertUUID(v1.NewID()),
-		LedgerID:      convertUUID(ledgerID),
-		UserID:        convertUUID(invitedUserID),
-		LastTimestamp: convertTime(time.Now()),
-		Balance:       0,
-	}
-	if err := queries.CreateLedgerParticipantBalance(ctx, createLedgerBalanceReq); err != nil {
-		return fmt.Errorf("failed to create ledger participant balance: %w", err)
-	}
-
 	return nil
 }

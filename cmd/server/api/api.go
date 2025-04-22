@@ -42,6 +42,13 @@ func newErrorResponse(ctx context.Context, statusCode int, errs ...handlers.Erro
 }
 
 func (a *API) NewError(ctx context.Context, err error) *handlers.ErrorResponseStatusCode {
+	if target := new(ogenerrors.SecurityError); errors.As(err, &target) {
+		return newErrorResponse(ctx, http.StatusUnauthorized, handlers.Error{
+			Code:    handlers.ErrorCodeUnauthorized,
+			Message: target.Err.Error(),
+		})
+	}
+
 	if target := new(validate.Error); errors.As(err, &target) {
 		errs := make([]handlers.Error, 0, len(target.Fields))
 

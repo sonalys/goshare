@@ -54,6 +54,8 @@ func (r *LedgerRepository) AddParticipants(ctx context.Context, ledgerID, userID
 		for _, invitedUserID := range ids {
 			err := r.addLedgerParticipant(ctx, query, ledgerID, userID, invitedUserID)
 			switch {
+			case err == nil:
+				continue
 			case isViolatingConstraint(err, constraintLedgerUniqueParticipant):
 				return v1.FieldError{
 					Field: "user_id",

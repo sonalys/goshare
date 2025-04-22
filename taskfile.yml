@@ -27,6 +27,9 @@ tasks:
   dev:
     cmd: go run ./cmd/server/...
 
+  migrate:
+    cmd: go run ./cmd/migration/...
+
   generate-sql:
     cmd: go run github.com/sqlc-dev/sqlc/cmd/sqlc -f .config/.sqlc.yaml generate
 
@@ -46,6 +49,9 @@ tasks:
 
   compose-down:
     cmd: docker compose -f {{ .COMPOSE_FILE }} down
+
+  compose-db:
+    cmd: docker compose -f {{ .COMPOSE_FILE }} up -d postgres
 
   enter-db:
     cmd: docker exec -it postgres psql -U user goshare
