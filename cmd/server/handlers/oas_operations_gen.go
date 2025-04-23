@@ -9,6 +9,7 @@ const (
 	AddLedgerParticipantOperation   OperationName = "AddLedgerParticipant"
 	CreateExpenseOperation          OperationName = "CreateExpense"
 	CreateLedgerOperation           OperationName = "CreateLedger"
+	GetExpenseOperation             OperationName = "GetExpense"
 	GetHealthcheckOperation         OperationName = "GetHealthcheck"
 	GetIdentityOperation            OperationName = "GetIdentity"
 	ListLedgerParticipantsOperation OperationName = "ListLedgerParticipants"

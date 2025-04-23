@@ -26,6 +26,12 @@ type Handler interface {
 	//
 	// POST /ledgers
 	CreateLedger(ctx context.Context, req *CreateLedgerReq) (*CreateLedgerOK, error)
+	// GetExpense implements GetExpense operation.
+	//
+	// Retrieves an expense record.
+	//
+	// GET /ledgers/{ledgerID}/expenses/{expenseID}
+	GetExpense(ctx context.Context, params GetExpenseParams) (*Expense, error)
 	// GetHealthcheck implements GetHealthcheck operation.
 	//
 	// Check if the service is healthy.

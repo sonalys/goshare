@@ -1,0 +1,16 @@
+meta {
+  name: Get
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{api_url}}/ledgers/:ledger_id/expenses/:expense_id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  ledger_id: {{ledger_id}}
+  expense_id: {{expense_id}}
+}

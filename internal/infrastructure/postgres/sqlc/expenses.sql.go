@@ -106,16 +106,11 @@ func (q *Queries) FindExpenseById(ctx context.Context, id pgtype.UUID) (Expense,
 }
 
 const getExpenseRecords = `-- name: GetExpenseRecords :many
-SELECT id, expense_id, record_type, amount, from_user_id, to_user_id, created_at, created_by, updated_at, updated_by FROM expense_records WHERE expense_id = $1 ORDER BY created_at DESC LIMIT $2
+SELECT id, expense_id, record_type, amount, from_user_id, to_user_id, created_at, created_by, updated_at, updated_by FROM expense_records WHERE expense_id = $1 ORDER BY created_at DESC
 `
 
-type GetExpenseRecordsParams struct {
-	ExpenseID pgtype.UUID
-	Limit     int32
-}
-
-func (q *Queries) GetExpenseRecords(ctx context.Context, arg GetExpenseRecordsParams) ([]ExpenseRecord, error) {
-	rows, err := q.db.Query(ctx, getExpenseRecords, arg.ExpenseID, arg.Limit)
+func (q *Queries) GetExpenseRecords(ctx context.Context, expenseID pgtype.UUID) ([]ExpenseRecord, error) {
+	rows, err := q.db.Query(ctx, getExpenseRecords, expenseID)
 	if err != nil {
 		return nil, err
 	}

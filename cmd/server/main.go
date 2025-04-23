@@ -16,7 +16,7 @@ import (
 var version string = "dev"
 
 func init() {
-	slog.SetDefault(logger.NewLogger())
+	logger.InitializeLogger()
 }
 
 func main() {

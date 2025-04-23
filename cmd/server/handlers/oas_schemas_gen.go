@@ -335,11 +335,18 @@ func (s *ErrorResponseStatusCode) SetResponse(val ErrorResponse) {
 
 // Ref: #/components/schemas/Expense
 type Expense struct {
+	// Unique identifier for the expense.
+	ID OptUUID `json:"id"`
 	// Name of the expense.
 	Name string `json:"name"`
 	// Date and time of the expense.
 	ExpenseDate time.Time       `json:"expense_date"`
 	Records     []ExpenseRecord `json:"records"`
+}
+
+// GetID returns the value of ID.
+func (s *Expense) GetID() OptUUID {
+	return s.ID
 }
 
 // GetName returns the value of Name.
@@ -355,6 +362,11 @@ func (s *Expense) GetExpenseDate() time.Time {
 // GetRecords returns the value of Records.
 func (s *Expense) GetRecords() []ExpenseRecord {
 	return s.Records
+}
+
+// SetID sets the value of ID.
+func (s *Expense) SetID(val OptUUID) {
+	s.ID = val
 }
 
 // SetName sets the value of Name.
@@ -374,6 +386,8 @@ func (s *Expense) SetRecords(val []ExpenseRecord) {
 
 // Ref: #/components/schemas/ExpenseRecord
 type ExpenseRecord struct {
+	// Unique identifier for the record.
+	ID OptUUID `json:"id"`
 	// Type of the record.
 	Type ExpenseRecordType `json:"type"`
 	// User ID of the person who owes money.
@@ -382,6 +396,11 @@ type ExpenseRecord struct {
 	ToUserID uuid.UUID `json:"to_user_id"`
 	// Amount of money involved in the transaction.
 	Amount int32 `json:"amount"`
+}
+
+// GetID returns the value of ID.
+func (s *ExpenseRecord) GetID() OptUUID {
+	return s.ID
 }
 
 // GetType returns the value of Type.
@@ -402,6 +421,11 @@ func (s *ExpenseRecord) GetToUserID() uuid.UUID {
 // GetAmount returns the value of Amount.
 func (s *ExpenseRecord) GetAmount() int32 {
 	return s.Amount
+}
+
+// SetID sets the value of ID.
+func (s *ExpenseRecord) SetID(val OptUUID) {
+	s.ID = val
 }
 
 // SetType sets the value of Type.
@@ -764,6 +788,52 @@ func (o OptString) Get() (v string, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptString) Or(d string) string {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptUUID returns new OptUUID with value set to v.
+func NewOptUUID(v uuid.UUID) OptUUID {
+	return OptUUID{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptUUID is optional uuid.UUID.
+type OptUUID struct {
+	Value uuid.UUID
+	Set   bool
+}
+
+// IsSet returns true if OptUUID was set.
+func (o OptUUID) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptUUID) Reset() {
+	var v uuid.UUID
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptUUID) SetTo(v uuid.UUID) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptUUID) Get() (v uuid.UUID, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptUUID) Or(d uuid.UUID) uuid.UUID {
 	if v, ok := o.Get(); ok {
 		return v
 	}

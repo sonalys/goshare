@@ -1,14 +1,8 @@
 package v1
 
 import (
-	"errors"
 	"fmt"
 	"time"
-)
-
-const (
-	LedgerMaxUsers = 100
-	UserMaxLedgers = 5
 )
 
 type (
@@ -23,15 +17,21 @@ type (
 		ID        ID
 		LedgerID  ID
 		UserID    ID
+		Balance   int32
 		CreatedAt time.Time
 		CreatedBy ID
-		Balance   int32
 	}
 )
 
+const (
+	ErrUserAlreadyMember = StringError("user is already a member")
+	ErrUserNotAMember    = StringError("user is not a member")
+
+	LedgerMaxUsers = 100
+	UserMaxLedgers = 5
+)
+
 var (
-	ErrUserAlreadyMember = errors.New("user is already a member")
-	ErrLedgerMaxUsers    = fmt.Errorf("ledger reached maximum number of users: %d", LedgerMaxUsers)
-	ErrUserMaxLedgers    = fmt.Errorf("user reached the maximum number of ledgers: %d", UserMaxLedgers)
-	ErrUserNotAMember    = errors.New("user is not a member")
+	ErrLedgerMaxUsers = fmt.Errorf("ledger reached maximum number of users: %d", LedgerMaxUsers)
+	ErrUserMaxLedgers = fmt.Errorf("user reached the maximum number of ledgers: %d", UserMaxLedgers)
 )

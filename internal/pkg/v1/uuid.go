@@ -6,9 +6,9 @@ import (
 	"github.com/google/uuid"
 )
 
-type privateUUID = uuid.UUID
+type id = uuid.UUID
 
-type ID struct{ privateUUID }
+type ID struct{ id }
 
 var EmptyID = ID{uuid.Nil}
 
@@ -17,7 +17,7 @@ func NewID() ID {
 	if err != nil {
 		panic(fmt.Errorf("could not generate uuid v7: %w", err))
 	}
-	return ID{privateUUID: id}
+	return ID{id: id}
 }
 
 func ConvertID(id uuid.UUID) ID {
@@ -43,9 +43,9 @@ func ParseID(from string) (ID, error) {
 }
 
 func (id *ID) UUID() uuid.UUID {
-	return id.privateUUID
+	return id.id
 }
 
 func (id *ID) IsEmpty() bool {
-	return id.privateUUID == uuid.Nil
+	return id.id == uuid.Nil
 }

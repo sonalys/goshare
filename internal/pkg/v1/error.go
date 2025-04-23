@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -20,22 +19,19 @@ type (
 		Metadata FieldErrorMetadata
 	}
 
-	ValueRangeError struct {
-		Min int
-		Max int
-	}
-
 	ValueLengthError struct {
 		Min int
 		Max int
 	}
+
+	StringError string
 )
 
-var (
-	ErrRequiredValue = errors.New("cannot be empty")
-	ErrInvalidValue  = errors.New("invalid value")
-	ErrConflict      = errors.New("conflict")
-	ErrNotFound      = errors.New("not found")
+const (
+	ErrRequiredValue = StringError("cannot be empty")
+	ErrInvalidValue  = StringError("invalid value")
+	ErrConflict      = StringError("conflict")
+	ErrNotFound      = StringError("not found")
 )
 
 func NewRequiredFieldError(field string) FieldError {
@@ -49,13 +45,6 @@ func NewInvalidFieldError(field string) FieldError {
 	return FieldError{
 		Field: field,
 		Cause: ErrInvalidValue,
-	}
-}
-
-func NewFieldRangeError(field string, min, max int) FieldError {
-	return FieldError{
-		Field: field,
-		Cause: &ValueRangeError{Min: min, Max: max},
 	}
 }
 
@@ -93,10 +82,10 @@ func (e *FormError) Validate() error {
 	return FieldErrorList(*e)
 }
 
-func (e *ValueRangeError) Error() string {
-	return fmt.Sprintf("value must be between %d and %d", e.Min, e.Max)
-}
-
 func (e *ValueLengthError) Error() string {
 	return fmt.Sprintf("value length must be between %d and %d", e.Min, e.Max)
+}
+
+func (e StringError) Error() string {
+	return string(e)
 }

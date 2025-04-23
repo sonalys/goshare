@@ -294,6 +294,37 @@ paths:
                     type: string
                     format: uuid
 
+  /ledgers/{ledgerID}/expenses/{expenseID}:
+    get:
+      operationId: GetExpense
+      description: Retrieves an expense record
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: ledgerID
+          in: path
+          required: true
+          description: Ledger ID
+          schema:
+            type: string
+            format: uuid
+        - name: expenseID
+          in: path
+          required: true
+          description: Expense ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+        '200':
+          description: Expense was retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Expense"
+
 components:
   securitySchemes:
     cookieAuth:
@@ -329,6 +360,11 @@ components:
         - expense_date
         - records
       properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the expense
+          readOnly: true
         name:
           type: string
           description: Name of the expense
@@ -350,6 +386,11 @@ components:
         - to_user_id
         - amount
       properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the record
+          readOnly: true
         type:
           type: string
           enum:

@@ -13,7 +13,7 @@ import (
 )
 
 func init() {
-	slog.SetDefault(logger.NewLogger())
+	logger.InitializeLogger()
 }
 
 func main() {

@@ -801,6 +801,12 @@ func (s *Expense) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *Expense) encodeFields(e *jx.Encoder) {
 	{
+		if s.ID.Set {
+			e.FieldStart("id")
+			s.ID.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("name")
 		e.Str(s.Name)
 	}
@@ -818,10 +824,11 @@ func (s *Expense) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfExpense = [3]string{
-	0: "name",
-	1: "expense_date",
-	2: "records",
+var jsonFieldsNameOfExpense = [4]string{
+	0: "id",
+	1: "name",
+	2: "expense_date",
+	3: "records",
 }
 
 // Decode decodes Expense from json.
@@ -833,8 +840,18 @@ func (s *Expense) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
+		case "id":
+			if err := func() error {
+				s.ID.Reset()
+				if err := s.ID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"id\"")
+			}
 		case "name":
-			requiredBitSet[0] |= 1 << 0
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
 				v, err := d.Str()
 				s.Name = string(v)
@@ -846,7 +863,7 @@ func (s *Expense) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"name\"")
 			}
 		case "expense_date":
-			requiredBitSet[0] |= 1 << 1
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.ExpenseDate = v
@@ -858,7 +875,7 @@ func (s *Expense) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"expense_date\"")
 			}
 		case "records":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				s.Records = make([]ExpenseRecord, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -885,7 +902,7 @@ func (s *Expense) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000111,
+		0b00001110,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -941,6 +958,12 @@ func (s *ExpenseRecord) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *ExpenseRecord) encodeFields(e *jx.Encoder) {
 	{
+		if s.ID.Set {
+			e.FieldStart("id")
+			s.ID.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("type")
 		s.Type.Encode(e)
 	}
@@ -958,11 +981,12 @@ func (s *ExpenseRecord) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfExpenseRecord = [4]string{
-	0: "type",
-	1: "from_user_id",
-	2: "to_user_id",
-	3: "amount",
+var jsonFieldsNameOfExpenseRecord = [5]string{
+	0: "id",
+	1: "type",
+	2: "from_user_id",
+	3: "to_user_id",
+	4: "amount",
 }
 
 // Decode decodes ExpenseRecord from json.
@@ -974,8 +998,18 @@ func (s *ExpenseRecord) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
+		case "id":
+			if err := func() error {
+				s.ID.Reset()
+				if err := s.ID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"id\"")
+			}
 		case "type":
-			requiredBitSet[0] |= 1 << 0
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
 				if err := s.Type.Decode(d); err != nil {
 					return err
@@ -985,7 +1019,7 @@ func (s *ExpenseRecord) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"type\"")
 			}
 		case "from_user_id":
-			requiredBitSet[0] |= 1 << 1
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := json.DecodeUUID(d)
 				s.FromUserID = v
@@ -997,7 +1031,7 @@ func (s *ExpenseRecord) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"from_user_id\"")
 			}
 		case "to_user_id":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := json.DecodeUUID(d)
 				s.ToUserID = v
@@ -1009,7 +1043,7 @@ func (s *ExpenseRecord) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"to_user_id\"")
 			}
 		case "amount":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := d.Int32()
 				s.Amount = int32(v)
@@ -1030,7 +1064,7 @@ func (s *ExpenseRecord) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00001111,
+		0b00011110,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -1929,6 +1963,41 @@ func (s OptString) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptString) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes uuid.UUID as json.
+func (o OptUUID) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	json.EncodeUUID(e, o.Value)
+}
+
+// Decode decodes uuid.UUID from json.
+func (o *OptUUID) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptUUID to nil")
+	}
+	o.Set = true
+	v, err := json.DecodeUUID(d)
+	if err != nil {
+		return err
+	}
+	o.Value = v
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptUUID) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptUUID) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

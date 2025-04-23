@@ -15,13 +15,13 @@ type fieldFormatterHandler struct {
 	slog.Handler
 }
 
-func NewLogger() *slog.Logger {
+func InitializeLogger() {
 	handler := tint.NewHandler(os.Stdout, nil)
 	otelHandler := slogotel.OtelHandler{
 		Next: handler,
 	}
 	internalHandler := &fieldFormatterHandler{otelHandler}
-	return slog.New(internalHandler)
+	slog.SetDefault(slog.New(internalHandler))
 }
 
 func (h *fieldFormatterHandler) Handle(ctx context.Context, record slog.Record) error {

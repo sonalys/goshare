@@ -40,6 +40,15 @@ func (UnimplementedHandler) CreateLedger(ctx context.Context, req *CreateLedgerR
 	return r, ht.ErrNotImplemented
 }
 
+// GetExpense implements GetExpense operation.
+//
+// Retrieves an expense record.
+//
+// GET /ledgers/{ledgerID}/expenses/{expenseID}
+func (UnimplementedHandler) GetExpense(ctx context.Context, params GetExpenseParams) (r *Expense, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetHealthcheck implements GetHealthcheck operation.
 //
 // Check if the service is healthy.

@@ -21,11 +21,23 @@ func NewClient(jwtSignKey []byte) *Client {
 
 func (c *Client) Decode(tokenString string) (*v1.Identity, error) {
 	var claims jwt.MapClaims
-	token, err := jwt.ParseWithClaims(tokenString, &claims, func(token *jwt.Token) (interface{}, error) {
+
+	keyFunc := func(token *jwt.Token) (any, error) {
 		return c.jwtSignKey, nil
-	})
+	}
+
+	supportedMethods := []string{
+		jwt.SigningMethodHS256.Alg(),
+	}
+
+	token, err := jwt.ParseWithClaims(
+		tokenString,
+		&claims,
+		keyFunc,
+		jwt.WithValidMethods(supportedMethods),
+	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("parsing token: %v", err)
 	}
 
 	if !token.Valid {
@@ -44,7 +56,7 @@ func (c *Client) Decode(tokenString string) (*v1.Identity, error) {
 
 	userUUID, err := v1.ParseID(userID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse user_id: %v", err)
+		return nil, fmt.Errorf("parsing user_id: %v", err)
 	}
 
 	exp, ok := claims["exp"].(float64)
@@ -71,7 +83,7 @@ func (c *Client) Encode(identity *v1.Identity) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString(c.jwtSignKey)
 	if err != nil {
-		return "", fmt.Errorf("failed to sign token: %v", err)
+		return "", fmt.Errorf("signing token: %v", err)
 	}
 
 	return tokenString, nil

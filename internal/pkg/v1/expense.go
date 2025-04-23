@@ -4,7 +4,35 @@ import (
 	"time"
 )
 
-type RecordType int
+type (
+	RecordType int
+
+	Record struct {
+		ID        ID
+		Type      RecordType
+		Amount    int32
+		From      ID
+		To        ID
+		CreatedAt time.Time
+		CreatedBy ID
+		UpdatedAt time.Time
+		UpdatedBy ID
+	}
+
+	Expense struct {
+		ID          ID
+		LedgerID    ID
+		Amount      int32
+		Name        string
+		ExpenseDate time.Time
+		Records     []Record
+
+		CreatedAt time.Time
+		CreatedBy ID
+		UpdatedAt time.Time
+		UpdatedBy ID
+	}
+)
 
 const (
 	RecordTypeUnknown RecordType = iota
@@ -37,30 +65,4 @@ func NewRecordType(s string) RecordType {
 	default:
 		return RecordTypeUnknown
 	}
-}
-
-type Record struct {
-	ID        ID
-	Type      RecordType
-	Amount    int32
-	From      ID
-	To        ID
-	CreatedAt time.Time
-	CreatedBy ID
-	UpdatedAt time.Time
-	UpdatedBy ID
-}
-
-type Expense struct {
-	ID          ID
-	LedgerID    ID
-	Amount      int32
-	Name        string
-	ExpenseDate time.Time
-	Records     []Record
-
-	CreatedAt time.Time
-	CreatedBy ID
-	UpdatedAt time.Time
-	UpdatedBy ID
 }

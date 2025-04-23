@@ -69,10 +69,7 @@ func (r *ExpenseRepository) Find(ctx context.Context, id v1.ID) (*v1.Expense, er
 		return nil, mapLedgerError(err)
 	}
 
-	records, err := r.client.queries().GetExpenseRecords(ctx, sqlc.GetExpenseRecordsParams{
-		ExpenseID: convertUUID(id),
-		Limit:     -1,
-	})
+	records, err := r.client.queries().GetExpenseRecords(ctx, expense.ID)
 	if err != nil {
 		return nil, fmt.Errorf("getting expense records: %w", err)
 	}

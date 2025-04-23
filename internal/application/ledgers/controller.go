@@ -20,6 +20,7 @@ type (
 
 	ExpenseRepository interface {
 		Create(ctx context.Context, expense *v1.Expense) error
+		Find(ctx context.Context, id v1.ID) (*v1.Expense, error)
 	}
 
 	Controller struct {

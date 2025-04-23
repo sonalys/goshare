@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"errors"
 	"time"
 )
 
@@ -15,7 +14,7 @@ type User struct {
 	CreatedAt       time.Time
 }
 
-var (
-	ErrEmailPasswordMismatch  = errors.New("email and/or password mismatch")
-	ErrEmailAlreadyRegistered = errors.New("email already registered")
+const (
+	ErrEmailPasswordMismatch  = StringError("email and/or password mismatch")
+	ErrEmailAlreadyRegistered = StringError("email already registered")
 )
