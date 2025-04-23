@@ -13,21 +13,21 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
-// AddLedgerMember implements AddLedgerMember operation.
+// AddLedgerParticipant implements AddLedgerParticipant operation.
 //
 // Adds a new member to the Ledger.
 //
-// POST /ledgers/{ledgerID}/members
-func (UnimplementedHandler) AddLedgerMember(ctx context.Context, req *AddLedgerMemberReq, params AddLedgerMemberParams) error {
+// POST /ledgers/{ledgerID}/participants
+func (UnimplementedHandler) AddLedgerParticipant(ctx context.Context, req *AddLedgerParticipantReq, params AddLedgerParticipantParams) error {
 	return ht.ErrNotImplemented
 }
 
 // CreateExpense implements CreateExpense operation.
 //
-// Creates a new expense.
+// Creates a new expense record.
 //
 // POST /ledgers/{ledgerID}/expenses
-func (UnimplementedHandler) CreateExpense(ctx context.Context, req *CreateExpenseReq, params CreateExpenseParams) (r *CreateExpenseOK, _ error) {
+func (UnimplementedHandler) CreateExpense(ctx context.Context, req *Expense, params CreateExpenseParams) (r *CreateExpenseOK, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -58,21 +58,12 @@ func (UnimplementedHandler) GetIdentity(ctx context.Context) (r *GetIdentityOK, 
 	return r, ht.ErrNotImplemented
 }
 
-// ListLedgerBalances implements ListLedgerBalances operation.
+// ListLedgerParticipants implements ListLedgerParticipants operation.
 //
-// Lists all ledger balances.
+// Lists all ledger participants and their balances.
 //
-// GET /ledgers/{ledgerID}/balances
-func (UnimplementedHandler) ListLedgerBalances(ctx context.Context, params ListLedgerBalancesParams) (r *ListLedgerBalancesOK, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// ListLedgerExpenses implements ListLedgerExpenses operation.
-//
-// Lists the expenses of the Ledger.
-//
-// GET /ledgers/{ledgerID}/expenses
-func (UnimplementedHandler) ListLedgerExpenses(ctx context.Context, params ListLedgerExpensesParams) (r *ListLedgerExpensesOK, _ error) {
+// GET /ledgers/{ledgerID}/participants
+func (UnimplementedHandler) ListLedgerParticipants(ctx context.Context, params ListLedgerParticipantsParams) (r *ListLedgerParticipantsOK, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

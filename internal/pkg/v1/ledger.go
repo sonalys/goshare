@@ -25,23 +25,7 @@ type (
 		UserID    ID
 		CreatedAt time.Time
 		CreatedBy ID
-	}
-
-	LedgerRecord struct {
-		ID          ID
-		LedgerID    ID
-		ExpenseID   ID
-		UserID      ID
-		Amount      int32
-		Description string
-		CreatedAt   time.Time
-		CreatedBy   ID
-	}
-
-	LedgerParticipantBalance struct {
-		LedgerID ID
-		UserID   ID
-		Balance  int32
+		Balance   int32
 	}
 )
 

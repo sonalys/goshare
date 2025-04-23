@@ -8,7 +8,7 @@ import (
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
-func (a *API) AddLedgerMember(ctx context.Context, req *handlers.AddLedgerMemberReq, params handlers.AddLedgerMemberParams) error {
+func (a *API) AddLedgerParticipant(ctx context.Context, req *handlers.AddLedgerParticipantReq, params handlers.AddLedgerParticipantParams) error {
 	identity, err := getIdentity(ctx)
 	if err != nil {
 		return err

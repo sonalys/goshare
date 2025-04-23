@@ -16,11 +16,10 @@ type (
 
 	LedgerController interface {
 		Create(ctx context.Context, req ledgers.CreateRequest) (*ledgers.CreateResponse, error)
-		GetBalances(ctx context.Context, ledgerID v1.ID) ([]v1.LedgerParticipantBalance, error)
+		GetParticipants(ctx context.Context, ledgerID v1.ID) ([]v1.LedgerParticipant, error)
 		AddParticipants(ctx context.Context, req ledgers.AddMembersRequest) error
 		GetByUser(ctx context.Context, userID v1.ID) ([]v1.Ledger, error)
 		CreateExpense(ctx context.Context, req ledgers.CreateExpenseRequest) (*ledgers.CreateExpenseResponse, error)
-		ListExpensesByLedger(ctx context.Context, params ledgers.ListByLedgerParams) (*ledgers.ListByLedgerResponse, error)
 	}
 
 	Dependencies struct {

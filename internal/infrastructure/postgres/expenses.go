@@ -2,132 +2,114 @@ package postgres
 
 import (
 	"context"
-	"errors"
-	"time"
+	"fmt"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
-	"github.com/sonalys/goshare/internal/pkg/monoids"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
-type ExpensesRepository struct {
+type ExpenseRepository struct {
 	client *Client
 }
 
-func NewExpensesRepository(client *Client) *ExpensesRepository {
-	return &ExpensesRepository{
+func NewExpenseRepository(client *Client) *ExpenseRepository {
+	return &ExpenseRepository{
 		client: client,
 	}
 }
 
-func (r *ExpensesRepository) Create(ctx context.Context, expense *v1.Expense) error {
-	return mapExpenseError(r.client.transaction(ctx, func(tx pgx.Tx) error {
-		return r.createExpense(ctx, tx, expense)
-	}))
-}
+func (r *ExpenseRepository) Create(ctx context.Context, expense *v1.Expense) error {
+	r.client.transaction(ctx, func(tx pgx.Tx) error {
+		query := r.client.queries().WithTx(tx)
 
-func (r *ExpensesRepository) Update(ctx context.Context, expense *v1.Expense) error {
-	return mapExpenseError(r.client.queries().UpdateExpense(ctx, sqlc.UpdateExpenseParams{
-		ID:          convertUUID(expense.ID),
-		Amount:      expense.Amount,
-		CategoryID:  convertUUIDPtr(expense.CategoryID),
-		Name:        expense.Name,
-		ExpenseDate: convertTime(expense.ExpenseDate),
-		UpdatedAt:   convertTime(expense.UpdatedAt),
-		UpdatedBy:   convertUUID(expense.UpdatedBy),
-	}))
-}
-
-func (r *ExpensesRepository) Delete(ctx context.Context, id v1.ID) error {
-	return mapExpenseError(r.client.queries().DeleteExpense(ctx, convertUUID(id)))
-}
-
-func (r *ExpensesRepository) GetByLedger(ctx context.Context, ledgerID v1.ID, cursor time.Time, limit int32) ([]v1.Expense, error) {
-	params := sqlc.GetLedgerExpensesParams{
-		LedgerID:  convertUUID(ledgerID),
-		CreatedAt: convertTime(cursor),
-		Limit:     limit,
-	}
-
-	expenses, err := r.client.queries().GetLedgerExpenses(ctx, params)
-	if err != nil {
-		return nil, mapExpenseError(err)
-	}
-
-	ids := monoids.Map(expenses, func(from sqlc.Expense) pgtype.UUID {
-		return from.ID
-	})
-
-	ledgerRecords, err := r.client.queries().GetExpensesRecords(ctx, ids)
-	if err != nil {
-		return nil, mapExpenseError(err)
-	}
-
-	return convertExpenses(expenses, ledgerRecords), nil
-}
-
-func newUserBalances(from []sqlc.LedgerRecord) []v1.ExpenseUserBalance {
-	balances := make([]v1.ExpenseUserBalance, len(from))
-	for i, record := range from {
-		balances[i] = v1.ExpenseUserBalance{
-			UserID:  newUUID(record.UserID),
-			Balance: record.Amount,
+		createExpenseReq := sqlc.CreateExpenseParams{
+			ID:          convertUUID(expense.ID),
+			LedgerID:    convertUUID(expense.LedgerID),
+			Amount:      expense.Amount,
+			Name:        expense.Name,
+			ExpenseDate: convertTime(expense.ExpenseDate),
+			CreatedAt:   convertTime(expense.CreatedAt),
+			CreatedBy:   convertUUID(expense.CreatedBy),
+			UpdatedAt:   convertTime(expense.UpdatedAt),
+			UpdatedBy:   convertUUID(expense.UpdatedBy),
 		}
-	}
-	return balances
-}
 
-func newExpense(expense *sqlc.Expense, records []sqlc.LedgerRecord) *v1.Expense {
-	return &v1.Expense{
-		ID:           newUUID(expense.ID),
-		Amount:       expense.Amount,
-		CategoryID:   newUUIDPtr(expense.CategoryID),
-		LedgerID:     newUUID(expense.LedgerID),
-		Name:         expense.Name,
-		ExpenseDate:  expense.ExpenseDate.Time,
-		UserBalances: newUserBalances(records),
-		CreatedAt:    expense.CreatedAt.Time,
-		CreatedBy:    newUUID(expense.CreatedBy),
-		UpdatedAt:    expense.UpdatedAt.Time,
-		UpdatedBy:    newUUID(expense.UpdatedBy),
-	}
-}
+		if err := query.CreateExpense(ctx, createExpenseReq); err != nil {
+			return fmt.Errorf("creating expense: %w", err)
+		}
 
-func convertExpenses(from []sqlc.Expense, records []sqlc.LedgerRecord) []v1.Expense {
-	to := make([]v1.Expense, 0, len(from))
-
-	buffer := make([]sqlc.LedgerRecord, 0, len(records))
-	for i := range from {
-		buffer = buffer[:0]
-		records := monoids.Reduce(records, buffer, func(acc []sqlc.LedgerRecord, record sqlc.LedgerRecord) []sqlc.LedgerRecord {
-			if record.LedgerID == from[i].LedgerID {
-				acc = append(acc, record)
+		for _, record := range expense.Records {
+			createRecordReq := sqlc.CreateExpenseRecordParams{
+				ID:         convertUUID(record.ID),
+				ExpenseID:  convertUUID(expense.ID),
+				FromUserID: convertUUID(record.From),
+				ToUserID:   convertUUID(record.To),
+				RecordType: record.Type.String(),
+				Amount:     record.Amount,
+				CreatedAt:  convertTime(record.CreatedAt),
+				CreatedBy:  convertUUID(record.CreatedBy),
+				UpdatedAt:  convertTime(record.UpdatedAt),
+				UpdatedBy:  convertUUID(record.UpdatedBy),
 			}
-			return acc
-		})
 
-		to = append(to, *newExpense(&from[i], records))
-	}
+			if err := query.CreateExpenseRecord(ctx, createRecordReq); err != nil {
+				return fmt.Errorf("creating expense record: %w", err)
+			}
+		}
 
-	return to
-}
-
-func mapExpenseError(err error) error {
-	switch {
-	case err == nil:
 		return nil
-	case isViolatingConstraint(err, constraintLedgerRecordsUser):
-		if fieldErr := new(v1.FieldError); errors.As(err, fieldErr) {
-			return v1.FieldError{
-				Cause:    v1.ErrUserNotAMember,
-				Field:    fieldErr.Field,
-				Metadata: fieldErr.Metadata,
-			}
-		}
-		return v1.ErrUserNotAMember
-	default:
-		return mapError(err)
+	})
+	return nil
+}
+
+func (r *ExpenseRepository) Find(ctx context.Context, id v1.ID) (*v1.Expense, error) {
+	expense, err := r.client.queries().FindExpenseById(ctx, convertUUID(id))
+	if err != nil {
+		return nil, mapLedgerError(err)
+	}
+
+	records, err := r.client.queries().GetExpenseRecords(ctx, sqlc.GetExpenseRecordsParams{
+		ExpenseID: convertUUID(id),
+		Limit:     -1,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("getting expense records: %w", err)
+	}
+
+	return NewExpense(&expense, records), nil
+}
+
+func NewExpense(expense *sqlc.Expense, records []sqlc.ExpenseRecord) *v1.Expense {
+	result := &v1.Expense{
+		ID:          newUUID(expense.ID),
+		LedgerID:    newUUID(expense.LedgerID),
+		Amount:      expense.Amount,
+		Name:        expense.Name,
+		ExpenseDate: expense.ExpenseDate.Time,
+		CreatedAt:   expense.CreatedAt.Time,
+		CreatedBy:   newUUID(expense.CreatedBy),
+		UpdatedAt:   expense.UpdatedAt.Time,
+		UpdatedBy:   newUUID(expense.UpdatedBy),
+	}
+
+	for _, record := range records {
+		result.Records = append(result.Records, *NewRecord(&record))
+	}
+
+	return result
+}
+
+func NewRecord(record *sqlc.ExpenseRecord) *v1.Record {
+	return &v1.Record{
+		ID:        newUUID(record.ID),
+		From:      newUUID(record.FromUserID),
+		To:        newUUID(record.ToUserID),
+		Type:      v1.NewRecordType(record.RecordType),
+		Amount:    record.Amount,
+		CreatedAt: record.CreatedAt.Time,
+		CreatedBy: newUUID(record.CreatedBy),
+		UpdatedAt: record.UpdatedAt.Time,
+		UpdatedBy: newUUID(record.UpdatedBy),
 	}
 }

@@ -1,0 +1,30 @@
+meta {
+  name: Create
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{api_url}}/ledgers/:ledger_id/expenses
+  body: json
+  auth: none
+}
+
+params:path {
+  ledger_id: {{ledger_id}}
+}
+
+body:json {
+  {
+      "name": "dinner",
+      "expense_date": "2020-01-01T00:00:00Z",
+      "records": [
+          {
+              "type": "expense",
+              "from_user_id": "{{user_id}}",
+              "to_user_id": "0196637b-00e0-7855-87c2-5478eb54fddf",
+              "amount": 90
+          }
+      ]
+  }
+}

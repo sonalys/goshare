@@ -5,7 +5,6 @@ package handlers
 import (
 	"net/http"
 	"net/url"
-	"time"
 
 	"github.com/go-faster/errors"
 	"github.com/google/uuid"
@@ -17,13 +16,13 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
-// AddLedgerMemberParams is parameters of AddLedgerMember operation.
-type AddLedgerMemberParams struct {
+// AddLedgerParticipantParams is parameters of AddLedgerParticipant operation.
+type AddLedgerParticipantParams struct {
 	// Ledger ID.
 	LedgerID uuid.UUID
 }
 
-func unpackAddLedgerMemberParams(packed middleware.Parameters) (params AddLedgerMemberParams) {
+func unpackAddLedgerParticipantParams(packed middleware.Parameters) (params AddLedgerParticipantParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "ledgerID",
@@ -34,7 +33,7 @@ func unpackAddLedgerMemberParams(packed middleware.Parameters) (params AddLedger
 	return params
 }
 
-func decodeAddLedgerMemberParams(args [1]string, argsEscaped bool, r *http.Request) (params AddLedgerMemberParams, _ error) {
+func decodeAddLedgerParticipantParams(args [1]string, argsEscaped bool, r *http.Request) (params AddLedgerParticipantParams, _ error) {
 	// Decode path: ledgerID.
 	if err := func() error {
 		param := args[0]
@@ -149,13 +148,13 @@ func decodeCreateExpenseParams(args [1]string, argsEscaped bool, r *http.Request
 	return params, nil
 }
 
-// ListLedgerBalancesParams is parameters of ListLedgerBalances operation.
-type ListLedgerBalancesParams struct {
+// ListLedgerParticipantsParams is parameters of ListLedgerParticipants operation.
+type ListLedgerParticipantsParams struct {
 	// Ledger ID.
 	LedgerID uuid.UUID
 }
 
-func unpackListLedgerBalancesParams(packed middleware.Parameters) (params ListLedgerBalancesParams) {
+func unpackListLedgerParticipantsParams(packed middleware.Parameters) (params ListLedgerParticipantsParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "ledgerID",
@@ -166,7 +165,7 @@ func unpackListLedgerBalancesParams(packed middleware.Parameters) (params ListLe
 	return params
 }
 
-func decodeListLedgerBalancesParams(args [1]string, argsEscaped bool, r *http.Request) (params ListLedgerBalancesParams, _ error) {
+func decodeListLedgerParticipantsParams(args [1]string, argsEscaped bool, r *http.Request) (params ListLedgerParticipantsParams, _ error) {
 	// Decode path: ledgerID.
 	if err := func() error {
 		param := args[0]
@@ -209,177 +208,6 @@ func decodeListLedgerBalancesParams(args [1]string, argsEscaped bool, r *http.Re
 		return params, &ogenerrors.DecodeParamError{
 			Name: "ledgerID",
 			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// ListLedgerExpensesParams is parameters of ListLedgerExpenses operation.
-type ListLedgerExpensesParams struct {
-	// Ledger ID.
-	LedgerID uuid.UUID
-	// The number of documents returned.
-	Limit OptInt32
-	// The identifier of the last document returned on the previous pagination.
-	Cursor OptDateTime
-}
-
-func unpackListLedgerExpensesParams(packed middleware.Parameters) (params ListLedgerExpensesParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "ledgerID",
-			In:   "path",
-		}
-		params.LedgerID = packed[key].(uuid.UUID)
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "limit",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.Limit = v.(OptInt32)
-		}
-	}
-	{
-		key := middleware.ParameterKey{
-			Name: "cursor",
-			In:   "query",
-		}
-		if v, ok := packed[key]; ok {
-			params.Cursor = v.(OptDateTime)
-		}
-	}
-	return params
-}
-
-func decodeListLedgerExpensesParams(args [1]string, argsEscaped bool, r *http.Request) (params ListLedgerExpensesParams, _ error) {
-	q := uri.NewQueryDecoder(r.URL.Query())
-	// Decode path: ledgerID.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "ledgerID",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToUUID(val)
-				if err != nil {
-					return err
-				}
-
-				params.LedgerID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "ledgerID",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode query: limit.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "limit",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotLimitVal int32
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToInt32(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotLimitVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.Limit.SetTo(paramsDotLimitVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "limit",
-			In:   "query",
-			Err:  err,
-		}
-	}
-	// Decode query: cursor.
-	if err := func() error {
-		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "cursor",
-			Style:   uri.QueryStyleForm,
-			Explode: true,
-		}
-
-		if err := q.HasParam(cfg); err == nil {
-			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotCursorVal time.Time
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToDateTime(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotCursorVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.Cursor.SetTo(paramsDotCursorVal)
-				return nil
-			}); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "cursor",
-			In:   "query",
 			Err:  err,
 		}
 	}

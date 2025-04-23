@@ -1,1 +1,0 @@
-ALTER TABLE participant RENAME TO users;

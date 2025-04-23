@@ -14,8 +14,8 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
-func (s *Server) decodeAddLedgerMemberRequest(r *http.Request) (
-	req *AddLedgerMemberReq,
+func (s *Server) decodeAddLedgerParticipantRequest(r *http.Request) (
+	req *AddLedgerParticipantReq,
 	close func() error,
 	rerr error,
 ) {
@@ -54,7 +54,7 @@ func (s *Server) decodeAddLedgerMemberRequest(r *http.Request) (
 
 		d := jx.DecodeBytes(buf)
 
-		var request AddLedgerMemberReq
+		var request AddLedgerParticipantReq
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err
@@ -86,7 +86,7 @@ func (s *Server) decodeAddLedgerMemberRequest(r *http.Request) (
 }
 
 func (s *Server) decodeCreateExpenseRequest(r *http.Request) (
-	req *CreateExpenseReq,
+	req *Expense,
 	close func() error,
 	rerr error,
 ) {
@@ -125,7 +125,7 @@ func (s *Server) decodeCreateExpenseRequest(r *http.Request) (
 
 		d := jx.DecodeBytes(buf)
 
-		var request CreateExpenseReq
+		var request Expense
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err

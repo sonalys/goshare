@@ -1,0 +1,15 @@
+meta {
+  name: Participants
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{api_url}}/ledgers/:ledger_id/participants
+  body: none
+  auth: inherit
+}
+
+params:path {
+  ledger_id: {{ledger_id}}
+}

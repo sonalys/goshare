@@ -5,17 +5,17 @@ meta {
 }
 
 post {
-  url: http://localhost:8080/api/v1/ledgers
+  url: {{api_url}}/ledgers
   body: json
   auth: none
 }
 
 body:json {
   {
-    "name":"ledger name"
+    "name": "My Ledger"
   }
 }
 
 vars:post-response {
-  ledger_id: res.body.id
+  ledger_id: res?.body?.id
 }

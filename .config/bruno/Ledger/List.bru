@@ -1,15 +1,15 @@
 meta {
   name: List
   type: http
-  seq: 3
+  seq: 1
 }
 
 get {
-  url: http://localhost:8080/api/v1/ledgers
-  body: none
+  url: {{api_url}}/ledgers
+  body: json
   auth: none
 }
 
 vars:post-response {
-  ledger_id: res.body.ledgers[0].id
+  ledger_id: res.body?.ledgers?.[0]?.id
 }

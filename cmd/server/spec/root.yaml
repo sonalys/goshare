@@ -191,10 +191,10 @@ paths:
                     type: string
                     format: uuid
 
-  /ledgers/{ledgerID}/expenses:
+  /ledgers/{ledgerID}/participants:
     get:
-      operationId: ListLedgerExpenses
-      description: Lists the expenses of the Ledger
+      operationId: ListLedgerParticipants
+      description: Lists all ledger participants and their balances
       security:
         - cookieAuth: []
       parameters:
@@ -205,138 +205,25 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: limit
-          in: query
-          required: false
-          description: The number of documents returned
-          schema:
-            type: integer
-            format: int32
-        - name: cursor
-          in: query
-          required: false
-          description: The identifier of the last document returned on the previous pagination
-          schema:
-            type: string
-            format: date-time
       responses:
         default:
           $ref: "#/components/responses/ErrorResponse"
         '200':
-          description: The list of expenses for the Ledger
+          description: List of ledger participants
           content:
             application/json:
               schema:
                 type: object
                 required:
-                  - expenses
+                  - participants
                 properties:
-                  cursor:
-                    type: string
-                    format: date-time
-                  expenses:
+                  participants:
                     type: array
                     items:
-                      $ref: "#/components/schemas/LedgerExpense"
+                      $ref: "#/components/schemas/LedgerParticipant"
 
     post:
-      operationId: CreateExpense
-      description: Creates a new expense
-      security:
-        - cookieAuth: []
-      parameters:
-        - name: ledgerID
-          in: path
-          required: true
-          description: Ledger ID
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - amount
-                - name
-                - expense_date
-                - user_balances
-              properties:
-                amount:
-                  type: integer
-                  format: int32
-                  description: Expense amount
-                  example: 10000
-                category_id:
-                  type: string
-                  format: uuid
-                  description: Category ID
-                  example: "123e4567-e89b-12d3-a456-426614174000"
-                name:
-                  type: string
-                  description: Expense name
-                  example: "Dinner"
-                expense_date:
-                  type: string
-                  format: date-time
-                  description: Date and time the expense was made
-                  example: "2020-01-01T00:00:00Z"
-                user_balances:
-                  type: array
-                  items:
-                    $ref: "#/components/schemas/ExpenseUserBalance"
-      responses:
-        default:
-          $ref: "#/components/responses/ErrorResponse"
-        '200':
-          description: Expense was created
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - id
-                properties:
-                  id:
-                    type: string
-                    format: uuid
-
-  /ledgers/{ledgerID}/balances:
-    get:
-      operationId: ListLedgerBalances
-      description: Lists all ledger balances
-      security:
-        - cookieAuth: []
-      parameters:
-        - name: ledgerID
-          in: path
-          required: true
-          description: Ledger ID
-          schema:
-            type: string
-            format: uuid
-      responses:
-        default:
-          $ref: "#/components/responses/ErrorResponse"
-        '200':
-          description: List of ledger balances
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - balances
-                properties:
-                  balances:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/LedgerParticipantBalance"
-
-  /ledgers/{ledgerID}/members:
-    post:
-      operationId: AddLedgerMember
+      operationId: AddLedgerParticipant
       description: Adds a new member to the Ledger
       security:
         - cookieAuth: []
@@ -370,6 +257,43 @@ paths:
           $ref: "#/components/responses/ErrorResponse"
         '202':
           description: All users were added to the ledger
+
+  /ledgers/{ledgerID}/expenses:
+    post:
+      operationId: CreateExpense
+      description: Creates a new expense record
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: ledgerID
+          in: path
+          required: true
+          description: Ledger ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Expense"
+      responses:
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+        '200':
+          description: Expense was created
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+
 components:
   securitySchemes:
     cookieAuth:
@@ -398,90 +322,81 @@ components:
                 items:
                   $ref: "#/components/schemas/Error"
   schemas:
-    LedgerExpense:
+    Expense:
       type: object
       required:
-        - id
-        - amount
         - name
         - expense_date
-        - user_balances
-        - createdAt
-        - createdBy
-        - updatedAt
-        - updatedBy
+        - records
       properties:
-        id:
-          type: string
-          format: uuid
-        amount:
-          type: integer
-          format: int32
-          description: Expense amount
-          example: 10000
-        category_id:
-          type: string
-          format: uuid
-          description: Category ID
-          example: "123e4567-e89b-12d3-a456-426614174000"
         name:
           type: string
-          description: Expense name
+          description: Name of the expense
           example: "Dinner"
         expense_date:
           type: string
           format: date-time
-          description: Date and time the expense was made
+          description: Date and time of the expense
           example: "2020-01-01T00:00:00Z"
-        user_balances:
+        records:
           type: array
-          minItems: 1
           items:
-            $ref: "#/components/schemas/ExpenseUserBalance"
-        createdAt:
+            $ref: "#/components/schemas/ExpenseRecord"
+    ExpenseRecord:
+      type: object
+      required:
+        - type
+        - from_user_id
+        - to_user_id
+        - amount
+      properties:
+        type:
+          type: string
+          enum:
+            - "expense"
+            - "settlement"
+          description: Type of the record
+        from_user_id:
+          type: string
+          format: uuid
+          description: User ID of the person who owes money
+        to_user_id:
+          type: string
+          format: uuid
+          description: User ID of the person who is owed money
+        amount:
+          type: integer
+          format: int32
+          description: Amount of money involved in the transaction
+    LedgerParticipant:
+      type: object
+      required:
+        - id
+        - user_id
+        - created_at
+        - created_by
+        - balance
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        created_at:
           type: string
           format: date-time
-          description: Date and time the expense was created
+          description: Date and time the participant was created
           example: "2020-01-01T00:00:00Z"
-        createdBy:
+        created_by:
           type: string
           format: uuid
           description: User ID of the creator
           example: "123e4567-e89b-12d3-a456-426614174000"
-        updatedAt:
-          type: string
-          format: date-time
-          description: Date and time the expense was last updated
-          example: "2020-01-01T00:00:00Z"
-        updatedBy:
-          type: string
-          format: uuid
-          description: User ID of the last updater
-          example: "123e4567-e89b-12d3-a456-426614174000"
-    ExpenseUserBalance:
-      type: object
-      required:
-        - user_id
-        - balance
-      properties:
-        user_id:
-          type: string
-          format: uuid
         balance:
           type: integer
           format: int32
-    LedgerParticipantBalance:
-      type: object
-      required:
-        - user_id
-        - balance
-      properties:
-        user_id:
-          type: string
-          format: uuid
-        balance:
-          type: integer
-          format: int32
+          description: User's balance in the ledger
     Ledger:
       type: object
       required:

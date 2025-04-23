@@ -11,8 +11,8 @@ import (
 	ht "github.com/ogen-go/ogen/http"
 )
 
-func encodeAddLedgerMemberRequest(
-	req *AddLedgerMemberReq,
+func encodeAddLedgerParticipantRequest(
+	req *AddLedgerParticipantReq,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -26,7 +26,7 @@ func encodeAddLedgerMemberRequest(
 }
 
 func encodeCreateExpenseRequest(
-	req *CreateExpenseReq,
+	req *Expense,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

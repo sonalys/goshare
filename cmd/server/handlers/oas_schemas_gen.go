@@ -14,21 +14,21 @@ func (s *ErrorResponseStatusCode) Error() string {
 	return fmt.Sprintf("code %d: %+v", s.StatusCode, s.Response)
 }
 
-// AddLedgerMemberAccepted is response for AddLedgerMember operation.
-type AddLedgerMemberAccepted struct{}
+// AddLedgerParticipantAccepted is response for AddLedgerParticipant operation.
+type AddLedgerParticipantAccepted struct{}
 
-type AddLedgerMemberReq struct {
+type AddLedgerParticipantReq struct {
 	// Invite up to 99 other users. The limit is by Ledger.
 	Emails []string `json:"emails"`
 }
 
 // GetEmails returns the value of Emails.
-func (s *AddLedgerMemberReq) GetEmails() []string {
+func (s *AddLedgerParticipantReq) GetEmails() []string {
 	return s.Emails
 }
 
 // SetEmails sets the value of Emails.
-func (s *AddLedgerMemberReq) SetEmails(val []string) {
+func (s *AddLedgerParticipantReq) SetEmails(val []string) {
 	s.Emails = val
 }
 
@@ -58,68 +58,6 @@ func (s *CreateExpenseOK) GetID() uuid.UUID {
 // SetID sets the value of ID.
 func (s *CreateExpenseOK) SetID(val uuid.UUID) {
 	s.ID = val
-}
-
-type CreateExpenseReq struct {
-	// Expense amount.
-	Amount int32 `json:"amount"`
-	// Category ID.
-	CategoryID OptUUID `json:"category_id"`
-	// Expense name.
-	Name string `json:"name"`
-	// Date and time the expense was made.
-	ExpenseDate  time.Time            `json:"expense_date"`
-	UserBalances []ExpenseUserBalance `json:"user_balances"`
-}
-
-// GetAmount returns the value of Amount.
-func (s *CreateExpenseReq) GetAmount() int32 {
-	return s.Amount
-}
-
-// GetCategoryID returns the value of CategoryID.
-func (s *CreateExpenseReq) GetCategoryID() OptUUID {
-	return s.CategoryID
-}
-
-// GetName returns the value of Name.
-func (s *CreateExpenseReq) GetName() string {
-	return s.Name
-}
-
-// GetExpenseDate returns the value of ExpenseDate.
-func (s *CreateExpenseReq) GetExpenseDate() time.Time {
-	return s.ExpenseDate
-}
-
-// GetUserBalances returns the value of UserBalances.
-func (s *CreateExpenseReq) GetUserBalances() []ExpenseUserBalance {
-	return s.UserBalances
-}
-
-// SetAmount sets the value of Amount.
-func (s *CreateExpenseReq) SetAmount(val int32) {
-	s.Amount = val
-}
-
-// SetCategoryID sets the value of CategoryID.
-func (s *CreateExpenseReq) SetCategoryID(val OptUUID) {
-	s.CategoryID = val
-}
-
-// SetName sets the value of Name.
-func (s *CreateExpenseReq) SetName(val string) {
-	s.Name = val
-}
-
-// SetExpenseDate sets the value of ExpenseDate.
-func (s *CreateExpenseReq) SetExpenseDate(val time.Time) {
-	s.ExpenseDate = val
-}
-
-// SetUserBalances sets the value of UserBalances.
-func (s *CreateExpenseReq) SetUserBalances(val []ExpenseUserBalance) {
-	s.UserBalances = val
 }
 
 type CreateLedgerOK struct {
@@ -395,30 +333,137 @@ func (s *ErrorResponseStatusCode) SetResponse(val ErrorResponse) {
 	s.Response = val
 }
 
-// Ref: #/components/schemas/ExpenseUserBalance
-type ExpenseUserBalance struct {
-	UserID  uuid.UUID `json:"user_id"`
-	Balance int32     `json:"balance"`
+// Ref: #/components/schemas/Expense
+type Expense struct {
+	// Name of the expense.
+	Name string `json:"name"`
+	// Date and time of the expense.
+	ExpenseDate time.Time       `json:"expense_date"`
+	Records     []ExpenseRecord `json:"records"`
 }
 
-// GetUserID returns the value of UserID.
-func (s *ExpenseUserBalance) GetUserID() uuid.UUID {
-	return s.UserID
+// GetName returns the value of Name.
+func (s *Expense) GetName() string {
+	return s.Name
 }
 
-// GetBalance returns the value of Balance.
-func (s *ExpenseUserBalance) GetBalance() int32 {
-	return s.Balance
+// GetExpenseDate returns the value of ExpenseDate.
+func (s *Expense) GetExpenseDate() time.Time {
+	return s.ExpenseDate
 }
 
-// SetUserID sets the value of UserID.
-func (s *ExpenseUserBalance) SetUserID(val uuid.UUID) {
-	s.UserID = val
+// GetRecords returns the value of Records.
+func (s *Expense) GetRecords() []ExpenseRecord {
+	return s.Records
 }
 
-// SetBalance sets the value of Balance.
-func (s *ExpenseUserBalance) SetBalance(val int32) {
-	s.Balance = val
+// SetName sets the value of Name.
+func (s *Expense) SetName(val string) {
+	s.Name = val
+}
+
+// SetExpenseDate sets the value of ExpenseDate.
+func (s *Expense) SetExpenseDate(val time.Time) {
+	s.ExpenseDate = val
+}
+
+// SetRecords sets the value of Records.
+func (s *Expense) SetRecords(val []ExpenseRecord) {
+	s.Records = val
+}
+
+// Ref: #/components/schemas/ExpenseRecord
+type ExpenseRecord struct {
+	// Type of the record.
+	Type ExpenseRecordType `json:"type"`
+	// User ID of the person who owes money.
+	FromUserID uuid.UUID `json:"from_user_id"`
+	// User ID of the person who is owed money.
+	ToUserID uuid.UUID `json:"to_user_id"`
+	// Amount of money involved in the transaction.
+	Amount int32 `json:"amount"`
+}
+
+// GetType returns the value of Type.
+func (s *ExpenseRecord) GetType() ExpenseRecordType {
+	return s.Type
+}
+
+// GetFromUserID returns the value of FromUserID.
+func (s *ExpenseRecord) GetFromUserID() uuid.UUID {
+	return s.FromUserID
+}
+
+// GetToUserID returns the value of ToUserID.
+func (s *ExpenseRecord) GetToUserID() uuid.UUID {
+	return s.ToUserID
+}
+
+// GetAmount returns the value of Amount.
+func (s *ExpenseRecord) GetAmount() int32 {
+	return s.Amount
+}
+
+// SetType sets the value of Type.
+func (s *ExpenseRecord) SetType(val ExpenseRecordType) {
+	s.Type = val
+}
+
+// SetFromUserID sets the value of FromUserID.
+func (s *ExpenseRecord) SetFromUserID(val uuid.UUID) {
+	s.FromUserID = val
+}
+
+// SetToUserID sets the value of ToUserID.
+func (s *ExpenseRecord) SetToUserID(val uuid.UUID) {
+	s.ToUserID = val
+}
+
+// SetAmount sets the value of Amount.
+func (s *ExpenseRecord) SetAmount(val int32) {
+	s.Amount = val
+}
+
+// Type of the record.
+type ExpenseRecordType string
+
+const (
+	ExpenseRecordTypeExpense    ExpenseRecordType = "expense"
+	ExpenseRecordTypeSettlement ExpenseRecordType = "settlement"
+)
+
+// AllValues returns all ExpenseRecordType values.
+func (ExpenseRecordType) AllValues() []ExpenseRecordType {
+	return []ExpenseRecordType{
+		ExpenseRecordTypeExpense,
+		ExpenseRecordTypeSettlement,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s ExpenseRecordType) MarshalText() ([]byte, error) {
+	switch s {
+	case ExpenseRecordTypeExpense:
+		return []byte(s), nil
+	case ExpenseRecordTypeSettlement:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *ExpenseRecordType) UnmarshalText(data []byte) error {
+	switch ExpenseRecordType(data) {
+	case ExpenseRecordTypeExpense:
+		*s = ExpenseRecordTypeExpense
+		return nil
+	case ExpenseRecordTypeSettlement:
+		*s = ExpenseRecordTypeSettlement
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // GetHealthcheckOK is response for GetHealthcheck operation.
@@ -501,191 +546,80 @@ func (s *Ledger) SetCreatedBy(val uuid.UUID) {
 	s.CreatedBy = val
 }
 
-// Ref: #/components/schemas/LedgerExpense
-type LedgerExpense struct {
-	ID uuid.UUID `json:"id"`
-	// Expense amount.
-	Amount int32 `json:"amount"`
-	// Category ID.
-	CategoryID OptUUID `json:"category_id"`
-	// Expense name.
-	Name string `json:"name"`
-	// Date and time the expense was made.
-	ExpenseDate  time.Time            `json:"expense_date"`
-	UserBalances []ExpenseUserBalance `json:"user_balances"`
-	// Date and time the expense was created.
-	CreatedAt time.Time `json:"createdAt"`
+// Ref: #/components/schemas/LedgerParticipant
+type LedgerParticipant struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+	// Date and time the participant was created.
+	CreatedAt time.Time `json:"created_at"`
 	// User ID of the creator.
-	CreatedBy uuid.UUID `json:"createdBy"`
-	// Date and time the expense was last updated.
-	UpdatedAt time.Time `json:"updatedAt"`
-	// User ID of the last updater.
-	UpdatedBy uuid.UUID `json:"updatedBy"`
+	CreatedBy uuid.UUID `json:"created_by"`
+	// User's balance in the ledger.
+	Balance int32 `json:"balance"`
 }
 
 // GetID returns the value of ID.
-func (s *LedgerExpense) GetID() uuid.UUID {
+func (s *LedgerParticipant) GetID() uuid.UUID {
 	return s.ID
 }
 
-// GetAmount returns the value of Amount.
-func (s *LedgerExpense) GetAmount() int32 {
-	return s.Amount
-}
-
-// GetCategoryID returns the value of CategoryID.
-func (s *LedgerExpense) GetCategoryID() OptUUID {
-	return s.CategoryID
-}
-
-// GetName returns the value of Name.
-func (s *LedgerExpense) GetName() string {
-	return s.Name
-}
-
-// GetExpenseDate returns the value of ExpenseDate.
-func (s *LedgerExpense) GetExpenseDate() time.Time {
-	return s.ExpenseDate
-}
-
-// GetUserBalances returns the value of UserBalances.
-func (s *LedgerExpense) GetUserBalances() []ExpenseUserBalance {
-	return s.UserBalances
+// GetUserID returns the value of UserID.
+func (s *LedgerParticipant) GetUserID() uuid.UUID {
+	return s.UserID
 }
 
 // GetCreatedAt returns the value of CreatedAt.
-func (s *LedgerExpense) GetCreatedAt() time.Time {
+func (s *LedgerParticipant) GetCreatedAt() time.Time {
 	return s.CreatedAt
 }
 
 // GetCreatedBy returns the value of CreatedBy.
-func (s *LedgerExpense) GetCreatedBy() uuid.UUID {
+func (s *LedgerParticipant) GetCreatedBy() uuid.UUID {
 	return s.CreatedBy
 }
 
-// GetUpdatedAt returns the value of UpdatedAt.
-func (s *LedgerExpense) GetUpdatedAt() time.Time {
-	return s.UpdatedAt
-}
-
-// GetUpdatedBy returns the value of UpdatedBy.
-func (s *LedgerExpense) GetUpdatedBy() uuid.UUID {
-	return s.UpdatedBy
+// GetBalance returns the value of Balance.
+func (s *LedgerParticipant) GetBalance() int32 {
+	return s.Balance
 }
 
 // SetID sets the value of ID.
-func (s *LedgerExpense) SetID(val uuid.UUID) {
+func (s *LedgerParticipant) SetID(val uuid.UUID) {
 	s.ID = val
 }
 
-// SetAmount sets the value of Amount.
-func (s *LedgerExpense) SetAmount(val int32) {
-	s.Amount = val
-}
-
-// SetCategoryID sets the value of CategoryID.
-func (s *LedgerExpense) SetCategoryID(val OptUUID) {
-	s.CategoryID = val
-}
-
-// SetName sets the value of Name.
-func (s *LedgerExpense) SetName(val string) {
-	s.Name = val
-}
-
-// SetExpenseDate sets the value of ExpenseDate.
-func (s *LedgerExpense) SetExpenseDate(val time.Time) {
-	s.ExpenseDate = val
-}
-
-// SetUserBalances sets the value of UserBalances.
-func (s *LedgerExpense) SetUserBalances(val []ExpenseUserBalance) {
-	s.UserBalances = val
+// SetUserID sets the value of UserID.
+func (s *LedgerParticipant) SetUserID(val uuid.UUID) {
+	s.UserID = val
 }
 
 // SetCreatedAt sets the value of CreatedAt.
-func (s *LedgerExpense) SetCreatedAt(val time.Time) {
+func (s *LedgerParticipant) SetCreatedAt(val time.Time) {
 	s.CreatedAt = val
 }
 
 // SetCreatedBy sets the value of CreatedBy.
-func (s *LedgerExpense) SetCreatedBy(val uuid.UUID) {
+func (s *LedgerParticipant) SetCreatedBy(val uuid.UUID) {
 	s.CreatedBy = val
 }
 
-// SetUpdatedAt sets the value of UpdatedAt.
-func (s *LedgerExpense) SetUpdatedAt(val time.Time) {
-	s.UpdatedAt = val
-}
-
-// SetUpdatedBy sets the value of UpdatedBy.
-func (s *LedgerExpense) SetUpdatedBy(val uuid.UUID) {
-	s.UpdatedBy = val
-}
-
-// Ref: #/components/schemas/LedgerParticipantBalance
-type LedgerParticipantBalance struct {
-	UserID  uuid.UUID `json:"user_id"`
-	Balance int32     `json:"balance"`
-}
-
-// GetUserID returns the value of UserID.
-func (s *LedgerParticipantBalance) GetUserID() uuid.UUID {
-	return s.UserID
-}
-
-// GetBalance returns the value of Balance.
-func (s *LedgerParticipantBalance) GetBalance() int32 {
-	return s.Balance
-}
-
-// SetUserID sets the value of UserID.
-func (s *LedgerParticipantBalance) SetUserID(val uuid.UUID) {
-	s.UserID = val
-}
-
 // SetBalance sets the value of Balance.
-func (s *LedgerParticipantBalance) SetBalance(val int32) {
+func (s *LedgerParticipant) SetBalance(val int32) {
 	s.Balance = val
 }
 
-type ListLedgerBalancesOK struct {
-	Balances []LedgerParticipantBalance `json:"balances"`
+type ListLedgerParticipantsOK struct {
+	Participants []LedgerParticipant `json:"participants"`
 }
 
-// GetBalances returns the value of Balances.
-func (s *ListLedgerBalancesOK) GetBalances() []LedgerParticipantBalance {
-	return s.Balances
+// GetParticipants returns the value of Participants.
+func (s *ListLedgerParticipantsOK) GetParticipants() []LedgerParticipant {
+	return s.Participants
 }
 
-// SetBalances sets the value of Balances.
-func (s *ListLedgerBalancesOK) SetBalances(val []LedgerParticipantBalance) {
-	s.Balances = val
-}
-
-type ListLedgerExpensesOK struct {
-	Cursor   OptDateTime     `json:"cursor"`
-	Expenses []LedgerExpense `json:"expenses"`
-}
-
-// GetCursor returns the value of Cursor.
-func (s *ListLedgerExpensesOK) GetCursor() OptDateTime {
-	return s.Cursor
-}
-
-// GetExpenses returns the value of Expenses.
-func (s *ListLedgerExpensesOK) GetExpenses() []LedgerExpense {
-	return s.Expenses
-}
-
-// SetCursor sets the value of Cursor.
-func (s *ListLedgerExpensesOK) SetCursor(val OptDateTime) {
-	s.Cursor = val
-}
-
-// SetExpenses sets the value of Expenses.
-func (s *ListLedgerExpensesOK) SetExpenses(val []LedgerExpense) {
-	s.Expenses = val
+// SetParticipants sets the value of Participants.
+func (s *ListLedgerParticipantsOK) SetParticipants(val []LedgerParticipant) {
+	s.Participants = val
 }
 
 type ListLedgersOK struct {
@@ -744,52 +678,6 @@ func (s *LoginReq) SetPassword(val string) {
 	s.Password = val
 }
 
-// NewOptDateTime returns new OptDateTime with value set to v.
-func NewOptDateTime(v time.Time) OptDateTime {
-	return OptDateTime{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptDateTime is optional time.Time.
-type OptDateTime struct {
-	Value time.Time
-	Set   bool
-}
-
-// IsSet returns true if OptDateTime was set.
-func (o OptDateTime) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptDateTime) Reset() {
-	var v time.Time
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptDateTime) SetTo(v time.Time) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptDateTime) Get() (v time.Time, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptDateTime) Or(d time.Time) time.Time {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
 // NewOptErrorMetadata returns new OptErrorMetadata with value set to v.
 func NewOptErrorMetadata(v ErrorMetadata) OptErrorMetadata {
 	return OptErrorMetadata{
@@ -836,52 +724,6 @@ func (o OptErrorMetadata) Or(d ErrorMetadata) ErrorMetadata {
 	return d
 }
 
-// NewOptInt32 returns new OptInt32 with value set to v.
-func NewOptInt32(v int32) OptInt32 {
-	return OptInt32{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptInt32 is optional int32.
-type OptInt32 struct {
-	Value int32
-	Set   bool
-}
-
-// IsSet returns true if OptInt32 was set.
-func (o OptInt32) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptInt32) Reset() {
-	var v int32
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptInt32) SetTo(v int32) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptInt32) Get() (v int32, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptInt32) Or(d int32) int32 {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
 // NewOptString returns new OptString with value set to v.
 func NewOptString(v string) OptString {
 	return OptString{
@@ -922,52 +764,6 @@ func (o OptString) Get() (v string, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptString) Or(d string) string {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptUUID returns new OptUUID with value set to v.
-func NewOptUUID(v uuid.UUID) OptUUID {
-	return OptUUID{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptUUID is optional uuid.UUID.
-type OptUUID struct {
-	Value uuid.UUID
-	Set   bool
-}
-
-// IsSet returns true if OptUUID was set.
-func (o OptUUID) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptUUID) Reset() {
-	var v uuid.UUID
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptUUID) SetTo(v uuid.UUID) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptUUID) Get() (v uuid.UUID, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptUUID) Or(d uuid.UUID) uuid.UUID {
 	if v, ok := o.Get(); ok {
 		return v
 	}

@@ -47,7 +47,15 @@ func (r *LedgerRepository) Create(ctx context.Context, ledger *v1.Ledger) error 
 			return fmt.Errorf("failed to create ledger: %w", err)
 		}
 
-		if err := r.addLedgerParticipant(ctx, query, ledger.ID, ledger.CreatedBy, ledger.CreatedBy); err != nil {
+		addReq := sqlc.AddUserToLedgerParams{
+			ID:        convertUUID(v1.NewID()),
+			LedgerID:  createLedgerReq.ID,
+			UserID:    createLedgerReq.CreatedBy,
+			CreatedAt: createLedgerReq.CreatedAt,
+			CreatedBy: createLedgerReq.CreatedBy,
+		}
+
+		if err := query.AddUserToLedger(ctx, addReq); err != nil {
 			return fmt.Errorf("failed to add user to ledger: %w", err)
 		}
 

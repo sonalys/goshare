@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"math"
 	"time"
 
 	"github.com/sonalys/goshare/internal/pkg/otel"
@@ -14,13 +13,11 @@ import (
 
 type (
 	CreateExpenseRequest struct {
-		UserID       v1.ID
-		LedgerID     v1.ID
-		CategoryID   *v1.ID
-		Amount       int32
-		Name         string
-		ExpenseDate  time.Time
-		UserBalances []v1.ExpenseUserBalance
+		UserID      v1.ID
+		LedgerID    v1.ID
+		Name        string
+		ExpenseDate time.Time
+		Records     []v1.Record
 	}
 
 	CreateExpenseResponse struct {
@@ -35,10 +32,6 @@ func (r CreateExpenseRequest) Validate() error {
 		errs = append(errs, v1.NewRequiredFieldError("ledger_id"))
 	}
 
-	if r.Amount <= 0 {
-		errs = append(errs, v1.NewFieldRangeError("amount", 0, math.MaxInt32))
-	}
-
 	if r.Name == "" {
 		errs = append(errs, v1.NewRequiredFieldError("name"))
 	}
@@ -47,36 +40,8 @@ func (r CreateExpenseRequest) Validate() error {
 		errs = append(errs, v1.NewRequiredFieldError("expense_date"))
 	}
 
-	if len(r.UserBalances) == 0 {
+	if len(r.Records) == 0 {
 		errs = append(errs, v1.NewRequiredFieldError("user_balances"))
-	}
-
-	var balanceSum int32
-	var totalPaid int32
-	for i, ub := range r.UserBalances {
-		balanceSum += ub.Balance
-
-		if ub.Balance > 0 {
-			totalPaid += ub.Balance
-		}
-
-		if ub.UserID.IsEmpty() {
-			errs = append(errs, v1.NewRequiredFieldError("user_balances["+fmt.Sprint(i)+"].user_id"))
-		}
-	}
-
-	if balanceSum != 0 {
-		errs = append(errs, v1.FieldError{
-			Field: "user_balances",
-			Cause: fmt.Errorf("%w: sum should be equal to 0. got %s", v1.ErrInvalidValue, v1.NewMoney(balanceSum, 2, "$")),
-		})
-	}
-
-	if totalPaid > r.Amount {
-		errs = append(errs, v1.FieldError{
-			Field: "user_balances",
-			Cause: fmt.Errorf("%w: total payment should be less or equal to the expense value. got %s", v1.ErrInvalidValue, v1.NewMoney(totalPaid, 2, "$")),
-		})
 	}
 
 	return errs.Validate()
@@ -91,18 +56,25 @@ func (c *Controller) CreateExpense(ctx context.Context, req CreateExpenseRequest
 		return nil, fmt.Errorf("invalid request: %w", err)
 	}
 
+	var totalAmount int32
+
+	for _, record := range req.Records {
+		if record.Type == v1.RecordTypeExpense {
+			totalAmount += record.Amount
+		}
+	}
+
 	expense := &v1.Expense{
-		ID:           v1.NewID(),
-		CategoryID:   req.CategoryID,
-		LedgerID:     req.LedgerID,
-		Amount:       req.Amount,
-		Name:         req.Name,
-		ExpenseDate:  req.ExpenseDate,
-		UserBalances: req.UserBalances,
-		CreatedAt:    time.Now(),
-		CreatedBy:    req.UserID,
-		UpdatedAt:    time.Now(),
-		UpdatedBy:    req.UserID,
+		ID:          v1.NewID(),
+		LedgerID:    req.LedgerID,
+		Name:        req.Name,
+		Amount:      totalAmount,
+		ExpenseDate: req.ExpenseDate,
+		Records:     req.Records,
+		CreatedAt:   time.Now(),
+		CreatedBy:   req.UserID,
+		UpdatedAt:   time.Now(),
+		UpdatedBy:   req.UserID,
 	}
 
 	switch err := c.expenseRepository.Create(ctx, expense); {

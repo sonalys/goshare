@@ -8,18 +8,18 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
-	// AddLedgerMember implements AddLedgerMember operation.
+	// AddLedgerParticipant implements AddLedgerParticipant operation.
 	//
 	// Adds a new member to the Ledger.
 	//
-	// POST /ledgers/{ledgerID}/members
-	AddLedgerMember(ctx context.Context, req *AddLedgerMemberReq, params AddLedgerMemberParams) error
+	// POST /ledgers/{ledgerID}/participants
+	AddLedgerParticipant(ctx context.Context, req *AddLedgerParticipantReq, params AddLedgerParticipantParams) error
 	// CreateExpense implements CreateExpense operation.
 	//
-	// Creates a new expense.
+	// Creates a new expense record.
 	//
 	// POST /ledgers/{ledgerID}/expenses
-	CreateExpense(ctx context.Context, req *CreateExpenseReq, params CreateExpenseParams) (*CreateExpenseOK, error)
+	CreateExpense(ctx context.Context, req *Expense, params CreateExpenseParams) (*CreateExpenseOK, error)
 	// CreateLedger implements CreateLedger operation.
 	//
 	// Creates a new ledger. A user can have a maximum of 5 ledgers.
@@ -38,18 +38,12 @@ type Handler interface {
 	//
 	// GET /authentication/whoami
 	GetIdentity(ctx context.Context) (*GetIdentityOK, error)
-	// ListLedgerBalances implements ListLedgerBalances operation.
+	// ListLedgerParticipants implements ListLedgerParticipants operation.
 	//
-	// Lists all ledger balances.
+	// Lists all ledger participants and their balances.
 	//
-	// GET /ledgers/{ledgerID}/balances
-	ListLedgerBalances(ctx context.Context, params ListLedgerBalancesParams) (*ListLedgerBalancesOK, error)
-	// ListLedgerExpenses implements ListLedgerExpenses operation.
-	//
-	// Lists the expenses of the Ledger.
-	//
-	// GET /ledgers/{ledgerID}/expenses
-	ListLedgerExpenses(ctx context.Context, params ListLedgerExpensesParams) (*ListLedgerExpensesOK, error)
+	// GET /ledgers/{ledgerID}/participants
+	ListLedgerParticipants(ctx context.Context, params ListLedgerParticipantsParams) (*ListLedgerParticipantsOK, error)
 	// ListLedgers implements ListLedgers operation.
 	//
 	// Lists all ledgers.

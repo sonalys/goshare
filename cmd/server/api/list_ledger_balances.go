@@ -7,23 +7,26 @@ import (
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
-func (a *API) ListLedgerBalances(ctx context.Context, params handlers.ListLedgerBalancesParams) (r *handlers.ListLedgerBalancesOK, _ error) {
-	balances, err := a.dependencies.LedgerController.GetBalances(ctx, v1.ConvertID(params.LedgerID))
+func (a *API) ListLedgerParticipants(ctx context.Context, params handlers.ListLedgerParticipantsParams) (r *handlers.ListLedgerParticipantsOK, _ error) {
+	balances, err := a.dependencies.LedgerController.GetParticipants(ctx, v1.ConvertID(params.LedgerID))
 	if err != nil {
 		return nil, err
 	}
 
-	return &handlers.ListLedgerBalancesOK{
-		Balances: mapLedgerParticipantBalanceToResponseObject(balances),
+	return &handlers.ListLedgerParticipantsOK{
+		Participants: mapLedgerParticipantBalanceToResponseObject(balances),
 	}, nil
 }
 
-func mapLedgerParticipantBalanceToResponseObject(balance []v1.LedgerParticipantBalance) []handlers.LedgerParticipantBalance {
-	var balances []handlers.LedgerParticipantBalance
+func mapLedgerParticipantBalanceToResponseObject(balance []v1.LedgerParticipant) []handlers.LedgerParticipant {
+	var balances []handlers.LedgerParticipant
 	for _, b := range balance {
-		balances = append(balances, handlers.LedgerParticipantBalance{
-			UserID:  b.UserID.UUID(),
-			Balance: b.Balance,
+		balances = append(balances, handlers.LedgerParticipant{
+			ID:        b.ID.UUID(),
+			UserID:    b.UserID.UUID(),
+			CreatedAt: b.CreatedAt,
+			CreatedBy: b.CreatedBy.UUID(),
+			Balance:   b.Balance,
 		})
 	}
 

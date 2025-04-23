@@ -6,14 +6,13 @@ package handlers
 type OperationName = string
 
 const (
-	AddLedgerMemberOperation    OperationName = "AddLedgerMember"
-	CreateExpenseOperation      OperationName = "CreateExpense"
-	CreateLedgerOperation       OperationName = "CreateLedger"
-	GetHealthcheckOperation     OperationName = "GetHealthcheck"
-	GetIdentityOperation        OperationName = "GetIdentity"
-	ListLedgerBalancesOperation OperationName = "ListLedgerBalances"
-	ListLedgerExpensesOperation OperationName = "ListLedgerExpenses"
-	ListLedgersOperation        OperationName = "ListLedgers"
-	LoginOperation              OperationName = "Login"
-	RegisterUserOperation       OperationName = "RegisterUser"
+	AddLedgerParticipantOperation   OperationName = "AddLedgerParticipant"
+	CreateExpenseOperation          OperationName = "CreateExpense"
+	CreateLedgerOperation           OperationName = "CreateLedger"
+	GetHealthcheckOperation         OperationName = "GetHealthcheck"
+	GetIdentityOperation            OperationName = "GetIdentity"
+	ListLedgerParticipantsOperation OperationName = "ListLedgerParticipants"
+	ListLedgersOperation            OperationName = "ListLedgers"
+	LoginOperation                  OperationName = "Login"
+	RegisterUserOperation           OperationName = "RegisterUser"
 )

@@ -7,7 +7,7 @@ import (
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
-func (a *API) ListLedgers(ctx context.Context) (r *handlers.ListLedgersOK, _ error) {
+func (a *API) ListLedgers(ctx context.Context) (*handlers.ListLedgersOK, error) {
 	identity, err := getIdentity(ctx)
 	if err != nil {
 		return nil, err

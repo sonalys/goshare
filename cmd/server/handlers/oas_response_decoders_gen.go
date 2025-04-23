@@ -16,11 +16,11 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
-func decodeAddLedgerMemberResponse(resp *http.Response) (res *AddLedgerMemberAccepted, _ error) {
+func decodeAddLedgerParticipantResponse(resp *http.Response) (res *AddLedgerParticipantAccepted, _ error) {
 	switch resp.StatusCode {
 	case 202:
 		// Code 202.
-		return &AddLedgerMemberAccepted{}, nil
+		return &AddLedgerParticipantAccepted{}, nil
 	}
 	// Convenient error response.
 	defRes, err := func() (res *ErrorResponseStatusCode, err error) {
@@ -421,7 +421,7 @@ func decodeGetIdentityResponse(resp *http.Response) (res *GetIdentityOK, _ error
 	return res, errors.Wrap(defRes, "error")
 }
 
-func decodeListLedgerBalancesResponse(resp *http.Response) (res *ListLedgerBalancesOK, _ error) {
+func decodeListLedgerParticipantsResponse(resp *http.Response) (res *ListLedgerParticipantsOK, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -437,108 +437,7 @@ func decodeListLedgerBalancesResponse(resp *http.Response) (res *ListLedgerBalan
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response ListLedgerBalancesOK
-			if err := func() error {
-				if err := response.Decode(d); err != nil {
-					return err
-				}
-				if err := d.Skip(); err != io.EOF {
-					return errors.New("unexpected trailing data")
-				}
-				return nil
-			}(); err != nil {
-				err = &ogenerrors.DecodeBodyError{
-					ContentType: ct,
-					Body:        buf,
-					Err:         err,
-				}
-				return res, err
-			}
-			// Validate response.
-			if err := func() error {
-				if err := response.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return res, errors.Wrap(err, "validate")
-			}
-			return &response, nil
-		default:
-			return res, validate.InvalidContentType(ct)
-		}
-	}
-	// Convenient error response.
-	defRes, err := func() (res *ErrorResponseStatusCode, err error) {
-		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
-		if err != nil {
-			return res, errors.Wrap(err, "parse media type")
-		}
-		switch {
-		case ct == "application/json":
-			buf, err := io.ReadAll(resp.Body)
-			if err != nil {
-				return res, err
-			}
-			d := jx.DecodeBytes(buf)
-
-			var response ErrorResponse
-			if err := func() error {
-				if err := response.Decode(d); err != nil {
-					return err
-				}
-				if err := d.Skip(); err != io.EOF {
-					return errors.New("unexpected trailing data")
-				}
-				return nil
-			}(); err != nil {
-				err = &ogenerrors.DecodeBodyError{
-					ContentType: ct,
-					Body:        buf,
-					Err:         err,
-				}
-				return res, err
-			}
-			// Validate response.
-			if err := func() error {
-				if err := response.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return res, errors.Wrap(err, "validate")
-			}
-			return &ErrorResponseStatusCode{
-				StatusCode: resp.StatusCode,
-				Response:   response,
-			}, nil
-		default:
-			return res, validate.InvalidContentType(ct)
-		}
-	}()
-	if err != nil {
-		return res, errors.Wrapf(err, "default (code %d)", resp.StatusCode)
-	}
-	return res, errors.Wrap(defRes, "error")
-}
-
-func decodeListLedgerExpensesResponse(resp *http.Response) (res *ListLedgerExpensesOK, _ error) {
-	switch resp.StatusCode {
-	case 200:
-		// Code 200.
-		ct, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
-		if err != nil {
-			return res, errors.Wrap(err, "parse media type")
-		}
-		switch {
-		case ct == "application/json":
-			buf, err := io.ReadAll(resp.Body)
-			if err != nil {
-				return res, err
-			}
-			d := jx.DecodeBytes(buf)
-
-			var response ListLedgerExpensesOK
+			var response ListLedgerParticipantsOK
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err

@@ -31,7 +31,7 @@ tasks:
     cmd: go run ./cmd/migration/...
 
   generate-sql:
-    cmd: go run github.com/sqlc-dev/sqlc/cmd/sqlc -f .config/.sqlc.yaml generate
+    cmd: go tool sqlc -f .config/.sqlc.yaml generate
 
   generate-openapi:
     cmd: go tool ogen -package handlers --target cmd/server/handlers --clean cmd/server/spec/root.yaml

@@ -189,28 +189,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							break
 						}
 						switch elem[0] {
-						case 'b': // Prefix: "balances"
-
-							if l := len("balances"); len(elem) >= l && elem[0:l] == "balances" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch r.Method {
-								case "GET":
-									s.handleListLedgerBalancesRequest([1]string{
-										args[0],
-									}, elemIsEscaped, w, r)
-								default:
-									s.notAllowed(w, r, "GET")
-								}
-
-								return
-							}
-
 						case 'e': // Prefix: "expenses"
 
 							if l := len("expenses"); len(elem) >= l && elem[0:l] == "expenses" {
@@ -222,24 +200,20 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							if len(elem) == 0 {
 								// Leaf node.
 								switch r.Method {
-								case "GET":
-									s.handleListLedgerExpensesRequest([1]string{
-										args[0],
-									}, elemIsEscaped, w, r)
 								case "POST":
 									s.handleCreateExpenseRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								default:
-									s.notAllowed(w, r, "GET,POST")
+									s.notAllowed(w, r, "POST")
 								}
 
 								return
 							}
 
-						case 'm': // Prefix: "members"
+						case 'p': // Prefix: "participants"
 
-							if l := len("members"); len(elem) >= l && elem[0:l] == "members" {
+							if l := len("participants"); len(elem) >= l && elem[0:l] == "participants" {
 								elem = elem[l:]
 							} else {
 								break
@@ -248,12 +222,16 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							if len(elem) == 0 {
 								// Leaf node.
 								switch r.Method {
+								case "GET":
+									s.handleListLedgerParticipantsRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
 								case "POST":
-									s.handleAddLedgerMemberRequest([1]string{
+									s.handleAddLedgerParticipantRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								default:
-									s.notAllowed(w, r, "POST")
+									s.notAllowed(w, r, "GET,POST")
 								}
 
 								return
@@ -529,30 +507,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							break
 						}
 						switch elem[0] {
-						case 'b': // Prefix: "balances"
-
-							if l := len("balances"); len(elem) >= l && elem[0:l] == "balances" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								// Leaf node.
-								switch method {
-								case "GET":
-									r.name = ListLedgerBalancesOperation
-									r.summary = ""
-									r.operationID = "ListLedgerBalances"
-									r.pathPattern = "/ledgers/{ledgerID}/balances"
-									r.args = args
-									r.count = 1
-									return r, true
-								default:
-									return
-								}
-							}
-
 						case 'e': // Prefix: "expenses"
 
 							if l := len("expenses"); len(elem) >= l && elem[0:l] == "expenses" {
@@ -564,14 +518,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							if len(elem) == 0 {
 								// Leaf node.
 								switch method {
-								case "GET":
-									r.name = ListLedgerExpensesOperation
-									r.summary = ""
-									r.operationID = "ListLedgerExpenses"
-									r.pathPattern = "/ledgers/{ledgerID}/expenses"
-									r.args = args
-									r.count = 1
-									return r, true
 								case "POST":
 									r.name = CreateExpenseOperation
 									r.summary = ""
@@ -585,9 +531,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								}
 							}
 
-						case 'm': // Prefix: "members"
+						case 'p': // Prefix: "participants"
 
-							if l := len("members"); len(elem) >= l && elem[0:l] == "members" {
+							if l := len("participants"); len(elem) >= l && elem[0:l] == "participants" {
 								elem = elem[l:]
 							} else {
 								break
@@ -596,11 +542,19 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							if len(elem) == 0 {
 								// Leaf node.
 								switch method {
-								case "POST":
-									r.name = AddLedgerMemberOperation
+								case "GET":
+									r.name = ListLedgerParticipantsOperation
 									r.summary = ""
-									r.operationID = "AddLedgerMember"
-									r.pathPattern = "/ledgers/{ledgerID}/members"
+									r.operationID = "ListLedgerParticipants"
+									r.pathPattern = "/ledgers/{ledgerID}/participants"
+									r.args = args
+									r.count = 1
+									return r, true
+								case "POST":
+									r.name = AddLedgerParticipantOperation
+									r.summary = ""
+									r.operationID = "AddLedgerParticipant"
+									r.pathPattern = "/ledgers/{ledgerID}/participants"
 									r.args = args
 									r.count = 1
 									return r, true
