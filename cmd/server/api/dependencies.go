@@ -25,7 +25,7 @@ type (
 	}
 
 	Dependencies struct {
-		LedgerController
-		UserController
+		LedgerController LedgerController
+		UserController   UserController
 	}
 )

@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -44,7 +45,11 @@ func (c *Client) transaction(ctx context.Context, f func(tx pgx.Tx) error) error
 	if err != nil {
 		return fmt.Errorf("failed to start transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		if err := tx.Rollback(ctx); err != nil {
+			slog.ErrorContext(ctx, "failed to rollback transaction")
+		}
+	}()
 
 	err = f(tx)
 	if err != nil {

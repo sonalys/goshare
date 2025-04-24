@@ -9,7 +9,7 @@ import (
 
 // AuthenticationWhoAmI implements handlers.StrictServerInterface.
 func (a *API) AuthenticationWhoAmI(ctx context.Context) (*handlers.AuthenticationWhoAmIOK, error) {
-	identity, err := a.AuthenticationWhoAmI(ctx)
+	identity, err := getIdentity(ctx)
 	if err != nil {
 		slog.ErrorContext(ctx, "could not retrieve identity", slog.Any("error", err))
 		return nil, err
@@ -17,6 +17,6 @@ func (a *API) AuthenticationWhoAmI(ctx context.Context) (*handlers.Authenticatio
 
 	return &handlers.AuthenticationWhoAmIOK{
 		Email:  identity.Email,
-		UserID: identity.UserID,
+		UserID: identity.UserID.UUID(),
 	}, nil
 }

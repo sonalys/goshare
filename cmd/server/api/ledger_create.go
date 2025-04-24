@@ -18,8 +18,8 @@ func (a *API) LedgerCreate(ctx context.Context, req *handlers.LedgerCreateReq) (
 		Name:   req.Name,
 	}
 
-	switch resp, err := a.dependencies.LedgerController.Create(ctx, apiParams); {
-	case err == nil:
+	switch resp, err := a.dependencies.LedgerController.Create(ctx, apiParams); err {
+	case nil:
 		return &handlers.LedgerCreateOK{
 			ID: resp.ID.UUID(),
 		}, nil

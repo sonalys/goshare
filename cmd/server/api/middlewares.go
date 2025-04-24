@@ -8,7 +8,9 @@ import (
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
-const userCtxKey = "user-key"
+type contextKey string
+
+var userCtxKey contextKey = "user-key"
 
 func getIdentity(ctx context.Context) (*v1.Identity, error) {
 	identity, ok := ctx.Value(userCtxKey).(*v1.Identity)

@@ -50,10 +50,11 @@ func (r *LedgerRepository) AddParticipants(ctx context.Context, ledgerID v1.ID, 
 			}
 		}
 
+	outer2:
 		for _, existingParticipant := range participantsModel {
 			for _, participant := range ledger.Participants {
 				if participant.UserID.UUID() == existingParticipant.UserID.Bytes {
-					continue outer
+					continue outer2
 				}
 			}
 			participantsToRemove = append(participantsToRemove, existingParticipant)

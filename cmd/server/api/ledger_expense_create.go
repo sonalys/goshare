@@ -23,8 +23,8 @@ func (a *API) LedgerExpenseCreate(ctx context.Context, req *handlers.Expense, pa
 		Records:     convertUserBalances(identity.UserID, req.Records),
 	}
 
-	switch resp, err := a.dependencies.LedgerController.CreateExpense(ctx, apiReq); {
-	case err == nil:
+	switch resp, err := a.dependencies.LedgerController.CreateExpense(ctx, apiReq); err {
+	case nil:
 		return &handlers.LedgerExpenseCreateOK{
 			ID: resp.ID.UUID(),
 		}, nil
