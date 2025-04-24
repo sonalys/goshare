@@ -54,7 +54,7 @@ func (c *Controller) AddParticipants(ctx context.Context, req AddMembersRequest)
 		slog.String("ledger_id", req.LedgerID.String()),
 	}
 
-	users, err := c.userRepository.GetByEmail(ctx, req.Emails)
+	users, err := c.userRepository.ListByEmail(ctx, req.Emails)
 	if err != nil {
 		slog.ErrorContext(ctx, "failed to get users by email", append(logFields, slog.Any("error", err))...)
 		return fmt.Errorf("failed to get users by email: %w", err)

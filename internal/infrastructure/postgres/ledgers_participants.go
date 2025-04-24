@@ -30,7 +30,7 @@ func (r *LedgerRepository) AddParticipants(ctx context.Context, ledgerID v1.ID, 
 			return fmt.Errorf("getting ledger participants: %w", err)
 		}
 
-		ledger := newLedger(&ledgerModel, participantsModel)
+		ledger := mappers.NewLedger(&ledgerModel, participantsModel)
 
 		if err := updateFn(ledger); err != nil {
 			return fmt.Errorf("updating ledger: %w", err)

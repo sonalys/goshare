@@ -17,7 +17,7 @@ type (
 	}
 
 	UserRepository interface {
-		GetByEmail(ctx context.Context, emails []string) ([]v1.User, error)
+		ListByEmail(ctx context.Context, emails []string) ([]v1.User, error)
 	}
 
 	ExpenseRepository interface {

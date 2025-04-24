@@ -54,11 +54,11 @@ func (q *Queries) FindUserByEmail(ctx context.Context, email string) (User, erro
 	return i, err
 }
 
-const getByEmail = `-- name: GetByEmail :many
+const getByEmail = `-- name: ListByEmail :many
 SELECT id, first_name, last_name, email, password_hash, created_at FROM users WHERE email = ANY($1::text[])
 `
 
-func (q *Queries) GetByEmail(ctx context.Context, emails []string) ([]User, error) {
+func (q *Queries) ListByEmail(ctx context.Context, emails []string) ([]User, error) {
 	rows, err := q.db.Query(ctx, getByEmail, emails)
 	if err != nil {
 		return nil, err

@@ -20,3 +20,10 @@ func isConstraintError(err error) bool {
 
 	return false
 }
+
+func isViolatingConstraint(err error, constraintName string) bool {
+	if pgErr := new(pgconn.PgError); errors.As(err, &pgErr) {
+		return pgErr.ConstraintName == constraintName
+	}
+	return false
+}

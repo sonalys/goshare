@@ -2,11 +2,10 @@ package postgres
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"slices"
 
-	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres/mappers"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
@@ -21,14 +20,14 @@ func NewUsersRepository(client *Client) *UsersRepository {
 	}
 }
 
-func (r *UsersRepository) Create(ctx context.Context, participant *v1.User) error {
+func (r *UsersRepository) Create(ctx context.Context, user *v1.User) error {
 	return mapError(r.client.queries().CreateUser(ctx, sqlc.CreateUserParams{
-		ID:           convertUUID(participant.ID),
-		FirstName:    participant.FirstName,
-		LastName:     participant.LastName,
-		Email:        participant.Email,
-		PasswordHash: participant.PasswordHash,
-		CreatedAt:    convertTime(participant.CreatedAt),
+		ID:           convertUUID(user.ID),
+		FirstName:    user.FirstName,
+		LastName:     user.LastName,
+		Email:        user.Email,
+		PasswordHash: user.PasswordHash,
+		CreatedAt:    convertTime(user.CreatedAt),
 	}))
 }
 
@@ -38,34 +37,12 @@ func (r *UsersRepository) FindByEmail(ctx context.Context, email string) (*v1.Us
 		return nil, mapError(err)
 	}
 
-	return convertUser(user), nil
+	return mappers.NewUser(user), nil
 }
 
-func convertUser(user sqlc.User) *v1.User {
-	return &v1.User{
-		ID:              newUUID(user.ID),
-		FirstName:       user.FirstName,
-		LastName:        user.LastName,
-		Email:           user.Email,
-		IsEmailVerified: false,
-		PasswordHash:    user.PasswordHash,
-		CreatedAt:       user.CreatedAt.Time,
-	}
-}
-
-func convertUsers(from []sqlc.User) []v1.User {
-	to := make([]v1.User, 0, len(from))
-
-	for i := range from {
-		to = append(to, *convertUser(from[i]))
-	}
-
-	return to
-}
-
-func (r *UsersRepository) GetByEmail(ctx context.Context, emails []string) ([]v1.User, error) {
+func (r *UsersRepository) ListByEmail(ctx context.Context, emails []string) ([]v1.User, error) {
 	emails = slices.Compact(emails)
-	users, err := r.client.queries().GetByEmail(ctx, emails)
+	users, err := r.client.queries().ListByEmail(ctx, emails)
 	if err != nil {
 		return nil, mapError(err)
 	}
@@ -86,12 +63,5 @@ func (r *UsersRepository) GetByEmail(ctx context.Context, emails []string) ([]v1
 		return nil, fmt.Errorf("failed to get users by email: %w", err)
 	}
 
-	return convertUsers(users), nil
-}
-
-func isViolatingConstraint(err error, constraintName string) bool {
-	if pgErr := new(pgconn.PgError); errors.As(err, &pgErr) {
-		return pgErr.ConstraintName == constraintName
-	}
-	return false
+	return mappers.NewUsers(users), nil
 }

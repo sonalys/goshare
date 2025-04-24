@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres/mappers"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
@@ -79,7 +80,7 @@ func (r *LedgerRepository) Find(ctx context.Context, id v1.ID) (*v1.Ledger, erro
 		return nil, mapLedgerError(err)
 	}
 
-	return newLedger(&ledger, participants), nil
+	return mappers.NewLedger(&ledger, participants), nil
 }
 
 func (r *LedgerRepository) GetByUser(ctx context.Context, userID v1.ID) ([]v1.Ledger, error) {
@@ -94,31 +95,9 @@ func (r *LedgerRepository) GetByUser(ctx context.Context, userID v1.ID) ([]v1.Le
 		if err != nil {
 			return nil, mapLedgerError(err)
 		}
-		result = append(result, *newLedger(&ledger, participants))
+		result = append(result, *mappers.NewLedger(&ledger, participants))
 	}
 	return result, nil
-}
-
-func newLedger(ledger *sqlc.Ledger, participants []sqlc.LedgerParticipant) *v1.Ledger {
-	ledgerParticipants := make([]v1.LedgerParticipant, 0, len(participants))
-
-	for _, participant := range participants {
-		ledgerParticipants = append(ledgerParticipants, v1.LedgerParticipant{
-			ID:        newUUID(participant.ID),
-			UserID:    newUUID(participant.UserID),
-			Balance:   participant.Balance,
-			CreatedAt: participant.CreatedAt.Time,
-			CreatedBy: newUUID(participant.CreatedBy),
-		})
-	}
-
-	return &v1.Ledger{
-		ID:           newUUID(ledger.ID),
-		Name:         ledger.Name,
-		Participants: ledgerParticipants,
-		CreatedAt:    ledger.CreatedAt.Time,
-		CreatedBy:    newUUID(ledger.CreatedBy),
-	}
 }
 
 func mapLedgerError(err error) error {
