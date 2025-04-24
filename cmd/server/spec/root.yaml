@@ -294,6 +294,59 @@ paths:
                     type: string
                     format: uuid
 
+    get:
+      operationId: ListExpenses
+      description: Lists all expenses in the ledger
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: ledgerID
+          in: path
+          required: true
+          description: Ledger ID
+          schema:
+            type: string
+            format: uuid
+        - name: cursor
+          in: query
+          required: false
+          description: Cursor for pagination
+          schema:
+            type: string
+            format: date-time
+            example: "2020-01-01T00:00:00Z"
+        - name: limit
+          in: query
+          required: false
+          description: Number of items to return
+          schema:
+            type: integer
+            format: int32
+            default: 10
+            minimum: 1
+            maximum: 100
+      responses:
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+        '200':
+          description: List of expenses
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - expenses
+                properties:
+                  cursor:
+                    type: string
+                    format: date-time
+                    description: Cursor for pagination
+                    example: "2020-01-01T00:00:00Z"
+                  expenses:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ExpenseSummary"
+
   /ledgers/{ledgerID}/expenses/{expenseID}:
     get:
       operationId: GetExpense
@@ -353,6 +406,57 @@ components:
                 items:
                   $ref: "#/components/schemas/Error"
   schemas:
+    ExpenseSummary:
+      type: object
+      required:
+        - name
+        - expense_date
+        - amount
+        - id
+        - created_at
+        - created_by
+        - updated_at
+        - updated_by
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the expense
+          readOnly: true
+        name:
+          type: string
+          description: Name of the expense
+          example: "Dinner"
+        expense_date:
+          type: string
+          format: date-time
+          description: Date and time of the expense
+          example: "2020-01-01T00:00:00Z"
+        amount:
+          type: integer
+          format: int32
+          description: Total amount of the expense
+          example: 100
+        created_at:
+          type: string
+          format: date-time
+          description: Date and time the expense was created
+          example: "2020-01-01T00:00:00Z"
+        created_by:
+          type: string
+          format: uuid
+          description: User ID of the creator
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        updated_at:
+          type: string
+          format: date-time
+          description: Date and time the expense was last updated
+          example: "2020-01-01T00:00:00Z"
+        updated_by:
+          type: string
+          format: uuid
+          description: User ID of the last updater
+          example: "123e4567-e89b-12d3-a456-426614174000"
     Expense:
       type: object
       required:
@@ -394,7 +498,7 @@ components:
         type:
           type: string
           enum:
-            - "expense"
+            - "debt"
             - "settlement"
           description: Type of the record
         from_user_id:

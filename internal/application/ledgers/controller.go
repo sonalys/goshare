@@ -2,6 +2,7 @@ package ledgers
 
 import (
 	"context"
+	"time"
 
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
@@ -21,6 +22,7 @@ type (
 	ExpenseRepository interface {
 		Create(ctx context.Context, expense *v1.Expense) error
 		Find(ctx context.Context, id v1.ID) (*v1.Expense, error)
+		GetByLedger(ctx context.Context, ledgerID v1.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error)
 	}
 
 	Controller struct {

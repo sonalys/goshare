@@ -3,8 +3,10 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres/mappers"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
@@ -20,7 +22,7 @@ func NewExpenseRepository(client *Client) *ExpenseRepository {
 }
 
 func (r *ExpenseRepository) Create(ctx context.Context, expense *v1.Expense) error {
-	r.client.transaction(ctx, func(tx pgx.Tx) error {
+	return r.client.transaction(ctx, func(tx pgx.Tx) error {
 		query := r.client.queries().WithTx(tx)
 
 		createExpenseReq := sqlc.CreateExpenseParams{
@@ -60,7 +62,6 @@ func (r *ExpenseRepository) Create(ctx context.Context, expense *v1.Expense) err
 
 		return nil
 	})
-	return nil
 }
 
 func (r *ExpenseRepository) Find(ctx context.Context, id v1.ID) (*v1.Expense, error) {
@@ -74,39 +75,23 @@ func (r *ExpenseRepository) Find(ctx context.Context, id v1.ID) (*v1.Expense, er
 		return nil, fmt.Errorf("getting expense records: %w", err)
 	}
 
-	return NewExpense(&expense, records), nil
+	return mappers.NewExpense(&expense, records), nil
 }
 
-func NewExpense(expense *sqlc.Expense, records []sqlc.ExpenseRecord) *v1.Expense {
-	result := &v1.Expense{
-		ID:          newUUID(expense.ID),
-		LedgerID:    newUUID(expense.LedgerID),
-		Amount:      expense.Amount,
-		Name:        expense.Name,
-		ExpenseDate: expense.ExpenseDate.Time,
-		CreatedAt:   expense.CreatedAt.Time,
-		CreatedBy:   newUUID(expense.CreatedBy),
-		UpdatedAt:   expense.UpdatedAt.Time,
-		UpdatedBy:   newUUID(expense.UpdatedBy),
+func (r *ExpenseRepository) GetByLedger(ctx context.Context, ledgerID v1.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
+	expenses, err := r.client.queries().GetLedgerExpenses(ctx, sqlc.GetLedgerExpensesParams{
+		LedgerID:  convertUUID(ledgerID),
+		Limit:     limit,
+		CreatedAt: convertTime(cursor),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("getting ledger expenses: %w", err)
 	}
 
-	for _, record := range records {
-		result.Records = append(result.Records, *NewRecord(&record))
+	result := make([]v1.LedgerExpenseSummary, 0, len(expenses))
+	for _, expense := range expenses {
+		result = append(result, *mappers.NewLedgerExpenseSummary(&expense))
 	}
 
-	return result
-}
-
-func NewRecord(record *sqlc.ExpenseRecord) *v1.Record {
-	return &v1.Record{
-		ID:        newUUID(record.ID),
-		From:      newUUID(record.FromUserID),
-		To:        newUUID(record.ToUserID),
-		Type:      v1.NewRecordType(record.RecordType),
-		Amount:    record.Amount,
-		CreatedAt: record.CreatedAt.Time,
-		CreatedBy: newUUID(record.CreatedBy),
-		UpdatedAt: record.UpdatedAt.Time,
-		UpdatedBy: newUUID(record.UpdatedBy),
-	}
+	return result, nil
 }

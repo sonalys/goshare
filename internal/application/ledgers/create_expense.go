@@ -59,7 +59,7 @@ func (c *Controller) CreateExpense(ctx context.Context, req CreateExpenseRequest
 	var totalAmount int32
 
 	for _, record := range req.Records {
-		if record.Type == v1.RecordTypeExpense {
+		if record.Type == v1.RecordTypeDebt {
 			totalAmount += record.Amount
 		}
 	}

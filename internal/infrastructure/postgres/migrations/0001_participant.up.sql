@@ -56,7 +56,7 @@ CREATE TABLE expense_records (
     id UUID PRIMARY KEY,
     expense_id UUID NOT NULL,
 
-    record_type TEXT NOT NULL CHECK (record_type IN ('expense', 'settlement')),
+    record_type TEXT NOT NULL CHECK (record_type IN ('debt', 'settlement')),
     amount INTEGER NOT NULL,
     from_user_id UUID NOT NULL,
     to_user_id UUID NOT NULL,

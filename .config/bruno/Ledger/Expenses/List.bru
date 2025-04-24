@@ -1,0 +1,24 @@
+meta {
+  name: List
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{api_url}}/ledgers/:ledger_id/expenses?limit=2&cursor={{cursor}}
+  body: none
+  auth: inherit
+}
+
+params:query {
+  limit: 2
+  cursor: {{cursor}}
+}
+
+params:path {
+  ledger_id: {{ledger_id}}
+}
+
+vars:post-response {
+  cursor: res?.body?.cursor
+}

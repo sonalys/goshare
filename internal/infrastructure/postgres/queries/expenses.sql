@@ -18,3 +18,6 @@ INSERT INTO expense_records (id,expense_id,record_type,amount,from_user_id,to_us
 
 -- name: GetExpenseRecords :many
 SELECT * FROM expense_records WHERE expense_id = $1 ORDER BY created_at DESC;
+
+-- name: GetExpensesByLedger :many
+SELECT * FROM expenses WHERE ledger_id = $1 AND created_at < $2 ORDER BY created_at DESC LIMIT $3;

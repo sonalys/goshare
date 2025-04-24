@@ -264,7 +264,7 @@ func (s *ExpenseRecord) Validate() error {
 
 func (s ExpenseRecordType) Validate() error {
 	switch s {
-	case "expense":
+	case "debt":
 		return nil
 	case "settlement":
 		return nil
@@ -295,6 +295,29 @@ func (s *GetIdentityOK) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "email",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *ListExpensesOK) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Expenses == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "expenses",
 			Error: err,
 		})
 	}

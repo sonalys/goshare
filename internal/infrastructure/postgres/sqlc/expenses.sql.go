@@ -140,6 +140,46 @@ func (q *Queries) GetExpenseRecords(ctx context.Context, expenseID pgtype.UUID) 
 	return items, nil
 }
 
+const getExpensesByLedger = `-- name: GetExpensesByLedger :many
+SELECT id, ledger_id, amount, name, expense_date, created_at, created_by, updated_at, updated_by FROM expenses WHERE ledger_id = $1 AND created_at < $2 ORDER BY created_at DESC LIMIT $3
+`
+
+type GetExpensesByLedgerParams struct {
+	LedgerID  pgtype.UUID
+	CreatedAt pgtype.Timestamp
+	Limit     int32
+}
+
+func (q *Queries) GetExpensesByLedger(ctx context.Context, arg GetExpensesByLedgerParams) ([]Expense, error) {
+	rows, err := q.db.Query(ctx, getExpensesByLedger, arg.LedgerID, arg.CreatedAt, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Expense
+	for rows.Next() {
+		var i Expense
+		if err := rows.Scan(
+			&i.ID,
+			&i.LedgerID,
+			&i.Amount,
+			&i.Name,
+			&i.ExpenseDate,
+			&i.CreatedAt,
+			&i.CreatedBy,
+			&i.UpdatedAt,
+			&i.UpdatedBy,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getLedgerExpenses = `-- name: GetLedgerExpenses :many
 SELECT id, ledger_id, amount, name, expense_date, created_at, created_by, updated_at, updated_by FROM expenses WHERE ledger_id = $1 AND created_at < $2 ORDER BY created_at DESC LIMIT $3
 `

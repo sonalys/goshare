@@ -21,6 +21,17 @@ type (
 		CreatedAt time.Time
 		CreatedBy ID
 	}
+
+	LedgerExpenseSummary struct {
+		ID          ID
+		Amount      int32
+		Name        string
+		ExpenseDate time.Time
+		CreatedAt   time.Time
+		CreatedBy   ID
+		UpdatedAt   time.Time
+		UpdatedBy   ID
+	}
 )
 
 const (

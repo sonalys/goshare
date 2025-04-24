@@ -1,0 +1,53 @@
+package mappers
+
+import (
+	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
+	v1 "github.com/sonalys/goshare/internal/pkg/v1"
+)
+
+func NewLedgerExpenseSummary(expense *sqlc.Expense) *v1.LedgerExpenseSummary {
+	return &v1.LedgerExpenseSummary{
+		ID:          newUUID(expense.ID),
+		Amount:      expense.Amount,
+		Name:        expense.Name,
+		ExpenseDate: expense.ExpenseDate.Time,
+		CreatedAt:   expense.CreatedAt.Time,
+		CreatedBy:   newUUID(expense.CreatedBy),
+		UpdatedAt:   expense.UpdatedAt.Time,
+		UpdatedBy:   newUUID(expense.UpdatedBy),
+	}
+}
+
+func NewExpense(expense *sqlc.Expense, records []sqlc.ExpenseRecord) *v1.Expense {
+	result := &v1.Expense{
+		ID:          newUUID(expense.ID),
+		LedgerID:    newUUID(expense.LedgerID),
+		Amount:      expense.Amount,
+		Name:        expense.Name,
+		ExpenseDate: expense.ExpenseDate.Time,
+		CreatedAt:   expense.CreatedAt.Time,
+		CreatedBy:   newUUID(expense.CreatedBy),
+		UpdatedAt:   expense.UpdatedAt.Time,
+		UpdatedBy:   newUUID(expense.UpdatedBy),
+	}
+
+	for _, record := range records {
+		result.Records = append(result.Records, *NewRecord(&record))
+	}
+
+	return result
+}
+
+func NewRecord(record *sqlc.ExpenseRecord) *v1.Record {
+	return &v1.Record{
+		ID:        newUUID(record.ID),
+		From:      newUUID(record.FromUserID),
+		To:        newUUID(record.ToUserID),
+		Type:      v1.NewRecordType(record.RecordType),
+		Amount:    record.Amount,
+		CreatedAt: record.CreatedAt.Time,
+		CreatedBy: newUUID(record.CreatedBy),
+		UpdatedAt: record.UpdatedAt.Time,
+		UpdatedBy: newUUID(record.UpdatedBy),
+	}
+}

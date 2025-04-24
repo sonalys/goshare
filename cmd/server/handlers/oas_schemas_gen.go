@@ -452,14 +452,14 @@ func (s *ExpenseRecord) SetAmount(val int32) {
 type ExpenseRecordType string
 
 const (
-	ExpenseRecordTypeExpense    ExpenseRecordType = "expense"
+	ExpenseRecordTypeDebt       ExpenseRecordType = "debt"
 	ExpenseRecordTypeSettlement ExpenseRecordType = "settlement"
 )
 
 // AllValues returns all ExpenseRecordType values.
 func (ExpenseRecordType) AllValues() []ExpenseRecordType {
 	return []ExpenseRecordType{
-		ExpenseRecordTypeExpense,
+		ExpenseRecordTypeDebt,
 		ExpenseRecordTypeSettlement,
 	}
 }
@@ -467,7 +467,7 @@ func (ExpenseRecordType) AllValues() []ExpenseRecordType {
 // MarshalText implements encoding.TextMarshaler.
 func (s ExpenseRecordType) MarshalText() ([]byte, error) {
 	switch s {
-	case ExpenseRecordTypeExpense:
+	case ExpenseRecordTypeDebt:
 		return []byte(s), nil
 	case ExpenseRecordTypeSettlement:
 		return []byte(s), nil
@@ -479,8 +479,8 @@ func (s ExpenseRecordType) MarshalText() ([]byte, error) {
 // UnmarshalText implements encoding.TextUnmarshaler.
 func (s *ExpenseRecordType) UnmarshalText(data []byte) error {
 	switch ExpenseRecordType(data) {
-	case ExpenseRecordTypeExpense:
-		*s = ExpenseRecordTypeExpense
+	case ExpenseRecordTypeDebt:
+		*s = ExpenseRecordTypeDebt
 		return nil
 	case ExpenseRecordTypeSettlement:
 		*s = ExpenseRecordTypeSettlement
@@ -488,6 +488,106 @@ func (s *ExpenseRecordType) UnmarshalText(data []byte) error {
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+// Ref: #/components/schemas/ExpenseSummary
+type ExpenseSummary struct {
+	// Unique identifier for the expense.
+	ID uuid.UUID `json:"id"`
+	// Name of the expense.
+	Name string `json:"name"`
+	// Date and time of the expense.
+	ExpenseDate time.Time `json:"expense_date"`
+	// Total amount of the expense.
+	Amount int32 `json:"amount"`
+	// Date and time the expense was created.
+	CreatedAt time.Time `json:"created_at"`
+	// User ID of the creator.
+	CreatedBy uuid.UUID `json:"created_by"`
+	// Date and time the expense was last updated.
+	UpdatedAt time.Time `json:"updated_at"`
+	// User ID of the last updater.
+	UpdatedBy uuid.UUID `json:"updated_by"`
+}
+
+// GetID returns the value of ID.
+func (s *ExpenseSummary) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *ExpenseSummary) GetName() string {
+	return s.Name
+}
+
+// GetExpenseDate returns the value of ExpenseDate.
+func (s *ExpenseSummary) GetExpenseDate() time.Time {
+	return s.ExpenseDate
+}
+
+// GetAmount returns the value of Amount.
+func (s *ExpenseSummary) GetAmount() int32 {
+	return s.Amount
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *ExpenseSummary) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetCreatedBy returns the value of CreatedBy.
+func (s *ExpenseSummary) GetCreatedBy() uuid.UUID {
+	return s.CreatedBy
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *ExpenseSummary) GetUpdatedAt() time.Time {
+	return s.UpdatedAt
+}
+
+// GetUpdatedBy returns the value of UpdatedBy.
+func (s *ExpenseSummary) GetUpdatedBy() uuid.UUID {
+	return s.UpdatedBy
+}
+
+// SetID sets the value of ID.
+func (s *ExpenseSummary) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *ExpenseSummary) SetName(val string) {
+	s.Name = val
+}
+
+// SetExpenseDate sets the value of ExpenseDate.
+func (s *ExpenseSummary) SetExpenseDate(val time.Time) {
+	s.ExpenseDate = val
+}
+
+// SetAmount sets the value of Amount.
+func (s *ExpenseSummary) SetAmount(val int32) {
+	s.Amount = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *ExpenseSummary) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetCreatedBy sets the value of CreatedBy.
+func (s *ExpenseSummary) SetCreatedBy(val uuid.UUID) {
+	s.CreatedBy = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *ExpenseSummary) SetUpdatedAt(val time.Time) {
+	s.UpdatedAt = val
+}
+
+// SetUpdatedBy sets the value of UpdatedBy.
+func (s *ExpenseSummary) SetUpdatedBy(val uuid.UUID) {
+	s.UpdatedBy = val
 }
 
 // GetHealthcheckOK is response for GetHealthcheck operation.
@@ -632,6 +732,32 @@ func (s *LedgerParticipant) SetBalance(val int32) {
 	s.Balance = val
 }
 
+type ListExpensesOK struct {
+	// Cursor for pagination.
+	Cursor   OptDateTime      `json:"cursor"`
+	Expenses []ExpenseSummary `json:"expenses"`
+}
+
+// GetCursor returns the value of Cursor.
+func (s *ListExpensesOK) GetCursor() OptDateTime {
+	return s.Cursor
+}
+
+// GetExpenses returns the value of Expenses.
+func (s *ListExpensesOK) GetExpenses() []ExpenseSummary {
+	return s.Expenses
+}
+
+// SetCursor sets the value of Cursor.
+func (s *ListExpensesOK) SetCursor(val OptDateTime) {
+	s.Cursor = val
+}
+
+// SetExpenses sets the value of Expenses.
+func (s *ListExpensesOK) SetExpenses(val []ExpenseSummary) {
+	s.Expenses = val
+}
+
 type ListLedgerParticipantsOK struct {
 	Participants []LedgerParticipant `json:"participants"`
 }
@@ -702,6 +828,52 @@ func (s *LoginReq) SetPassword(val string) {
 	s.Password = val
 }
 
+// NewOptDateTime returns new OptDateTime with value set to v.
+func NewOptDateTime(v time.Time) OptDateTime {
+	return OptDateTime{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDateTime is optional time.Time.
+type OptDateTime struct {
+	Value time.Time
+	Set   bool
+}
+
+// IsSet returns true if OptDateTime was set.
+func (o OptDateTime) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDateTime) Reset() {
+	var v time.Time
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDateTime) SetTo(v time.Time) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDateTime) Get() (v time.Time, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDateTime) Or(d time.Time) time.Time {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptErrorMetadata returns new OptErrorMetadata with value set to v.
 func NewOptErrorMetadata(v ErrorMetadata) OptErrorMetadata {
 	return OptErrorMetadata{
@@ -742,6 +914,52 @@ func (o OptErrorMetadata) Get() (v ErrorMetadata, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptErrorMetadata) Or(d ErrorMetadata) ErrorMetadata {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptInt32 returns new OptInt32 with value set to v.
+func NewOptInt32(v int32) OptInt32 {
+	return OptInt32{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptInt32 is optional int32.
+type OptInt32 struct {
+	Value int32
+	Set   bool
+}
+
+// IsSet returns true if OptInt32 was set.
+func (o OptInt32) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptInt32) Reset() {
+	var v int32
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptInt32) SetTo(v int32) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptInt32) Get() (v int32, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptInt32) Or(d int32) int32 {
 	if v, ok := o.Get(); ok {
 		return v
 	}

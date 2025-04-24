@@ -12,6 +12,7 @@ const (
 	GetExpenseOperation             OperationName = "GetExpense"
 	GetHealthcheckOperation         OperationName = "GetHealthcheck"
 	GetIdentityOperation            OperationName = "GetIdentity"
+	ListExpensesOperation           OperationName = "ListExpenses"
 	ListLedgerParticipantsOperation OperationName = "ListLedgerParticipants"
 	ListLedgersOperation            OperationName = "ListLedgers"
 	LoginOperation                  OperationName = "Login"

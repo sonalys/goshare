@@ -13,7 +13,7 @@ func (a *API) GetExpense(ctx context.Context, params handlers.GetExpenseParams) 
 		return nil, err
 	}
 
-	expense, err := a.dependencies.LedgerController.GetExpense(ctx, v1.ConvertID(params.LedgerID), v1.ConvertID(params.ExpenseID))
+	expense, err := a.dependencies.LedgerController.FindExpense(ctx, v1.ConvertID(params.LedgerID), v1.ConvertID(params.ExpenseID))
 	if err != nil {
 		return nil, err
 	}

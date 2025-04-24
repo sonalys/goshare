@@ -67,6 +67,15 @@ func (UnimplementedHandler) GetIdentity(ctx context.Context) (r *GetIdentityOK, 
 	return r, ht.ErrNotImplemented
 }
 
+// ListExpenses implements ListExpenses operation.
+//
+// Lists all expenses in the ledger.
+//
+// GET /ledgers/{ledgerID}/expenses
+func (UnimplementedHandler) ListExpenses(ctx context.Context, params ListExpensesParams) (r *ListExpensesOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ListLedgerParticipants implements ListLedgerParticipants operation.
 //
 // Lists all ledger participants and their balances.

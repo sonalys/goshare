@@ -44,6 +44,12 @@ type Handler interface {
 	//
 	// GET /authentication/whoami
 	GetIdentity(ctx context.Context) (*GetIdentityOK, error)
+	// ListExpenses implements ListExpenses operation.
+	//
+	// Lists all expenses in the ledger.
+	//
+	// GET /ledgers/{ledgerID}/expenses
+	ListExpenses(ctx context.Context, params ListExpensesParams) (*ListExpensesOK, error)
 	// ListLedgerParticipants implements ListLedgerParticipants operation.
 	//
 	// Lists all ledger participants and their balances.

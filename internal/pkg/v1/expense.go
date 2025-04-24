@@ -36,15 +36,15 @@ type (
 
 const (
 	RecordTypeUnknown RecordType = iota
-	RecordTypeExpense
+	RecordTypeDebt
 	RecordTypeSettlement
 	recordTypeMaxBoundary
 )
 
 func (r RecordType) String() string {
 	switch r {
-	case RecordTypeExpense:
-		return "expense"
+	case RecordTypeDebt:
+		return "debt"
 	case RecordTypeSettlement:
 		return "settlement"
 	default:
@@ -58,8 +58,8 @@ func (r RecordType) IsValid() bool {
 
 func NewRecordType(s string) RecordType {
 	switch s {
-	case "expense":
-		return RecordTypeExpense
+	case "debt":
+		return RecordTypeDebt
 	case "settlement":
 		return RecordTypeSettlement
 	default:
