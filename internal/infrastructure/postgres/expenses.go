@@ -21,9 +21,26 @@ func NewExpenseRepository(client *Client) *ExpenseRepository {
 	}
 }
 
-func (r *ExpenseRepository) Create(ctx context.Context, expense *v1.Expense) error {
+func (r *ExpenseRepository) Create(ctx context.Context, ledgerID v1.ID, createFn func(ledger *v1.Ledger) (*v1.Expense, error)) error {
 	return r.client.transaction(ctx, func(tx pgx.Tx) error {
 		query := r.client.queries().WithTx(tx)
+
+		ledgerModel, err := query.FindLedgerById(ctx, convertUUID(ledgerID))
+		if err != nil {
+			return fmt.Errorf("finding ledger: %w", err)
+		}
+
+		ledger := v1.Ledger{
+			ID:        newUUID(ledgerModel.ID),
+			Name:      ledgerModel.Name,
+			CreatedAt: ledgerModel.CreatedAt.Time,
+			CreatedBy: newUUID(ledgerModel.CreatedBy),
+		}
+
+		expense, err := createFn(&ledger)
+		if err != nil {
+			return fmt.Errorf("creating expense: %w", err)
+		}
 
 		createExpenseReq := sqlc.CreateExpenseParams{
 			ID:          convertUUID(expense.ID),

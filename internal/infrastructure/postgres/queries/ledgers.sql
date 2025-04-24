@@ -7,6 +7,9 @@ SELECT * FROM ledgers WHERE id = $1;
 -- name: AddUserToLedger :exec
 INSERT INTO ledger_participants (id,ledger_id,user_id,created_at,created_by,balance) VALUES ($1,$2,$3,$4,$5,0);
 
+-- name: RemoveUserFromLedger :exec
+DELETE FROM ledger_participants WHERE id = $1;
+
 -- name: GetLedgerParticipants :many
 SELECT * FROM ledger_participants WHERE ledger_id = $1;
 

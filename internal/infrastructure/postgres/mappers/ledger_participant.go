@@ -8,7 +8,6 @@ import (
 func NewLedgerParticipant(user *sqlc.LedgerParticipant) *v1.LedgerParticipant {
 	return &v1.LedgerParticipant{
 		ID:        newUUID(user.ID),
-		LedgerID:  newUUID(user.LedgerID),
 		UserID:    newUUID(user.UserID),
 		Balance:   user.Balance,
 		CreatedAt: user.CreatedAt.Time,

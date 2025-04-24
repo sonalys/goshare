@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"slices"
+	"time"
 
 	"github.com/sonalys/goshare/internal/pkg/otel"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
@@ -67,7 +68,27 @@ func (c *Controller) AddParticipants(ctx context.Context, req AddMembersRequest)
 		ids = append(ids, user.ID)
 	}
 
-	err = c.ledgerRepository.AddParticipants(ctx, req.LedgerID, req.UserID, ids...)
+	err = c.ledgerRepository.AddParticipants(ctx, req.LedgerID, func(ledger *v1.Ledger) error {
+		if ledger.CreatedBy != req.UserID {
+			return fmt.Errorf("user %s is not the owner of the ledger %s", req.UserID, ledger.ID)
+		}
+
+		if len(ledger.Participants) >= v1.LedgerMaxUsers {
+			return v1.ErrLedgerMaxUsers
+		}
+
+		for _, id := range ids {
+			ledger.Participants = append(ledger.Participants, v1.LedgerParticipant{
+				ID:        v1.NewID(),
+				UserID:    id,
+				Balance:   0,
+				CreatedAt: time.Now(),
+				CreatedBy: req.UserID,
+			})
+		}
+
+		return nil
+	})
 	switch {
 	case err == nil:
 		slog.InfoContext(ctx, "added users to ledger", logFields...)
@@ -81,4 +102,19 @@ func (c *Controller) AddParticipants(ctx context.Context, req AddMembersRequest)
 		slog.ErrorContext(ctx, "failed to add users to ledger", append(logFields, slog.Any("error", err))...)
 		return fmt.Errorf("failed to add users to ledger: %w", err)
 	}
+}
+
+func (c *Controller) GetParticipants(ctx context.Context, ledgerID v1.ID) ([]v1.LedgerParticipant, error) {
+	ctx, span := otel.Tracer.Start(ctx, "ledgers.GetBalances")
+	defer span.End()
+
+	participants, err := c.ledgerRepository.GetParticipants(ctx, ledgerID)
+	if err != nil {
+		slog.ErrorContext(ctx, "failed to get ledger participants balances", slog.Any("error", err))
+		return nil, fmt.Errorf("failed to get ledger participants balances: %w", err)
+	}
+
+	slog.InfoContext(ctx, "ledger participants balances retrieved")
+
+	return participants, nil
 }

@@ -9,10 +9,11 @@ import (
 
 type (
 	LedgerRepository interface {
-		Create(ctx context.Context, ledger *v1.Ledger) error
+		Create(ctx context.Context, userID v1.ID, createFn func(count int64) (*v1.Ledger, error)) error
 		GetByUser(ctx context.Context, userID v1.ID) ([]v1.Ledger, error)
-		AddParticipants(ctx context.Context, ledgerID, userID v1.ID, ids ...v1.ID) error
+		AddParticipants(ctx context.Context, ledgerID v1.ID, updateFn func(*v1.Ledger) error) error
 		GetParticipants(ctx context.Context, ledgerID v1.ID) ([]v1.LedgerParticipant, error)
+		Find(ctx context.Context, id v1.ID) (*v1.Ledger, error)
 	}
 
 	UserRepository interface {
@@ -20,7 +21,7 @@ type (
 	}
 
 	ExpenseRepository interface {
-		Create(ctx context.Context, expense *v1.Expense) error
+		Create(ctx context.Context, ledgerID v1.ID, createFn func(ledger *v1.Ledger) (*v1.Expense, error)) error
 		Find(ctx context.Context, id v1.ID) (*v1.Expense, error)
 		GetByLedger(ctx context.Context, ledgerID v1.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error)
 	}

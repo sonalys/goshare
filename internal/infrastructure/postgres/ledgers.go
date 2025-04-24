@@ -19,21 +19,24 @@ func NewLedgerRepository(client *Client) *LedgerRepository {
 	}
 }
 
-func (r *LedgerRepository) Create(ctx context.Context, ledger *v1.Ledger) error {
+func (r *LedgerRepository) Create(ctx context.Context, userID v1.ID, createFn func(count int64) (*v1.Ledger, error)) error {
 	return mapLedgerError(r.client.transaction(ctx, func(tx pgx.Tx) error {
 		query := r.client.queries().WithTx(tx)
 
-		if err := query.LockUserForUpdate(ctx, convertUUID(ledger.CreatedBy)); err != nil {
+		id := convertUUID(userID)
+
+		if err := query.LockUserForUpdate(ctx, id); err != nil {
 			return fmt.Errorf("failed to acquire user lock for updating ledger")
 		}
 
-		userLedgersCount, err := query.CountUserLedgers(ctx, convertUUID(ledger.CreatedBy))
+		userLedgersCount, err := query.CountUserLedgers(ctx, id)
 		if err != nil {
 			return fmt.Errorf("failed to count user ledgers")
 		}
 
-		if userLedgersCount+1 > v1.UserMaxLedgers {
-			return v1.ErrUserMaxLedgers
+		ledger, err := createFn(userLedgersCount)
+		if err != nil {
+			return fmt.Errorf("failed to create ledger: %w", err)
 		}
 
 		createLedgerReq := sqlc.CreateLedgerParams{
@@ -47,16 +50,18 @@ func (r *LedgerRepository) Create(ctx context.Context, ledger *v1.Ledger) error 
 			return fmt.Errorf("failed to create ledger: %w", err)
 		}
 
-		addReq := sqlc.AddUserToLedgerParams{
-			ID:        convertUUID(v1.NewID()),
-			LedgerID:  createLedgerReq.ID,
-			UserID:    createLedgerReq.CreatedBy,
-			CreatedAt: createLedgerReq.CreatedAt,
-			CreatedBy: createLedgerReq.CreatedBy,
-		}
+		for _, participant := range ledger.Participants {
+			addReq := sqlc.AddUserToLedgerParams{
+				ID:        convertUUID(participant.ID),
+				LedgerID:  createLedgerReq.ID,
+				UserID:    convertUUID(participant.UserID),
+				CreatedAt: createLedgerReq.CreatedAt,
+				CreatedBy: createLedgerReq.CreatedBy,
+			}
 
-		if err := query.AddUserToLedger(ctx, addReq); err != nil {
-			return fmt.Errorf("failed to add user to ledger: %w", err)
+			if err := query.AddUserToLedger(ctx, addReq); err != nil {
+				return fmt.Errorf("failed to add user to ledger: %w", err)
+			}
 		}
 
 		return nil
@@ -68,7 +73,13 @@ func (r *LedgerRepository) Find(ctx context.Context, id v1.ID) (*v1.Ledger, erro
 	if err != nil {
 		return nil, mapLedgerError(err)
 	}
-	return newLedger(&ledger), nil
+
+	participants, err := r.client.queries().GetLedgerParticipants(ctx, convertUUID(id))
+	if err != nil {
+		return nil, mapLedgerError(err)
+	}
+
+	return newLedger(&ledger, participants), nil
 }
 
 func (r *LedgerRepository) GetByUser(ctx context.Context, userID v1.ID) ([]v1.Ledger, error) {
@@ -76,19 +87,37 @@ func (r *LedgerRepository) GetByUser(ctx context.Context, userID v1.ID) ([]v1.Le
 	if err != nil {
 		return nil, mapLedgerError(err)
 	}
+
 	result := make([]v1.Ledger, 0, len(ledgers))
 	for _, ledger := range ledgers {
-		result = append(result, *newLedger(&ledger))
+		participants, err := r.client.queries().GetLedgerParticipants(ctx, ledger.ID)
+		if err != nil {
+			return nil, mapLedgerError(err)
+		}
+		result = append(result, *newLedger(&ledger, participants))
 	}
 	return result, nil
 }
 
-func newLedger(ledger *sqlc.Ledger) *v1.Ledger {
+func newLedger(ledger *sqlc.Ledger, participants []sqlc.LedgerParticipant) *v1.Ledger {
+	ledgerParticipants := make([]v1.LedgerParticipant, 0, len(participants))
+
+	for _, participant := range participants {
+		ledgerParticipants = append(ledgerParticipants, v1.LedgerParticipant{
+			ID:        newUUID(participant.ID),
+			UserID:    newUUID(participant.UserID),
+			Balance:   participant.Balance,
+			CreatedAt: participant.CreatedAt.Time,
+			CreatedBy: newUUID(participant.CreatedBy),
+		})
+	}
+
 	return &v1.Ledger{
-		ID:        newUUID(ledger.ID),
-		Name:      ledger.Name,
-		CreatedAt: ledger.CreatedAt.Time,
-		CreatedBy: newUUID(ledger.CreatedBy),
+		ID:           newUUID(ledger.ID),
+		Name:         ledger.Name,
+		Participants: ledgerParticipants,
+		CreatedAt:    ledger.CreatedAt.Time,
+		CreatedBy:    newUUID(ledger.CreatedBy),
 	}
 }
 

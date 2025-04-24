@@ -170,3 +170,12 @@ func (q *Queries) LockUserForUpdate(ctx context.Context, id pgtype.UUID) error {
 	_, err := q.db.Exec(ctx, lockUserForUpdate, id)
 	return err
 }
+
+const removeUserFromLedger = `-- name: RemoveUserFromLedger :exec
+DELETE FROM ledger_participants WHERE id = $1
+`
+
+func (q *Queries) RemoveUserFromLedger(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, removeUserFromLedger, id)
+	return err
+}
