@@ -12,14 +12,14 @@ import (
 )
 
 // Login implements handlers.StrictServerInterface.
-func (a *API) Login(ctx context.Context, req *handlers.LoginReq) (*handlers.LoginOK, error) {
+func (a *API) AuthenticationLogin(ctx context.Context, req *handlers.AuthenticationLoginReq) (*handlers.AuthenticationLoginOK, error) {
 	resp, err := a.dependencies.UserController.Login(ctx, users.LoginRequest{
 		Email:    string(req.Email),
 		Password: req.Password,
 	})
 	switch {
 	case err == nil:
-		return &handlers.LoginOK{
+		return &handlers.AuthenticationLoginOK{
 			SetCookie: handlers.NewOptString(fmt.Sprintf("SESSIONID=%s; Path=/; HttpOnly; SameSite=Strict", resp.Token)),
 		}, nil
 	case errors.Is(err, v1.ErrEmailPasswordMismatch):

@@ -8,72 +8,72 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
-	// AddLedgerParticipant implements AddLedgerParticipant operation.
-	//
-	// Adds a new member to the Ledger.
-	//
-	// POST /ledgers/{ledgerID}/participants
-	AddLedgerParticipant(ctx context.Context, req *AddLedgerParticipantReq, params AddLedgerParticipantParams) error
-	// CreateExpense implements CreateExpense operation.
-	//
-	// Creates a new expense record.
-	//
-	// POST /ledgers/{ledgerID}/expenses
-	CreateExpense(ctx context.Context, req *Expense, params CreateExpenseParams) (*CreateExpenseOK, error)
-	// CreateLedger implements CreateLedger operation.
-	//
-	// Creates a new ledger. A user can have a maximum of 5 ledgers.
-	//
-	// POST /ledgers
-	CreateLedger(ctx context.Context, req *CreateLedgerReq) (*CreateLedgerOK, error)
-	// GetExpense implements GetExpense operation.
-	//
-	// Retrieves an expense record.
-	//
-	// GET /ledgers/{ledgerID}/expenses/{expenseID}
-	GetExpense(ctx context.Context, params GetExpenseParams) (*Expense, error)
-	// GetHealthcheck implements GetHealthcheck operation.
-	//
-	// Check if the service is healthy.
-	//
-	// GET /healthcheck
-	GetHealthcheck(ctx context.Context) error
-	// GetIdentity implements GetIdentity operation.
-	//
-	// Returns current information on the authenticated entity.
-	//
-	// GET /authentication/whoami
-	GetIdentity(ctx context.Context) (*GetIdentityOK, error)
-	// ListExpenses implements ListExpenses operation.
-	//
-	// Lists all expenses in the ledger.
-	//
-	// GET /ledgers/{ledgerID}/expenses
-	ListExpenses(ctx context.Context, params ListExpensesParams) (*ListExpensesOK, error)
-	// ListLedgerParticipants implements ListLedgerParticipants operation.
-	//
-	// Lists all ledger participants and their balances.
-	//
-	// GET /ledgers/{ledgerID}/participants
-	ListLedgerParticipants(ctx context.Context, params ListLedgerParticipantsParams) (*ListLedgerParticipantsOK, error)
-	// ListLedgers implements ListLedgers operation.
-	//
-	// Lists all ledgers.
-	//
-	// GET /ledgers
-	ListLedgers(ctx context.Context) (*ListLedgersOK, error)
-	// Login implements Login operation.
+	// AuthenticationLogin implements AuthenticationLogin operation.
 	//
 	// Authenticate as the specified identity.
 	//
 	// POST /authentication/login
-	Login(ctx context.Context, req *LoginReq) (*LoginOK, error)
-	// RegisterUser implements RegisterUser operation.
+	AuthenticationLogin(ctx context.Context, req *AuthenticationLoginReq) (*AuthenticationLoginOK, error)
+	// AuthenticationWhoAmI implements AuthenticationWhoAmI operation.
+	//
+	// Returns current information on the authenticated entity.
+	//
+	// GET /authentication/whoami
+	AuthenticationWhoAmI(ctx context.Context) (*AuthenticationWhoAmIOK, error)
+	// Healthcheck implements Healthcheck operation.
+	//
+	// Check if the service is healthy.
+	//
+	// GET /healthcheck
+	Healthcheck(ctx context.Context) error
+	// LedgerCreate implements LedgerCreate operation.
+	//
+	// Creates a new ledger. A user can have a maximum of 5 ledgers.
+	//
+	// POST /ledgers
+	LedgerCreate(ctx context.Context, req *LedgerCreateReq) (*LedgerCreateOK, error)
+	// LedgerExpenseCreate implements LedgerExpenseCreate operation.
+	//
+	// Creates a new expense record.
+	//
+	// POST /ledgers/{ledgerID}/expenses
+	LedgerExpenseCreate(ctx context.Context, req *Expense, params LedgerExpenseCreateParams) (*LedgerExpenseCreateOK, error)
+	// LedgerExpenseGet implements LedgerExpenseGet operation.
+	//
+	// Retrieves an expense record.
+	//
+	// GET /ledgers/{ledgerID}/expenses/{expenseID}
+	LedgerExpenseGet(ctx context.Context, params LedgerExpenseGetParams) (*Expense, error)
+	// LedgerExpenseList implements LedgerExpenseList operation.
+	//
+	// Lists all expenses in the ledger.
+	//
+	// GET /ledgers/{ledgerID}/expenses
+	LedgerExpenseList(ctx context.Context, params LedgerExpenseListParams) (*LedgerExpenseListOK, error)
+	// LedgerList implements LedgerList operation.
+	//
+	// Lists all ledgers.
+	//
+	// GET /ledgers
+	LedgerList(ctx context.Context) (*LedgerListOK, error)
+	// LedgerParticipantAdd implements LedgerParticipantAdd operation.
+	//
+	// Adds a new member to the Ledger.
+	//
+	// POST /ledgers/{ledgerID}/participants
+	LedgerParticipantAdd(ctx context.Context, req *LedgerParticipantAddReq, params LedgerParticipantAddParams) error
+	// LedgerParticipantList implements LedgerParticipantList operation.
+	//
+	// Lists all ledger participants and their balances.
+	//
+	// GET /ledgers/{ledgerID}/participants
+	LedgerParticipantList(ctx context.Context, params LedgerParticipantListParams) (*LedgerParticipantListOK, error)
+	// UserRegister implements UserRegister operation.
 	//
 	// Registers a new user.
 	//
 	// POST /users
-	RegisterUser(ctx context.Context, req *RegisterUserReq) (*RegisterUserOK, error)
+	UserRegister(ctx context.Context, req *UserRegisterReq) (*UserRegisterOK, error)
 	// NewError creates *ErrorResponseStatusCode from error returned by handler.
 	//
 	// Used for common default response.

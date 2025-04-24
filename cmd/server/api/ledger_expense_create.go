@@ -9,7 +9,7 @@ import (
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
-func (a *API) CreateExpense(ctx context.Context, req *handlers.Expense, params handlers.CreateExpenseParams) (r *handlers.CreateExpenseOK, _ error) {
+func (a *API) LedgerExpenseCreate(ctx context.Context, req *handlers.Expense, params handlers.LedgerExpenseCreateParams) (r *handlers.LedgerExpenseCreateOK, _ error) {
 	identity, err := getIdentity(ctx)
 	if err != nil {
 		return nil, err
@@ -25,7 +25,7 @@ func (a *API) CreateExpense(ctx context.Context, req *handlers.Expense, params h
 
 	switch resp, err := a.dependencies.LedgerController.CreateExpense(ctx, apiReq); {
 	case err == nil:
-		return &handlers.CreateExpenseOK{
+		return &handlers.LedgerExpenseCreateOK{
 			ID: resp.ID.UUID(),
 		}, nil
 	default:

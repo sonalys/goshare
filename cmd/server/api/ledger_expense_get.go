@@ -7,7 +7,7 @@ import (
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
-func (a *API) GetExpense(ctx context.Context, params handlers.GetExpenseParams) (*handlers.Expense, error) {
+func (a *API) LedgerExpenseGet(ctx context.Context, params handlers.LedgerExpenseGetParams) (*handlers.Expense, error) {
 	_, err := getIdentity(ctx)
 	if err != nil {
 		return nil, err

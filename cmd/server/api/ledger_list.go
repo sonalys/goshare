@@ -7,7 +7,7 @@ import (
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
-func (a *API) ListLedgers(ctx context.Context) (*handlers.ListLedgersOK, error) {
+func (a *API) LedgerList(ctx context.Context) (*handlers.LedgerListOK, error) {
 	identity, err := getIdentity(ctx)
 	if err != nil {
 		return nil, err
@@ -18,7 +18,7 @@ func (a *API) ListLedgers(ctx context.Context) (*handlers.ListLedgersOK, error) 
 		return nil, err
 	}
 
-	return &handlers.ListLedgersOK{
+	return &handlers.LedgerListOK{
 		Ledgers: convertLedgers(ledgers),
 	}, nil
 }

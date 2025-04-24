@@ -14,22 +14,72 @@ func (s *ErrorResponseStatusCode) Error() string {
 	return fmt.Sprintf("code %d: %+v", s.StatusCode, s.Response)
 }
 
-// AddLedgerParticipantAccepted is response for AddLedgerParticipant operation.
-type AddLedgerParticipantAccepted struct{}
-
-type AddLedgerParticipantReq struct {
-	// Invite up to 99 other users. The limit is by Ledger.
-	Emails []string `json:"emails"`
+// AuthenticationLoginOK is response for AuthenticationLogin operation.
+type AuthenticationLoginOK struct {
+	SetCookie OptString
 }
 
-// GetEmails returns the value of Emails.
-func (s *AddLedgerParticipantReq) GetEmails() []string {
-	return s.Emails
+// GetSetCookie returns the value of SetCookie.
+func (s *AuthenticationLoginOK) GetSetCookie() OptString {
+	return s.SetCookie
 }
 
-// SetEmails sets the value of Emails.
-func (s *AddLedgerParticipantReq) SetEmails(val []string) {
-	s.Emails = val
+// SetSetCookie sets the value of SetCookie.
+func (s *AuthenticationLoginOK) SetSetCookie(val OptString) {
+	s.SetCookie = val
+}
+
+type AuthenticationLoginReq struct {
+	// User's email address.
+	Email string `json:"email"`
+	// User's password.
+	Password string `json:"password"`
+}
+
+// GetEmail returns the value of Email.
+func (s *AuthenticationLoginReq) GetEmail() string {
+	return s.Email
+}
+
+// GetPassword returns the value of Password.
+func (s *AuthenticationLoginReq) GetPassword() string {
+	return s.Password
+}
+
+// SetEmail sets the value of Email.
+func (s *AuthenticationLoginReq) SetEmail(val string) {
+	s.Email = val
+}
+
+// SetPassword sets the value of Password.
+func (s *AuthenticationLoginReq) SetPassword(val string) {
+	s.Password = val
+}
+
+type AuthenticationWhoAmIOK struct {
+	// User's email address.
+	Email  string    `json:"email"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+// GetEmail returns the value of Email.
+func (s *AuthenticationWhoAmIOK) GetEmail() string {
+	return s.Email
+}
+
+// GetUserID returns the value of UserID.
+func (s *AuthenticationWhoAmIOK) GetUserID() uuid.UUID {
+	return s.UserID
+}
+
+// SetEmail sets the value of Email.
+func (s *AuthenticationWhoAmIOK) SetEmail(val string) {
+	s.Email = val
+}
+
+// SetUserID sets the value of UserID.
+func (s *AuthenticationWhoAmIOK) SetUserID(val uuid.UUID) {
+	s.UserID = val
 }
 
 type CookieAuth struct {
@@ -44,49 +94,6 @@ func (s *CookieAuth) GetAPIKey() string {
 // SetAPIKey sets the value of APIKey.
 func (s *CookieAuth) SetAPIKey(val string) {
 	s.APIKey = val
-}
-
-type CreateExpenseOK struct {
-	ID uuid.UUID `json:"id"`
-}
-
-// GetID returns the value of ID.
-func (s *CreateExpenseOK) GetID() uuid.UUID {
-	return s.ID
-}
-
-// SetID sets the value of ID.
-func (s *CreateExpenseOK) SetID(val uuid.UUID) {
-	s.ID = val
-}
-
-type CreateLedgerOK struct {
-	ID uuid.UUID `json:"id"`
-}
-
-// GetID returns the value of ID.
-func (s *CreateLedgerOK) GetID() uuid.UUID {
-	return s.ID
-}
-
-// SetID sets the value of ID.
-func (s *CreateLedgerOK) SetID(val uuid.UUID) {
-	s.ID = val
-}
-
-type CreateLedgerReq struct {
-	// Ledger's name.
-	Name string `json:"name"`
-}
-
-// GetName returns the value of Name.
-func (s *CreateLedgerReq) GetName() string {
-	return s.Name
-}
-
-// SetName sets the value of Name.
-func (s *CreateLedgerReq) SetName(val string) {
-	s.Name = val
 }
 
 // Ref: #/components/schemas/Error
@@ -590,34 +597,8 @@ func (s *ExpenseSummary) SetUpdatedBy(val uuid.UUID) {
 	s.UpdatedBy = val
 }
 
-// GetHealthcheckOK is response for GetHealthcheck operation.
-type GetHealthcheckOK struct{}
-
-type GetIdentityOK struct {
-	// User's email address.
-	Email  string    `json:"email"`
-	UserID uuid.UUID `json:"user_id"`
-}
-
-// GetEmail returns the value of Email.
-func (s *GetIdentityOK) GetEmail() string {
-	return s.Email
-}
-
-// GetUserID returns the value of UserID.
-func (s *GetIdentityOK) GetUserID() uuid.UUID {
-	return s.UserID
-}
-
-// SetEmail sets the value of Email.
-func (s *GetIdentityOK) SetEmail(val string) {
-	s.Email = val
-}
-
-// SetUserID sets the value of UserID.
-func (s *GetIdentityOK) SetUserID(val uuid.UUID) {
-	s.UserID = val
-}
+// HealthcheckOK is response for Healthcheck operation.
+type HealthcheckOK struct{}
 
 // Ref: #/components/schemas/Ledger
 type Ledger struct {
@@ -668,6 +649,89 @@ func (s *Ledger) SetCreatedAt(val time.Time) {
 // SetCreatedBy sets the value of CreatedBy.
 func (s *Ledger) SetCreatedBy(val uuid.UUID) {
 	s.CreatedBy = val
+}
+
+type LedgerCreateOK struct {
+	ID uuid.UUID `json:"id"`
+}
+
+// GetID returns the value of ID.
+func (s *LedgerCreateOK) GetID() uuid.UUID {
+	return s.ID
+}
+
+// SetID sets the value of ID.
+func (s *LedgerCreateOK) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+type LedgerCreateReq struct {
+	// Ledger's name.
+	Name string `json:"name"`
+}
+
+// GetName returns the value of Name.
+func (s *LedgerCreateReq) GetName() string {
+	return s.Name
+}
+
+// SetName sets the value of Name.
+func (s *LedgerCreateReq) SetName(val string) {
+	s.Name = val
+}
+
+type LedgerExpenseCreateOK struct {
+	ID uuid.UUID `json:"id"`
+}
+
+// GetID returns the value of ID.
+func (s *LedgerExpenseCreateOK) GetID() uuid.UUID {
+	return s.ID
+}
+
+// SetID sets the value of ID.
+func (s *LedgerExpenseCreateOK) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+type LedgerExpenseListOK struct {
+	// Cursor for pagination.
+	Cursor   OptDateTime      `json:"cursor"`
+	Expenses []ExpenseSummary `json:"expenses"`
+}
+
+// GetCursor returns the value of Cursor.
+func (s *LedgerExpenseListOK) GetCursor() OptDateTime {
+	return s.Cursor
+}
+
+// GetExpenses returns the value of Expenses.
+func (s *LedgerExpenseListOK) GetExpenses() []ExpenseSummary {
+	return s.Expenses
+}
+
+// SetCursor sets the value of Cursor.
+func (s *LedgerExpenseListOK) SetCursor(val OptDateTime) {
+	s.Cursor = val
+}
+
+// SetExpenses sets the value of Expenses.
+func (s *LedgerExpenseListOK) SetExpenses(val []ExpenseSummary) {
+	s.Expenses = val
+}
+
+type LedgerListOK struct {
+	Ledgers []Ledger `json:"ledgers"`
+}
+
+// GetLedgers returns the value of Ledgers.
+func (s *LedgerListOK) GetLedgers() []Ledger {
+	return s.Ledgers
+}
+
+// SetLedgers sets the value of Ledgers.
+func (s *LedgerListOK) SetLedgers(val []Ledger) {
+	s.Ledgers = val
 }
 
 // Ref: #/components/schemas/LedgerParticipant
@@ -732,100 +796,36 @@ func (s *LedgerParticipant) SetBalance(val int32) {
 	s.Balance = val
 }
 
-type ListExpensesOK struct {
-	// Cursor for pagination.
-	Cursor   OptDateTime      `json:"cursor"`
-	Expenses []ExpenseSummary `json:"expenses"`
+// LedgerParticipantAddAccepted is response for LedgerParticipantAdd operation.
+type LedgerParticipantAddAccepted struct{}
+
+type LedgerParticipantAddReq struct {
+	// Invite up to 99 other users. The limit is by Ledger.
+	Emails []string `json:"emails"`
 }
 
-// GetCursor returns the value of Cursor.
-func (s *ListExpensesOK) GetCursor() OptDateTime {
-	return s.Cursor
+// GetEmails returns the value of Emails.
+func (s *LedgerParticipantAddReq) GetEmails() []string {
+	return s.Emails
 }
 
-// GetExpenses returns the value of Expenses.
-func (s *ListExpensesOK) GetExpenses() []ExpenseSummary {
-	return s.Expenses
+// SetEmails sets the value of Emails.
+func (s *LedgerParticipantAddReq) SetEmails(val []string) {
+	s.Emails = val
 }
 
-// SetCursor sets the value of Cursor.
-func (s *ListExpensesOK) SetCursor(val OptDateTime) {
-	s.Cursor = val
-}
-
-// SetExpenses sets the value of Expenses.
-func (s *ListExpensesOK) SetExpenses(val []ExpenseSummary) {
-	s.Expenses = val
-}
-
-type ListLedgerParticipantsOK struct {
+type LedgerParticipantListOK struct {
 	Participants []LedgerParticipant `json:"participants"`
 }
 
 // GetParticipants returns the value of Participants.
-func (s *ListLedgerParticipantsOK) GetParticipants() []LedgerParticipant {
+func (s *LedgerParticipantListOK) GetParticipants() []LedgerParticipant {
 	return s.Participants
 }
 
 // SetParticipants sets the value of Participants.
-func (s *ListLedgerParticipantsOK) SetParticipants(val []LedgerParticipant) {
+func (s *LedgerParticipantListOK) SetParticipants(val []LedgerParticipant) {
 	s.Participants = val
-}
-
-type ListLedgersOK struct {
-	Ledgers []Ledger `json:"ledgers"`
-}
-
-// GetLedgers returns the value of Ledgers.
-func (s *ListLedgersOK) GetLedgers() []Ledger {
-	return s.Ledgers
-}
-
-// SetLedgers sets the value of Ledgers.
-func (s *ListLedgersOK) SetLedgers(val []Ledger) {
-	s.Ledgers = val
-}
-
-// LoginOK is response for Login operation.
-type LoginOK struct {
-	SetCookie OptString
-}
-
-// GetSetCookie returns the value of SetCookie.
-func (s *LoginOK) GetSetCookie() OptString {
-	return s.SetCookie
-}
-
-// SetSetCookie sets the value of SetCookie.
-func (s *LoginOK) SetSetCookie(val OptString) {
-	s.SetCookie = val
-}
-
-type LoginReq struct {
-	// User's email address.
-	Email string `json:"email"`
-	// User's password.
-	Password string `json:"password"`
-}
-
-// GetEmail returns the value of Email.
-func (s *LoginReq) GetEmail() string {
-	return s.Email
-}
-
-// GetPassword returns the value of Password.
-func (s *LoginReq) GetPassword() string {
-	return s.Password
-}
-
-// SetEmail sets the value of Email.
-func (s *LoginReq) SetEmail(val string) {
-	s.Email = val
-}
-
-// SetPassword sets the value of Password.
-func (s *LoginReq) SetPassword(val string) {
-	s.Password = val
 }
 
 // NewOptDateTime returns new OptDateTime with value set to v.
@@ -1058,21 +1058,21 @@ func (o OptUUID) Or(d uuid.UUID) uuid.UUID {
 	return d
 }
 
-type RegisterUserOK struct {
+type UserRegisterOK struct {
 	ID uuid.UUID `json:"id"`
 }
 
 // GetID returns the value of ID.
-func (s *RegisterUserOK) GetID() uuid.UUID {
+func (s *UserRegisterOK) GetID() uuid.UUID {
 	return s.ID
 }
 
 // SetID sets the value of ID.
-func (s *RegisterUserOK) SetID(val uuid.UUID) {
+func (s *UserRegisterOK) SetID(val uuid.UUID) {
 	s.ID = val
 }
 
-type RegisterUserReq struct {
+type UserRegisterReq struct {
 	// User's first name.
 	FirstName string `json:"first_name"`
 	// User's last name.
@@ -1084,41 +1084,41 @@ type RegisterUserReq struct {
 }
 
 // GetFirstName returns the value of FirstName.
-func (s *RegisterUserReq) GetFirstName() string {
+func (s *UserRegisterReq) GetFirstName() string {
 	return s.FirstName
 }
 
 // GetLastName returns the value of LastName.
-func (s *RegisterUserReq) GetLastName() string {
+func (s *UserRegisterReq) GetLastName() string {
 	return s.LastName
 }
 
 // GetEmail returns the value of Email.
-func (s *RegisterUserReq) GetEmail() string {
+func (s *UserRegisterReq) GetEmail() string {
 	return s.Email
 }
 
 // GetPassword returns the value of Password.
-func (s *RegisterUserReq) GetPassword() string {
+func (s *UserRegisterReq) GetPassword() string {
 	return s.Password
 }
 
 // SetFirstName sets the value of FirstName.
-func (s *RegisterUserReq) SetFirstName(val string) {
+func (s *UserRegisterReq) SetFirstName(val string) {
 	s.FirstName = val
 }
 
 // SetLastName sets the value of LastName.
-func (s *RegisterUserReq) SetLastName(val string) {
+func (s *UserRegisterReq) SetLastName(val string) {
 	s.LastName = val
 }
 
 // SetEmail sets the value of Email.
-func (s *RegisterUserReq) SetEmail(val string) {
+func (s *UserRegisterReq) SetEmail(val string) {
 	s.Email = val
 }
 
 // SetPassword sets the value of Password.
-func (s *RegisterUserReq) SetPassword(val string) {
+func (s *UserRegisterReq) SetPassword(val string) {
 	s.Password = val
 }

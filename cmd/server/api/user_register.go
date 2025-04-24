@@ -10,7 +10,7 @@ import (
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
-func (a *API) RegisterUser(ctx context.Context, req *handlers.RegisterUserReq) (r *handlers.RegisterUserOK, _ error) {
+func (a *API) UserRegister(ctx context.Context, req *handlers.UserRegisterReq) (r *handlers.UserRegisterOK, _ error) {
 	apiParams := users.RegisterRequest{
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
@@ -20,7 +20,7 @@ func (a *API) RegisterUser(ctx context.Context, req *handlers.RegisterUserReq) (
 
 	switch resp, err := a.dependencies.UserController.Register(ctx, apiParams); {
 	case err == nil:
-		return &handlers.RegisterUserOK{
+		return &handlers.UserRegisterOK{
 			ID: resp.ID.UUID(),
 		}, nil
 	case errors.Is(err, v1.ErrConflict):

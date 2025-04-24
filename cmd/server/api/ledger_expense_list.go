@@ -9,7 +9,7 @@ import (
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
-func (a *API) ListExpenses(ctx context.Context, params handlers.ListExpensesParams) (*handlers.ListExpensesOK, error) {
+func (a *API) LedgerExpenseList(ctx context.Context, params handlers.LedgerExpenseListParams) (*handlers.LedgerExpenseListOK, error) {
 	result, err := a.dependencies.LedgerController.GetExpenses(ctx, ledgers.GetExpensesParams{
 		LedgerID: v1.ConvertID(params.LedgerID),
 		Limit:    params.Limit.Or(10),
@@ -25,7 +25,7 @@ func (a *API) ListExpenses(ctx context.Context, params handlers.ListExpensesPara
 		cursor = handlers.NewOptDateTime(*result.Cursor)
 	}
 
-	return &handlers.ListExpensesOK{
+	return &handlers.LedgerExpenseListOK{
 		Expenses: mapLedgerExpenseToResponseObject(result.Expenses),
 		Cursor:   cursor,
 	}, nil

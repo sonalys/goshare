@@ -11,8 +11,8 @@ import (
 	ht "github.com/ogen-go/ogen/http"
 )
 
-func encodeAddLedgerParticipantRequest(
-	req *AddLedgerParticipantReq,
+func encodeAuthenticationLoginRequest(
+	req *AuthenticationLoginReq,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -25,7 +25,21 @@ func encodeAddLedgerParticipantRequest(
 	return nil
 }
 
-func encodeCreateExpenseRequest(
+func encodeLedgerCreateRequest(
+	req *LedgerCreateReq,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeLedgerExpenseCreateRequest(
 	req *Expense,
 	r *http.Request,
 ) error {
@@ -39,8 +53,8 @@ func encodeCreateExpenseRequest(
 	return nil
 }
 
-func encodeCreateLedgerRequest(
-	req *CreateLedgerReq,
+func encodeLedgerParticipantAddRequest(
+	req *LedgerParticipantAddReq,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -53,22 +67,8 @@ func encodeCreateLedgerRequest(
 	return nil
 }
 
-func encodeLoginRequest(
-	req *LoginReq,
-	r *http.Request,
-) error {
-	const contentType = "application/json"
-	e := new(jx.Encoder)
-	{
-		req.Encode(e)
-	}
-	encoded := e.Bytes()
-	ht.SetBody(r, bytes.NewReader(encoded), contentType)
-	return nil
-}
-
-func encodeRegisterUserRequest(
-	req *RegisterUserReq,
+func encodeUserRegisterRequest(
+	req *UserRegisterReq,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

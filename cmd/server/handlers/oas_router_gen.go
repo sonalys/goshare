@@ -85,7 +85,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						// Leaf node.
 						switch r.Method {
 						case "POST":
-							s.handleLoginRequest([0]string{}, elemIsEscaped, w, r)
+							s.handleAuthenticationLoginRequest([0]string{}, elemIsEscaped, w, r)
 						default:
 							s.notAllowed(w, r, "POST")
 						}
@@ -105,7 +105,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						// Leaf node.
 						switch r.Method {
 						case "GET":
-							s.handleGetIdentityRequest([0]string{}, elemIsEscaped, w, r)
+							s.handleAuthenticationWhoAmIRequest([0]string{}, elemIsEscaped, w, r)
 						default:
 							s.notAllowed(w, r, "GET")
 						}
@@ -127,7 +127,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					// Leaf node.
 					switch r.Method {
 					case "GET":
-						s.handleGetHealthcheckRequest([0]string{}, elemIsEscaped, w, r)
+						s.handleHealthcheckRequest([0]string{}, elemIsEscaped, w, r)
 					default:
 						s.notAllowed(w, r, "GET")
 					}
@@ -146,9 +146,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				if len(elem) == 0 {
 					switch r.Method {
 					case "GET":
-						s.handleListLedgersRequest([0]string{}, elemIsEscaped, w, r)
+						s.handleLedgerListRequest([0]string{}, elemIsEscaped, w, r)
 					case "POST":
-						s.handleCreateLedgerRequest([0]string{}, elemIsEscaped, w, r)
+						s.handleLedgerCreateRequest([0]string{}, elemIsEscaped, w, r)
 					default:
 						s.notAllowed(w, r, "GET,POST")
 					}
@@ -200,11 +200,11 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							if len(elem) == 0 {
 								switch r.Method {
 								case "GET":
-									s.handleListExpensesRequest([1]string{
+									s.handleLedgerExpenseListRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								case "POST":
-									s.handleCreateExpenseRequest([1]string{
+									s.handleLedgerExpenseCreateRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								default:
@@ -235,7 +235,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									// Leaf node.
 									switch r.Method {
 									case "GET":
-										s.handleGetExpenseRequest([2]string{
+										s.handleLedgerExpenseGetRequest([2]string{
 											args[0],
 											args[1],
 										}, elemIsEscaped, w, r)
@@ -260,11 +260,11 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								// Leaf node.
 								switch r.Method {
 								case "GET":
-									s.handleListLedgerParticipantsRequest([1]string{
+									s.handleLedgerParticipantListRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								case "POST":
-									s.handleAddLedgerParticipantRequest([1]string{
+									s.handleLedgerParticipantAddRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								default:
@@ -292,7 +292,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					// Leaf node.
 					switch r.Method {
 					case "POST":
-						s.handleRegisterUserRequest([0]string{}, elemIsEscaped, w, r)
+						s.handleUserRegisterRequest([0]string{}, elemIsEscaped, w, r)
 					default:
 						s.notAllowed(w, r, "POST")
 					}
@@ -418,9 +418,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						// Leaf node.
 						switch method {
 						case "POST":
-							r.name = LoginOperation
+							r.name = AuthenticationLoginOperation
 							r.summary = ""
-							r.operationID = "Login"
+							r.operationID = "AuthenticationLogin"
 							r.pathPattern = "/authentication/login"
 							r.args = args
 							r.count = 0
@@ -442,9 +442,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						// Leaf node.
 						switch method {
 						case "GET":
-							r.name = GetIdentityOperation
+							r.name = AuthenticationWhoAmIOperation
 							r.summary = ""
-							r.operationID = "GetIdentity"
+							r.operationID = "AuthenticationWhoAmI"
 							r.pathPattern = "/authentication/whoami"
 							r.args = args
 							r.count = 0
@@ -468,9 +468,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					// Leaf node.
 					switch method {
 					case "GET":
-						r.name = GetHealthcheckOperation
+						r.name = HealthcheckOperation
 						r.summary = "Healthcheck"
-						r.operationID = "GetHealthcheck"
+						r.operationID = "Healthcheck"
 						r.pathPattern = "/healthcheck"
 						r.args = args
 						r.count = 0
@@ -491,17 +491,17 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				if len(elem) == 0 {
 					switch method {
 					case "GET":
-						r.name = ListLedgersOperation
+						r.name = LedgerListOperation
 						r.summary = ""
-						r.operationID = "ListLedgers"
+						r.operationID = "LedgerList"
 						r.pathPattern = "/ledgers"
 						r.args = args
 						r.count = 0
 						return r, true
 					case "POST":
-						r.name = CreateLedgerOperation
+						r.name = LedgerCreateOperation
 						r.summary = ""
-						r.operationID = "CreateLedger"
+						r.operationID = "LedgerCreate"
 						r.pathPattern = "/ledgers"
 						r.args = args
 						r.count = 0
@@ -555,17 +555,17 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							if len(elem) == 0 {
 								switch method {
 								case "GET":
-									r.name = ListExpensesOperation
+									r.name = LedgerExpenseListOperation
 									r.summary = ""
-									r.operationID = "ListExpenses"
+									r.operationID = "LedgerExpenseList"
 									r.pathPattern = "/ledgers/{ledgerID}/expenses"
 									r.args = args
 									r.count = 1
 									return r, true
 								case "POST":
-									r.name = CreateExpenseOperation
+									r.name = LedgerExpenseCreateOperation
 									r.summary = ""
-									r.operationID = "CreateExpense"
+									r.operationID = "LedgerExpenseCreate"
 									r.pathPattern = "/ledgers/{ledgerID}/expenses"
 									r.args = args
 									r.count = 1
@@ -596,9 +596,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									// Leaf node.
 									switch method {
 									case "GET":
-										r.name = GetExpenseOperation
+										r.name = LedgerExpenseGetOperation
 										r.summary = ""
-										r.operationID = "GetExpense"
+										r.operationID = "LedgerExpenseGet"
 										r.pathPattern = "/ledgers/{ledgerID}/expenses/{expenseID}"
 										r.args = args
 										r.count = 2
@@ -622,17 +622,17 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								// Leaf node.
 								switch method {
 								case "GET":
-									r.name = ListLedgerParticipantsOperation
+									r.name = LedgerParticipantListOperation
 									r.summary = ""
-									r.operationID = "ListLedgerParticipants"
+									r.operationID = "LedgerParticipantList"
 									r.pathPattern = "/ledgers/{ledgerID}/participants"
 									r.args = args
 									r.count = 1
 									return r, true
 								case "POST":
-									r.name = AddLedgerParticipantOperation
+									r.name = LedgerParticipantAddOperation
 									r.summary = ""
-									r.operationID = "AddLedgerParticipant"
+									r.operationID = "LedgerParticipantAdd"
 									r.pathPattern = "/ledgers/{ledgerID}/participants"
 									r.args = args
 									r.count = 1
@@ -660,9 +660,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					// Leaf node.
 					switch method {
 					case "POST":
-						r.name = RegisterUserOperation
+						r.name = UserRegisterOperation
 						r.summary = ""
-						r.operationID = "RegisterUser"
+						r.operationID = "UserRegister"
 						r.pathPattern = "/users"
 						r.args = args
 						r.count = 0

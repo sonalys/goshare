@@ -17,13 +17,13 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
-// AddLedgerParticipantParams is parameters of AddLedgerParticipant operation.
-type AddLedgerParticipantParams struct {
+// LedgerExpenseCreateParams is parameters of LedgerExpenseCreate operation.
+type LedgerExpenseCreateParams struct {
 	// Ledger ID.
 	LedgerID uuid.UUID
 }
 
-func unpackAddLedgerParticipantParams(packed middleware.Parameters) (params AddLedgerParticipantParams) {
+func unpackLedgerExpenseCreateParams(packed middleware.Parameters) (params LedgerExpenseCreateParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "ledgerID",
@@ -34,7 +34,7 @@ func unpackAddLedgerParticipantParams(packed middleware.Parameters) (params AddL
 	return params
 }
 
-func decodeAddLedgerParticipantParams(args [1]string, argsEscaped bool, r *http.Request) (params AddLedgerParticipantParams, _ error) {
+func decodeLedgerExpenseCreateParams(args [1]string, argsEscaped bool, r *http.Request) (params LedgerExpenseCreateParams, _ error) {
 	// Decode path: ledgerID.
 	if err := func() error {
 		param := args[0]
@@ -83,81 +83,15 @@ func decodeAddLedgerParticipantParams(args [1]string, argsEscaped bool, r *http.
 	return params, nil
 }
 
-// CreateExpenseParams is parameters of CreateExpense operation.
-type CreateExpenseParams struct {
-	// Ledger ID.
-	LedgerID uuid.UUID
-}
-
-func unpackCreateExpenseParams(packed middleware.Parameters) (params CreateExpenseParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "ledgerID",
-			In:   "path",
-		}
-		params.LedgerID = packed[key].(uuid.UUID)
-	}
-	return params
-}
-
-func decodeCreateExpenseParams(args [1]string, argsEscaped bool, r *http.Request) (params CreateExpenseParams, _ error) {
-	// Decode path: ledgerID.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "ledgerID",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToUUID(val)
-				if err != nil {
-					return err
-				}
-
-				params.LedgerID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "ledgerID",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
-// GetExpenseParams is parameters of GetExpense operation.
-type GetExpenseParams struct {
+// LedgerExpenseGetParams is parameters of LedgerExpenseGet operation.
+type LedgerExpenseGetParams struct {
 	// Ledger ID.
 	LedgerID uuid.UUID
 	// Expense ID.
 	ExpenseID uuid.UUID
 }
 
-func unpackGetExpenseParams(packed middleware.Parameters) (params GetExpenseParams) {
+func unpackLedgerExpenseGetParams(packed middleware.Parameters) (params LedgerExpenseGetParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "ledgerID",
@@ -175,7 +109,7 @@ func unpackGetExpenseParams(packed middleware.Parameters) (params GetExpensePara
 	return params
 }
 
-func decodeGetExpenseParams(args [2]string, argsEscaped bool, r *http.Request) (params GetExpenseParams, _ error) {
+func decodeLedgerExpenseGetParams(args [2]string, argsEscaped bool, r *http.Request) (params LedgerExpenseGetParams, _ error) {
 	// Decode path: ledgerID.
 	if err := func() error {
 		param := args[0]
@@ -269,8 +203,8 @@ func decodeGetExpenseParams(args [2]string, argsEscaped bool, r *http.Request) (
 	return params, nil
 }
 
-// ListExpensesParams is parameters of ListExpenses operation.
-type ListExpensesParams struct {
+// LedgerExpenseListParams is parameters of LedgerExpenseList operation.
+type LedgerExpenseListParams struct {
 	// Ledger ID.
 	LedgerID uuid.UUID
 	// Cursor for pagination.
@@ -279,7 +213,7 @@ type ListExpensesParams struct {
 	Limit OptInt32
 }
 
-func unpackListExpensesParams(packed middleware.Parameters) (params ListExpensesParams) {
+func unpackLedgerExpenseListParams(packed middleware.Parameters) (params LedgerExpenseListParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "ledgerID",
@@ -308,7 +242,7 @@ func unpackListExpensesParams(packed middleware.Parameters) (params ListExpenses
 	return params
 }
 
-func decodeListExpensesParams(args [1]string, argsEscaped bool, r *http.Request) (params ListExpensesParams, _ error) {
+func decodeLedgerExpenseListParams(args [1]string, argsEscaped bool, r *http.Request) (params LedgerExpenseListParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Decode path: ledgerID.
 	if err := func() error {
@@ -469,13 +403,13 @@ func decodeListExpensesParams(args [1]string, argsEscaped bool, r *http.Request)
 	return params, nil
 }
 
-// ListLedgerParticipantsParams is parameters of ListLedgerParticipants operation.
-type ListLedgerParticipantsParams struct {
+// LedgerParticipantAddParams is parameters of LedgerParticipantAdd operation.
+type LedgerParticipantAddParams struct {
 	// Ledger ID.
 	LedgerID uuid.UUID
 }
 
-func unpackListLedgerParticipantsParams(packed middleware.Parameters) (params ListLedgerParticipantsParams) {
+func unpackLedgerParticipantAddParams(packed middleware.Parameters) (params LedgerParticipantAddParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "ledgerID",
@@ -486,7 +420,73 @@ func unpackListLedgerParticipantsParams(packed middleware.Parameters) (params Li
 	return params
 }
 
-func decodeListLedgerParticipantsParams(args [1]string, argsEscaped bool, r *http.Request) (params ListLedgerParticipantsParams, _ error) {
+func decodeLedgerParticipantAddParams(args [1]string, argsEscaped bool, r *http.Request) (params LedgerParticipantAddParams, _ error) {
+	// Decode path: ledgerID.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "ledgerID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.LedgerID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "ledgerID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// LedgerParticipantListParams is parameters of LedgerParticipantList operation.
+type LedgerParticipantListParams struct {
+	// Ledger ID.
+	LedgerID uuid.UUID
+}
+
+func unpackLedgerParticipantListParams(packed middleware.Parameters) (params LedgerParticipantListParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "ledgerID",
+			In:   "path",
+		}
+		params.LedgerID = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeLedgerParticipantListParams(args [1]string, argsEscaped bool, r *http.Request) (params LedgerParticipantListParams, _ error) {
 	// Decode path: ledgerID.
 	if err := func() error {
 		param := args[0]

@@ -10,7 +10,7 @@ servers:
 paths:
   /healthcheck:
     get:
-      operationId: GetHealthcheck
+      operationId: Healthcheck
       summary: Healthcheck
       description: Check if the service is healthy
       responses:
@@ -21,7 +21,7 @@ paths:
 
   /authentication/whoami:
     get:
-      operationId: GetIdentity
+      operationId: AuthenticationWhoAmI
       description: returns current information on the authenticated entity
       security:
         - cookieAuth: []
@@ -49,7 +49,7 @@ paths:
 
   /authentication/login:
     post:
-      operationId: Login
+      operationId: AuthenticationLogin
       description: Authenticate as the specified identity
       requestBody:
         required: true
@@ -86,7 +86,7 @@ paths:
 
   /users:
     post:
-      operationId: RegisterUser
+      operationId: UserRegister
       description: Registers a new user
       requestBody:
         required: true
@@ -137,7 +137,7 @@ paths:
 
   /ledgers:
     get:
-      operationId: ListLedgers
+      operationId: LedgerList
       description: Lists all ledgers
       security:
         - cookieAuth: []
@@ -158,7 +158,7 @@ paths:
                     items:
                       $ref: "#/components/schemas/Ledger"
     post:
-      operationId: CreateLedger
+      operationId: LedgerCreate
       description: Creates a new ledger. A user can have a maximum of 5 ledgers.
       security:
         - cookieAuth: []
@@ -193,7 +193,7 @@ paths:
 
   /ledgers/{ledgerID}/participants:
     get:
-      operationId: ListLedgerParticipants
+      operationId: LedgerParticipantList
       description: Lists all ledger participants and their balances
       security:
         - cookieAuth: []
@@ -223,7 +223,7 @@ paths:
                       $ref: "#/components/schemas/LedgerParticipant"
 
     post:
-      operationId: AddLedgerParticipant
+      operationId: LedgerParticipantAdd
       description: Adds a new member to the Ledger
       security:
         - cookieAuth: []
@@ -260,7 +260,7 @@ paths:
 
   /ledgers/{ledgerID}/expenses:
     post:
-      operationId: CreateExpense
+      operationId: LedgerExpenseCreate
       description: Creates a new expense record
       security:
         - cookieAuth: []
@@ -295,7 +295,7 @@ paths:
                     format: uuid
 
     get:
-      operationId: ListExpenses
+      operationId: LedgerExpenseList
       description: Lists all expenses in the ledger
       security:
         - cookieAuth: []
@@ -349,7 +349,7 @@ paths:
 
   /ledgers/{ledgerID}/expenses/{expenseID}:
     get:
-      operationId: GetExpense
+      operationId: LedgerExpenseGet
       description: Retrieves an expense record
       security:
         - cookieAuth: []

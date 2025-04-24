@@ -13,102 +13,102 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
-// AddLedgerParticipant implements AddLedgerParticipant operation.
-//
-// Adds a new member to the Ledger.
-//
-// POST /ledgers/{ledgerID}/participants
-func (UnimplementedHandler) AddLedgerParticipant(ctx context.Context, req *AddLedgerParticipantReq, params AddLedgerParticipantParams) error {
-	return ht.ErrNotImplemented
-}
-
-// CreateExpense implements CreateExpense operation.
-//
-// Creates a new expense record.
-//
-// POST /ledgers/{ledgerID}/expenses
-func (UnimplementedHandler) CreateExpense(ctx context.Context, req *Expense, params CreateExpenseParams) (r *CreateExpenseOK, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// CreateLedger implements CreateLedger operation.
-//
-// Creates a new ledger. A user can have a maximum of 5 ledgers.
-//
-// POST /ledgers
-func (UnimplementedHandler) CreateLedger(ctx context.Context, req *CreateLedgerReq) (r *CreateLedgerOK, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetExpense implements GetExpense operation.
-//
-// Retrieves an expense record.
-//
-// GET /ledgers/{ledgerID}/expenses/{expenseID}
-func (UnimplementedHandler) GetExpense(ctx context.Context, params GetExpenseParams) (r *Expense, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetHealthcheck implements GetHealthcheck operation.
-//
-// Check if the service is healthy.
-//
-// GET /healthcheck
-func (UnimplementedHandler) GetHealthcheck(ctx context.Context) error {
-	return ht.ErrNotImplemented
-}
-
-// GetIdentity implements GetIdentity operation.
-//
-// Returns current information on the authenticated entity.
-//
-// GET /authentication/whoami
-func (UnimplementedHandler) GetIdentity(ctx context.Context) (r *GetIdentityOK, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// ListExpenses implements ListExpenses operation.
-//
-// Lists all expenses in the ledger.
-//
-// GET /ledgers/{ledgerID}/expenses
-func (UnimplementedHandler) ListExpenses(ctx context.Context, params ListExpensesParams) (r *ListExpensesOK, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// ListLedgerParticipants implements ListLedgerParticipants operation.
-//
-// Lists all ledger participants and their balances.
-//
-// GET /ledgers/{ledgerID}/participants
-func (UnimplementedHandler) ListLedgerParticipants(ctx context.Context, params ListLedgerParticipantsParams) (r *ListLedgerParticipantsOK, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// ListLedgers implements ListLedgers operation.
-//
-// Lists all ledgers.
-//
-// GET /ledgers
-func (UnimplementedHandler) ListLedgers(ctx context.Context) (r *ListLedgersOK, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// Login implements Login operation.
+// AuthenticationLogin implements AuthenticationLogin operation.
 //
 // Authenticate as the specified identity.
 //
 // POST /authentication/login
-func (UnimplementedHandler) Login(ctx context.Context, req *LoginReq) (r *LoginOK, _ error) {
+func (UnimplementedHandler) AuthenticationLogin(ctx context.Context, req *AuthenticationLoginReq) (r *AuthenticationLoginOK, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
-// RegisterUser implements RegisterUser operation.
+// AuthenticationWhoAmI implements AuthenticationWhoAmI operation.
+//
+// Returns current information on the authenticated entity.
+//
+// GET /authentication/whoami
+func (UnimplementedHandler) AuthenticationWhoAmI(ctx context.Context) (r *AuthenticationWhoAmIOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// Healthcheck implements Healthcheck operation.
+//
+// Check if the service is healthy.
+//
+// GET /healthcheck
+func (UnimplementedHandler) Healthcheck(ctx context.Context) error {
+	return ht.ErrNotImplemented
+}
+
+// LedgerCreate implements LedgerCreate operation.
+//
+// Creates a new ledger. A user can have a maximum of 5 ledgers.
+//
+// POST /ledgers
+func (UnimplementedHandler) LedgerCreate(ctx context.Context, req *LedgerCreateReq) (r *LedgerCreateOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// LedgerExpenseCreate implements LedgerExpenseCreate operation.
+//
+// Creates a new expense record.
+//
+// POST /ledgers/{ledgerID}/expenses
+func (UnimplementedHandler) LedgerExpenseCreate(ctx context.Context, req *Expense, params LedgerExpenseCreateParams) (r *LedgerExpenseCreateOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// LedgerExpenseGet implements LedgerExpenseGet operation.
+//
+// Retrieves an expense record.
+//
+// GET /ledgers/{ledgerID}/expenses/{expenseID}
+func (UnimplementedHandler) LedgerExpenseGet(ctx context.Context, params LedgerExpenseGetParams) (r *Expense, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// LedgerExpenseList implements LedgerExpenseList operation.
+//
+// Lists all expenses in the ledger.
+//
+// GET /ledgers/{ledgerID}/expenses
+func (UnimplementedHandler) LedgerExpenseList(ctx context.Context, params LedgerExpenseListParams) (r *LedgerExpenseListOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// LedgerList implements LedgerList operation.
+//
+// Lists all ledgers.
+//
+// GET /ledgers
+func (UnimplementedHandler) LedgerList(ctx context.Context) (r *LedgerListOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// LedgerParticipantAdd implements LedgerParticipantAdd operation.
+//
+// Adds a new member to the Ledger.
+//
+// POST /ledgers/{ledgerID}/participants
+func (UnimplementedHandler) LedgerParticipantAdd(ctx context.Context, req *LedgerParticipantAddReq, params LedgerParticipantAddParams) error {
+	return ht.ErrNotImplemented
+}
+
+// LedgerParticipantList implements LedgerParticipantList operation.
+//
+// Lists all ledger participants and their balances.
+//
+// GET /ledgers/{ledgerID}/participants
+func (UnimplementedHandler) LedgerParticipantList(ctx context.Context, params LedgerParticipantListParams) (r *LedgerParticipantListOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UserRegister implements UserRegister operation.
 //
 // Registers a new user.
 //
 // POST /users
-func (UnimplementedHandler) RegisterUser(ctx context.Context, req *RegisterUserReq) (r *RegisterUserOK, _ error) {
+func (UnimplementedHandler) UserRegister(ctx context.Context, req *UserRegisterReq) (r *UserRegisterOK, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

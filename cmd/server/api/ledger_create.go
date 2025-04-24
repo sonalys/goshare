@@ -7,7 +7,7 @@ import (
 	"github.com/sonalys/goshare/internal/application/ledgers"
 )
 
-func (a *API) CreateLedger(ctx context.Context, req *handlers.CreateLedgerReq) (r *handlers.CreateLedgerOK, _ error) {
+func (a *API) LedgerCreate(ctx context.Context, req *handlers.LedgerCreateReq) (r *handlers.LedgerCreateOK, _ error) {
 	identity, err := getIdentity(ctx)
 	if err != nil {
 		return nil, err
@@ -20,7 +20,7 @@ func (a *API) CreateLedger(ctx context.Context, req *handlers.CreateLedgerReq) (
 
 	switch resp, err := a.dependencies.LedgerController.Create(ctx, apiParams); {
 	case err == nil:
-		return &handlers.CreateLedgerOK{
+		return &handlers.LedgerCreateOK{
 			ID: resp.ID.UUID(),
 		}, nil
 	default:

@@ -14,8 +14,8 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
-func (s *Server) decodeAddLedgerParticipantRequest(r *http.Request) (
-	req *AddLedgerParticipantReq,
+func (s *Server) decodeAuthenticationLoginRequest(r *http.Request) (
+	req *AuthenticationLoginReq,
 	close func() error,
 	rerr error,
 ) {
@@ -54,7 +54,7 @@ func (s *Server) decodeAddLedgerParticipantRequest(r *http.Request) (
 
 		d := jx.DecodeBytes(buf)
 
-		var request AddLedgerParticipantReq
+		var request AuthenticationLoginReq
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err
@@ -85,7 +85,70 @@ func (s *Server) decodeAddLedgerParticipantRequest(r *http.Request) (
 	}
 }
 
-func (s *Server) decodeCreateExpenseRequest(r *http.Request) (
+func (s *Server) decodeLedgerCreateRequest(r *http.Request) (
+	req *LedgerCreateReq,
+	close func() error,
+	rerr error,
+) {
+	var closers []func() error
+	close = func() error {
+		var merr error
+		// Close in reverse order, to match defer behavior.
+		for i := len(closers) - 1; i >= 0; i-- {
+			c := closers[i]
+			merr = errors.Join(merr, c())
+		}
+		return merr
+	}
+	defer func() {
+		if rerr != nil {
+			rerr = errors.Join(rerr, close())
+		}
+	}()
+	ct, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
+	if err != nil {
+		return req, close, errors.Wrap(err, "parse media type")
+	}
+	switch {
+	case ct == "application/json":
+		if r.ContentLength == 0 {
+			return req, close, validate.ErrBodyRequired
+		}
+		buf, err := io.ReadAll(r.Body)
+		if err != nil {
+			return req, close, err
+		}
+
+		if len(buf) == 0 {
+			return req, close, validate.ErrBodyRequired
+		}
+
+		d := jx.DecodeBytes(buf)
+
+		var request LedgerCreateReq
+		if err := func() error {
+			if err := request.Decode(d); err != nil {
+				return err
+			}
+			if err := d.Skip(); err != io.EOF {
+				return errors.New("unexpected trailing data")
+			}
+			return nil
+		}(); err != nil {
+			err = &ogenerrors.DecodeBodyError{
+				ContentType: ct,
+				Body:        buf,
+				Err:         err,
+			}
+			return req, close, err
+		}
+		return &request, close, nil
+	default:
+		return req, close, validate.InvalidContentType(ct)
+	}
+}
+
+func (s *Server) decodeLedgerExpenseCreateRequest(r *http.Request) (
 	req *Expense,
 	close func() error,
 	rerr error,
@@ -156,8 +219,8 @@ func (s *Server) decodeCreateExpenseRequest(r *http.Request) (
 	}
 }
 
-func (s *Server) decodeCreateLedgerRequest(r *http.Request) (
-	req *CreateLedgerReq,
+func (s *Server) decodeLedgerParticipantAddRequest(r *http.Request) (
+	req *LedgerParticipantAddReq,
 	close func() error,
 	rerr error,
 ) {
@@ -196,70 +259,7 @@ func (s *Server) decodeCreateLedgerRequest(r *http.Request) (
 
 		d := jx.DecodeBytes(buf)
 
-		var request CreateLedgerReq
-		if err := func() error {
-			if err := request.Decode(d); err != nil {
-				return err
-			}
-			if err := d.Skip(); err != io.EOF {
-				return errors.New("unexpected trailing data")
-			}
-			return nil
-		}(); err != nil {
-			err = &ogenerrors.DecodeBodyError{
-				ContentType: ct,
-				Body:        buf,
-				Err:         err,
-			}
-			return req, close, err
-		}
-		return &request, close, nil
-	default:
-		return req, close, validate.InvalidContentType(ct)
-	}
-}
-
-func (s *Server) decodeLoginRequest(r *http.Request) (
-	req *LoginReq,
-	close func() error,
-	rerr error,
-) {
-	var closers []func() error
-	close = func() error {
-		var merr error
-		// Close in reverse order, to match defer behavior.
-		for i := len(closers) - 1; i >= 0; i-- {
-			c := closers[i]
-			merr = errors.Join(merr, c())
-		}
-		return merr
-	}
-	defer func() {
-		if rerr != nil {
-			rerr = errors.Join(rerr, close())
-		}
-	}()
-	ct, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
-	if err != nil {
-		return req, close, errors.Wrap(err, "parse media type")
-	}
-	switch {
-	case ct == "application/json":
-		if r.ContentLength == 0 {
-			return req, close, validate.ErrBodyRequired
-		}
-		buf, err := io.ReadAll(r.Body)
-		if err != nil {
-			return req, close, err
-		}
-
-		if len(buf) == 0 {
-			return req, close, validate.ErrBodyRequired
-		}
-
-		d := jx.DecodeBytes(buf)
-
-		var request LoginReq
+		var request LedgerParticipantAddReq
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err
@@ -290,8 +290,8 @@ func (s *Server) decodeLoginRequest(r *http.Request) (
 	}
 }
 
-func (s *Server) decodeRegisterUserRequest(r *http.Request) (
-	req *RegisterUserReq,
+func (s *Server) decodeUserRegisterRequest(r *http.Request) (
+	req *UserRegisterReq,
 	close func() error,
 	rerr error,
 ) {
@@ -330,7 +330,7 @@ func (s *Server) decodeRegisterUserRequest(r *http.Request) (
 
 		d := jx.DecodeBytes(buf)
 
-		var request RegisterUserReq
+		var request UserRegisterReq
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err
