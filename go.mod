@@ -12,6 +12,7 @@ require (
 	github.com/lmittmann/tint v1.0.6
 	github.com/ogen-go/ogen v1.12.0
 	github.com/remychantenay/slog-otel v1.3.2
+	github.com/sonalys/kset v0.2.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.58.0
 	go.opentelemetry.io/otel v1.35.0
 	go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc v0.9.0

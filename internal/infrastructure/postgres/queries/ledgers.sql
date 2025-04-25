@@ -5,7 +5,7 @@ INSERT INTO ledgers (id,name,created_at,created_by) VALUES ($1,$2,$3,$4);
 SELECT * FROM ledgers WHERE id = $1;
 
 -- name: AddUserToLedger :exec
-INSERT INTO ledger_participants (id,ledger_id,user_id,created_at,created_by,balance) VALUES ($1,$2,$3,$4,$5,0);
+INSERT INTO ledger_participants (id,ledger_id,user_id,created_at,created_by,balance) VALUES ($1,$2,$3,$4,$5,$6);
 
 -- name: RemoveUserFromLedger :exec
 DELETE FROM ledger_participants WHERE id = $1;

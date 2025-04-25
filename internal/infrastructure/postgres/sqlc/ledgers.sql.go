@@ -12,7 +12,7 @@ import (
 )
 
 const addUserToLedger = `-- name: AddUserToLedger :exec
-INSERT INTO ledger_participants (id,ledger_id,user_id,created_at,created_by,balance) VALUES ($1,$2,$3,$4,$5,0)
+INSERT INTO ledger_participants (id,ledger_id,user_id,created_at,created_by,balance) VALUES ($1,$2,$3,$4,$5,$6)
 `
 
 type AddUserToLedgerParams struct {
@@ -21,6 +21,7 @@ type AddUserToLedgerParams struct {
 	UserID    pgtype.UUID
 	CreatedAt pgtype.Timestamp
 	CreatedBy pgtype.UUID
+	Balance   int32
 }
 
 func (q *Queries) AddUserToLedger(ctx context.Context, arg AddUserToLedgerParams) error {
@@ -30,6 +31,7 @@ func (q *Queries) AddUserToLedger(ctx context.Context, arg AddUserToLedgerParams
 		arg.UserID,
 		arg.CreatedAt,
 		arg.CreatedBy,
+		arg.Balance,
 	)
 	return err
 }

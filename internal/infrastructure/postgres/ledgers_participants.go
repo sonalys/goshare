@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/mappers"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
+	"github.com/sonalys/kset"
 )
 
 func (r *LedgerRepository) AddParticipants(ctx context.Context, ledgerID v1.ID, updateFn func(*v1.Ledger) error) error {
@@ -36,35 +38,20 @@ func (r *LedgerRepository) AddParticipants(ctx context.Context, ledgerID v1.ID, 
 			return fmt.Errorf("updating ledger: %w", err)
 		}
 
-		participantsToRemove := make([]sqlc.LedgerParticipant, 0, len(ledger.Participants))
-		participantsToAdd := make([]v1.LedgerParticipant, 0, len(ledger.Participants))
+		oldParticipants := kset.New(func(p sqlc.LedgerParticipant) uuid.UUID {
+			return p.ID.Bytes
+		}, participantsModel...)
 
-	outer:
-		for _, participant := range ledger.Participants {
-			for _, existingParticipant := range participantsModel {
-				if participant.UserID.UUID() == existingParticipant.UserID.Bytes {
-					continue outer
-				}
+		newParticipants := kset.New(func(p v1.LedgerParticipant) uuid.UUID {
+			return p.ID.UUID()
+		}, ledger.Participants...)
 
-				participantsToAdd = append(participantsToAdd, participant)
-			}
-		}
-
-	outer2:
-		for _, existingParticipant := range participantsModel {
-			for _, participant := range ledger.Participants {
-				if participant.UserID.UUID() == existingParticipant.UserID.Bytes {
-					continue outer2
-				}
-			}
-			participantsToRemove = append(participantsToRemove, existingParticipant)
-		}
-
-		for _, participant := range participantsToAdd {
+		for participant := range newParticipants.Difference(oldParticipants).Iter() {
 			addReq := sqlc.AddUserToLedgerParams{
 				ID:        convertUUID(v1.NewID()),
 				LedgerID:  ledgerUUID,
 				UserID:    convertUUID(participant.UserID),
+				Balance:   participant.Balance,
 				CreatedAt: convertTime(participant.CreatedAt),
 				CreatedBy: convertUUID(participant.CreatedBy),
 			}
@@ -82,7 +69,7 @@ func (r *LedgerRepository) AddParticipants(ctx context.Context, ledgerID v1.ID, 
 			}
 		}
 
-		for _, participant := range participantsToRemove {
+		for participant := range oldParticipants.Difference(newParticipants).Iter() {
 			if err := query.RemoveUserFromLedger(ctx, participant.ID); err != nil {
 				return fmt.Errorf("removing participant: %w", err)
 			}
