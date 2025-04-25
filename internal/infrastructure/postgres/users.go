@@ -22,7 +22,7 @@ func NewUsersRepository(client *Client) *UsersRepository {
 
 func (r *UsersRepository) Create(ctx context.Context, user *v1.User) error {
 	return mapError(r.client.queries().CreateUser(ctx, sqlc.CreateUserParams{
-		ID:           convertUUID(user.ID),
+		ID:           convertID(user.ID),
 		FirstName:    user.FirstName,
 		LastName:     user.LastName,
 		Email:        user.Email,

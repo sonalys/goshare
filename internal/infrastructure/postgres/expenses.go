@@ -25,7 +25,7 @@ func (r *ExpenseRepository) Create(ctx context.Context, ledgerID v1.ID, createFn
 	return r.client.transaction(ctx, func(tx pgx.Tx) error {
 		query := r.client.queries().WithTx(tx)
 
-		ledgerModel, err := query.FindLedgerById(ctx, convertUUID(ledgerID))
+		ledgerModel, err := query.FindLedgerById(ctx, convertID(ledgerID))
 		if err != nil {
 			return fmt.Errorf("finding ledger: %w", err)
 		}
@@ -43,15 +43,15 @@ func (r *ExpenseRepository) Create(ctx context.Context, ledgerID v1.ID, createFn
 		}
 
 		createExpenseReq := sqlc.CreateExpenseParams{
-			ID:          convertUUID(expense.ID),
-			LedgerID:    convertUUID(expense.LedgerID),
+			ID:          convertID(expense.ID),
+			LedgerID:    convertID(expense.LedgerID),
 			Amount:      expense.Amount,
 			Name:        expense.Name,
 			ExpenseDate: convertTime(expense.ExpenseDate),
 			CreatedAt:   convertTime(expense.CreatedAt),
-			CreatedBy:   convertUUID(expense.CreatedBy),
+			CreatedBy:   convertID(expense.CreatedBy),
 			UpdatedAt:   convertTime(expense.UpdatedAt),
-			UpdatedBy:   convertUUID(expense.UpdatedBy),
+			UpdatedBy:   convertID(expense.UpdatedBy),
 		}
 
 		if err := query.CreateExpense(ctx, createExpenseReq); err != nil {
@@ -60,16 +60,16 @@ func (r *ExpenseRepository) Create(ctx context.Context, ledgerID v1.ID, createFn
 
 		for _, record := range expense.Records {
 			createRecordReq := sqlc.CreateExpenseRecordParams{
-				ID:         convertUUID(record.ID),
-				ExpenseID:  convertUUID(expense.ID),
-				FromUserID: convertUUID(record.From),
-				ToUserID:   convertUUID(record.To),
+				ID:         convertID(record.ID),
+				ExpenseID:  convertID(expense.ID),
+				FromUserID: convertID(record.From),
+				ToUserID:   convertID(record.To),
 				RecordType: record.Type.String(),
 				Amount:     record.Amount,
 				CreatedAt:  convertTime(record.CreatedAt),
-				CreatedBy:  convertUUID(record.CreatedBy),
+				CreatedBy:  convertID(record.CreatedBy),
 				UpdatedAt:  convertTime(record.UpdatedAt),
-				UpdatedBy:  convertUUID(record.UpdatedBy),
+				UpdatedBy:  convertID(record.UpdatedBy),
 			}
 
 			if err := query.CreateExpenseRecord(ctx, createRecordReq); err != nil {
@@ -82,7 +82,7 @@ func (r *ExpenseRepository) Create(ctx context.Context, ledgerID v1.ID, createFn
 }
 
 func (r *ExpenseRepository) Find(ctx context.Context, id v1.ID) (*v1.Expense, error) {
-	expense, err := r.client.queries().FindExpenseById(ctx, convertUUID(id))
+	expense, err := r.client.queries().FindExpenseById(ctx, convertID(id))
 	if err != nil {
 		return nil, mapLedgerError(err)
 	}
@@ -97,7 +97,7 @@ func (r *ExpenseRepository) Find(ctx context.Context, id v1.ID) (*v1.Expense, er
 
 func (r *ExpenseRepository) GetByLedger(ctx context.Context, ledgerID v1.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
 	expenses, err := r.client.queries().GetLedgerExpenses(ctx, sqlc.GetLedgerExpensesParams{
-		LedgerID:  convertUUID(ledgerID),
+		LedgerID:  convertID(ledgerID),
 		Limit:     limit,
 		CreatedAt: convertTime(cursor),
 	})

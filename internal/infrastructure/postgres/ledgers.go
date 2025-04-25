@@ -24,7 +24,7 @@ func (r *LedgerRepository) Create(ctx context.Context, userID v1.ID, createFn fu
 	return mapLedgerError(r.client.transaction(ctx, func(tx pgx.Tx) error {
 		query := r.client.queries().WithTx(tx)
 
-		id := convertUUID(userID)
+		id := convertID(userID)
 
 		if err := query.LockUserForUpdate(ctx, id); err != nil {
 			return fmt.Errorf("failed to acquire user lock for updating ledger")
@@ -41,10 +41,10 @@ func (r *LedgerRepository) Create(ctx context.Context, userID v1.ID, createFn fu
 		}
 
 		createLedgerReq := sqlc.CreateLedgerParams{
-			ID:        convertUUID(ledger.ID),
+			ID:        convertID(ledger.ID),
 			Name:      ledger.Name,
 			CreatedAt: convertTime(ledger.CreatedAt),
-			CreatedBy: convertUUID(ledger.CreatedBy),
+			CreatedBy: convertID(ledger.CreatedBy),
 		}
 
 		if err := query.CreateLedger(ctx, createLedgerReq); err != nil {
@@ -53,9 +53,9 @@ func (r *LedgerRepository) Create(ctx context.Context, userID v1.ID, createFn fu
 
 		for _, participant := range ledger.Participants {
 			addReq := sqlc.AddUserToLedgerParams{
-				ID:        convertUUID(participant.ID),
+				ID:        convertID(participant.ID),
 				LedgerID:  createLedgerReq.ID,
-				UserID:    convertUUID(participant.UserID),
+				UserID:    convertID(participant.UserID),
 				CreatedAt: createLedgerReq.CreatedAt,
 				CreatedBy: createLedgerReq.CreatedBy,
 			}
@@ -70,12 +70,12 @@ func (r *LedgerRepository) Create(ctx context.Context, userID v1.ID, createFn fu
 }
 
 func (r *LedgerRepository) Find(ctx context.Context, id v1.ID) (*v1.Ledger, error) {
-	ledger, err := r.client.queries().FindLedgerById(ctx, convertUUID(id))
+	ledger, err := r.client.queries().FindLedgerById(ctx, convertID(id))
 	if err != nil {
 		return nil, mapLedgerError(err)
 	}
 
-	participants, err := r.client.queries().GetLedgerParticipants(ctx, convertUUID(id))
+	participants, err := r.client.queries().GetLedgerParticipants(ctx, convertID(id))
 	if err != nil {
 		return nil, mapLedgerError(err)
 	}
@@ -84,7 +84,7 @@ func (r *LedgerRepository) Find(ctx context.Context, id v1.ID) (*v1.Ledger, erro
 }
 
 func (r *LedgerRepository) GetByUser(ctx context.Context, userID v1.ID) ([]v1.Ledger, error) {
-	ledgers, err := r.client.queries().GetUserLedgers(ctx, convertUUID(userID))
+	ledgers, err := r.client.queries().GetUserLedgers(ctx, convertID(userID))
 	if err != nil {
 		return nil, mapLedgerError(err)
 	}

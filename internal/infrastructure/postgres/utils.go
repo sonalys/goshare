@@ -3,13 +3,21 @@ package postgres
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
-func convertUUID(from v1.ID) pgtype.UUID {
+func convertID(from v1.ID) pgtype.UUID {
 	return pgtype.UUID{
 		Bytes: from.UUID(),
+		Valid: true,
+	}
+}
+
+func convertUUID(from uuid.UUID) pgtype.UUID {
+	return pgtype.UUID{
+		Bytes: from,
 		Valid: true,
 	}
 }

@@ -13,7 +13,7 @@ import (
 )
 
 func (r *LedgerRepository) AddParticipants(ctx context.Context, ledgerID v1.ID, updateFn func(*v1.Ledger) error) error {
-	ledgerUUID := convertUUID(ledgerID)
+	ledgerUUID := convertID(ledgerID)
 
 	return mapLedgerError(r.client.transaction(ctx, func(tx pgx.Tx) error {
 		query := r.client.queries().WithTx(tx)
@@ -38,22 +38,22 @@ func (r *LedgerRepository) AddParticipants(ctx context.Context, ledgerID v1.ID, 
 			return fmt.Errorf("updating ledger: %w", err)
 		}
 
-		oldParticipants := kset.New(func(p sqlc.LedgerParticipant) uuid.UUID {
+		oldParticipants := kset.NewFrom(func(p sqlc.LedgerParticipant) uuid.UUID {
 			return p.ID.Bytes
 		}, participantsModel...)
 
-		newParticipants := kset.New(func(p v1.LedgerParticipant) uuid.UUID {
+		newParticipants := kset.NewKeyValue(func(p v1.LedgerParticipant) uuid.UUID {
 			return p.ID.UUID()
 		}, ledger.Participants...)
 
 		for participant := range newParticipants.Difference(oldParticipants).Iter() {
 			addReq := sqlc.AddUserToLedgerParams{
-				ID:        convertUUID(v1.NewID()),
+				ID:        convertID(v1.NewID()),
 				LedgerID:  ledgerUUID,
-				UserID:    convertUUID(participant.UserID),
+				UserID:    convertID(participant.UserID),
 				Balance:   participant.Balance,
 				CreatedAt: convertTime(participant.CreatedAt),
-				CreatedBy: convertUUID(participant.CreatedBy),
+				CreatedBy: convertID(participant.CreatedBy),
 			}
 
 			switch err := query.AddUserToLedger(ctx, addReq); {
@@ -69,8 +69,8 @@ func (r *LedgerRepository) AddParticipants(ctx context.Context, ledgerID v1.ID, 
 			}
 		}
 
-		for participant := range oldParticipants.Difference(newParticipants).Iter() {
-			if err := query.RemoveUserFromLedger(ctx, participant.ID); err != nil {
+		for id := range oldParticipants.Difference(newParticipants).Iter() {
+			if err := query.RemoveUserFromLedger(ctx, convertUUID(id)); err != nil {
 				return fmt.Errorf("removing participant: %w", err)
 			}
 		}
@@ -80,7 +80,7 @@ func (r *LedgerRepository) AddParticipants(ctx context.Context, ledgerID v1.ID, 
 }
 
 func (r *LedgerRepository) GetParticipants(ctx context.Context, ledgerID v1.ID) ([]v1.LedgerParticipant, error) {
-	participants, err := r.client.queries().GetLedgerParticipants(ctx, convertUUID(ledgerID))
+	participants, err := r.client.queries().GetLedgerParticipants(ctx, convertID(ledgerID))
 	if err != nil {
 		return nil, mapLedgerError(err)
 	}
