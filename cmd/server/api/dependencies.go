@@ -21,7 +21,7 @@ type (
 		GetByUser(ctx context.Context, userID v1.ID) ([]v1.Ledger, error)
 		CreateExpense(ctx context.Context, req ledgers.CreateExpenseRequest) (*ledgers.CreateExpenseResponse, error)
 		FindExpense(ctx context.Context, ledgerID, expenseID v1.ID) (*v1.Expense, error)
-		GetExpenses(ctx context.Context, params ledgers.GetExpensesParams) (*ledgers.GetExpensesResult, error)
+		GetExpenses(ctx context.Context, params ledgers.GetExpensesRequest) (*ledgers.GetExpensesResult, error)
 	}
 
 	Dependencies struct {

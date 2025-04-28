@@ -2,35 +2,38 @@ package main
 
 import (
 	"context"
-	"log/slog"
 	"os"
 	"os/signal"
 	"time"
 
 	"github.com/sonalys/goshare/cmd/server/api"
-	"github.com/sonalys/goshare/internal/pkg/logger"
 	"github.com/sonalys/goshare/internal/pkg/otel"
 	"github.com/sonalys/goshare/internal/pkg/secrets"
+	"github.com/sonalys/goshare/internal/pkg/slog"
 )
 
 var version string = "dev"
 
 func init() {
-	logger.InitializeLogger()
+	slog.Init()
 }
 
 func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
-	cfg := loadConfigFromEnv()
+	cfg := loadConfigFromEnv(ctx)
 
-	slog.Info("starting server", slog.String("version", version), slog.String("service_name", cfg.ServiceName))
+	ctx = slog.Context(ctx,
+		slog.WithString("version", version),
+		slog.WithString("service_name", cfg.ServiceName),
+	)
+
+	slog.Info(ctx, "starting server")
 
 	shutdown, err := otel.Initialize(ctx, cfg.TelemetryEndpoint)
 	if err != nil {
-		slog.Error("failed to initialize telemetry", slog.Any("error", err))
-		os.Exit(1)
+		slog.Panic(ctx, "starting telemetry", slog.WithError(err))
 	}
 
 	secrets := secrets.LoadSecrets()
@@ -56,8 +59,8 @@ func main() {
 
 	server.Shutdown(ctx)
 	if err := shutdown(ctx); err != nil {
-		slog.Error("failed to shutdown telemetry", slog.Any("error", err))
+		slog.Error(ctx, "stopping telemetry", err)
 	}
 
-	slog.Info("shutting down server")
+	slog.Info(ctx, "shutting down")
 }

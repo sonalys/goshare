@@ -1,30 +1,35 @@
 package main
 
 import (
-	"log/slog"
+	"context"
+	"os"
+	"os/signal"
 
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres"
-	"github.com/sonalys/goshare/internal/pkg/logger"
 	"github.com/sonalys/goshare/internal/pkg/secrets"
+	"github.com/sonalys/goshare/internal/pkg/slog"
 )
 
 func init() {
-	logger.InitializeLogger()
+	slog.Init()
 }
 
 func main() {
-	slog.Info("starting migration")
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
+
+	slog.Info(ctx, "starting migration")
 
 	driver, err := iofs.New(postgres.MigrationsFS, "migrations")
 	if err != nil {
 		panic(err)
 	}
 
-	slog.Info("migration files loaded")
+	slog.Info(ctx, "migration files loaded")
 
 	secrets := secrets.LoadSecrets()
 
@@ -38,20 +43,20 @@ func main() {
 		panic(err)
 	}
 
-	slog.Info("migrate driver loaded", slog.Uint64("currentVersion", uint64(version)), slog.Bool("isDirty", dirty))
+	slog.Info(ctx, "migrate driver loaded", slog.WithUint64("current_version", uint64(version)), slog.WithBool("is_dirty", dirty))
 
 	if err := m.Up(); err != nil {
 		if err == migrate.ErrNoChange {
-			slog.Info("no changes to migrate")
+			slog.Info(ctx, "no changes to migrate")
 			return
 		}
-		panic(err)
+		slog.Panic(ctx, "migrating up")
 	}
 
 	version, _, err = m.Version()
 	if err != nil {
-		panic(err)
+		slog.Panic(ctx, "reading current version")
 	}
 
-	slog.Info("migrated up", slog.Uint64("currentVersion", uint64(version)))
+	slog.Info(ctx, "migrated up", slog.WithUint64("currentVersion", uint64(version)))
 }

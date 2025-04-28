@@ -10,10 +10,14 @@ import (
 
 type contextKey string
 
-var userCtxKey contextKey = "user-key"
+type identityController interface {
+	Decode(string) (*v1.Identity, error)
+}
+
+var identityContextKey contextKey = "identity-key"
 
 func getIdentity(ctx context.Context) (*v1.Identity, error) {
-	identity, ok := ctx.Value(userCtxKey).(*v1.Identity)
+	identity, ok := ctx.Value(identityContextKey).(*v1.Identity)
 	if !ok {
 		return nil, fmt.Errorf("unauthorized")
 	}
@@ -21,25 +25,19 @@ func getIdentity(ctx context.Context) (*v1.Identity, error) {
 }
 
 type SecurityHandler struct {
-	identityDecoder interface {
-		Decode(string) (*v1.Identity, error)
-	}
+	controller identityController
 }
 
 func (h *SecurityHandler) HandleCookieAuth(ctx context.Context, operationName handlers.OperationName, t handlers.CookieAuth) (context.Context, error) {
-	identity, err := h.identityDecoder.Decode(t.APIKey)
+	identity, err := h.controller.Decode(t.APIKey)
 	if err != nil {
-		return ctx, err
+		return nil, err
 	}
-
-	ctx = context.WithValue(ctx, userCtxKey, identity)
-	return ctx, nil
+	return context.WithValue(ctx, identityContextKey, identity), nil
 }
 
-func NewSecurityHandler(identityDecoder interface {
-	Decode(string) (*v1.Identity, error)
-}) *SecurityHandler {
+func NewSecurityHandler(c identityController) *SecurityHandler {
 	return &SecurityHandler{
-		identityDecoder: identityDecoder,
+		controller: c,
 	}
 }

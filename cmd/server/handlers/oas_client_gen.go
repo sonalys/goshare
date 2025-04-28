@@ -70,7 +70,7 @@ type Invoker interface {
 	// Lists all expenses in the ledger.
 	//
 	// GET /ledgers/{ledgerID}/expenses
-	LedgerExpenseList(ctx context.Context, params LedgerExpenseListParams) (*LedgerExpenseListOK, error)
+	LedgerExpenseList(ctx context.Context, params LedgerExpenseListParams) (LedgerExpenseListRes, error)
 	// LedgerList invokes LedgerList operation.
 	//
 	// Lists all ledgers.
@@ -780,12 +780,12 @@ func (c *Client) sendLedgerExpenseGet(ctx context.Context, params LedgerExpenseG
 // Lists all expenses in the ledger.
 //
 // GET /ledgers/{ledgerID}/expenses
-func (c *Client) LedgerExpenseList(ctx context.Context, params LedgerExpenseListParams) (*LedgerExpenseListOK, error) {
+func (c *Client) LedgerExpenseList(ctx context.Context, params LedgerExpenseListParams) (LedgerExpenseListRes, error) {
 	res, err := c.sendLedgerExpenseList(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendLedgerExpenseList(ctx context.Context, params LedgerExpenseListParams) (res *LedgerExpenseListOK, err error) {
+func (c *Client) sendLedgerExpenseList(ctx context.Context, params LedgerExpenseListParams) (res LedgerExpenseListRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("LedgerExpenseList"),
 		semconv.HTTPRequestMethodKey.String("GET"),

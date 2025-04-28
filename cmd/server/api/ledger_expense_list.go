@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/sonalys/goshare/cmd/server/handlers"
@@ -9,14 +10,23 @@ import (
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
-func (a *API) LedgerExpenseList(ctx context.Context, params handlers.LedgerExpenseListParams) (*handlers.LedgerExpenseListOK, error) {
-	result, err := a.dependencies.LedgerController.GetExpenses(ctx, ledgers.GetExpensesParams{
+func (a *API) LedgerExpenseList(ctx context.Context, params handlers.LedgerExpenseListParams) (handlers.LedgerExpenseListRes, error) {
+	identity, err := getIdentity(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := a.dependencies.LedgerController.GetExpenses(ctx, ledgers.GetExpensesRequest{
+		UserID:   identity.UserID,
 		LedgerID: v1.ConvertID(params.LedgerID),
 		Limit:    params.Limit.Or(10),
 		Cursor:   params.Cursor.Or(time.Now()),
 	})
-	if err != nil {
-		return nil, err
+	switch {
+	case err == nil:
+
+	case errors.Is(err, v1.ErrUserNotAMember):
+		return newRespUnauthorized(ctx), nil
 	}
 
 	var cursor handlers.OptDateTime

@@ -1,10 +1,12 @@
 package main
 
 import (
-	"log/slog"
+	"context"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/sonalys/goshare/internal/pkg/slog"
 )
 
 type Config struct {
@@ -15,7 +17,7 @@ type Config struct {
 	TelemetryEndpoint string
 }
 
-func loadConfigFromEnv() Config {
+func loadConfigFromEnv(ctx context.Context) Config {
 	cfg := Config{
 		ServiceName:       "server",
 		AddrPort:          ":8080",
@@ -33,7 +35,7 @@ func loadConfigFromEnv() Config {
 		if ok == nil {
 			cfg.EnableTelemetry = enableTelemetry
 		} else {
-			slog.Warn("failed to parse ENABLE_TELEMETRY")
+			slog.Warn(ctx, "failed to parse ENABLE_TELEMETRY")
 		}
 	}
 
@@ -45,7 +47,7 @@ func loadConfigFromEnv() Config {
 		if d, err := time.ParseDuration(readTimeout); err == nil {
 			cfg.ReadTimeout = d
 		} else {
-			slog.Warn("failed to parse READ_TIMEOUT", slog.Any("error", err))
+			slog.Warn(ctx, "failed to parse READ_TIMEOUT", slog.WithError(err))
 		}
 	}
 

@@ -3,6 +3,8 @@ package v1
 import (
 	"fmt"
 	"time"
+
+	"github.com/sonalys/kset"
 )
 
 type (
@@ -54,4 +56,23 @@ func (l Ledger) IsParticipant(userID ID) bool {
 		}
 	}
 	return false
+}
+
+func (l *Ledger) AddParticipants(userID ID, ids ...ID) int {
+	participantsSet := kset.NewKeyValue(func(p LedgerParticipant) ID { return p.UserID }, l.Participants...)
+	addedCount := 0
+
+	for _, id := range ids {
+		addedCount += participantsSet.Append(LedgerParticipant{
+			ID:        NewID(),
+			UserID:    id,
+			Balance:   0,
+			CreatedAt: time.Now(),
+			CreatedBy: userID,
+		})
+	}
+
+	l.Participants = participantsSet.ToSlice()
+
+	return addedCount
 }

@@ -72,7 +72,7 @@ func (UnimplementedHandler) LedgerExpenseGet(ctx context.Context, params LedgerE
 // Lists all expenses in the ledger.
 //
 // GET /ledgers/{ledgerID}/expenses
-func (UnimplementedHandler) LedgerExpenseList(ctx context.Context, params LedgerExpenseListParams) (r *LedgerExpenseListOK, _ error) {
+func (UnimplementedHandler) LedgerExpenseList(ctx context.Context, params LedgerExpenseListParams) (r LedgerExpenseListRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

@@ -34,13 +34,13 @@ type (
 )
 
 func NewController(
-	ledgerRepository LedgerRepository,
-	expenseRepository ExpenseRepository,
-	userReposiroty UserRepository,
+	ledger LedgerRepository,
+	expense ExpenseRepository,
+	user UserRepository,
 ) *Controller {
 	return &Controller{
-		ledgerRepository:  ledgerRepository,
-		expenseRepository: expenseRepository,
-		userRepository:    userReposiroty,
+		ledgerRepository:  ledger,
+		expenseRepository: expense,
+		userRepository:    user,
 	}
 }

@@ -2,10 +2,9 @@ package ledgers
 
 import (
 	"context"
-	"fmt"
-	"log/slog"
 
 	"github.com/sonalys/goshare/internal/pkg/otel"
+	"github.com/sonalys/goshare/internal/pkg/slog"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
@@ -15,8 +14,7 @@ func (c *Controller) GetByUser(ctx context.Context, userID v1.ID) ([]v1.Ledger, 
 
 	ledgers, err := c.ledgerRepository.GetByUser(ctx, userID)
 	if err != nil {
-		slog.ErrorContext(ctx, "failed to list ledgers", slog.Any("error", err))
-		return nil, fmt.Errorf("failed to list ledgers: %w", err)
+		return nil, slog.ErrorReturn(ctx, "failed to list ledgers", err)
 	}
 
 	return ledgers, nil

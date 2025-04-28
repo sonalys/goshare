@@ -1224,7 +1224,7 @@ func (s *Server) handleLedgerExpenseListRequest(args [1]string, argsEscaped bool
 		return
 	}
 
-	var response *LedgerExpenseListOK
+	var response LedgerExpenseListRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -1252,7 +1252,7 @@ func (s *Server) handleLedgerExpenseListRequest(args [1]string, argsEscaped bool
 		type (
 			Request  = struct{}
 			Params   = LedgerExpenseListParams
-			Response = *LedgerExpenseListOK
+			Response = LedgerExpenseListRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,

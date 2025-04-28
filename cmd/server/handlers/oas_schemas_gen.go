@@ -340,6 +340,8 @@ func (s *ErrorResponseStatusCode) SetResponse(val ErrorResponse) {
 	s.Response = val
 }
 
+func (*ErrorResponseStatusCode) ledgerExpenseListRes() {}
+
 // Ref: #/components/schemas/Expense
 type Expense struct {
 	// Unique identifier for the expense.
@@ -719,6 +721,8 @@ func (s *LedgerExpenseListOK) SetCursor(val OptDateTime) {
 func (s *LedgerExpenseListOK) SetExpenses(val []ExpenseSummary) {
 	s.Expenses = val
 }
+
+func (*LedgerExpenseListOK) ledgerExpenseListRes() {}
 
 type LedgerListOK struct {
 	Ledgers []Ledger `json:"ledgers"`

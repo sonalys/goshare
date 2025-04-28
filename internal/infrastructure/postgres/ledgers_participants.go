@@ -38,15 +38,10 @@ func (r *LedgerRepository) AddParticipants(ctx context.Context, ledgerID v1.ID, 
 			return fmt.Errorf("updating ledger: %w", err)
 		}
 
-		oldParticipants := kset.NewFrom(func(p sqlc.LedgerParticipant) uuid.UUID {
-			return p.ID.Bytes
-		}, participantsModel...)
+		oldIDs := kset.NewFrom(func(p sqlc.LedgerParticipant) uuid.UUID { return p.ID.Bytes }, participantsModel...)
+		newParticipants := kset.NewKeyValue(func(p v1.LedgerParticipant) uuid.UUID { return p.ID.UUID() }, ledger.Participants...)
 
-		newParticipants := kset.NewKeyValue(func(p v1.LedgerParticipant) uuid.UUID {
-			return p.ID.UUID()
-		}, ledger.Participants...)
-
-		for participant := range newParticipants.Difference(oldParticipants).Iter() {
+		for participant := range newParticipants.Difference(oldIDs).Iter() {
 			addReq := sqlc.AddUserToLedgerParams{
 				ID:        convertID(v1.NewID()),
 				LedgerID:  ledgerUUID,
@@ -69,7 +64,7 @@ func (r *LedgerRepository) AddParticipants(ctx context.Context, ledgerID v1.ID, 
 			}
 		}
 
-		for id := range oldParticipants.Difference(newParticipants).Iter() {
+		for id := range oldIDs.Difference(newParticipants).Iter() {
 			if err := query.RemoveUserFromLedger(ctx, convertUUID(id)); err != nil {
 				return fmt.Errorf("removing participant: %w", err)
 			}

@@ -1,9 +1,10 @@
 package middlewares
 
 import (
-	"log/slog"
 	"net/http"
 	"time"
+
+	"github.com/sonalys/goshare/internal/pkg/slog"
 )
 
 type responseWriter struct {
@@ -39,11 +40,11 @@ func LogRequests(find RouteFinder) Middleware {
 			if route, ok := find(r.Method, r.URL); ok {
 				opID = route.OperationID()
 			}
-			slog.InfoContext(ctx, "request received",
-				slog.String("method", r.Method),
-				slog.String("url", r.URL.String()),
-				slog.String("operation_id", opID),
-				slog.String("remote_addr", r.RemoteAddr),
+			slog.Info(ctx, "request received",
+				slog.WithString("method", r.Method),
+				slog.WithString("url", r.URL.String()),
+				slog.WithString("operation_id", opID),
+				slog.WithString("remote_addr", r.RemoteAddr),
 			)
 
 			rw := wrapResponseWriter(w)
@@ -53,21 +54,21 @@ func LogRequests(find RouteFinder) Middleware {
 			defer func() {
 				status := rw.Status()
 
-				fields := []any{
-					slog.String("method", r.Method),
-					slog.String("url", r.URL.String()),
-					slog.String("operation_id", opID),
-					slog.String("remote_addr", r.RemoteAddr),
-					slog.Int("status", rw.Status()),
-					slog.Duration("duration", time.Since(t1)),
-				}
+				ctx = slog.Context(ctx,
+					slog.WithString("method", r.Method),
+					slog.WithString("url", r.URL.String()),
+					slog.WithString("operation_id", opID),
+					slog.WithString("remote_addr", r.RemoteAddr),
+					slog.WithInt("status", rw.Status()),
+					slog.WithDuration("duration", time.Since(t1)),
+				)
 
 				if status >= 400 {
-					slog.ErrorContext(ctx, "request failed", fields...)
+					slog.Error(ctx, "request failed", nil)
 					return
 				}
 
-				slog.InfoContext(ctx, "request completed", fields...)
+				slog.Info(ctx, "request completed")
 			}()
 
 			next.ServeHTTP(rw, r)

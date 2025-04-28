@@ -2,10 +2,10 @@ package ledgers
 
 import (
 	"context"
-	"log/slog"
 	"time"
 
 	"github.com/sonalys/goshare/internal/pkg/otel"
+	"github.com/sonalys/goshare/internal/pkg/slog"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
@@ -40,9 +40,12 @@ func (c *Controller) Create(ctx context.Context, req CreateRequest) (*CreateResp
 	ctx, span := otel.Tracer.Start(ctx, "ledgers.Create")
 	defer span.End()
 
+	ctx = slog.Context(ctx,
+		slog.WithStringer("user_id", req.UserID),
+	)
+
 	if err := req.Validate(); err != nil {
-		slog.ErrorContext(ctx, "invalid request", slog.Any("error", err))
-		return nil, err
+		return nil, slog.ErrorReturn(ctx, "invalid request", err)
 	}
 
 	ledger := &v1.Ledger{
@@ -61,6 +64,10 @@ func (c *Controller) Create(ctx context.Context, req CreateRequest) (*CreateResp
 		CreatedBy: req.UserID,
 	}
 
+	ctx = slog.Context(ctx,
+		slog.WithStringer("ledger_id", ledger.ID),
+	)
+
 	err := c.ledgerRepository.Create(ctx, req.UserID, func(count int64) (*v1.Ledger, error) {
 		if count+1 > v1.UserMaxLedgers {
 			return nil, v1.ErrUserMaxLedgers
@@ -69,11 +76,10 @@ func (c *Controller) Create(ctx context.Context, req CreateRequest) (*CreateResp
 		return ledger, nil
 	})
 	if err != nil {
-		slog.ErrorContext(ctx, "failed to create ledger", slog.Any("error", err))
-		return nil, err
+		return nil, slog.ErrorReturn(ctx, "failed to create ledger", err)
 	}
 
-	slog.InfoContext(ctx, "ledger created", slog.String("ledger_id", ledger.ID.String()))
+	slog.Info(ctx, "ledger created")
 
 	resp := &CreateResponse{
 		ID: ledger.ID,

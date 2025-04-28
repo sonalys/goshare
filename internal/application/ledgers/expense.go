@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log/slog"
 	"time"
 
 	"github.com/sonalys/goshare/internal/pkg/otel"
+	"github.com/sonalys/goshare/internal/pkg/slog"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
@@ -24,7 +24,7 @@ type (
 		ID v1.ID
 	}
 
-	GetExpensesParams struct {
+	GetExpensesRequest struct {
 		UserID   v1.ID
 		LedgerID v1.ID
 		Cursor   time.Time
@@ -63,9 +63,13 @@ func (c *Controller) CreateExpense(ctx context.Context, req CreateExpenseRequest
 	ctx, span := otel.Tracer.Start(ctx, "ledgers.CreateExpense")
 	defer span.End()
 
+	ctx = slog.Context(ctx,
+		slog.WithStringer("user_id", req.UserID),
+		slog.WithStringer("ledger_id", req.LedgerID),
+	)
+
 	if err := req.Validate(); err != nil {
-		slog.ErrorContext(ctx, "invalid request", slog.Any("error", err))
-		return nil, err
+		return nil, slog.ErrorReturn(ctx, "validating request", err)
 	}
 
 	var totalAmount int32
@@ -89,6 +93,10 @@ func (c *Controller) CreateExpense(ctx context.Context, req CreateExpenseRequest
 		UpdatedBy:   req.UserID,
 	}
 
+	ctx = slog.Context(ctx,
+		slog.WithStringer("expense_id", expense.ID),
+	)
+
 	switch err := c.expenseRepository.Create(ctx, req.LedgerID, func(ledger *v1.Ledger) (*v1.Expense, error) {
 		if !ledger.IsParticipant(req.UserID) {
 			return nil, v1.ErrUserNotAMember
@@ -105,10 +113,9 @@ func (c *Controller) CreateExpense(ctx context.Context, req CreateExpenseRequest
 		}
 		return nil, err
 	case err != nil:
-		slog.ErrorContext(ctx, "failed to create expense", slog.Any("error", err))
-		return nil, err
+		return nil, slog.ErrorReturn(ctx, "creating expense", err)
 	default:
-		slog.InfoContext(ctx, "expense created", slog.String("expense_id", expense.ID.String()))
+		slog.Info(ctx, "expense created")
 
 		return &CreateExpenseResponse{
 			ID: expense.ID,
@@ -116,59 +123,58 @@ func (c *Controller) CreateExpense(ctx context.Context, req CreateExpenseRequest
 	}
 }
 
-func (c *Controller) FindExpense(ctx context.Context, _ v1.ID, expenseID v1.ID) (*v1.Expense, error) {
+func (c *Controller) FindExpense(ctx context.Context, ledgerID v1.ID, expenseID v1.ID) (*v1.Expense, error) {
 	ctx, span := otel.Tracer.Start(ctx, "ledgers.FindExpense")
 	defer span.End()
 
-	logFields := []any{
-		slog.String("expense_id", expenseID.String()),
-	}
+	ctx = slog.Context(ctx,
+		slog.WithStringer("ledger_id", ledgerID),
+		slog.WithStringer("expense_id", expenseID),
+	)
 
 	expense, err := c.expenseRepository.Find(ctx, expenseID)
 	if err != nil {
-		slog.ErrorContext(ctx, "failed to get ledger expense", append(logFields, slog.Any("error", err))...)
-		return nil, err
+		return nil, slog.ErrorReturn(ctx, "failed to get ledger expense", err)
 	}
 
-	slog.InfoContext(ctx, "ledger expense retrieved")
+	slog.Info(ctx, "ledger expense retrieved")
 
 	return expense, nil
 }
 
-func (c *Controller) GetExpenses(ctx context.Context, params GetExpensesParams) (*GetExpensesResult, error) {
+func (c *Controller) GetExpenses(ctx context.Context, req GetExpensesRequest) (*GetExpensesResult, error) {
 	ctx, span := otel.Tracer.Start(ctx, "ledgers.GetExpenses")
 	defer span.End()
 
-	params.Limit = max(1, params.Limit)
+	req.Limit = max(1, req.Limit)
 
-	logFields := []any{
-		slog.String("ledger_id", params.LedgerID.String()),
-	}
+	ctx = slog.Context(ctx,
+		slog.WithStringer("user_id", req.UserID),
+		slog.WithStringer("ledger_id", req.LedgerID),
+	)
 
-	ledger, err := c.ledgerRepository.Find(ctx, params.LedgerID)
+	ledger, err := c.ledgerRepository.Find(ctx, req.LedgerID)
 	if err != nil {
-		slog.ErrorContext(ctx, "failed to get ledger", append(logFields, slog.Any("error", err))...)
-		return nil, err
+		return nil, slog.ErrorReturn(ctx, "failed to get ledger", err)
 	}
 
-	if !ledger.IsParticipant(params.UserID) {
-		return nil, v1.ErrUserNotAMember
+	if !ledger.IsParticipant(req.UserID) {
+		return nil, slog.ErrorReturn(ctx, "authorizing request", v1.ErrUserNotAMember)
 	}
 
-	expenses, err := c.expenseRepository.GetByLedger(ctx, params.LedgerID, params.Cursor, params.Limit+1)
+	expenses, err := c.expenseRepository.GetByLedger(ctx, req.LedgerID, req.Cursor, req.Limit+1)
 	if err != nil {
-		slog.ErrorContext(ctx, "failed to get ledger expenses", append(logFields, slog.Any("error", err))...)
-		return nil, err
+		return nil, slog.ErrorReturn(ctx, "failed to get ledger expenses", err)
 	}
 
 	if len(expenses) == 0 {
 		return nil, nil
 	}
 
-	slog.InfoContext(ctx, "ledger expenses retrieved", logFields...)
+	slog.Info(ctx, "ledger expenses retrieved")
 
 	var cursor *time.Time
-	if len(expenses) == int(params.Limit)+1 {
+	if len(expenses) == int(req.Limit)+1 {
 		expenses = expenses[:len(expenses)-1]
 		cursor = &expenses[len(expenses)-1].CreatedAt
 	}

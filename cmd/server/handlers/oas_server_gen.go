@@ -49,7 +49,7 @@ type Handler interface {
 	// Lists all expenses in the ledger.
 	//
 	// GET /ledgers/{ledgerID}/expenses
-	LedgerExpenseList(ctx context.Context, params LedgerExpenseListParams) (*LedgerExpenseListOK, error)
+	LedgerExpenseList(ctx context.Context, params LedgerExpenseListParams) (LedgerExpenseListRes, error)
 	// LedgerList implements LedgerList operation.
 	//
 	// Lists all ledgers.

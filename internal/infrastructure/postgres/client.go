@@ -2,12 +2,13 @@ package postgres
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"log/slog"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
+	"github.com/sonalys/goshare/internal/pkg/slog"
 )
 
 type Client struct {
@@ -46,8 +47,8 @@ func (c *Client) transaction(ctx context.Context, f func(tx pgx.Tx) error) error
 		return fmt.Errorf("failed to start transaction: %w", err)
 	}
 	defer func() {
-		if err := tx.Rollback(ctx); err != nil {
-			slog.ErrorContext(ctx, "failed to rollback transaction")
+		if err := tx.Rollback(ctx); err != nil && !errors.Is(err, pgx.ErrTxClosed) {
+			slog.Error(ctx, "failed to rollback transaction", err)
 		}
 	}()
 

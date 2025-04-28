@@ -3,10 +3,10 @@ package users
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"time"
 
 	"github.com/sonalys/goshare/internal/pkg/otel"
+	"github.com/sonalys/goshare/internal/pkg/slog"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -41,13 +41,12 @@ func (c *Controller) Login(ctx context.Context, req LoginRequest) (*LoginRespons
 	defer span.End()
 
 	if err := req.Validate(); err != nil {
-		slog.ErrorContext(ctx, "invalid login request", slog.Any("error", err))
-		return nil, err
+		return nil, slog.ErrorReturn(ctx, "invalid login request", err)
 	}
 
 	user, err := c.repository.FindByEmail(ctx, req.Email)
 	if err != nil {
-		slog.ErrorContext(ctx, "could not find user by email", slog.Any("error", err))
+		slog.Error(ctx, "could not find user by email", err)
 		return nil, v1.ErrEmailPasswordMismatch
 	}
 	span.AddEvent("user found")
@@ -55,7 +54,7 @@ func (c *Controller) Login(ctx context.Context, req LoginRequest) (*LoginRespons
 	// Use bcrypt to compare the hashed password
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password))
 	if err != nil {
-		slog.ErrorContext(ctx, "password hash mismatch", slog.Any("error", err))
+		slog.Error(ctx, "password hash mismatch", err)
 		return nil, v1.ErrEmailPasswordMismatch
 	}
 	span.AddEvent("hash compared")
@@ -67,11 +66,11 @@ func (c *Controller) Login(ctx context.Context, req LoginRequest) (*LoginRespons
 	}
 	token, err := c.identityEncoder.Encode(identity)
 	if err != nil {
-		slog.ErrorContext(ctx, "could not sign JWT token", slog.Any("error", err))
+		slog.Error(ctx, "could not sign JWT token", err)
 		return nil, fmt.Errorf("failed to sign token: %v", err)
 	}
 
-	slog.InfoContext(ctx, "user logged in", slog.String("user_id", user.ID.String()))
+	slog.Info(ctx, "user logged in", slog.WithStringer("user_id", user.ID))
 
 	return &LoginResponse{Token: token}, nil
 }

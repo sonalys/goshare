@@ -2,11 +2,11 @@ package middlewares
 
 import (
 	"encoding/json"
-	"log/slog"
 	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/sonalys/goshare/cmd/server/handlers"
+	"github.com/sonalys/goshare/internal/pkg/slog"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -17,7 +17,7 @@ func Recoverer(next http.Handler) http.Handler {
 			if rec == nil {
 				return
 			}
-			slog.ErrorContext(r.Context(), "panic recovered", slog.Any("error", rec))
+			slog.Error(r.Context(), "panic recovered", nil, slog.WithAny("r", rec))
 			w.WriteHeader(http.StatusInternalServerError)
 
 			var traceID trace.TraceID
@@ -37,7 +37,7 @@ func Recoverer(next http.Handler) http.Handler {
 
 			w.Header().Set("Content-Type", "application/json")
 			if err := json.NewEncoder(w).Encode(resp); err != nil {
-				slog.ErrorContext(r.Context(), "failed to encode error response", slog.Any("error", err))
+				slog.Error(r.Context(), "failed to encode error response", err)
 			}
 		}()
 		next.ServeHTTP(w, r)

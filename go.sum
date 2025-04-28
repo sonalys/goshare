@@ -147,8 +147,6 @@ github.com/rogpeppe/go-internal v1.13.1/go.mod h1:uMEvuHeurkdAXX61udpOXGD/AzZDWN
 github.com/russross/blackfriday/v2 v2.1.0/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
 github.com/segmentio/asm v1.2.0 h1:9BQrFxC+YOHJlTlHGkTrFWf59nbL3XnCoFLTwDCI7ys=
 github.com/segmentio/asm v1.2.0/go.mod h1:BqMnlJP91P8d+4ibuonYZw9mfnzI9HfxselHZr5aAcs=
-github.com/sonalys/kset v0.2.0 h1:a5+7KJ5C+TvmJIrGwxxsq1i++iV7TRC31aaUkurELkc=
-github.com/sonalys/kset v0.2.0/go.mod h1:6Cl4vmtVIO4uX0BoYylJfvJV5oyn4lexeq8XUUW9T2s=
 github.com/sonalys/kset v0.3.2 h1:KTorxoUZ7+WNZ0iE+MOnf+zZgWGOuOPDbgsirce1eXY=
 github.com/sonalys/kset v0.3.2/go.mod h1:6Cl4vmtVIO4uX0BoYylJfvJV5oyn4lexeq8XUUW9T2s=
 github.com/spf13/cobra v1.9.1 h1:CXSaggrXdbHK9CF+8ywj8Amf7PBRmPCOJugH954Nnlo=

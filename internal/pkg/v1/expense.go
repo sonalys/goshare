@@ -41,6 +41,17 @@ const (
 	recordTypeMaxBoundary
 )
 
+func NewRecordType(s string) RecordType {
+	switch s {
+	case "debt":
+		return RecordTypeDebt
+	case "settlement":
+		return RecordTypeSettlement
+	default:
+		return RecordTypeUnknown
+	}
+}
+
 func (r RecordType) String() string {
 	switch r {
 	case RecordTypeDebt:
@@ -54,15 +65,4 @@ func (r RecordType) String() string {
 
 func (r RecordType) IsValid() bool {
 	return r <= RecordTypeUnknown || r >= recordTypeMaxBoundary
-}
-
-func NewRecordType(s string) RecordType {
-	switch s {
-	case "debt":
-		return RecordTypeDebt
-	case "settlement":
-		return RecordTypeSettlement
-	default:
-		return RecordTypeUnknown
-	}
 }

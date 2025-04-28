@@ -3,13 +3,13 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"log/slog"
 	"net/http"
 
 	"github.com/sonalys/goshare/cmd/server/api"
 	"github.com/sonalys/goshare/cmd/server/handlers"
 	"github.com/sonalys/goshare/cmd/server/middlewares"
 	"github.com/sonalys/goshare/internal/pkg/otel"
+	"github.com/sonalys/goshare/internal/pkg/slog"
 )
 
 func NewHandler(client *api.API, repositories *repositories, serviceName string) http.Handler {
@@ -24,7 +24,7 @@ func NewHandler(client *api.API, repositories *repositories, serviceName string)
 
 			w.Header().Set("Content-Type", "application/json")
 			if err := json.NewEncoder(w).Encode(resp); err != nil {
-				slog.Error("failed to encode error response", slog.Any("error", err))
+				slog.Error(ctx, "failed to encode error response", err)
 			}
 		}),
 	)

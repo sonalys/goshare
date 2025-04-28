@@ -2,12 +2,11 @@ package users
 
 import (
 	"context"
-	"fmt"
-	"log/slog"
 	"net/mail"
 	"time"
 
 	"github.com/sonalys/goshare/internal/pkg/otel"
+	"github.com/sonalys/goshare/internal/pkg/slog"
 	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -55,8 +54,7 @@ func (c *Controller) Register(ctx context.Context, req RegisterRequest) (*Regist
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		slog.ErrorContext(ctx, "failed to hash password", slog.Any("error", err))
-		return nil, err
+		return nil, slog.ErrorReturn(ctx, "failed to hash password", err)
 	}
 
 	user := &v1.User{
@@ -70,11 +68,10 @@ func (c *Controller) Register(ctx context.Context, req RegisterRequest) (*Regist
 	}
 
 	if err := c.repository.Create(ctx, user); err != nil {
-		slog.ErrorContext(ctx, err.Error())
-		return nil, fmt.Errorf("failed to create user: %w", err)
+		return nil, slog.ErrorReturn(ctx, "creating user", err)
 	}
 
-	slog.InfoContext(ctx, "user registered", slog.String("user_id", user.ID.String()))
+	slog.Info(ctx, "user registered", slog.WithStringer("user_id", user.ID))
 
 	return &RegisterResponse{
 		ID: user.ID,
