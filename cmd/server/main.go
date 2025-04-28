@@ -15,7 +15,7 @@ import (
 var version string = "dev"
 
 func init() {
-	slog.Init()
+	slog.Init(slog.LevelDebug)
 }
 
 func main() {
@@ -31,7 +31,7 @@ func main() {
 
 	slog.Info(ctx, "starting server")
 
-	shutdown, err := otel.Initialize(ctx, cfg.TelemetryEndpoint)
+	shutdown, err := otel.Initialize(ctx, cfg.TelemetryEndpoint, version)
 	if err != nil {
 		slog.Panic(ctx, "starting telemetry", slog.WithError(err))
 	}

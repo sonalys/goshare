@@ -15,7 +15,7 @@ import (
 )
 
 func init() {
-	slog.Init()
+	slog.Init(slog.LevelDebug)
 }
 
 func main() {

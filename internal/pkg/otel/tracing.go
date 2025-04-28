@@ -40,7 +40,7 @@ func (tp Provider) TextMapPropagator() propagation.TextMapPropagator {
 
 // Initialize bootstraps the OpenTelemetry pipeline.
 // If it does not return an error, make sure to call shutdown for proper cleanup.
-func Initialize(ctx context.Context, endpoint string) (shutdown func(context.Context) error, err error) {
+func Initialize(ctx context.Context, endpoint, version string) (shutdown func(context.Context) error, err error) {
 	var shutdownFuncs []func(context.Context) error
 
 	// shutdown calls cleanup functions registered via shutdownFuncs.
@@ -61,7 +61,7 @@ func Initialize(ctx context.Context, endpoint string) (shutdown func(context.Con
 	}
 
 	// Create resource.
-	res, err := newResource()
+	res, err := newResource(version)
 	if err != nil {
 		panic(err)
 	}
@@ -119,10 +119,10 @@ func newTraceExporter(ctx context.Context, endpoint string) (traceSDK.SpanExport
 	)
 }
 
-func newResource() (*resource.Resource, error) {
+func newResource(version string) (*resource.Resource, error) {
 	return resource.Merge(resource.Default(),
 		resource.NewWithAttributes(semconv.SchemaURL,
-			semconv.ServiceName("goshare"),
-			semconv.ServiceVersion("0.1.0"),
+			semconv.ServiceName(name),
+			semconv.ServiceVersion(version),
 		))
 }

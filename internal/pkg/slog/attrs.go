@@ -7,7 +7,10 @@ import (
 )
 
 func WithError(err error) slog.Attr {
-	return slog.Any("error", err)
+	if err == nil {
+		return slog.Any("error", nil)
+	}
+	return slog.Any("error", err.Error())
 }
 
 func WithAny(key string, value any) slog.Attr {

@@ -10,15 +10,25 @@ import (
 	slogotel "github.com/remychantenay/slog-otel"
 )
 
-const LevelPanic slog.Level = 12
+const (
+	LevelDebug slog.Level = -4 + iota*4
+	LevelInfo
+	LevelWarn
+	LevelError
+	LevelPanic
+)
 
-func Init() {
+func Init(level slog.Level) {
+	slog.SetLogLoggerLevel(level)
 	internalHandler := &fieldFormatterHandler{
 		Next: slogotel.OtelHandler{
-			Next: tint.NewHandler(os.Stdout, nil),
+			Next: tint.NewHandler(os.Stdout, &tint.Options{
+				Level: level,
+			}),
 		},
 	}
-	slog.SetDefault(slog.New(internalHandler))
+	logger := slog.New(internalHandler)
+	slog.SetDefault(logger)
 }
 
 func Info(ctx context.Context, msg string, args ...any) {

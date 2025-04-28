@@ -44,6 +44,8 @@ func (c *Controller) Create(ctx context.Context, req CreateRequest) (*CreateResp
 		slog.WithStringer("user_id", req.UserID),
 	)
 
+	slog.Debug(ctx, "creating ledger", slog.WithAny("req", req))
+
 	if err := req.Validate(); err != nil {
 		return nil, slog.ErrorReturn(ctx, "invalid request", err)
 	}
@@ -67,6 +69,8 @@ func (c *Controller) Create(ctx context.Context, req CreateRequest) (*CreateResp
 	ctx = slog.Context(ctx,
 		slog.WithStringer("ledger_id", ledger.ID),
 	)
+
+	slog.Debug(ctx, "ledger entity initialized", slog.WithAny("ledger", ledger))
 
 	err := c.ledgerRepository.Create(ctx, req.UserID, func(count int64) (*v1.Ledger, error) {
 		if count+1 > v1.UserMaxLedgers {
