@@ -6,6 +6,7 @@ env:
   COMPOSE_FILE: .config/deployment/local/compose.yml
   GO_VERSION: 1.24
   VERSION: 0.1.0
+  CGO_ENABLED: 0
 
 tasks:
   build-server:
@@ -32,8 +33,8 @@ tasks:
 
   generate-openapi:
     cmd: go tool ogen -package handlers --target cmd/server/handlers --clean cmd/server/spec/root.yaml
-    # sources:
-    #   - cmd/server/spec/root.yaml
+    sources:
+      - cmd/server/spec/root.yaml
 
   compose-server:
     cmd: docker compose -f {{ .COMPOSE_FILE }} up -d --build goshare && docker compose -f {{ .COMPOSE_FILE }} logs -f goshare_migrate goshare
@@ -54,8 +55,10 @@ tasks:
     cmd: docker exec -it postgres psql -U user goshare
 
   debug-server:
-    cmd: dlv debug /app/cmd/server --headless --listen=:2345 --api-version=2 --accept-multiclient
+    cmd: dlv debug cmd/server --headless --listen=:2345 --api-version=2 --accept-multiclient
     sources:
-      - ./*.go
+      - ./**/*.go
+      - go.mod
+      - go.sum
     generates:
       - bin/server
