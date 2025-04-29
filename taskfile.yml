@@ -5,19 +5,16 @@ env:
   DOCKERFILE: ./dockerfile
   COMPOSE_FILE: .config/deployment/local/compose.yml
   GO_VERSION: 1.24
+  VERSION: 0.1.0
 
 tasks:
   build-server:
-    cmd: go build -gcflags "all=-N -l" -a -ldflags "-extldflags '-static' -X main.version=$VERSION" -o /app/bin/server /app/cmd/server
-    sources:
-      - ./*.go
+    cmd: go build -ldflags "-extldflags '-static' -X main.version=$VERSION" -o ./bin/server ./cmd/server
     generates:
       - bin/server
 
   build-migration:
-    cmd: go build -gcflags "all=-N -l" -a -ldflags "-extldflags '-static' -X main.version=$VERSION" -o /app/bin/migration /app/cmd/migration
-    sources:
-      - ./*.go
+    cmd: go build -gcflags "all=-N -l" -a -ldflags "-extldflags '-static' -X main.version=$VERSION" -o ./bin/migration ./cmd/migration
     generates:
       - bin/migration
 
