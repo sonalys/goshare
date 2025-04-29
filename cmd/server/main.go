@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
+	"errors"
 	"os"
 	"os/signal"
+	"sync"
+	"syscall"
 	"time"
 
 	"github.com/sonalys/goshare/cmd/server/api"
@@ -31,7 +34,7 @@ func main() {
 
 	slog.Info(ctx, "starting server")
 
-	shutdown, err := otel.Initialize(ctx, cfg.TelemetryEndpoint, version)
+	telemetryShutdown, err := otel.Initialize(ctx, cfg.TelemetryEndpoint, version)
 	if err != nil {
 		slog.Panic(ctx, "starting telemetry", slog.WithError(err))
 	}
@@ -54,13 +57,41 @@ func main() {
 
 	<-ctx.Done()
 
-	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+	shutdown(
+		server.Shutdown,
+		telemetryShutdown,
+	)
+}
+
+func shutdown(fns ...func(context.Context) error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	server.Shutdown(ctx)
-	if err := shutdown(ctx); err != nil {
-		slog.Error(ctx, "stopping telemetry", err)
+	var wg sync.WaitGroup
+
+	wait := make(chan struct{})
+
+	for _, fn := range fns {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if err := fn(ctx); err != nil && !errors.Is(err, context.Canceled) {
+				slog.Error(ctx, "shutting down service", err)
+			}
+		}()
 	}
 
-	slog.Info(ctx, "shutting down")
+	go func() {
+		wg.Wait()
+		close(wait)
+	}()
+
+	select {
+	case <-ctx.Done():
+		slog.Error(ctx, "could not stop all services", nil)
+		syscall.Exit(1)
+	case <-wait:
+		slog.Info(ctx, "all services stopped gracefully")
+		syscall.Exit(0)
+	}
 }
