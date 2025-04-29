@@ -168,7 +168,7 @@ func (c *Controller) GetExpenses(ctx context.Context, req GetExpensesRequest) (*
 	}
 
 	if len(expenses) == 0 {
-		return nil, nil
+		return &GetExpensesResult{}, nil
 	}
 
 	slog.Info(ctx, "ledger expenses retrieved")

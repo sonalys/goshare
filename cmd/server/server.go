@@ -30,8 +30,6 @@ func (s *Server) ServeHTTP(ctx context.Context) {
 	}
 }
 
-func (s *Server) Shutdown(ctx context.Context) {
-	if err := s.httpServer.Shutdown(ctx); err != nil {
-		slog.Error(ctx, "failed to shutdown server", err)
-	}
+func (s *Server) Shutdown(ctx context.Context) error {
+	return s.httpServer.Shutdown(ctx)
 }
