@@ -38,8 +38,8 @@ func (r *LedgerRepository) AddParticipants(ctx context.Context, ledgerID v1.ID, 
 			return fmt.Errorf("updating ledger: %w", err)
 		}
 
-		oldIDs := kset.NewFrom(func(p sqlc.LedgerParticipant) uuid.UUID { return p.ID.Bytes }, participantsModel...)
-		newParticipants := kset.NewKeyValue(func(p v1.LedgerParticipant) uuid.UUID { return p.ID.UUID() }, ledger.Participants...)
+		oldIDs := kset.HashMapKey(kset.Select(func(p sqlc.LedgerParticipant) uuid.UUID { return p.ID.Bytes }, participantsModel...)...)
+		newParticipants := kset.HashMapKeyValue(func(p v1.LedgerParticipant) uuid.UUID { return p.ID.UUID() }, ledger.Participants...)
 
 		for participant := range newParticipants.Difference(oldIDs).Iter() {
 			addReq := sqlc.AddUserToLedgerParams{

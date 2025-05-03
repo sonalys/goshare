@@ -59,7 +59,7 @@ func (l Ledger) IsParticipant(userID ID) bool {
 }
 
 func (l *Ledger) AddParticipants(userID ID, ids ...ID) int {
-	participantsSet := kset.NewKeyValue(func(p LedgerParticipant) ID { return p.UserID }, l.Participants...)
+	participantsSet := kset.HashMapKeyValue(func(p LedgerParticipant) ID { return p.UserID }, l.Participants...)
 	addedCount := 0
 
 	for _, id := range ids {
