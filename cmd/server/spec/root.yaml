@@ -221,7 +221,6 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/LedgerParticipant"
-
     post:
       operationId: LedgerParticipantAdd
       description: Adds a new member to the Ledger
@@ -293,7 +292,6 @@ paths:
                   id:
                     type: string
                     format: uuid
-
     get:
       operationId: LedgerExpenseList
       description: Lists all expenses in the ledger

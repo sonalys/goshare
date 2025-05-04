@@ -30,14 +30,14 @@ func (r *ExpenseRepository) Create(ctx context.Context, ledgerID v1.ID, createFn
 			return fmt.Errorf("finding ledger: %w", err)
 		}
 
-		ledger := v1.Ledger{
-			ID:        newUUID(ledgerModel.ID),
-			Name:      ledgerModel.Name,
-			CreatedAt: ledgerModel.CreatedAt.Time,
-			CreatedBy: newUUID(ledgerModel.CreatedBy),
+		participants, err := r.client.queries().GetLedgerParticipants(ctx, convertID(ledgerID))
+		if err != nil {
+			return mapLedgerError(err)
 		}
 
-		expense, err := createFn(&ledger)
+		ledger := mappers.NewLedger(&ledgerModel, participants)
+
+		expense, err := createFn(ledger)
 		if err != nil {
 			return fmt.Errorf("creating expense: %w", err)
 		}

@@ -5,14 +5,14 @@ meta {
 }
 
 get {
-  url: {{api_url}}/ledgers/:ledger_id/expenses?limit=2&cursor={{cursor}}
+  url: {{api_url}}/ledgers/:ledger_id/expenses
   body: none
   auth: inherit
 }
 
 params:query {
-  limit: 2
-  cursor: {{cursor}}
+  ~limit: 2
+  ~cursor: {{cursor}}
 }
 
 params:path {
