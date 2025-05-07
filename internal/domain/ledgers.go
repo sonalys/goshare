@@ -208,12 +208,12 @@ func (l Ledger) IsParticipant(identity ID) bool {
 	return false
 }
 
-func (l *Ledger) AddParticipants(identity ID, participants ...ID) int {
+func (l *Ledger) AddParticipants(identity ID, participants ...ID) ([]Event[LedgerParticipant], error) {
 	participantsSet := kset.HashMapKeyValue(func(p LedgerParticipant) ID { return p.Identity }, l.Participants...)
-	addedCount := 0
+	pendingParticipantsSet := kset.HashMapKeyValue(func(p LedgerParticipant) ID { return p.Identity })
 
 	for _, id := range participants {
-		addedCount += participantsSet.Append(LedgerParticipant{
+		pendingParticipantsSet.Append(LedgerParticipant{
 			ID:        NewID(),
 			Identity:  id,
 			Balance:   0,
@@ -222,7 +222,20 @@ func (l *Ledger) AddParticipants(identity ID, participants ...ID) int {
 		})
 	}
 
-	l.Participants = participantsSet.ToSlice()
+	newParticipants := pendingParticipantsSet.Difference(participantsSet).ToSlice()
+	l.Participants = append(l.Participants, newParticipants...)
 
-	return addedCount
+	if len(l.Participants) >= LedgerMaxMembers {
+		return nil, ErrLedgerMaxUsers
+	}
+
+	events := make([]Event[LedgerParticipant], 0, len(newParticipants))
+	for i := range newParticipants {
+		events = append(events, Event[LedgerParticipant]{
+			Topic: TopicLedgerParticipantAdded,
+			Data:  newParticipants[i],
+		})
+	}
+
+	return events, nil
 }

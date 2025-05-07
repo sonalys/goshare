@@ -275,18 +275,20 @@ func (c *Ledgers) AddParticipants(ctx context.Context, req AddMembersRequest) er
 		ids = append(ids, user.ID)
 	}
 
-	err = c.db.Ledger().AddParticipants(ctx, req.LedgerID, func(ledger *domain.Ledger) error {
-		if ledger.CreatedBy != req.Identity {
-			return fmt.Errorf("user %s is not the owner of the ledger %s", req.Identity, ledger.ID)
+	err = c.db.Transaction(ctx, func(db Database) error {
+		var events []domain.Event[domain.LedgerParticipant]
+
+		err := c.db.Ledger().AddParticipants(ctx, req.LedgerID, func(ledger *domain.Ledger) error {
+			events, err = ledger.AddParticipants(req.Identity, ids...)
+			if err != nil {
+				return err
+			}
+			return nil
+		})
+		if err != nil {
+			return err
 		}
-
-		ledger.AddParticipants(req.Identity, ids...)
-
-		if len(ledger.Participants) >= domain.LedgerMaxMembers {
-			return domain.ErrLedgerMaxUsers
-		}
-
-		return nil
+		return c.subscriber.handle(ctx, db, convertEvents(events)...)
 	})
 	switch {
 	case err == nil:
