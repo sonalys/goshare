@@ -11,16 +11,16 @@ import (
 type (
 	LedgerRepository interface {
 		Create(ctx context.Context, identity domain.ID, createFn func(count int64) (*domain.Ledger, error)) error
-		GetByUser(ctx context.Context, identity domain.ID) ([]domain.Ledger, error)
-		AddParticipants(ctx context.Context, ledgerID domain.ID, updateFn func(*domain.Ledger) error) error
-		GetParticipants(ctx context.Context, ledgerID domain.ID) ([]domain.LedgerParticipant, error)
 		Find(ctx context.Context, id domain.ID) (*domain.Ledger, error)
+		GetByUser(ctx context.Context, identity domain.ID) ([]domain.Ledger, error)
+		GetParticipants(ctx context.Context, ledgerID domain.ID) ([]domain.LedgerParticipant, error)
+		Update(ctx context.Context, ledgerID domain.ID, updateFn func(*domain.Ledger) error) error
 	}
 
 	UserRepository interface {
-		ListByEmail(ctx context.Context, emails []string) ([]domain.User, error)
 		Create(ctx context.Context, user *domain.User) error
 		FindByEmail(ctx context.Context, email string) (*domain.User, error)
+		ListByEmail(ctx context.Context, emails []string) ([]domain.User, error)
 	}
 
 	ExpenseRepository interface {
@@ -35,9 +35,9 @@ type (
 	}
 
 	Repositories interface {
+		Expense() ExpenseRepository
 		Ledger() LedgerRepository
 		User() UserRepository
-		Expense() ExpenseRepository
 	}
 
 	IdentityEncoder interface {

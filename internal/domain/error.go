@@ -14,25 +14,25 @@ type (
 	}
 
 	FieldError struct {
-		Field    string
 		Cause    error
+		Field    string
 		Metadata FieldErrorMetadata
 	}
 
 	ValueLengthError struct {
-		Min int
 		Max int
+		Min int
 	}
 
 	StringError string
 )
 
 const (
-	ErrRequiredValue = StringError("cannot be empty")
-	ErrInvalidValue  = StringError("invalid value")
 	ErrConflict      = StringError("conflict")
-	ErrNotFound      = StringError("not found")
 	ErrForbidden     = StringError("forbidden")
+	ErrInvalidValue  = StringError("invalid value")
+	ErrNotFound      = StringError("not found")
+	ErrRequiredValue = StringError("cannot be empty")
 )
 
 func NewRequiredFieldError(field string) FieldError {
@@ -57,7 +57,7 @@ func NewFieldLengthError(field string, min, max int) FieldError {
 }
 
 func (e FieldError) Error() string {
-	return fmt.Sprintf("field %s: %v", e.Field, e.Cause)
+	return fmt.Sprintf("field '%s': %v", e.Field, e.Cause)
 }
 
 func (e FieldError) Unwrap() error {
@@ -73,6 +73,9 @@ func (el FieldErrorList) Unwrap() []error {
 }
 
 func (el FieldErrorList) Error() string {
+	if len(el) == 1 {
+		return el[0].Error()
+	}
 	return fmt.Sprintf("%v", []FieldError(el))
 }
 

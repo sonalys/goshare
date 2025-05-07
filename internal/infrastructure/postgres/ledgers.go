@@ -19,8 +19,12 @@ func NewLedgerRepository(client connection) *LedgerRepository {
 	}
 }
 
+func (r *LedgerRepository) transaction(ctx context.Context, f func(q *sqlc.Queries) error) error {
+	return mapLedgerError(r.client.transaction(ctx, f))
+}
+
 func (r *LedgerRepository) Create(ctx context.Context, userID domain.ID, createFn func(count int64) (*domain.Ledger, error)) error {
-	return mapLedgerError(r.client.transaction(ctx, func(query *sqlc.Queries) error {
+	return r.transaction(ctx, func(query *sqlc.Queries) error {
 		id := convertID(userID)
 
 		if err := query.LockUserForUpdate(ctx, id); err != nil {
@@ -63,7 +67,7 @@ func (r *LedgerRepository) Create(ctx context.Context, userID domain.ID, createF
 		}
 
 		return nil
-	}))
+	})
 }
 
 func (r *LedgerRepository) Find(ctx context.Context, id domain.ID) (*domain.Ledger, error) {

@@ -9,18 +9,18 @@ import (
 )
 
 type User struct {
-	ID              ID
-	FirstName       string
-	LastName        string
-	Email           string
-	IsEmailVerified bool
-	PasswordHash    string
 	CreatedAt       time.Time
+	Email           string
+	FirstName       string
+	ID              ID
+	IsEmailVerified bool
+	LastName        string
+	PasswordHash    string
 }
 
 const (
-	ErrEmailPasswordMismatch  = StringError("email and/or password mismatch")
 	ErrEmailAlreadyRegistered = StringError("email already registered")
+	ErrEmailPasswordMismatch  = StringError("email and/or password mismatch")
 )
 
 func NewUser(firstName string, lastName string, email string, password string) (*Event[User], error) {

@@ -181,3 +181,17 @@ func (q *Queries) RemoveUserFromLedger(ctx context.Context, id pgtype.UUID) erro
 	_, err := q.db.Exec(ctx, removeUserFromLedger, id)
 	return err
 }
+
+const updateLedger = `-- name: UpdateLedger :exec
+UPDATE ledgers SET name = $1 WHERE id = $2
+`
+
+type UpdateLedgerParams struct {
+	Name string
+	ID   pgtype.UUID
+}
+
+func (q *Queries) UpdateLedger(ctx context.Context, arg UpdateLedgerParams) error {
+	_, err := q.db.Exec(ctx, updateLedger, arg.Name, arg.ID)
+	return err
+}

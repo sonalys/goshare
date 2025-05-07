@@ -9,8 +9,8 @@ import (
 
 type (
 	Event interface {
-		GetTopic() domain.Topic
 		GetData() any
+		GetTopic() domain.Topic
 	}
 
 	Subscription func(ctx context.Context, event Event, r Repositories) error
@@ -27,10 +27,10 @@ func newSubscriber() *Subscriber {
 }
 
 func convertEvents[T Event](events []T) []Event {
-	out := make([]Event, 0, len(events))
+	out := make([]Event, len(events))
 
 	for i := range events {
-		out = append(out, events[i])
+		out[i] = events[i]
 	}
 
 	return out

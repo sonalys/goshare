@@ -11,10 +11,10 @@ import (
 	"github.com/sonalys/kset"
 )
 
-func (r *LedgerRepository) AddParticipants(ctx context.Context, ledgerID domain.ID, updateFn func(*domain.Ledger) error) error {
+func (r *LedgerRepository) Update(ctx context.Context, ledgerID domain.ID, updateFn func(*domain.Ledger) error) error {
 	ledgerUUID := convertID(ledgerID)
 
-	return mapLedgerError(r.client.transaction(ctx, func(query *sqlc.Queries) error {
+	return r.transaction(ctx, func(query *sqlc.Queries) error {
 		if err := query.LockLedgerForUpdate(ctx, ledgerUUID); err != nil {
 			return fmt.Errorf("locking ledger for update: %w", err)
 		}
@@ -35,10 +35,27 @@ func (r *LedgerRepository) AddParticipants(ctx context.Context, ledgerID domain.
 			return fmt.Errorf("updating ledger: %w", err)
 		}
 
-		oldIDs := kset.HashMapKey(kset.Select(func(p sqlc.LedgerParticipant) uuid.UUID { return p.ID.Bytes }, participantsModel...)...)
-		newParticipants := kset.HashMapKeyValue(func(p domain.LedgerParticipant) uuid.UUID { return p.ID.UUID() }, ledger.Participants...)
+		updateLedgerParams := sqlc.UpdateLedgerParams{
+			ID:   ledgerUUID,
+			Name: ledger.Name,
+		}
+		if err = query.UpdateLedger(ctx, updateLedgerParams); err != nil {
+			return fmt.Errorf("updating ledger: %w", err)
+		}
 
-		for participant := range newParticipants.Difference(oldIDs).Iter() {
+		currentParticipants := kset.HashMapKey(
+			kset.Select(
+				func(p sqlc.LedgerParticipant) uuid.UUID { return p.ID.Bytes },
+				participantsModel...,
+			)...,
+		)
+
+		newParticipants := kset.HashMapKeyValue(
+			func(p domain.LedgerParticipant) uuid.UUID { return p.ID.UUID() },
+			ledger.Participants...,
+		)
+
+		for participant := range newParticipants.Difference(currentParticipants).Iter() {
 			addReq := sqlc.AddUserToLedgerParams{
 				ID:        convertID(domain.NewID()),
 				LedgerID:  ledgerUUID,
@@ -61,14 +78,14 @@ func (r *LedgerRepository) AddParticipants(ctx context.Context, ledgerID domain.
 			}
 		}
 
-		for id := range oldIDs.Difference(newParticipants).Iter() {
+		for id := range currentParticipants.Difference(newParticipants).Iter() {
 			if err := query.RemoveUserFromLedger(ctx, convertUUID(id)); err != nil {
 				return fmt.Errorf("removing participant: %w", err)
 			}
 		}
 
 		return nil
-	}))
+	})
 }
 
 func (r *LedgerRepository) GetParticipants(ctx context.Context, ledgerID domain.ID) ([]domain.LedgerParticipant, error) {

@@ -11,7 +11,7 @@ import (
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/sonalys/goshare/internal/application/pkg/secrets"
 	"github.com/sonalys/goshare/internal/application/pkg/slog"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres/migrations"
 )
 
 func init() {
@@ -24,7 +24,7 @@ func main() {
 
 	slog.Info(ctx, "starting migration")
 
-	driver, err := iofs.New(postgres.MigrationsFS, "migrations")
+	driver, err := iofs.New(migrations.MigrationsFS, "migrations")
 	if err != nil {
 		panic(err)
 	}

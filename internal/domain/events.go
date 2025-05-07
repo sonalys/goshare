@@ -3,10 +3,10 @@ package domain
 type Topic string
 
 const (
-	TopicUserCreated            Topic = "user.created"
 	TopicLedgerCreated          Topic = "ledger.created"
-	TopicLedgerParticipantAdded Topic = "ledger.participant.added"
 	TopicLedgerExpenseCreated   Topic = "ledger.expense.created"
+	TopicLedgerParticipantAdded Topic = "ledger.participant.added"
+	TopicUserCreated            Topic = "user.created"
 )
 
 type Event[T any] struct {

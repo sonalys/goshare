@@ -27,3 +27,6 @@ SELECT * FROM users WHERE id = $1 FOR UPDATE;
 
 -- name: CountUserLedgers :one
 SELECT COUNT(*) FROM ledgers WHERE created_by = $1;
+
+-- name: UpdateLedger :exec
+UPDATE ledgers SET name = $1 WHERE id = $2;

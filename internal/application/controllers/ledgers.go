@@ -10,6 +10,7 @@ import (
 	"github.com/sonalys/goshare/internal/application/pkg/slog"
 	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/domain"
+	"github.com/sonalys/kset"
 )
 
 type (
@@ -32,7 +33,7 @@ type (
 		LedgerID    domain.ID
 		Name        string
 		ExpenseDate time.Time
-		Records     []domain.Record
+		Records     []domain.NewRecord
 	}
 
 	CreateExpenseResponse struct {
@@ -66,34 +67,30 @@ func (c *Ledgers) Create(ctx context.Context, req CreateLedgerRequest) (resp *Cr
 
 	slog.Debug(ctx, "creating ledger", slog.WithAny("req", req))
 
-	var ledgerID domain.ID
 	err = c.db.Transaction(ctx, func(db Database) error {
-		var event *domain.Event[domain.Ledger]
-		var err error
-
 		err = db.Ledger().Create(ctx, req.Identity, func(count int64) (*domain.Ledger, error) {
-			event, err = domain.NewLedger(req.Identity, req.Name, count+1)
+			event, err := domain.NewLedger(req.Identity, req.Name, count+1)
 			if err != nil {
 				return nil, err
 			}
 
 			resp = &CreateLedgerResponse{
-				ID: ledgerID,
+				ID: event.Data.ID,
 			}
 
-			return &event.Data, nil
+			return &event.Data, c.subscriber.handle(ctx, db, event)
 		})
 		if err != nil {
 			return err
 		}
 
-		return c.subscriber.handle(ctx, db, event)
+		return nil
 	})
 	if err != nil {
 		return nil, slog.ErrorReturn(ctx, "creating ledger", err)
 	}
 
-	slog.Info(ctx, "ledger created", slog.WithStringer("ledger_id", ledgerID))
+	slog.Info(ctx, "ledger created", slog.WithStringer("ledger_id", resp.ID))
 
 	return
 }
@@ -107,34 +104,16 @@ func (c *Ledgers) CreateExpense(ctx context.Context, req CreateExpenseRequest) (
 		slog.WithStringer("ledger_id", req.LedgerID),
 	)
 
-	now := time.Now()
-
 	event, err := domain.NewLedgerExpense(req.Identity, req.LedgerID, req.Name, req.ExpenseDate, req.Records)
 	if err != nil {
-		return nil, fmt.Errorf("creating ledger expense: %w", err)
+		return nil, slog.ErrorReturn(ctx, "creating ledger expense", err)
+	}
+	resp = &CreateExpenseResponse{
+		ID: event.Data.ID,
 	}
 
 	createFn := func(ledger *domain.Ledger) (*domain.Expense, error) {
-		if !ledger.IsParticipant(req.Identity) {
-			return nil, domain.ErrUserNotAMember
-		}
-
-		resp = &CreateExpenseResponse{
-			ID: event.Data.ID,
-		}
-
-		return &domain.Expense{
-			ID:          event.Data.ID,
-			LedgerID:    event.Data.ID,
-			Amount:      event.Data.Amount,
-			Name:        event.Data.Name,
-			ExpenseDate: event.Data.ExpenseDate,
-			CreatedAt:   now,
-			CreatedBy:   req.Identity,
-			UpdatedAt:   now,
-			UpdatedBy:   req.Identity,
-			Records:     event.Data.Records,
-		}, nil
+		return &event.Data, nil
 	}
 
 	err = c.db.Transaction(ctx, func(db Database) error {
@@ -190,25 +169,16 @@ func (c *Ledgers) GetExpenses(ctx context.Context, req GetExpensesRequest) (*Get
 		slog.WithStringer("ledger_id", req.LedgerID),
 	)
 
-	ledger, err := c.db.Ledger().Find(ctx, req.LedgerID)
-	if err != nil {
-		return nil, slog.ErrorReturn(ctx, "failed to get ledger", err)
-	}
-
-	if !ledger.IsParticipant(req.Identity) {
-		return nil, slog.ErrorReturn(ctx, "authorizing request", domain.ErrUserNotAMember)
-	}
-
 	expenses, err := c.db.Expense().GetByLedger(ctx, req.LedgerID, req.Cursor, req.Limit+1)
 	if err != nil {
 		return nil, slog.ErrorReturn(ctx, "failed to get ledger expenses", err)
 	}
 
+	slog.Info(ctx, "ledger expenses retrieved")
+
 	if len(expenses) == 0 {
 		return &GetExpensesResponse{}, nil
 	}
-
-	slog.Info(ctx, "ledger expenses retrieved")
 
 	var cursor *time.Time
 	if len(expenses) == int(req.Limit)+1 {
@@ -262,35 +232,29 @@ func (c *Ledgers) AddParticipants(ctx context.Context, req AddMembersRequest) er
 		slog.WithStringer("ledger_id", req.LedgerID),
 	)
 
-	users, err := c.db.User().ListByEmail(ctx, req.Emails)
-	if err != nil {
-		return slog.ErrorReturn(ctx, "failed to get users by email", err)
-	}
-
-	ids := make([]domain.ID, 0, len(users))
-	for _, user := range users {
-		if user.ID == req.Identity {
-			continue
+	transaction := func(db Database) error {
+		users, err := db.User().ListByEmail(ctx, req.Emails)
+		if err != nil {
+			return slog.ErrorReturn(ctx, "failed to get users by email", err)
 		}
-		ids = append(ids, user.ID)
-	}
 
-	err = c.db.Transaction(ctx, func(db Database) error {
-		var events []domain.Event[domain.LedgerParticipant]
-
-		err := c.db.Ledger().AddParticipants(ctx, req.LedgerID, func(ledger *domain.Ledger) error {
-			events, err = ledger.AddParticipants(req.Identity, ids...)
+		updateFn := func(ledger *domain.Ledger) error {
+			pendingMemberIDs := kset.Select(func(u domain.User) domain.ID { return u.ID }, users...)
+			events, err := ledger.AddParticipants(req.Identity, pendingMemberIDs...)
 			if err != nil {
 				return err
 			}
-			return nil
-		})
-		if err != nil {
+			return c.subscriber.handle(ctx, db, convertEvents(events)...)
+		}
+
+		if err := db.Ledger().Update(ctx, req.LedgerID, updateFn); err != nil {
 			return err
 		}
-		return c.subscriber.handle(ctx, db, convertEvents(events)...)
-	})
-	switch {
+
+		return nil
+	}
+
+	switch err := c.db.Transaction(ctx, transaction); {
 	case err == nil:
 		slog.Info(ctx, "added users to ledger")
 		return nil

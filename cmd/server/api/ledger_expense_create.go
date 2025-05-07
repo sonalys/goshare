@@ -32,10 +32,10 @@ func (a *API) LedgerExpenseCreate(ctx context.Context, req *handlers.Expense, pa
 	}
 }
 
-func convertUserBalances(userBalances []handlers.ExpenseRecord) []domain.Record {
-	balances := make([]domain.Record, 0, len(userBalances))
+func convertUserBalances(userBalances []handlers.ExpenseRecord) []domain.NewRecord {
+	balances := make([]domain.NewRecord, 0, len(userBalances))
 	for _, ub := range userBalances {
-		balances = append(balances, domain.Record{
+		balances = append(balances, domain.NewRecord{
 			Type:   domain.NewRecordType(string(ub.Type)),
 			Amount: ub.Amount,
 			From:   domain.ConvertID(ub.FromUserID),

@@ -1,7 +1,9 @@
 package domain
 
 import (
+	"errors"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/sonalys/kset"
@@ -9,47 +11,46 @@ import (
 
 type (
 	Ledger struct {
+		CreatedAt    time.Time
+		CreatedBy    ID
 		ID           ID
 		Name         string
 		Participants []LedgerParticipant
-		CreatedAt    time.Time
-		CreatedBy    ID
 	}
 
 	LedgerParticipant struct {
-		ID        ID
-		Identity  ID
 		Balance   int32
 		CreatedAt time.Time
 		CreatedBy ID
+		ID        ID
+		Identity  ID
 	}
 
 	RecordType int
 
 	Record struct {
-		ID        ID
-		Type      RecordType
 		Amount    int32
-		From      ID
-		To        ID
 		CreatedAt time.Time
 		CreatedBy ID
+		From      ID
+		ID        ID
+		To        ID
+		Type      RecordType
 		UpdatedAt time.Time
 		UpdatedBy ID
 	}
 
 	Expense struct {
+		Amount      int32
+		CreatedAt   time.Time
+		CreatedBy   ID
+		ExpenseDate time.Time
 		ID          ID
 		LedgerID    ID
-		Amount      int32
 		Name        string
-		ExpenseDate time.Time
 		Records     []Record
-
-		CreatedAt time.Time
-		CreatedBy ID
-		UpdatedAt time.Time
-		UpdatedBy ID
+		UpdatedAt   time.Time
+		UpdatedBy   ID
 	}
 )
 
@@ -59,9 +60,9 @@ const (
 	RecordTypeSettlement
 	recordTypeMaxBoundary
 
-	UserMaxLedgers    = 5
-	LedgerMaxMembers  = 100
 	ExpenseMaxRecords = 100
+	LedgerMaxMembers  = 100
+	UserMaxLedgers    = 5
 
 	ErrUserAlreadyMember = StringError("user is already a member")
 	ErrUserNotAMember    = StringError("user is not a member")
@@ -130,7 +131,14 @@ func (r RecordType) String() string {
 }
 
 func (r RecordType) IsValid() bool {
-	return r <= RecordTypeUnknown || r >= recordTypeMaxBoundary
+	return r > RecordTypeUnknown && r < recordTypeMaxBoundary
+}
+
+type NewRecord struct {
+	From   ID
+	To     ID
+	Type   RecordType
+	Amount int32
 }
 
 func NewLedgerExpense(
@@ -138,7 +146,7 @@ func NewLedgerExpense(
 	ledgerID ID,
 	name string,
 	expenseDate time.Time,
-	records []Record,
+	pendingRecords []NewRecord,
 ) (*Event[Expense], error) {
 	var errs FormError
 
@@ -150,19 +158,33 @@ func NewLedgerExpense(
 		errs = append(errs, NewRequiredFieldError("expenseDate"))
 	}
 
-	if recordsLen := len(records); recordsLen < 1 || recordsLen > ExpenseMaxRecords {
+	if recordsLen := len(pendingRecords); recordsLen < 1 || recordsLen > ExpenseMaxRecords {
 		errs = append(errs, NewFieldLengthError("records", 1, ExpenseMaxRecords))
 	}
 
 	var totalAmount int32
+	createdRecords := make([]Record, 0, len(pendingRecords))
 
-	for i := range records {
+	now := time.Now()
+
+	for i := range pendingRecords {
 		var recordErrs FormError
 
-		record := &records[i]
+		record := &pendingRecords[i]
 
 		if !record.Type.IsValid() {
 			recordErrs = append(recordErrs, NewInvalidFieldError("type"))
+		}
+
+		if record.Amount <= 0 {
+			recordErrs = append(recordErrs, NewFieldLengthError("amount", 1, math.MaxInt32))
+		}
+
+		if record.From == record.To {
+			recordErrs = append(recordErrs, FieldError{
+				Field: "to",
+				Cause: errors.New("from and to cannot be the same user"),
+			})
 		}
 
 		if err := recordErrs.Validate(); err != nil {
@@ -174,8 +196,28 @@ func NewLedgerExpense(
 		}
 
 		if record.Type == RecordTypeDebt {
-			totalAmount += record.Amount
+			newAmount := totalAmount + record.Amount
+			if newAmount < totalAmount {
+				errs = append(errs, FieldError{
+					Cause: errors.New("expense amount overflowed"),
+					Field: "amount",
+				})
+				break
+			}
+			totalAmount = newAmount
 		}
+
+		createdRecords = append(createdRecords, Record{
+			ID:        NewID(),
+			Amount:    record.Amount,
+			Type:      record.Type,
+			From:      record.From,
+			To:        record.To,
+			CreatedAt: now,
+			CreatedBy: identity,
+			UpdatedAt: now,
+			UpdatedBy: identity,
+		})
 	}
 
 	if err := errs.Validate(); err != nil {
@@ -189,11 +231,11 @@ func NewLedgerExpense(
 			LedgerID:    ledgerID,
 			Name:        name,
 			ExpenseDate: expenseDate,
-			Records:     records,
+			Records:     createdRecords,
 			Amount:      totalAmount,
-			CreatedAt:   time.Now(),
+			CreatedAt:   now,
 			CreatedBy:   identity,
-			UpdatedAt:   time.Now(),
+			UpdatedAt:   now,
 			UpdatedBy:   identity,
 		},
 	}, nil
