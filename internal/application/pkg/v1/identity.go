@@ -1,11 +1,13 @@
 package v1
 
+import "github.com/sonalys/goshare/internal/domain"
+
 type Identity struct {
 	Email  string
-	UserID ID
+	UserID domain.ID
 	Exp    int64
 }
 
 const (
-	ErrAuthenticationExpired = StringError("authentication expired")
+	ErrAuthenticationExpired = domain.StringError("authentication expired")
 )

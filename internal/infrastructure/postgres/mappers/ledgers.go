@@ -1,24 +1,24 @@
 package mappers
 
 import (
-	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
+	domain "github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 )
 
-func NewLedger(ledger *sqlc.Ledger, participants []sqlc.LedgerParticipant) *v1.Ledger {
-	ledgerParticipants := make([]v1.LedgerParticipant, 0, len(participants))
+func NewLedger(ledger *sqlc.Ledger, participants []sqlc.LedgerParticipant) *domain.Ledger {
+	ledgerParticipants := make([]domain.LedgerParticipant, 0, len(participants))
 
 	for _, participant := range participants {
-		ledgerParticipants = append(ledgerParticipants, v1.LedgerParticipant{
+		ledgerParticipants = append(ledgerParticipants, domain.LedgerParticipant{
 			ID:        newUUID(participant.ID),
-			UserID:    newUUID(participant.UserID),
+			Identity:  newUUID(participant.UserID),
 			Balance:   participant.Balance,
 			CreatedAt: participant.CreatedAt.Time,
 			CreatedBy: newUUID(participant.CreatedBy),
 		})
 	}
 
-	return &v1.Ledger{
+	return &domain.Ledger{
 		ID:           newUUID(ledger.ID),
 		Name:         ledger.Name,
 		Participants: ledgerParticipants,

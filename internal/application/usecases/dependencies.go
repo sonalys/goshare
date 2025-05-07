@@ -3,18 +3,18 @@ package usecases
 import (
 	"context"
 
-	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
+	"github.com/sonalys/goshare/internal/domain"
 )
 
 type (
 	AuthorizationResource interface {
-		ID() v1.ID
+		ID() domain.ID
 		Type() string
 	}
 
 	resource struct {
 		t  string
-		id v1.ID
+		id domain.ID
 	}
 
 	AuthorizationActionType int
@@ -35,21 +35,21 @@ const (
 	ActionLedgerExpenseWrite
 )
 
-func ResourceLedger(id v1.ID) AuthorizationResource {
+func ResourceLedger(id domain.ID) AuthorizationResource {
 	return resource{
 		t:  "ledger",
 		id: id,
 	}
 }
 
-func ResourceUser(id v1.ID) AuthorizationResource {
+func ResourceUser(id domain.ID) AuthorizationResource {
 	return resource{
 		t:  "user",
 		id: id,
 	}
 }
 
-func (r resource) ID() v1.ID {
+func (r resource) ID() domain.ID {
 	return r.id
 }
 

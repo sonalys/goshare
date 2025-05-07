@@ -8,7 +8,7 @@ import (
 
 	"github.com/sonalys/goshare/cmd/server/handlers"
 	"github.com/sonalys/goshare/internal/application/controllers"
-	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
+	"github.com/sonalys/goshare/internal/domain"
 )
 
 // Login implements handlers.StrictServerInterface.
@@ -22,7 +22,7 @@ func (a *API) AuthenticationLogin(ctx context.Context, req *handlers.Authenticat
 		return &handlers.AuthenticationLoginOK{
 			SetCookie: handlers.NewOptString(fmt.Sprintf("SESSIONID=%s; Path=/; HttpOnly; SameSite=Strict", resp.Token)),
 		}, nil
-	case errors.Is(err, v1.ErrEmailPasswordMismatch):
+	case errors.Is(err, domain.ErrEmailPasswordMismatch):
 		return nil, newErrorResponse(ctx, http.StatusUnauthorized, handlers.Error{
 			Code:    handlers.ErrorCodeEmailPasswordMismatch,
 			Message: "invalid credentials",

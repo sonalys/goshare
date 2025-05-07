@@ -5,7 +5,7 @@ import (
 
 	"github.com/sonalys/goshare/cmd/server/handlers"
 	"github.com/sonalys/goshare/internal/application/controllers"
-	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
+	"github.com/sonalys/goshare/internal/domain"
 )
 
 func (a *API) LedgerParticipantAdd(ctx context.Context, req *handlers.LedgerParticipantAddReq, params handlers.LedgerParticipantAddParams) error {
@@ -15,8 +15,8 @@ func (a *API) LedgerParticipantAdd(ctx context.Context, req *handlers.LedgerPart
 	}
 
 	apiParams := controllers.AddMembersRequest{
-		UserID:   identity.UserID,
-		LedgerID: v1.ConvertID(params.LedgerID),
+		Identity: identity.UserID,
+		LedgerID: domain.ConvertID(params.LedgerID),
 		Emails:   req.Emails,
 	}
 

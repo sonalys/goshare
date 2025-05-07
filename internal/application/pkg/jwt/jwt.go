@@ -5,6 +5,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
+	"github.com/sonalys/goshare/internal/domain"
 )
 
 type (
@@ -54,7 +55,7 @@ func (c *Client) Decode(tokenString string) (*v1.Identity, error) {
 		return nil, fmt.Errorf("missing user_id claim")
 	}
 
-	userUUID, err := v1.ParseID(userID)
+	userUUID, err := domain.ParseID(userID)
 	if err != nil {
 		return nil, fmt.Errorf("parsing user_id: %v", err)
 	}

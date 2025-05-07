@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"slices"
 	"time"
 
 	"github.com/sonalys/goshare/internal/application/pkg/otel"
 	"github.com/sonalys/goshare/internal/application/pkg/slog"
 	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
+	"github.com/sonalys/goshare/internal/domain"
 )
 
 type (
@@ -17,204 +17,150 @@ type (
 		subscriber *Subscriber
 		db         Database
 	}
-)
 
-type (
-	CreateRequest struct {
-		UserID v1.ID
-		Name   string
+	CreateLedgerRequest struct {
+		Identity domain.ID
+		Name     string
 	}
 
-	CreateResponse struct {
-		ID v1.ID
-	}
-)
-
-func (r CreateRequest) Validate() error {
-	var errs v1.FormError
-
-	if r.UserID.IsEmpty() {
-		errs = append(errs, v1.NewRequiredFieldError("user_id"))
+	CreateLedgerResponse struct {
+		ID domain.ID
 	}
 
-	if r.Name == "" {
-		errs = append(errs, v1.NewRequiredFieldError("name"))
-	} else if nameLength := len(r.Name); nameLength < 3 || nameLength > 255 {
-		errs = append(errs, v1.NewFieldLengthError("name", 3, 255))
-	}
-
-	return errs.Validate()
-}
-
-func (c *Ledgers) Create(ctx context.Context, req CreateRequest) (*CreateResponse, error) {
-	ctx, span := otel.Tracer.Start(ctx, "ledgers.Create")
-	defer span.End()
-
-	ctx = slog.Context(ctx,
-		slog.WithStringer("user_id", req.UserID),
-	)
-
-	slog.Debug(ctx, "creating ledger", slog.WithAny("req", req))
-
-	if err := req.Validate(); err != nil {
-		return nil, slog.ErrorReturn(ctx, "invalid request", err)
-	}
-
-	ledger := &v1.Ledger{
-		ID:   v1.NewID(),
-		Name: req.Name,
-		Participants: []v1.LedgerParticipant{
-			{
-				ID:        v1.NewID(),
-				UserID:    req.UserID,
-				Balance:   0,
-				CreatedAt: time.Now(),
-				CreatedBy: req.UserID,
-			},
-		},
-		CreatedAt: time.Now(),
-		CreatedBy: req.UserID,
-	}
-
-	ctx = slog.Context(ctx,
-		slog.WithStringer("ledger_id", ledger.ID),
-	)
-
-	slog.Debug(ctx, "ledger entity initialized", slog.WithAny("ledger", ledger))
-
-	err := c.db.Ledger().Create(ctx, req.UserID, func(count int64) (*v1.Ledger, error) {
-		if count+1 > v1.UserMaxLedgers {
-			return nil, v1.ErrUserMaxLedgers
-		}
-
-		return ledger, nil
-	})
-	if err != nil {
-		return nil, slog.ErrorReturn(ctx, "failed to create ledger", err)
-	}
-
-	slog.Info(ctx, "ledger created")
-
-	resp := &CreateResponse{
-		ID: ledger.ID,
-	}
-
-	return resp, nil
-}
-
-type (
 	CreateExpenseRequest struct {
-		UserID      v1.ID
-		LedgerID    v1.ID
+		Identity    domain.ID
+		LedgerID    domain.ID
 		Name        string
 		ExpenseDate time.Time
-		Records     []v1.Record
+		Records     []domain.Record
 	}
 
 	CreateExpenseResponse struct {
-		ID v1.ID
+		ID domain.ID
 	}
 
 	GetExpensesRequest struct {
-		UserID   v1.ID
-		LedgerID v1.ID
+		Identity domain.ID
+		LedgerID domain.ID
 		Cursor   time.Time
 		Limit    int32
 	}
 
-	GetExpensesResult struct {
+	GetExpensesResponse struct {
 		Expenses []v1.LedgerExpenseSummary
 		Cursor   *time.Time
 	}
+
+	AddMembersRequest struct {
+		Identity domain.ID
+		LedgerID domain.ID
+		Emails   []string
+	}
 )
 
-func (r CreateExpenseRequest) Validate() error {
-	var errs v1.FormError
+func (c *Ledgers) Create(ctx context.Context, req CreateLedgerRequest) (resp *CreateLedgerResponse, err error) {
+	ctx, span := otel.Tracer.Start(ctx, "ledgers.Create")
+	defer span.End()
 
-	if r.LedgerID.IsEmpty() {
-		errs = append(errs, v1.NewRequiredFieldError("ledger_id"))
+	ctx = slog.Context(ctx, slog.WithStringer("identity", req.Identity))
+
+	slog.Debug(ctx, "creating ledger", slog.WithAny("req", req))
+
+	var ledgerID domain.ID
+	err = c.db.Transaction(ctx, func(db Database) error {
+		var event *domain.Event[domain.Ledger]
+		var err error
+
+		err = db.Ledger().Create(ctx, req.Identity, func(count int64) (*domain.Ledger, error) {
+			event, err = domain.NewLedger(req.Identity, req.Name, count+1)
+			if err != nil {
+				return nil, err
+			}
+
+			resp = &CreateLedgerResponse{
+				ID: ledgerID,
+			}
+
+			return &event.Data, nil
+		})
+		if err != nil {
+			return err
+		}
+
+		return c.subscriber.handle(ctx, db, event)
+	})
+	if err != nil {
+		return nil, slog.ErrorReturn(ctx, "creating ledger", err)
 	}
 
-	if r.Name == "" {
-		errs = append(errs, v1.NewRequiredFieldError("name"))
-	}
+	slog.Info(ctx, "ledger created", slog.WithStringer("ledger_id", ledgerID))
 
-	if r.ExpenseDate.IsZero() {
-		errs = append(errs, v1.NewRequiredFieldError("expense_date"))
-	}
-
-	if len(r.Records) == 0 {
-		errs = append(errs, v1.NewRequiredFieldError("user_balances"))
-	}
-
-	return errs.Validate()
+	return
 }
 
-func (c *Ledgers) CreateExpense(ctx context.Context, req CreateExpenseRequest) (*CreateExpenseResponse, error) {
+func (c *Ledgers) CreateExpense(ctx context.Context, req CreateExpenseRequest) (resp *CreateExpenseResponse, err error) {
 	ctx, span := otel.Tracer.Start(ctx, "ledgers.CreateExpense")
 	defer span.End()
 
 	ctx = slog.Context(ctx,
-		slog.WithStringer("user_id", req.UserID),
+		slog.WithStringer("identity", req.Identity),
 		slog.WithStringer("ledger_id", req.LedgerID),
 	)
 
-	if err := req.Validate(); err != nil {
-		return nil, slog.ErrorReturn(ctx, "validating request", err)
+	now := time.Now()
+
+	event, err := domain.NewLedgerExpense(req.Identity, req.LedgerID, req.Name, req.ExpenseDate, req.Records)
+	if err != nil {
+		return nil, fmt.Errorf("creating ledger expense: %w", err)
 	}
 
-	var totalAmount int32
-
-	for _, record := range req.Records {
-		if record.Type == v1.RecordTypeDebt {
-			totalAmount += record.Amount
+	createFn := func(ledger *domain.Ledger) (*domain.Expense, error) {
+		if !ledger.IsParticipant(req.Identity) {
+			return nil, domain.ErrUserNotAMember
 		}
-	}
 
-	expense := &v1.Expense{
-		ID:          v1.NewID(),
-		LedgerID:    req.LedgerID,
-		Name:        req.Name,
-		Amount:      totalAmount,
-		ExpenseDate: req.ExpenseDate,
-		Records:     req.Records,
-		CreatedAt:   time.Now(),
-		CreatedBy:   req.UserID,
-		UpdatedAt:   time.Now(),
-		UpdatedBy:   req.UserID,
-	}
-
-	ctx = slog.Context(ctx,
-		slog.WithStringer("expense_id", expense.ID),
-	)
-
-	switch err := c.db.Expense().Create(ctx, req.LedgerID, func(ledger *v1.Ledger) (*v1.Expense, error) {
-		if !ledger.IsParticipant(req.UserID) {
-			return nil, v1.ErrUserNotAMember
+		resp = &CreateExpenseResponse{
+			ID: event.Data.ID,
 		}
-		return expense, nil
-	}); {
-	case errors.Is(err, v1.ErrUserNotAMember):
-		if fieldErr := new(v1.FieldError); errors.As(err, fieldErr) {
-			return nil, v1.FieldError{
-				Cause:    v1.ErrUserNotAMember,
-				Field:    fmt.Sprintf("user_balances.%d.user_id", fieldErr.Metadata.Index),
+
+		return &domain.Expense{
+			ID:          event.Data.ID,
+			LedgerID:    event.Data.ID,
+			Amount:      event.Data.Amount,
+			Name:        event.Data.Name,
+			ExpenseDate: event.Data.ExpenseDate,
+			CreatedAt:   now,
+			CreatedBy:   req.Identity,
+			UpdatedAt:   now,
+			UpdatedBy:   req.Identity,
+			Records:     event.Data.Records,
+		}, nil
+	}
+
+	err = c.db.Transaction(ctx, func(db Database) error {
+		if err := c.db.Expense().Create(ctx, req.LedgerID, createFn); err != nil {
+			return err
+		}
+		return c.subscriber.handle(ctx, db, event)
+	})
+	switch {
+	case errors.Is(err, domain.ErrUserNotAMember):
+		if fieldErr := new(domain.FieldError); errors.As(err, fieldErr) {
+			return nil, domain.FieldError{
+				Cause:    domain.ErrUserNotAMember,
+				Field:    fmt.Sprintf("user_balances.%d.identity", fieldErr.Metadata.Index),
 				Metadata: fieldErr.Metadata,
 			}
 		}
 		return nil, err
 	case err != nil:
 		return nil, slog.ErrorReturn(ctx, "creating expense", err)
-	default:
-		slog.Info(ctx, "expense created")
-
-		return &CreateExpenseResponse{
-			ID: expense.ID,
-		}, nil
 	}
+	slog.Info(ctx, "expense created")
+	return
 }
 
-func (c *Ledgers) FindExpense(ctx context.Context, ledgerID v1.ID, expenseID v1.ID) (*v1.Expense, error) {
+func (c *Ledgers) FindExpense(ctx context.Context, ledgerID domain.ID, expenseID domain.ID) (*domain.Expense, error) {
 	ctx, span := otel.Tracer.Start(ctx, "ledgers.FindExpense")
 	defer span.End()
 
@@ -233,14 +179,14 @@ func (c *Ledgers) FindExpense(ctx context.Context, ledgerID v1.ID, expenseID v1.
 	return expense, nil
 }
 
-func (c *Ledgers) GetExpenses(ctx context.Context, req GetExpensesRequest) (*GetExpensesResult, error) {
+func (c *Ledgers) GetExpenses(ctx context.Context, req GetExpensesRequest) (*GetExpensesResponse, error) {
 	ctx, span := otel.Tracer.Start(ctx, "ledgers.GetExpenses")
 	defer span.End()
 
 	req.Limit = max(1, req.Limit)
 
 	ctx = slog.Context(ctx,
-		slog.WithStringer("user_id", req.UserID),
+		slog.WithStringer("identity", req.Identity),
 		slog.WithStringer("ledger_id", req.LedgerID),
 	)
 
@@ -249,8 +195,8 @@ func (c *Ledgers) GetExpenses(ctx context.Context, req GetExpensesRequest) (*Get
 		return nil, slog.ErrorReturn(ctx, "failed to get ledger", err)
 	}
 
-	if !ledger.IsParticipant(req.UserID) {
-		return nil, slog.ErrorReturn(ctx, "authorizing request", v1.ErrUserNotAMember)
+	if !ledger.IsParticipant(req.Identity) {
+		return nil, slog.ErrorReturn(ctx, "authorizing request", domain.ErrUserNotAMember)
 	}
 
 	expenses, err := c.db.Expense().GetByLedger(ctx, req.LedgerID, req.Cursor, req.Limit+1)
@@ -259,7 +205,7 @@ func (c *Ledgers) GetExpenses(ctx context.Context, req GetExpensesRequest) (*Get
 	}
 
 	if len(expenses) == 0 {
-		return &GetExpensesResult{}, nil
+		return &GetExpensesResponse{}, nil
 	}
 
 	slog.Info(ctx, "ledger expenses retrieved")
@@ -270,15 +216,17 @@ func (c *Ledgers) GetExpenses(ctx context.Context, req GetExpensesRequest) (*Get
 		cursor = &expenses[len(expenses)-1].CreatedAt
 	}
 
-	return &GetExpensesResult{
+	return &GetExpensesResponse{
 		Expenses: expenses,
 		Cursor:   cursor,
 	}, nil
 }
 
-func (c *Ledgers) GetByUser(ctx context.Context, userID v1.ID) ([]v1.Ledger, error) {
+func (c *Ledgers) GetByUser(ctx context.Context, userID domain.ID) ([]domain.Ledger, error) {
 	ctx, span := otel.Tracer.Start(ctx, "ledgers.ListByUser")
 	defer span.End()
+
+	ctx = slog.Context(ctx, slog.WithStringer("identity", userID))
 
 	ledgers, err := c.db.Ledger().GetByUser(ctx, userID)
 	if err != nil {
@@ -288,45 +236,15 @@ func (c *Ledgers) GetByUser(ctx context.Context, userID v1.ID) ([]v1.Ledger, err
 	return ledgers, nil
 }
 
-type (
-	AddMembersRequest struct {
-		UserID   v1.ID
-		LedgerID v1.ID
-		Emails   []string
-	}
-)
-
-func (r *AddMembersRequest) Validate() error {
-	var errs v1.FormError
-
-	if r.UserID.IsEmpty() {
-		errs = append(errs, v1.NewRequiredFieldError("user_id"))
-	}
-
-	if r.LedgerID.IsEmpty() {
-		errs = append(errs, v1.NewRequiredFieldError("ledger_id"))
-	}
-
-	r.Emails = slices.Compact(r.Emails)
-	switch lenEmails := len(r.Emails); {
-	case lenEmails == 0:
-		errs = append(errs, v1.NewRequiredFieldError("emails"))
-	case lenEmails > v1.LedgerMaxUsers-1:
-		errs = append(errs, v1.NewFieldLengthError("emails", 1, v1.LedgerMaxUsers))
-	}
-
-	return errs.Validate()
-}
-
 // TODO(invitations): Here it's a simplification of the user membership process.
 // We can always invert the flow and create invitation links, so the users click themselves
 // We can also send invites through the system and they accept the invite through the API.
 func (c *Ledgers) AddParticipants(ctx context.Context, req AddMembersRequest) error {
-	ctx, span := otel.Tracer.Start(ctx, "ledgers.AddMembers")
+	ctx, span := otel.Tracer.Start(ctx, "ledgers.AddParticipants")
 	defer span.End()
 
 	ctx = slog.Context(ctx,
-		slog.WithStringer("user_id", req.UserID),
+		slog.WithStringer("identity", req.Identity),
 		slog.WithStringer("ledger_id", req.LedgerID),
 	)
 
@@ -335,23 +253,23 @@ func (c *Ledgers) AddParticipants(ctx context.Context, req AddMembersRequest) er
 		return slog.ErrorReturn(ctx, "failed to get users by email", err)
 	}
 
-	ids := make([]v1.ID, 0, len(users))
+	ids := make([]domain.ID, 0, len(users))
 	for _, user := range users {
-		if user.ID == req.UserID {
+		if user.ID == req.Identity {
 			continue
 		}
 		ids = append(ids, user.ID)
 	}
 
-	err = c.db.Ledger().AddParticipants(ctx, req.LedgerID, func(ledger *v1.Ledger) error {
-		if ledger.CreatedBy != req.UserID {
-			return fmt.Errorf("user %s is not the owner of the ledger %s", req.UserID, ledger.ID)
+	err = c.db.Ledger().AddParticipants(ctx, req.LedgerID, func(ledger *domain.Ledger) error {
+		if ledger.CreatedBy != req.Identity {
+			return fmt.Errorf("user %s is not the owner of the ledger %s", req.Identity, ledger.ID)
 		}
 
-		ledger.AddParticipants(req.UserID, ids...)
+		ledger.AddParticipants(req.Identity, ids...)
 
-		if len(ledger.Participants) >= v1.LedgerMaxUsers {
-			return v1.ErrLedgerMaxUsers
+		if len(ledger.Participants) >= domain.LedgerMaxMembers {
+			return domain.ErrLedgerMaxUsers
 		}
 
 		return nil
@@ -360,18 +278,18 @@ func (c *Ledgers) AddParticipants(ctx context.Context, req AddMembersRequest) er
 	case err == nil:
 		slog.Info(ctx, "added users to ledger")
 		return nil
-	case errors.Is(err, v1.ErrNotFound):
-		return v1.FieldError{
+	case errors.Is(err, domain.ErrNotFound):
+		return domain.FieldError{
 			Field: "ledger_id",
-			Cause: v1.ErrNotFound,
+			Cause: domain.ErrNotFound,
 		}
 	default:
 		return slog.ErrorReturn(ctx, "failed to add users to ledger", err)
 	}
 }
 
-func (c *Ledgers) GetParticipants(ctx context.Context, ledgerID v1.ID) ([]v1.LedgerParticipant, error) {
-	ctx, span := otel.Tracer.Start(ctx, "ledgers.GetBalances")
+func (c *Ledgers) GetParticipants(ctx context.Context, ledgerID domain.ID) ([]domain.LedgerParticipant, error) {
+	ctx, span := otel.Tracer.Start(ctx, "ledgers.GetParticipants")
 	defer span.End()
 
 	ctx = slog.Context(ctx,

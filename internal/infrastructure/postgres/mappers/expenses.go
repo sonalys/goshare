@@ -2,6 +2,7 @@ package mappers
 
 import (
 	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
+	domain "github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 )
 
@@ -18,8 +19,8 @@ func NewLedgerExpenseSummary(expense *sqlc.Expense) *v1.LedgerExpenseSummary {
 	}
 }
 
-func NewExpense(expense *sqlc.Expense, records []sqlc.ExpenseRecord) *v1.Expense {
-	result := &v1.Expense{
+func NewExpense(expense *sqlc.Expense, records []sqlc.ExpenseRecord) *domain.Expense {
+	result := &domain.Expense{
 		ID:          newUUID(expense.ID),
 		LedgerID:    newUUID(expense.LedgerID),
 		Amount:      expense.Amount,
@@ -38,12 +39,12 @@ func NewExpense(expense *sqlc.Expense, records []sqlc.ExpenseRecord) *v1.Expense
 	return result
 }
 
-func NewRecord(record *sqlc.ExpenseRecord) *v1.Record {
-	return &v1.Record{
+func NewRecord(record *sqlc.ExpenseRecord) *domain.Record {
+	return &domain.Record{
 		ID:        newUUID(record.ID),
 		From:      newUUID(record.FromUserID),
 		To:        newUUID(record.ToUserID),
-		Type:      v1.NewRecordType(record.RecordType),
+		Type:      domain.NewRecordType(record.RecordType),
 		Amount:    record.Amount,
 		CreatedAt: record.CreatedAt.Time,
 		CreatedBy: newUUID(record.CreatedBy),

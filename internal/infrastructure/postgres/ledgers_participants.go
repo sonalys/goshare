@@ -5,13 +5,13 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
+	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/mappers"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 	"github.com/sonalys/kset"
 )
 
-func (r *LedgerRepository) AddParticipants(ctx context.Context, ledgerID v1.ID, updateFn func(*v1.Ledger) error) error {
+func (r *LedgerRepository) AddParticipants(ctx context.Context, ledgerID domain.ID, updateFn func(*domain.Ledger) error) error {
 	ledgerUUID := convertID(ledgerID)
 
 	return mapLedgerError(r.client.transaction(ctx, func(query *sqlc.Queries) error {
@@ -36,13 +36,13 @@ func (r *LedgerRepository) AddParticipants(ctx context.Context, ledgerID v1.ID, 
 		}
 
 		oldIDs := kset.HashMapKey(kset.Select(func(p sqlc.LedgerParticipant) uuid.UUID { return p.ID.Bytes }, participantsModel...)...)
-		newParticipants := kset.HashMapKeyValue(func(p v1.LedgerParticipant) uuid.UUID { return p.ID.UUID() }, ledger.Participants...)
+		newParticipants := kset.HashMapKeyValue(func(p domain.LedgerParticipant) uuid.UUID { return p.ID.UUID() }, ledger.Participants...)
 
 		for participant := range newParticipants.Difference(oldIDs).Iter() {
 			addReq := sqlc.AddUserToLedgerParams{
-				ID:        convertID(v1.NewID()),
+				ID:        convertID(domain.NewID()),
 				LedgerID:  ledgerUUID,
-				UserID:    convertID(participant.UserID),
+				UserID:    convertID(participant.Identity),
 				Balance:   participant.Balance,
 				CreatedAt: convertTime(participant.CreatedAt),
 				CreatedBy: convertID(participant.CreatedBy),
@@ -52,9 +52,9 @@ func (r *LedgerRepository) AddParticipants(ctx context.Context, ledgerID v1.ID, 
 			case err == nil:
 				continue
 			case isViolatingConstraint(err, constraintLedgerUniqueParticipant):
-				return v1.FieldError{
+				return domain.FieldError{
 					Field: "user_id",
-					Cause: fmt.Errorf("user '%s' is already a participant of the ledger '%s'", participant.UserID, ledgerID),
+					Cause: fmt.Errorf("user '%s' is already a participant of the ledger '%s'", participant.Identity, ledgerID),
 				}
 			default:
 				return fmt.Errorf("adding participant: %w", err)
@@ -71,12 +71,12 @@ func (r *LedgerRepository) AddParticipants(ctx context.Context, ledgerID v1.ID, 
 	}))
 }
 
-func (r *LedgerRepository) GetParticipants(ctx context.Context, ledgerID v1.ID) ([]v1.LedgerParticipant, error) {
+func (r *LedgerRepository) GetParticipants(ctx context.Context, ledgerID domain.ID) ([]domain.LedgerParticipant, error) {
 	participants, err := r.client.queries().GetLedgerParticipants(ctx, convertID(ledgerID))
 	if err != nil {
 		return nil, mapLedgerError(err)
 	}
-	result := make([]v1.LedgerParticipant, 0, len(participants))
+	result := make([]domain.LedgerParticipant, 0, len(participants))
 	for _, participant := range participants {
 		result = append(result, *mappers.NewLedgerParticipant(&participant))
 	}

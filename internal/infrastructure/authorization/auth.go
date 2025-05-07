@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/sonalys/goshare/internal/application/controllers"
-	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/application/usecases"
+	"github.com/sonalys/goshare/internal/domain"
 )
 
 type Authorizer struct {
@@ -18,7 +18,7 @@ func (a *Authorizer) Authorize(ctx context.Context, action usecases.Authorizatio
 	case usecases.ActionLedgerExpenseWrite:
 		return nil
 	default:
-		return v1.ErrForbidden
+		return domain.ErrForbidden
 	}
 }
 

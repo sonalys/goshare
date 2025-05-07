@@ -2,11 +2,10 @@ package api
 
 import (
 	"context"
-	"time"
 
 	"github.com/sonalys/goshare/cmd/server/handlers"
 	"github.com/sonalys/goshare/internal/application/controllers"
-	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
+	"github.com/sonalys/goshare/internal/domain"
 )
 
 func (a *API) LedgerExpenseCreate(ctx context.Context, req *handlers.Expense, params handlers.LedgerExpenseCreateParams) (r *handlers.LedgerExpenseCreateOK, _ error) {
@@ -16,11 +15,11 @@ func (a *API) LedgerExpenseCreate(ctx context.Context, req *handlers.Expense, pa
 	}
 
 	apiReq := controllers.CreateExpenseRequest{
-		UserID:      identity.UserID,
-		LedgerID:    v1.ConvertID(params.LedgerID),
+		Identity:    identity.UserID,
+		LedgerID:    domain.ConvertID(params.LedgerID),
 		Name:        req.Name,
 		ExpenseDate: req.ExpenseDate,
-		Records:     convertUserBalances(identity.UserID, req.Records),
+		Records:     convertUserBalances(req.Records),
 	}
 
 	switch resp, err := a.Ledgers.CreateExpense(ctx, apiReq); err {
@@ -33,19 +32,14 @@ func (a *API) LedgerExpenseCreate(ctx context.Context, req *handlers.Expense, pa
 	}
 }
 
-func convertUserBalances(identity v1.ID, userBalances []handlers.ExpenseRecord) []v1.Record {
-	balances := make([]v1.Record, 0, len(userBalances))
+func convertUserBalances(userBalances []handlers.ExpenseRecord) []domain.Record {
+	balances := make([]domain.Record, 0, len(userBalances))
 	for _, ub := range userBalances {
-		balances = append(balances, v1.Record{
-			ID:        v1.NewID(),
-			Type:      v1.NewRecordType(string(ub.Type)),
-			Amount:    ub.Amount,
-			From:      v1.ConvertID(ub.FromUserID),
-			To:        v1.ConvertID(ub.ToUserID),
-			CreatedAt: time.Now(),
-			CreatedBy: identity,
-			UpdatedAt: time.Now(),
-			UpdatedBy: identity,
+		balances = append(balances, domain.Record{
+			Type:   domain.NewRecordType(string(ub.Type)),
+			Amount: ub.Amount,
+			From:   domain.ConvertID(ub.FromUserID),
+			To:     domain.ConvertID(ub.ToUserID),
 		})
 	}
 	return balances

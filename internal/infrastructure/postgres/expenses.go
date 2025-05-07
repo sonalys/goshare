@@ -6,6 +6,7 @@ import (
 	"time"
 
 	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
+	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/mappers"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 )
@@ -20,7 +21,7 @@ func NewExpenseRepository(client connection) *ExpenseRepository {
 	}
 }
 
-func (r *ExpenseRepository) Create(ctx context.Context, ledgerID v1.ID, createFn func(ledger *v1.Ledger) (*v1.Expense, error)) error {
+func (r *ExpenseRepository) Create(ctx context.Context, ledgerID domain.ID, createFn func(ledger *domain.Ledger) (*domain.Expense, error)) error {
 	return r.client.transaction(ctx, func(query *sqlc.Queries) error {
 		ledgerModel, err := query.FindLedgerById(ctx, convertID(ledgerID))
 		if err != nil {
@@ -78,7 +79,7 @@ func (r *ExpenseRepository) Create(ctx context.Context, ledgerID v1.ID, createFn
 	})
 }
 
-func (r *ExpenseRepository) Find(ctx context.Context, id v1.ID) (*v1.Expense, error) {
+func (r *ExpenseRepository) Find(ctx context.Context, id domain.ID) (*domain.Expense, error) {
 	expense, err := r.client.queries().FindExpenseById(ctx, convertID(id))
 	if err != nil {
 		return nil, mapLedgerError(err)
@@ -92,7 +93,7 @@ func (r *ExpenseRepository) Find(ctx context.Context, id v1.ID) (*v1.Expense, er
 	return mappers.NewExpense(&expense, records), nil
 }
 
-func (r *ExpenseRepository) GetByLedger(ctx context.Context, ledgerID v1.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
+func (r *ExpenseRepository) GetByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
 	expenses, err := r.client.queries().GetLedgerExpenses(ctx, sqlc.GetLedgerExpensesParams{
 		LedgerID:  convertID(ledgerID),
 		Limit:     limit,

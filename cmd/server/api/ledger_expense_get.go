@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/sonalys/goshare/cmd/server/handlers"
-	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
+	"github.com/sonalys/goshare/internal/domain"
 )
 
 func (a *API) LedgerExpenseGet(ctx context.Context, params handlers.LedgerExpenseGetParams) (*handlers.Expense, error) {
@@ -13,7 +13,7 @@ func (a *API) LedgerExpenseGet(ctx context.Context, params handlers.LedgerExpens
 		return nil, err
 	}
 
-	expense, err := a.Ledgers.FindExpense(ctx, v1.ConvertID(params.LedgerID), v1.ConvertID(params.ExpenseID))
+	expense, err := a.Ledgers.FindExpense(ctx, domain.ConvertID(params.LedgerID), domain.ConvertID(params.ExpenseID))
 	if err != nil {
 		return nil, err
 	}
@@ -21,7 +21,7 @@ func (a *API) LedgerExpenseGet(ctx context.Context, params handlers.LedgerExpens
 	return convertExpense(expense), nil
 }
 
-func convertExpense(expense *v1.Expense) *handlers.Expense {
+func convertExpense(expense *domain.Expense) *handlers.Expense {
 	return &handlers.Expense{
 		ID:          handlers.NewOptUUID(expense.ID.UUID()),
 		Name:        expense.Name,
@@ -30,7 +30,7 @@ func convertExpense(expense *v1.Expense) *handlers.Expense {
 	}
 }
 
-func convertRecords(records []v1.Record) []handlers.ExpenseRecord {
+func convertRecords(records []domain.Record) []handlers.ExpenseRecord {
 	result := make([]handlers.ExpenseRecord, 0, len(records))
 	for _, record := range records {
 		result = append(result, handlers.ExpenseRecord{

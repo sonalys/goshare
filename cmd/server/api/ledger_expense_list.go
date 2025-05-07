@@ -8,6 +8,7 @@ import (
 	"github.com/sonalys/goshare/cmd/server/handlers"
 	"github.com/sonalys/goshare/internal/application/controllers"
 	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
+	"github.com/sonalys/goshare/internal/domain"
 )
 
 func (a *API) LedgerExpenseList(ctx context.Context, params handlers.LedgerExpenseListParams) (handlers.LedgerExpenseListRes, error) {
@@ -17,8 +18,8 @@ func (a *API) LedgerExpenseList(ctx context.Context, params handlers.LedgerExpen
 	}
 
 	result, err := a.Ledgers.GetExpenses(ctx, controllers.GetExpensesRequest{
-		UserID:   identity.UserID,
-		LedgerID: v1.ConvertID(params.LedgerID),
+		Identity: identity.UserID,
+		LedgerID: domain.ConvertID(params.LedgerID),
 		Limit:    params.Limit.Or(10),
 		Cursor:   params.Cursor.Or(time.Now()),
 	})
@@ -34,7 +35,7 @@ func (a *API) LedgerExpenseList(ctx context.Context, params handlers.LedgerExpen
 			Expenses: mapLedgerExpenseToResponseObject(result.Expenses),
 			Cursor:   cursor,
 		}, nil
-	case errors.Is(err, v1.ErrUserNotAMember):
+	case errors.Is(err, domain.ErrUserNotAMember):
 		return newRespUnauthorized(ctx), nil
 	default:
 		return nil, err

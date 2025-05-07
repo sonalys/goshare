@@ -3,20 +3,27 @@ package domain
 import (
 	"fmt"
 	"net/mail"
+	"time"
 
-	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
-type UserCreated struct {
-	ID             uuid.UUID
-	Email          string
-	HashedPassword string
-	FirstName      string
-	LastName       string
+type User struct {
+	ID              ID
+	FirstName       string
+	LastName        string
+	Email           string
+	IsEmailVerified bool
+	PasswordHash    string
+	CreatedAt       time.Time
 }
 
-func NewUser(firstName string, lastName string, email string, password string) (*Event[UserCreated], error) {
+const (
+	ErrEmailPasswordMismatch  = StringError("email and/or password mismatch")
+	ErrEmailAlreadyRegistered = StringError("email already registered")
+)
+
+func NewUser(firstName string, lastName string, email string, password string) (*Event[User], error) {
 	var errs FormError
 
 	if _, err := mail.ParseAddress(email); err != nil {
@@ -44,14 +51,16 @@ func NewUser(firstName string, lastName string, email string, password string) (
 		return nil, fmt.Errorf("could not hash user password: %w", err)
 	}
 
-	return &Event[UserCreated]{
+	return &Event[User]{
 		Topic: TopicUserCreated,
-		Data: UserCreated{
-			ID:             uuid.New(),
-			FirstName:      firstName,
-			LastName:       lastName,
-			Email:          email,
-			HashedPassword: string(hashedPassword),
+		Data: User{
+			ID:              NewID(),
+			FirstName:       firstName,
+			LastName:        lastName,
+			Email:           email,
+			PasswordHash:    string(hashedPassword),
+			IsEmailVerified: false,
+			CreatedAt:       time.Now(),
 		},
 	}, nil
 }

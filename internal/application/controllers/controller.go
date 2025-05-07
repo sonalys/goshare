@@ -8,7 +8,7 @@ type (
 )
 
 func New(dep Dependencies) *Controller {
-	subscriber := newSubscriber(dep.Database)
+	subscriber := newSubscriber()
 
 	return &Controller{
 		Ledgers: &Ledgers{

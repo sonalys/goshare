@@ -27,6 +27,17 @@ type (
 	LoginResponse struct {
 		Token string
 	}
+
+	RegisterRequest struct {
+		FirstName string
+		LastName  string
+		Email     string
+		Password  string
+	}
+
+	RegisterResponse struct {
+		ID domain.ID
+	}
 )
 
 func (c *Users) Login(ctx context.Context, req LoginRequest) (*LoginResponse, error) {
@@ -36,14 +47,14 @@ func (c *Users) Login(ctx context.Context, req LoginRequest) (*LoginResponse, er
 	user, err := c.db.User().FindByEmail(ctx, req.Email)
 	if err != nil {
 		slog.Error(ctx, "could not find user by email", err)
-		return nil, v1.ErrEmailPasswordMismatch
+		return nil, domain.ErrEmailPasswordMismatch
 	}
 	span.AddEvent("user found")
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password))
 	if err != nil {
 		slog.Error(ctx, "password hash mismatch", err)
-		return nil, v1.ErrEmailPasswordMismatch
+		return nil, domain.ErrEmailPasswordMismatch
 	}
 	span.AddEvent("hash compared")
 
@@ -63,31 +74,28 @@ func (c *Users) Login(ctx context.Context, req LoginRequest) (*LoginResponse, er
 	return &LoginResponse{Token: token}, nil
 }
 
-type RegisterRequest struct {
-	FirstName string
-	LastName  string
-	Email     string
-	Password  string
-}
-
-type RegisterResponse struct {
-	ID v1.ID
-}
-
-func (c *Users) Register(ctx context.Context, req RegisterRequest) (*RegisterResponse, error) {
+func (c *Users) Register(ctx context.Context, req RegisterRequest) (resp *RegisterResponse, err error) {
 	ctx, span := otel.Tracer.Start(ctx, "user.register")
 	defer span.End()
 
-	event, err := domain.NewUser(req.FirstName, req.LastName, req.Email, req.Password)
-	if err != nil {
-		return nil, slog.ErrorReturn(ctx, "creating user", err)
-	}
+	err = c.db.Transaction(ctx, func(db Database) error {
+		event, err := domain.NewUser(req.FirstName, req.LastName, req.Email, req.Password)
+		if err != nil {
+			return fmt.Errorf("creating user: %w", err)
+		}
 
-	if err := c.subscriber.handle(ctx, event); err != nil {
+		if err = db.User().Create(ctx, &event.Data); err != nil {
+			return fmt.Errorf("storing user: %w", err)
+		}
+
+		resp = &RegisterResponse{
+			ID: event.Data.ID,
+		}
+
+		return c.subscriber.handle(ctx, c.db, event)
+	})
+	if err != nil {
 		return nil, slog.ErrorReturn(ctx, "registering new user", err)
 	}
-
-	return &RegisterResponse{
-		ID: v1.ConvertID(event.Data.ID),
-	}, nil
+	return
 }

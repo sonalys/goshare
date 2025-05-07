@@ -4,23 +4,22 @@ import (
 	"context"
 
 	"github.com/sonalys/goshare/internal/application/controllers"
-	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
+	"github.com/sonalys/goshare/internal/domain"
 )
 
 type (
 	Ledgers interface {
 		AddParticipants(ctx context.Context, req controllers.AddMembersRequest) error
-		Create(ctx context.Context, req controllers.CreateRequest) (*controllers.CreateResponse, error)
+		Create(ctx context.Context, req controllers.CreateLedgerRequest) (*controllers.CreateLedgerResponse, error)
 		CreateExpense(ctx context.Context, req controllers.CreateExpenseRequest) (*controllers.CreateExpenseResponse, error)
-		FindExpense(ctx context.Context, ledgerID v1.ID, expenseID v1.ID) (*v1.Expense, error)
-		GetByUser(ctx context.Context, userID v1.ID) ([]v1.Ledger, error)
-		GetExpenses(ctx context.Context, req controllers.GetExpensesRequest) (*controllers.GetExpensesResult, error)
-		GetParticipants(ctx context.Context, ledgerID v1.ID) ([]v1.LedgerParticipant, error)
+		FindExpense(ctx context.Context, ledgerID domain.ID, expenseID domain.ID) (*domain.Expense, error)
+		GetByUser(ctx context.Context, userID domain.ID) ([]domain.Ledger, error)
+		GetExpenses(ctx context.Context, req controllers.GetExpensesRequest) (*controllers.GetExpensesResponse, error)
+		GetParticipants(ctx context.Context, ledgerID domain.ID) ([]domain.LedgerParticipant, error)
 	}
 
 	ledgers struct {
 		ledgersController *controllers.Ledgers
-		authorizer        Authorizer
 	}
 )
 
@@ -31,33 +30,29 @@ func NewLedgers(ledgersController *controllers.Ledgers) Ledgers {
 }
 
 func (l *ledgers) AddParticipants(ctx context.Context, req controllers.AddMembersRequest) error {
-	if err := l.authorizer.Authorize(ctx, ActionLedgerExpenseWrite, ResourceUser(req.UserID), ResourceLedger(req.LedgerID)); err != nil {
-		return err
-	}
-
 	return l.ledgersController.AddParticipants(ctx, req)
 }
 
-func (l *ledgers) Create(ctx context.Context, req controllers.CreateRequest) (*controllers.CreateResponse, error) {
-	panic("unimplemented")
+func (l *ledgers) Create(ctx context.Context, req controllers.CreateLedgerRequest) (*controllers.CreateLedgerResponse, error) {
+	return l.ledgersController.Create(ctx, req)
 }
 
 func (l *ledgers) CreateExpense(ctx context.Context, req controllers.CreateExpenseRequest) (*controllers.CreateExpenseResponse, error) {
-	panic("unimplemented")
+	return l.ledgersController.CreateExpense(ctx, req)
 }
 
-func (l *ledgers) FindExpense(ctx context.Context, ledgerID v1.ID, expenseID v1.ID) (*v1.Expense, error) {
-	panic("unimplemented")
+func (l *ledgers) FindExpense(ctx context.Context, ledgerID domain.ID, expenseID domain.ID) (*domain.Expense, error) {
+	return l.ledgersController.FindExpense(ctx, ledgerID, expenseID)
 }
 
-func (l *ledgers) GetByUser(ctx context.Context, userID v1.ID) ([]v1.Ledger, error) {
-	panic("unimplemented")
+func (l *ledgers) GetByUser(ctx context.Context, userID domain.ID) ([]domain.Ledger, error) {
+	return l.ledgersController.GetByUser(ctx, userID)
 }
 
-func (l *ledgers) GetExpenses(ctx context.Context, req controllers.GetExpensesRequest) (*controllers.GetExpensesResult, error) {
-	panic("unimplemented")
+func (l *ledgers) GetExpenses(ctx context.Context, req controllers.GetExpensesRequest) (*controllers.GetExpensesResponse, error) {
+	return l.ledgersController.GetExpenses(ctx, req)
 }
 
-func (l *ledgers) GetParticipants(ctx context.Context, ledgerID v1.ID) ([]v1.LedgerParticipant, error) {
-	panic("unimplemented")
+func (l *ledgers) GetParticipants(ctx context.Context, ledgerID domain.ID) ([]domain.LedgerParticipant, error) {
+	return l.ledgersController.GetParticipants(ctx, ledgerID)
 }

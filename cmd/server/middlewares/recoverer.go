@@ -3,6 +3,7 @@ package middlewares
 import (
 	"encoding/json"
 	"net/http"
+	"runtime/debug"
 
 	"github.com/google/uuid"
 	"github.com/sonalys/goshare/cmd/server/handlers"
@@ -17,7 +18,9 @@ func Recoverer(next http.Handler) http.Handler {
 			if rec == nil {
 				return
 			}
-			slog.Error(r.Context(), "panic recovered", nil, slog.WithAny("r", rec))
+
+			stackTrace := string(debug.Stack())
+			slog.Error(r.Context(), "panic recovered", nil, slog.WithAny("r", rec), slog.WithString("stack_trace", stackTrace))
 			w.WriteHeader(http.StatusInternalServerError)
 
 			var traceID trace.TraceID

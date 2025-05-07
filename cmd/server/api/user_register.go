@@ -7,7 +7,7 @@ import (
 
 	"github.com/sonalys/goshare/cmd/server/handlers"
 	"github.com/sonalys/goshare/internal/application/controllers"
-	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
+	"github.com/sonalys/goshare/internal/domain"
 )
 
 func (a *API) UserRegister(ctx context.Context, req *handlers.UserRegisterReq) (r *handlers.UserRegisterOK, _ error) {
@@ -23,7 +23,7 @@ func (a *API) UserRegister(ctx context.Context, req *handlers.UserRegisterReq) (
 		return &handlers.UserRegisterOK{
 			ID: resp.ID.UUID(),
 		}, nil
-	case errors.Is(err, v1.ErrConflict):
+	case errors.Is(err, domain.ErrConflict):
 		return nil, newErrorResponse(ctx, http.StatusConflict, handlers.Error{
 			Code:    handlers.ErrorCodeInvalidField,
 			Message: "already registered",

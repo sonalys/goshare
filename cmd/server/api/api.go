@@ -9,8 +9,8 @@ import (
 	"github.com/ogen-go/ogen/ogenerrors"
 	"github.com/ogen-go/ogen/validate"
 	"github.com/sonalys/goshare/cmd/server/handlers"
-	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/application/usecases"
+	"github.com/sonalys/goshare/internal/domain"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -71,7 +71,7 @@ func (a *API) NewError(ctx context.Context, err error) *handlers.ErrorResponseSt
 		return newErrorResponse(ctx, http.StatusBadRequest, errs...)
 	}
 
-	if target := new(v1.FieldErrorList); errors.As(err, target) {
+	if target := new(domain.FieldErrorList); errors.As(err, target) {
 		errs := make([]handlers.Error, 0, len(*target))
 
 		for _, fieldErr := range *target {
@@ -87,14 +87,14 @@ func (a *API) NewError(ctx context.Context, err error) *handlers.ErrorResponseSt
 		return newErrorResponse(ctx, http.StatusBadRequest, errs...)
 	}
 
-	if errors.Is(err, v1.ErrNotFound) {
+	if errors.Is(err, domain.ErrNotFound) {
 		return newErrorResponse(ctx, http.StatusNotFound, handlers.Error{
 			Code:    handlers.ErrorCodeNotFound,
 			Message: err.Error(),
 		})
 	}
 
-	if target := new(v1.FieldError); errors.As(err, target) {
+	if target := new(domain.FieldError); errors.As(err, target) {
 		return newErrorResponse(ctx, http.StatusBadRequest, handlers.Error{
 			Code:    handlers.ErrorCodeInvalidField,
 			Message: target.Cause.Error(),

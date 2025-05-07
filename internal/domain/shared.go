@@ -1,4 +1,4 @@
-package v1
+package domain
 
 import (
 	"fmt"
@@ -20,20 +20,6 @@ func NewID() ID {
 	return ID{id: id}
 }
 
-func ConvertID(id uuid.UUID) ID {
-	return ID{id}
-}
-
-func ConvertPointerID(id *uuid.UUID) *ID {
-	if id == nil {
-		return nil
-	}
-
-	uid := ConvertID(*id)
-
-	return &uid
-}
-
 func ParseID(from string) (ID, error) {
 	id, err := uuid.Parse(from)
 	if err != nil {
@@ -48,4 +34,8 @@ func (id *ID) UUID() uuid.UUID {
 
 func (id *ID) IsEmpty() bool {
 	return id.id == uuid.Nil
+}
+
+func ConvertID(id uuid.UUID) ID {
+	return ID{id}
 }

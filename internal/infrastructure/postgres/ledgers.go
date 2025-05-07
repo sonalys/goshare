@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
+	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/mappers"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 )
@@ -19,7 +19,7 @@ func NewLedgerRepository(client connection) *LedgerRepository {
 	}
 }
 
-func (r *LedgerRepository) Create(ctx context.Context, userID v1.ID, createFn func(count int64) (*v1.Ledger, error)) error {
+func (r *LedgerRepository) Create(ctx context.Context, userID domain.ID, createFn func(count int64) (*domain.Ledger, error)) error {
 	return mapLedgerError(r.client.transaction(ctx, func(query *sqlc.Queries) error {
 		id := convertID(userID)
 
@@ -52,7 +52,7 @@ func (r *LedgerRepository) Create(ctx context.Context, userID v1.ID, createFn fu
 			addReq := sqlc.AddUserToLedgerParams{
 				ID:        convertID(participant.ID),
 				LedgerID:  createLedgerReq.ID,
-				UserID:    convertID(participant.UserID),
+				UserID:    convertID(participant.Identity),
 				CreatedAt: createLedgerReq.CreatedAt,
 				CreatedBy: createLedgerReq.CreatedBy,
 			}
@@ -66,7 +66,7 @@ func (r *LedgerRepository) Create(ctx context.Context, userID v1.ID, createFn fu
 	}))
 }
 
-func (r *LedgerRepository) Find(ctx context.Context, id v1.ID) (*v1.Ledger, error) {
+func (r *LedgerRepository) Find(ctx context.Context, id domain.ID) (*domain.Ledger, error) {
 	ledger, err := r.client.queries().FindLedgerById(ctx, convertID(id))
 	if err != nil {
 		return nil, mapLedgerError(err)
@@ -80,13 +80,13 @@ func (r *LedgerRepository) Find(ctx context.Context, id v1.ID) (*v1.Ledger, erro
 	return mappers.NewLedger(&ledger, participants), nil
 }
 
-func (r *LedgerRepository) GetByUser(ctx context.Context, userID v1.ID) ([]v1.Ledger, error) {
+func (r *LedgerRepository) GetByUser(ctx context.Context, userID domain.ID) ([]domain.Ledger, error) {
 	ledgers, err := r.client.queries().GetUserLedgers(ctx, convertID(userID))
 	if err != nil {
 		return nil, mapLedgerError(err)
 	}
 
-	result := make([]v1.Ledger, 0, len(ledgers))
+	result := make([]domain.Ledger, 0, len(ledgers))
 	for _, ledger := range ledgers {
 		participants, err := r.client.queries().GetLedgerParticipants(ctx, ledger.ID)
 		if err != nil {
@@ -102,9 +102,9 @@ func mapLedgerError(err error) error {
 	case err == nil:
 		return nil
 	case isViolatingConstraint(err, constraintLedgerUniqueParticipant):
-		return v1.ErrUserAlreadyMember
+		return domain.ErrUserAlreadyMember
 	case isViolatingConstraint(err, constraintLedgerParticipantsFK):
-		return v1.ErrNotFound
+		return domain.ErrNotFound
 	default:
 		return mapError(err)
 	}

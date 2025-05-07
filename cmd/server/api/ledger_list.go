@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/sonalys/goshare/cmd/server/handlers"
-	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
+	"github.com/sonalys/goshare/internal/domain"
 )
 
 func (a *API) LedgerList(ctx context.Context) (*handlers.LedgerListOK, error) {
@@ -23,7 +23,7 @@ func (a *API) LedgerList(ctx context.Context) (*handlers.LedgerListOK, error) {
 	}, nil
 }
 
-func convertLedgers(ledgers []v1.Ledger) []handlers.Ledger {
+func convertLedgers(ledgers []domain.Ledger) []handlers.Ledger {
 	result := make([]handlers.Ledger, 0, len(ledgers))
 	for _, ledger := range ledgers {
 		result = append(result, handlers.Ledger{
