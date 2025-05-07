@@ -9,9 +9,9 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
+	"github.com/sonalys/goshare/internal/application/pkg/secrets"
+	"github.com/sonalys/goshare/internal/application/pkg/slog"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres"
-	"github.com/sonalys/goshare/internal/pkg/secrets"
-	"github.com/sonalys/goshare/internal/pkg/slog"
 )
 
 func init() {

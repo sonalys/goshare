@@ -7,13 +7,13 @@ import (
 	"net/http"
 
 	"github.com/sonalys/goshare/cmd/server/handlers"
-	"github.com/sonalys/goshare/internal/application/users"
-	v1 "github.com/sonalys/goshare/internal/pkg/v1"
+	"github.com/sonalys/goshare/internal/application/controllers"
+	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 )
 
 // Login implements handlers.StrictServerInterface.
 func (a *API) AuthenticationLogin(ctx context.Context, req *handlers.AuthenticationLoginReq) (*handlers.AuthenticationLoginOK, error) {
-	resp, err := a.dependencies.UserController.Login(ctx, users.LoginRequest{
+	resp, err := a.Users.Login(ctx, controllers.LoginRequest{
 		Email:    string(req.Email),
 		Password: req.Password,
 	})

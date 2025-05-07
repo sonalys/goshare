@@ -6,19 +6,19 @@ import (
 	"net/http"
 
 	"github.com/sonalys/goshare/cmd/server/handlers"
-	"github.com/sonalys/goshare/internal/application/users"
-	v1 "github.com/sonalys/goshare/internal/pkg/v1"
+	"github.com/sonalys/goshare/internal/application/controllers"
+	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 )
 
 func (a *API) UserRegister(ctx context.Context, req *handlers.UserRegisterReq) (r *handlers.UserRegisterOK, _ error) {
-	apiParams := users.RegisterRequest{
+	apiParams := controllers.RegisterRequest{
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
 		Email:     string(req.Email),
 		Password:  req.Password,
 	}
 
-	switch resp, err := a.dependencies.UserController.Register(ctx, apiParams); {
+	switch resp, err := a.Users.Register(ctx, apiParams); {
 	case err == nil:
 		return &handlers.UserRegisterOK{
 			ID: resp.ID.UUID(),

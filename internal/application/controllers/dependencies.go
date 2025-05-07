@@ -1,10 +1,10 @@
-package ledgers
+package controllers
 
 import (
 	"context"
 	"time"
 
-	v1 "github.com/sonalys/goshare/internal/pkg/v1"
+	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 )
 
 type (
@@ -18,6 +18,8 @@ type (
 
 	UserRepository interface {
 		ListByEmail(ctx context.Context, emails []string) ([]v1.User, error)
+		Create(ctx context.Context, user *v1.User) error
+		FindByEmail(ctx context.Context, email string) (*v1.User, error)
 	}
 
 	ExpenseRepository interface {
@@ -26,21 +28,23 @@ type (
 		GetByLedger(ctx context.Context, ledgerID v1.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error)
 	}
 
-	Controller struct {
-		ledgerRepository  LedgerRepository
-		expenseRepository ExpenseRepository
-		userRepository    UserRepository
+	Database interface {
+		Repositories
+		Transaction(ctx context.Context, f func(r Repositories) error) error
+	}
+
+	Repositories interface {
+		Ledger() LedgerRepository
+		User() UserRepository
+		Expense() ExpenseRepository
+	}
+
+	IdentityEncoder interface {
+		Encode(identity *v1.Identity) (string, error)
+	}
+
+	Dependencies struct {
+		Database
+		IdentityEncoder
 	}
 )
-
-func NewController(
-	ledger LedgerRepository,
-	expense ExpenseRepository,
-	user UserRepository,
-) *Controller {
-	return &Controller{
-		ledgerRepository:  ledger,
-		expenseRepository: expense,
-		userRepository:    user,
-	}
-}

@@ -9,20 +9,26 @@ import (
 	"github.com/ogen-go/ogen/ogenerrors"
 	"github.com/ogen-go/ogen/validate"
 	"github.com/sonalys/goshare/cmd/server/handlers"
-	v1 "github.com/sonalys/goshare/internal/pkg/v1"
+	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
+	"github.com/sonalys/goshare/internal/application/usecases"
 	"go.opentelemetry.io/otel/trace"
 )
 
 type (
 	API struct {
 		handlers.UnimplementedHandler
-		dependencies Dependencies
+		usecases.Users
+		usecases.Ledgers
 	}
 )
 
-func New(dependencies Dependencies) *API {
+func New(
+	users usecases.Users,
+	ledgers usecases.Ledgers,
+) *API {
 	return &API{
-		dependencies: dependencies,
+		Users:   users,
+		Ledgers: ledgers,
 	}
 }
 

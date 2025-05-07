@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/sonalys/goshare/internal/pkg/slog"
+	"github.com/sonalys/goshare/internal/application/pkg/slog"
 )
 
 type responseWriter struct {

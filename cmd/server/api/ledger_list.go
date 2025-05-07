@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/sonalys/goshare/cmd/server/handlers"
-	v1 "github.com/sonalys/goshare/internal/pkg/v1"
+	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 )
 
 func (a *API) LedgerList(ctx context.Context) (*handlers.LedgerListOK, error) {
@@ -13,7 +13,7 @@ func (a *API) LedgerList(ctx context.Context) (*handlers.LedgerListOK, error) {
 		return nil, err
 	}
 
-	ledgers, err := a.dependencies.LedgerController.GetByUser(ctx, identity.UserID)
+	ledgers, err := a.Ledgers.GetByUser(ctx, identity.UserID)
 	if err != nil {
 		return nil, err
 	}

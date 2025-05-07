@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/sonalys/goshare/cmd/server/handlers"
-	v1 "github.com/sonalys/goshare/internal/pkg/v1"
+	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 )
 
 func (a *API) LedgerExpenseGet(ctx context.Context, params handlers.LedgerExpenseGetParams) (*handlers.Expense, error) {
@@ -13,7 +13,7 @@ func (a *API) LedgerExpenseGet(ctx context.Context, params handlers.LedgerExpens
 		return nil, err
 	}
 
-	expense, err := a.dependencies.LedgerController.FindExpense(ctx, v1.ConvertID(params.LedgerID), v1.ConvertID(params.ExpenseID))
+	expense, err := a.Ledgers.FindExpense(ctx, v1.ConvertID(params.LedgerID), v1.ConvertID(params.ExpenseID))
 	if err != nil {
 		return nil, err
 	}

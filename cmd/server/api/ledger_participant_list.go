@@ -4,11 +4,11 @@ import (
 	"context"
 
 	"github.com/sonalys/goshare/cmd/server/handlers"
-	v1 "github.com/sonalys/goshare/internal/pkg/v1"
+	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 )
 
 func (a *API) LedgerParticipantList(ctx context.Context, params handlers.LedgerParticipantListParams) (r *handlers.LedgerParticipantListOK, _ error) {
-	balances, err := a.dependencies.LedgerController.GetParticipants(ctx, v1.ConvertID(params.LedgerID))
+	balances, err := a.Ledgers.GetParticipants(ctx, v1.ConvertID(params.LedgerID))
 	if err != nil {
 		return nil, err
 	}

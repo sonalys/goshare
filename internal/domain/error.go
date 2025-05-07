@@ -1,4 +1,4 @@
-package v1
+package domain
 
 import (
 	"fmt"
@@ -32,6 +32,7 @@ const (
 	ErrInvalidValue  = StringError("invalid value")
 	ErrConflict      = StringError("conflict")
 	ErrNotFound      = StringError("not found")
+	ErrForbidden     = StringError("forbidden")
 )
 
 func NewRequiredFieldError(field string) FieldError {

@@ -1,16 +1,14 @@
 package main
 
 import (
+	"github.com/sonalys/goshare/internal/application/pkg/jwt"
+	"github.com/sonalys/goshare/internal/application/pkg/secrets"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres"
-	"github.com/sonalys/goshare/internal/pkg/jwt"
-	"github.com/sonalys/goshare/internal/pkg/secrets"
 )
 
 type repositories struct {
-	UserRepository     *postgres.UsersRepository
-	LedgerRepository   *postgres.LedgerRepository
-	ExpensesRepository *postgres.ExpenseRepository
-	JWTRepository      *jwt.Client
+	Database      *postgres.Postgres
+	JWTRepository *jwt.Client
 }
 
 func loadRepositories(
@@ -18,9 +16,7 @@ func loadRepositories(
 	infrastructure *infrastructure,
 ) *repositories {
 	return &repositories{
-		UserRepository:     postgres.NewUsersRepository(infrastructure.postgres),
-		LedgerRepository:   postgres.NewLedgerRepository(infrastructure.postgres),
-		ExpensesRepository: postgres.NewExpenseRepository(infrastructure.postgres),
-		JWTRepository:      jwt.NewClient(secrets.JWTSignKey),
+		Database:      infrastructure.postgres,
+		JWTRepository: jwt.NewClient(secrets.JWTSignKey),
 	}
 }

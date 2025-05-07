@@ -5,26 +5,23 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jackc/pgx/v5"
+	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/mappers"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
-	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
 type ExpenseRepository struct {
-	client *Client
+	client connection
 }
 
-func NewExpenseRepository(client *Client) *ExpenseRepository {
+func NewExpenseRepository(client connection) *ExpenseRepository {
 	return &ExpenseRepository{
 		client: client,
 	}
 }
 
 func (r *ExpenseRepository) Create(ctx context.Context, ledgerID v1.ID, createFn func(ledger *v1.Ledger) (*v1.Expense, error)) error {
-	return r.client.transaction(ctx, func(tx pgx.Tx) error {
-		query := r.client.queries().WithTx(tx)
-
+	return r.client.transaction(ctx, func(query *sqlc.Queries) error {
 		ledgerModel, err := query.FindLedgerById(ctx, convertID(ledgerID))
 		if err != nil {
 			return fmt.Errorf("finding ledger: %w", err)

@@ -1,8 +1,8 @@
 package mappers
 
 import (
+	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
-	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
 func NewLedgerParticipant(user *sqlc.LedgerParticipant) *v1.LedgerParticipant {

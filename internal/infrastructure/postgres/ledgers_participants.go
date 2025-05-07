@@ -5,19 +5,16 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
+	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/mappers"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
-	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 	"github.com/sonalys/kset"
 )
 
 func (r *LedgerRepository) AddParticipants(ctx context.Context, ledgerID v1.ID, updateFn func(*v1.Ledger) error) error {
 	ledgerUUID := convertID(ledgerID)
 
-	return mapLedgerError(r.client.transaction(ctx, func(tx pgx.Tx) error {
-		query := r.client.queries().WithTx(tx)
-
+	return mapLedgerError(r.client.transaction(ctx, func(query *sqlc.Queries) error {
 		if err := query.LockLedgerForUpdate(ctx, ledgerUUID); err != nil {
 			return fmt.Errorf("locking ledger for update: %w", err)
 		}

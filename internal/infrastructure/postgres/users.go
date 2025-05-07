@@ -5,16 +5,16 @@ import (
 	"fmt"
 	"slices"
 
+	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/mappers"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
-	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
 type UsersRepository struct {
-	client *Client
+	client connection
 }
 
-func NewUsersRepository(client *Client) *UsersRepository {
+func NewUsersRepository(client connection) *UsersRepository {
 	return &UsersRepository{
 		client: client,
 	}

@@ -4,26 +4,23 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jackc/pgx/v5"
+	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/mappers"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
-	v1 "github.com/sonalys/goshare/internal/pkg/v1"
 )
 
 type LedgerRepository struct {
-	client *Client
+	client connection
 }
 
-func NewLedgerRepository(client *Client) *LedgerRepository {
+func NewLedgerRepository(client connection) *LedgerRepository {
 	return &LedgerRepository{
 		client: client,
 	}
 }
 
 func (r *LedgerRepository) Create(ctx context.Context, userID v1.ID, createFn func(count int64) (*v1.Ledger, error)) error {
-	return mapLedgerError(r.client.transaction(ctx, func(tx pgx.Tx) error {
-		query := r.client.queries().WithTx(tx)
-
+	return mapLedgerError(r.client.transaction(ctx, func(query *sqlc.Queries) error {
 		id := convertID(userID)
 
 		if err := query.LockUserForUpdate(ctx, id); err != nil {

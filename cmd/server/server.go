@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/sonalys/goshare/internal/pkg/slog"
+	"github.com/sonalys/goshare/internal/application/pkg/slog"
 )
 
 type Server struct {
