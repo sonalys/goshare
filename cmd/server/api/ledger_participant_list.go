@@ -8,7 +8,12 @@ import (
 )
 
 func (a *API) LedgerParticipantList(ctx context.Context, params handlers.LedgerParticipantListParams) (r *handlers.LedgerParticipantListOK, _ error) {
-	balances, err := a.Ledgers.GetParticipants(ctx, domain.ConvertID(params.LedgerID))
+	identity, err := getIdentity(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	balances, err := a.Ledgers.GetParticipants(ctx, identity.UserID, domain.ConvertID(params.LedgerID))
 	if err != nil {
 		return nil, err
 	}

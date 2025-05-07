@@ -8,12 +8,12 @@ import (
 )
 
 func (a *API) LedgerExpenseGet(ctx context.Context, params handlers.LedgerExpenseGetParams) (*handlers.Expense, error) {
-	_, err := getIdentity(ctx)
+	identity, err := getIdentity(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	expense, err := a.Ledgers.FindExpense(ctx, domain.ConvertID(params.LedgerID), domain.ConvertID(params.ExpenseID))
+	expense, err := a.Ledgers.FindExpense(ctx, identity.UserID, domain.ConvertID(params.LedgerID), domain.ConvertID(params.ExpenseID))
 	if err != nil {
 		return nil, err
 	}

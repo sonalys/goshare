@@ -52,7 +52,7 @@ func main() {
 
 	api := api.New(
 		usecases.NewUsers(controllers.Users),
-		usecases.NewLedgers(controllers.Ledgers),
+		usecases.NewLedgers(controllers),
 	)
 	handler := NewHandler(api, repositories, cfg.ServiceName)
 

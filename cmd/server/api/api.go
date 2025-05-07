@@ -55,6 +55,13 @@ func (a *API) NewError(ctx context.Context, err error) *handlers.ErrorResponseSt
 		})
 	}
 
+	if errors.Is(err, domain.ErrForbidden) {
+		return newErrorResponse(ctx, http.StatusForbidden, handlers.Error{
+			Code:    handlers.ErrorCodeUnauthorized,
+			Message: "not authorized to access resource",
+		})
+	}
+
 	if target := new(validate.Error); errors.As(err, &target) {
 		errs := make([]handlers.Error, 0, len(target.Fields))
 

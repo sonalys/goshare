@@ -222,18 +222,32 @@ func (c *Ledgers) GetExpenses(ctx context.Context, req GetExpensesRequest) (*Get
 	}, nil
 }
 
-func (c *Ledgers) GetByUser(ctx context.Context, userID domain.ID) ([]domain.Ledger, error) {
+func (c *Ledgers) GetByIdentity(ctx context.Context, identity domain.ID) ([]domain.Ledger, error) {
 	ctx, span := otel.Tracer.Start(ctx, "ledgers.ListByUser")
 	defer span.End()
 
-	ctx = slog.Context(ctx, slog.WithStringer("identity", userID))
+	ctx = slog.Context(ctx, slog.WithStringer("identity", identity))
 
-	ledgers, err := c.db.Ledger().GetByUser(ctx, userID)
+	ledgers, err := c.db.Ledger().GetByUser(ctx, identity)
 	if err != nil {
 		return nil, slog.ErrorReturn(ctx, "failed to list ledgers", err)
 	}
 
 	return ledgers, nil
+}
+
+func (c *Ledgers) Find(ctx context.Context, ledgerID domain.ID) (*domain.Ledger, error) {
+	ctx, span := otel.Tracer.Start(ctx, "ledgers.Find")
+	defer span.End()
+
+	ctx = slog.Context(ctx, slog.WithStringer("ledgerID", ledgerID))
+
+	ledger, err := c.db.Ledger().Find(ctx, ledgerID)
+	if err != nil {
+		return nil, slog.ErrorReturn(ctx, "failed to list ledgers", err)
+	}
+
+	return ledger, nil
 }
 
 // TODO(invitations): Here it's a simplification of the user membership process.

@@ -199,26 +199,26 @@ func NewLedgerExpense(
 	}, nil
 }
 
-func (l Ledger) IsParticipant(userID ID) bool {
+func (l Ledger) IsParticipant(identity ID) bool {
 	for _, p := range l.Participants {
-		if p.Identity == userID {
+		if p.Identity == identity {
 			return true
 		}
 	}
 	return false
 }
 
-func (l *Ledger) AddParticipants(userID ID, ids ...ID) int {
+func (l *Ledger) AddParticipants(identity ID, participants ...ID) int {
 	participantsSet := kset.HashMapKeyValue(func(p LedgerParticipant) ID { return p.Identity }, l.Participants...)
 	addedCount := 0
 
-	for _, id := range ids {
+	for _, id := range participants {
 		addedCount += participantsSet.Append(LedgerParticipant{
 			ID:        NewID(),
 			Identity:  id,
 			Balance:   0,
 			CreatedAt: time.Now(),
-			CreatedBy: userID,
+			CreatedBy: identity,
 		})
 	}
 

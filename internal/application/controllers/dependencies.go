@@ -10,8 +10,8 @@ import (
 
 type (
 	LedgerRepository interface {
-		Create(ctx context.Context, userID domain.ID, createFn func(count int64) (*domain.Ledger, error)) error
-		GetByUser(ctx context.Context, userID domain.ID) ([]domain.Ledger, error)
+		Create(ctx context.Context, identity domain.ID, createFn func(count int64) (*domain.Ledger, error)) error
+		GetByUser(ctx context.Context, identity domain.ID) ([]domain.Ledger, error)
 		AddParticipants(ctx context.Context, ledgerID domain.ID, updateFn func(*domain.Ledger) error) error
 		GetParticipants(ctx context.Context, ledgerID domain.ID) ([]domain.LedgerParticipant, error)
 		Find(ctx context.Context, id domain.ID) (*domain.Ledger, error)
