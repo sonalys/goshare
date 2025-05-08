@@ -6,9 +6,10 @@ import (
 	"github.com/google/uuid"
 )
 
-type id = uuid.UUID
-
-type ID struct{ id }
+type (
+	id = uuid.UUID
+	ID struct{ id }
+)
 
 var EmptyID = ID{uuid.Nil}
 

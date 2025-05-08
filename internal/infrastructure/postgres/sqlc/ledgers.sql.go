@@ -80,7 +80,7 @@ func (q *Queries) CreateLedger(ctx context.Context, arg CreateLedgerParams) erro
 }
 
 const findLedgerById = `-- name: FindLedgerById :one
-SELECT id, name, created_at, created_by FROM ledgers WHERE id = $1
+SELECT id, name, created_at, created_by FROM ledgers WHERE id = $1 FOR UPDATE
 `
 
 func (q *Queries) FindLedgerById(ctx context.Context, id pgtype.UUID) (Ledger, error) {

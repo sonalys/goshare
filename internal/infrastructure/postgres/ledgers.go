@@ -23,24 +23,8 @@ func (r *LedgerRepository) transaction(ctx context.Context, f func(q *sqlc.Queri
 	return mapLedgerError(r.client.transaction(ctx, f))
 }
 
-func (r *LedgerRepository) Create(ctx context.Context, userID domain.ID, createFn func(count int64) (*domain.Ledger, error)) error {
+func (r *LedgerRepository) Create(ctx context.Context, ledger *domain.Ledger) error {
 	return r.transaction(ctx, func(query *sqlc.Queries) error {
-		id := convertID(userID)
-
-		if err := query.LockUserForUpdate(ctx, id); err != nil {
-			return fmt.Errorf("failed to acquire user lock for updating ledger")
-		}
-
-		userLedgersCount, err := query.CountUserLedgers(ctx, id)
-		if err != nil {
-			return fmt.Errorf("failed to count user ledgers")
-		}
-
-		ledger, err := createFn(userLedgersCount)
-		if err != nil {
-			return fmt.Errorf("failed to create ledger: %w", err)
-		}
-
 		createLedgerReq := sqlc.CreateLedgerParams{
 			ID:        convertID(ledger.ID),
 			Name:      ledger.Name,

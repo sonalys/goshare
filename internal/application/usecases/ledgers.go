@@ -33,13 +33,11 @@ func NewLedgers(controller *controllers.Controller) Ledgers {
 func (l *ledgers) checkAuthorization(ctx context.Context, ledgerID domain.ID, f func(*domain.Ledger) bool) error {
 	ledger, err := l.controller.Ledgers.Find(ctx, ledgerID)
 	switch {
-	case err == nil:
-		if !f(ledger) {
+	case err == nil || errors.Is(err, domain.ErrNotFound):
+		if err != nil || !f(ledger) {
 			return domain.ErrForbidden
 		}
 		return nil
-	case errors.Is(err, domain.ErrNotFound):
-		return domain.ErrForbidden
 	default:
 		return err
 	}

@@ -29,11 +29,11 @@ type (
 	}
 
 	CreateExpenseRequest struct {
-		Identity    domain.ID
-		LedgerID    domain.ID
-		Name        string
-		ExpenseDate time.Time
-		Records     []domain.NewRecord
+		Identity       domain.ID
+		LedgerID       domain.ID
+		Name           string
+		ExpenseDate    time.Time
+		PendingRecords []domain.PendingRecord
 	}
 
 	CreateExpenseResponse struct {
@@ -68,23 +68,21 @@ func (c *Ledgers) Create(ctx context.Context, req CreateLedgerRequest) (resp *Cr
 	slog.Debug(ctx, "creating ledger", slog.WithAny("req", req))
 
 	err = c.db.Transaction(ctx, func(db Database) error {
-		err = db.Ledger().Create(ctx, req.Identity, func(count int64) (*domain.Ledger, error) {
-			event, err := domain.NewLedger(req.Identity, req.Name, count+1)
-			if err != nil {
-				return nil, err
-			}
-
-			resp = &CreateLedgerResponse{
-				ID: event.Data.ID,
-			}
-
-			return &event.Data, c.subscriber.Handle(ctx, db, event)
-		})
+		user, err := db.User().Find(ctx, req.Identity)
 		if err != nil {
 			return err
 		}
 
-		return nil
+		ledger, err := user.CreateLedger(req.Name)
+		if err != nil {
+			return err
+		}
+
+		if err := db.Ledger().Create(ctx, ledger); err != nil {
+			return err
+		}
+
+		return c.subscriber.Handle(ctx, db, user.Events()...)
 	})
 	if err != nil {
 		return nil, slog.ErrorReturn(ctx, "creating ledger", err)
@@ -104,23 +102,28 @@ func (c *Ledgers) CreateExpense(ctx context.Context, req CreateExpenseRequest) (
 		slog.WithStringer("ledger_id", req.LedgerID),
 	)
 
-	event, err := domain.NewLedgerExpense(req.Identity, req.LedgerID, req.Name, req.ExpenseDate, req.Records)
-	if err != nil {
-		return nil, slog.ErrorReturn(ctx, "creating ledger expense", err)
-	}
-	resp = &CreateExpenseResponse{
-		ID: event.Data.ID,
-	}
-
-	createFn := func(ledger *domain.Ledger) (*domain.Expense, error) {
-		return &event.Data, nil
-	}
-
 	err = c.db.Transaction(ctx, func(db Database) error {
-		if err := c.db.Expense().Create(ctx, req.LedgerID, createFn); err != nil {
+		ledger, err := db.Ledger().Find(ctx, req.LedgerID)
+		if err != nil {
 			return err
 		}
-		return c.subscriber.Handle(ctx, db, event)
+
+		expense, err := ledger.CreateExpense(domain.CreateExpenseRequest{
+			Actor:          req.Identity,
+			Name:           req.Name,
+			ExpenseDate:    req.ExpenseDate,
+			PendingRecords: req.PendingRecords,
+		})
+		if err != nil {
+			return err
+		}
+
+		err = db.Expense().Create(ctx, req.LedgerID, expense)
+		if err != nil {
+			return err
+		}
+
+		return c.subscriber.Handle(ctx, db, ledger.Events()...)
 	})
 	switch {
 	case errors.Is(err, domain.ErrUserNotAMember):
@@ -235,23 +238,24 @@ func (c *Ledgers) AddParticipants(ctx context.Context, req AddMembersRequest) er
 	transaction := func(db Database) error {
 		users, err := db.User().ListByEmail(ctx, req.Emails)
 		if err != nil {
-			return slog.ErrorReturn(ctx, "failed to get users by email", err)
+			return slog.ErrorReturn(ctx, "failed to get users", err)
 		}
 
-		updateFn := func(ledger *domain.Ledger) error {
-			pendingMemberIDs := kset.Select(func(u domain.User) domain.ID { return u.ID }, users...)
-			events, err := ledger.AddParticipants(req.Identity, pendingMemberIDs...)
-			if err != nil {
-				return err
-			}
-			return c.subscriber.Handle(ctx, db, convertEvents(events)...)
+		ledger, err := db.Ledger().Find(ctx, req.LedgerID)
+		if err != nil {
+			return slog.ErrorReturn(ctx, "failed to find ledger", err)
 		}
 
-		if err := db.Ledger().Update(ctx, req.LedgerID, updateFn); err != nil {
+		err = ledger.AddParticipants(req.Identity, kset.Select(func(u domain.User) domain.ID { return u.ID }, users...)...)
+		if err != nil {
+			return slog.ErrorReturn(ctx, "adding participants", err)
+		}
+
+		if err := db.Ledger().Update(ctx, ledger); err != nil {
 			return err
 		}
 
-		return nil
+		return c.subscriber.Handle(ctx, db, ledger.Events()...)
 	}
 
 	switch err := c.db.Transaction(ctx, transaction); {

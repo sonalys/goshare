@@ -16,6 +16,8 @@ type (
 		ID           ID
 		Name         string
 		Participants []LedgerParticipant
+
+		events []Event
 	}
 
 	LedgerParticipant struct {
@@ -26,18 +28,11 @@ type (
 		Identity  ID
 	}
 
-	RecordType int
-
-	Record struct {
-		Amount    int32
-		CreatedAt time.Time
-		CreatedBy ID
-		From      ID
-		ID        ID
-		To        ID
-		Type      RecordType
-		UpdatedAt time.Time
-		UpdatedBy ID
+	CreateExpenseRequest struct {
+		Actor          ID
+		Name           string
+		ExpenseDate    time.Time
+		PendingRecords []PendingRecord
 	}
 
 	Expense struct {
@@ -55,11 +50,6 @@ type (
 )
 
 const (
-	RecordTypeUnknown RecordType = iota
-	RecordTypeDebt
-	RecordTypeSettlement
-	recordTypeMaxBoundary
-
 	ExpenseMaxRecords = 100
 	LedgerMaxMembers  = 100
 	UserMaxLedgers    = 5
@@ -73,104 +63,30 @@ var (
 	ErrUserMaxLedgers = fmt.Errorf("user reached the maximum number of ledgers: %d", UserMaxLedgers)
 )
 
-func NewLedger(identity ID, name string, userLedgersCount int64) (*Event[Ledger], error) {
+func (l *Ledger) Events() []Event {
+	return l.events
+}
+
+func (req *CreateExpenseRequest) validate() error {
 	var errs FormError
 
-	if userLedgersCount+1 > UserMaxLedgers {
-		return nil, ErrUserMaxLedgers
-	}
-
-	if nameLength := len(name); nameLength < 3 || nameLength > 255 {
-		errs = append(errs, NewFieldLengthError("name", 3, 255))
-	}
-
-	if err := errs.Validate(); err != nil {
-		return nil, err
-	}
-
-	return &Event[Ledger]{
-		Topic: TopicLedgerCreated,
-		Data: Ledger{
-			ID:   NewID(),
-			Name: name,
-			Participants: []LedgerParticipant{
-				{
-					ID:        NewID(),
-					Identity:  identity,
-					Balance:   0,
-					CreatedAt: time.Now(),
-					CreatedBy: identity,
-				},
-			},
-			CreatedAt: time.Now(),
-			CreatedBy: identity,
-		},
-	}, nil
-}
-
-func NewRecordType(s string) RecordType {
-	switch s {
-	case "debt":
-		return RecordTypeDebt
-	case "settlement":
-		return RecordTypeSettlement
-	default:
-		return RecordTypeUnknown
-	}
-}
-
-func (r RecordType) String() string {
-	switch r {
-	case RecordTypeDebt:
-		return "debt"
-	case RecordTypeSettlement:
-		return "settlement"
-	default:
-		return "unknown"
-	}
-}
-
-func (r RecordType) IsValid() bool {
-	return r > RecordTypeUnknown && r < recordTypeMaxBoundary
-}
-
-type NewRecord struct {
-	From   ID
-	To     ID
-	Type   RecordType
-	Amount int32
-}
-
-func NewLedgerExpense(
-	identity ID,
-	ledgerID ID,
-	name string,
-	expenseDate time.Time,
-	pendingRecords []NewRecord,
-) (*Event[Expense], error) {
-	var errs FormError
-
-	if name == "" {
+	if req.Name == "" {
 		errs = append(errs, NewRequiredFieldError("name"))
 	}
 
-	if expenseDate.IsZero() {
+	if req.ExpenseDate.IsZero() {
 		errs = append(errs, NewRequiredFieldError("expenseDate"))
 	}
 
-	if recordsLen := len(pendingRecords); recordsLen < 1 || recordsLen > ExpenseMaxRecords {
+	if recordsLen := len(req.PendingRecords); recordsLen < 1 || recordsLen > ExpenseMaxRecords {
 		errs = append(errs, NewFieldLengthError("records", 1, ExpenseMaxRecords))
 	}
 
 	var totalAmount int32
-	createdRecords := make([]Record, 0, len(pendingRecords))
-
-	now := time.Now()
-
-	for i := range pendingRecords {
+	for i := range req.PendingRecords {
 		var recordErrs FormError
 
-		record := &pendingRecords[i]
+		record := &req.PendingRecords[i]
 
 		if !record.Type.IsValid() {
 			recordErrs = append(recordErrs, NewInvalidFieldError("type"))
@@ -206,6 +122,30 @@ func NewLedgerExpense(
 			}
 			totalAmount = newAmount
 		}
+	}
+
+	return errs.Validate()
+}
+
+func (ledger *Ledger) CreateExpense(req CreateExpenseRequest) (*Expense, error) {
+	if !ledger.IsParticipant(req.Actor) {
+		return nil, ErrForbidden
+	}
+
+	if err := req.validate(); err != nil {
+		return nil, err
+	}
+
+	var totalAmount int32
+	now := time.Now()
+	createdRecords := make([]Record, 0, len(req.PendingRecords))
+
+	for i := range req.PendingRecords {
+		record := &req.PendingRecords[i]
+
+		if record.Type == RecordTypeDebt {
+			totalAmount += record.Amount
+		}
 
 		createdRecords = append(createdRecords, Record{
 			ID:        NewID(),
@@ -214,35 +154,35 @@ func NewLedgerExpense(
 			From:      record.From,
 			To:        record.To,
 			CreatedAt: now,
-			CreatedBy: identity,
+			CreatedBy: req.Actor,
 			UpdatedAt: now,
-			UpdatedBy: identity,
+			UpdatedBy: req.Actor,
 		})
 	}
 
-	if err := errs.Validate(); err != nil {
-		return nil, err
+	expense := Expense{
+		ID:          NewID(),
+		LedgerID:    ledger.ID,
+		Name:        req.Name,
+		ExpenseDate: req.ExpenseDate,
+		Records:     createdRecords,
+		Amount:      totalAmount,
+		CreatedAt:   now,
+		CreatedBy:   req.Actor,
+		UpdatedAt:   now,
+		UpdatedBy:   req.Actor,
 	}
 
-	return &Event[Expense]{
-		Topic: TopicLedgerExpenseCreated,
-		Data: Expense{
-			ID:          NewID(),
-			LedgerID:    ledgerID,
-			Name:        name,
-			ExpenseDate: expenseDate,
-			Records:     createdRecords,
-			Amount:      totalAmount,
-			CreatedAt:   now,
-			CreatedBy:   identity,
-			UpdatedAt:   now,
-			UpdatedBy:   identity,
-		},
-	}, nil
+	ledger.events = append(ledger.events, event[Expense]{
+		topic: TopicLedgerExpenseCreated,
+		data:  expense,
+	})
+
+	return &expense, nil
 }
 
-func (l Ledger) IsParticipant(identity ID) bool {
-	for _, p := range l.Participants {
+func (ledger *Ledger) IsParticipant(identity ID) bool {
+	for _, p := range ledger.Participants {
 		if p.Identity == identity {
 			return true
 		}
@@ -250,8 +190,12 @@ func (l Ledger) IsParticipant(identity ID) bool {
 	return false
 }
 
-func (l *Ledger) AddParticipants(identity ID, participants ...ID) ([]Event[LedgerParticipant], error) {
-	participantsSet := kset.HashMapKeyValue(func(p LedgerParticipant) ID { return p.Identity }, l.Participants...)
+func (ledger *Ledger) AddParticipants(actor ID, participants ...ID) error {
+	if !ledger.IsParticipant(actor) {
+		return ErrForbidden
+	}
+
+	participantsSet := kset.HashMapKeyValue(func(p LedgerParticipant) ID { return p.Identity }, ledger.Participants...)
 	pendingParticipantsSet := kset.HashMapKeyValue(func(p LedgerParticipant) ID { return p.Identity })
 
 	for _, id := range participants {
@@ -260,24 +204,26 @@ func (l *Ledger) AddParticipants(identity ID, participants ...ID) ([]Event[Ledge
 			Identity:  id,
 			Balance:   0,
 			CreatedAt: time.Now(),
-			CreatedBy: identity,
+			CreatedBy: actor,
 		})
 	}
 
 	newParticipants := pendingParticipantsSet.Difference(participantsSet).ToSlice()
-	l.Participants = append(l.Participants, newParticipants...)
+	ledger.Participants = append(ledger.Participants, newParticipants...)
 
-	if len(l.Participants) >= LedgerMaxMembers {
-		return nil, ErrLedgerMaxUsers
+	if len(ledger.Participants) >= LedgerMaxMembers {
+		return ErrLedgerMaxUsers
 	}
 
-	events := make([]Event[LedgerParticipant], 0, len(newParticipants))
+	events := make([]Event, 0, len(newParticipants))
+
 	for i := range newParticipants {
-		events = append(events, Event[LedgerParticipant]{
-			Topic: TopicLedgerParticipantAdded,
-			Data:  newParticipants[i],
+		events = append(events, event[LedgerParticipant]{
+			topic: TopicLedgerParticipantAdded,
+			data:  newParticipants[i],
 		})
 	}
 
-	return events, nil
+	ledger.events = append(ledger.events, events...)
+	return nil
 }

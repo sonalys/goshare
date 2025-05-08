@@ -10,21 +10,22 @@ import (
 
 type (
 	LedgerRepository interface {
-		Create(ctx context.Context, identity domain.ID, createFn func(count int64) (*domain.Ledger, error)) error
+		Create(ctx context.Context, ledger *domain.Ledger) error
 		Find(ctx context.Context, id domain.ID) (*domain.Ledger, error)
 		GetByUser(ctx context.Context, identity domain.ID) ([]domain.Ledger, error)
 		GetParticipants(ctx context.Context, ledgerID domain.ID) ([]domain.LedgerParticipant, error)
-		Update(ctx context.Context, ledgerID domain.ID, updateFn func(*domain.Ledger) error) error
+		Update(ctx context.Context, ledger *domain.Ledger) error
 	}
 
 	UserRepository interface {
 		Create(ctx context.Context, user *domain.User) error
+		Find(ctx context.Context, id domain.ID) (*domain.User, error)
 		FindByEmail(ctx context.Context, email string) (*domain.User, error)
 		ListByEmail(ctx context.Context, emails []string) ([]domain.User, error)
 	}
 
 	ExpenseRepository interface {
-		Create(ctx context.Context, ledgerID domain.ID, createFn func(ledger *domain.Ledger) (*domain.Expense, error)) error
+		Create(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error
 		Find(ctx context.Context, id domain.ID) (*domain.Expense, error)
 		GetByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error)
 	}

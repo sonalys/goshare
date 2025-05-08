@@ -1,6 +1,8 @@
 package mappers
 
 import (
+	"fmt"
+
 	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	domain "github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
@@ -19,7 +21,7 @@ func NewLedgerExpenseSummary(expense *sqlc.Expense) *v1.LedgerExpenseSummary {
 	}
 }
 
-func NewExpense(expense *sqlc.Expense, records []sqlc.ExpenseRecord) *domain.Expense {
+func NewExpense(expense *sqlc.Expense, records []sqlc.ExpenseRecord) (*domain.Expense, error) {
 	result := &domain.Expense{
 		ID:          newUUID(expense.ID),
 		LedgerID:    newUUID(expense.LedgerID),
@@ -33,22 +35,30 @@ func NewExpense(expense *sqlc.Expense, records []sqlc.ExpenseRecord) *domain.Exp
 	}
 
 	for _, record := range records {
-		result.Records = append(result.Records, *NewRecord(&record))
+		record, err := NewRecord(&record)
+		if err != nil {
+			return nil, fmt.Errorf("creating record: %w", err)
+		}
+		result.Records = append(result.Records, *record)
 	}
 
-	return result
+	return result, nil
 }
 
-func NewRecord(record *sqlc.ExpenseRecord) *domain.Record {
+func NewRecord(record *sqlc.ExpenseRecord) (*domain.Record, error) {
+	recordType, err := domain.NewRecordType(record.RecordType)
+	if err != nil {
+		return nil, fmt.Errorf("invalid record type: %w", err)
+	}
 	return &domain.Record{
 		ID:        newUUID(record.ID),
 		From:      newUUID(record.FromUserID),
 		To:        newUUID(record.ToUserID),
-		Type:      domain.NewRecordType(record.RecordType),
+		Type:      recordType,
 		Amount:    record.Amount,
 		CreatedAt: record.CreatedAt.Time,
 		CreatedBy: newUUID(record.CreatedBy),
 		UpdatedAt: record.UpdatedAt.Time,
 		UpdatedBy: newUUID(record.UpdatedBy),
-	}
+	}, nil
 }

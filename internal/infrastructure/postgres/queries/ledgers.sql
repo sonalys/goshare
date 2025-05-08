@@ -2,7 +2,7 @@
 INSERT INTO ledgers (id,name,created_at,created_by) VALUES ($1,$2,$3,$4);
 
 -- name: FindLedgerById :one
-SELECT * FROM ledgers WHERE id = $1;
+SELECT * FROM ledgers WHERE id = $1 FOR UPDATE;
 
 -- name: AddUserToLedger :exec
 INSERT INTO ledger_participants (id,ledger_id,user_id,created_at,created_by,balance) VALUES ($1,$2,$3,$4,$5,$6);

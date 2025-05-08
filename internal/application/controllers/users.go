@@ -79,20 +79,25 @@ func (c *Users) Register(ctx context.Context, req RegisterRequest) (resp *Regist
 	defer span.End()
 
 	err = c.db.Transaction(ctx, func(db Database) error {
-		event, err := domain.NewUser(req.FirstName, req.LastName, req.Email, req.Password)
+		user, err := domain.NewUser(domain.NewUserRequest{
+			FirstName: req.FirstName,
+			LastName:  req.LastName,
+			Email:     req.Email,
+			Password:  req.Password,
+		})
 		if err != nil {
 			return fmt.Errorf("creating user: %w", err)
 		}
 
-		if err = db.User().Create(ctx, &event.Data); err != nil {
+		if err = db.User().Create(ctx, user); err != nil {
 			return fmt.Errorf("storing user: %w", err)
 		}
 
 		resp = &RegisterResponse{
-			ID: event.Data.ID,
+			ID: user.ID,
 		}
 
-		return c.subscriber.Handle(ctx, c.db, event)
+		return c.subscriber.Handle(ctx, c.db, user.Events()...)
 	})
 	if err != nil {
 		return nil, slog.ErrorReturn(ctx, "registering new user", err)

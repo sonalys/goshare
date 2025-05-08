@@ -31,6 +31,15 @@ func (r *UsersRepository) Create(ctx context.Context, user *domain.User) error {
 	}))
 }
 
+func (r *UsersRepository) Find(ctx context.Context, id domain.ID) (*domain.User, error) {
+	user, err := r.client.queries().FindUser(ctx, convertID(id))
+	if err != nil {
+		return nil, mapError(err)
+	}
+
+	return mappers.NewUser(user), nil
+}
+
 func (r *UsersRepository) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
 	user, err := r.client.queries().FindUserByEmail(ctx, email)
 	if err != nil {
@@ -49,7 +58,7 @@ func (r *UsersRepository) ListByEmail(ctx context.Context, emails []string) ([]d
 
 	var errs domain.FormError
 	for idx, email := range emails {
-		if !slices.ContainsFunc(users, func(user sqlc.User) bool {
+		if !slices.ContainsFunc(users, func(user sqlc.UserView) bool {
 			return user.Email == email
 		}) {
 			errs = append(errs, domain.FieldError{

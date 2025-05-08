@@ -14,12 +14,17 @@ func (a *API) LedgerExpenseCreate(ctx context.Context, req *handlers.Expense, pa
 		return nil, err
 	}
 
+	pendingRecords, err := convertUserBalances(req.Records)
+	if err != nil {
+		return nil, err
+	}
+
 	apiReq := controllers.CreateExpenseRequest{
-		Identity:    identity.UserID,
-		LedgerID:    domain.ConvertID(params.LedgerID),
-		Name:        req.Name,
-		ExpenseDate: req.ExpenseDate,
-		Records:     convertUserBalances(req.Records),
+		Identity:       identity.UserID,
+		LedgerID:       domain.ConvertID(params.LedgerID),
+		Name:           req.Name,
+		ExpenseDate:    req.ExpenseDate,
+		PendingRecords: pendingRecords,
 	}
 
 	switch resp, err := a.Ledgers.CreateExpense(ctx, apiReq); err {
@@ -32,15 +37,33 @@ func (a *API) LedgerExpenseCreate(ctx context.Context, req *handlers.Expense, pa
 	}
 }
 
-func convertUserBalances(userBalances []handlers.ExpenseRecord) []domain.NewRecord {
-	balances := make([]domain.NewRecord, 0, len(userBalances))
-	for _, ub := range userBalances {
-		balances = append(balances, domain.NewRecord{
-			Type:   domain.NewRecordType(string(ub.Type)),
+func convertUserBalances(userBalances []handlers.ExpenseRecord) ([]domain.PendingRecord, error) {
+	var errs domain.FormError
+
+	balances := make([]domain.PendingRecord, 0, len(userBalances))
+	for i, ub := range userBalances {
+		recordType, err := domain.NewRecordType(string(ub.Type))
+		if err != nil {
+			errs = append(errs, domain.FieldError{
+				Cause: err,
+				Field: "records",
+				Metadata: domain.FieldErrorMetadata{
+					Index: i,
+				},
+			})
+		}
+
+		balances = append(balances, domain.PendingRecord{
+			Type:   recordType,
 			Amount: ub.Amount,
 			From:   domain.ConvertID(ub.FromUserID),
 			To:     domain.ConvertID(ub.ToUserID),
 		})
 	}
-	return balances
+
+	if err := errs.Validate(); err != nil {
+		return nil, err
+	}
+
+	return balances, nil
 }

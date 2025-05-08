@@ -36,13 +36,13 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 	return err
 }
 
-const findUserByEmail = `-- name: FindUserByEmail :one
-SELECT id, first_name, last_name, email, password_hash, created_at FROM users WHERE email = $1
+const findUser = `-- name: FindUser :one
+SELECT id, first_name, last_name, email, password_hash, created_at, ledger_count FROM user_view WHERE id = $1 FOR UPDATE
 `
 
-func (q *Queries) FindUserByEmail(ctx context.Context, email string) (User, error) {
-	row := q.db.QueryRow(ctx, findUserByEmail, email)
-	var i User
+func (q *Queries) FindUser(ctx context.Context, id pgtype.UUID) (UserView, error) {
+	row := q.db.QueryRow(ctx, findUser, id)
+	var i UserView
 	err := row.Scan(
 		&i.ID,
 		&i.FirstName,
@@ -50,23 +50,43 @@ func (q *Queries) FindUserByEmail(ctx context.Context, email string) (User, erro
 		&i.Email,
 		&i.PasswordHash,
 		&i.CreatedAt,
+		&i.LedgerCount,
+	)
+	return i, err
+}
+
+const findUserByEmail = `-- name: FindUserByEmail :one
+SELECT id, first_name, last_name, email, password_hash, created_at, ledger_count FROM user_view WHERE email = $1
+`
+
+func (q *Queries) FindUserByEmail(ctx context.Context, email string) (UserView, error) {
+	row := q.db.QueryRow(ctx, findUserByEmail, email)
+	var i UserView
+	err := row.Scan(
+		&i.ID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.PasswordHash,
+		&i.CreatedAt,
+		&i.LedgerCount,
 	)
 	return i, err
 }
 
 const listByEmail = `-- name: ListByEmail :many
-SELECT id, first_name, last_name, email, password_hash, created_at FROM users WHERE email = ANY($1::text[])
+SELECT id, first_name, last_name, email, password_hash, created_at, ledger_count FROM user_view WHERE email = ANY($1::text[])
 `
 
-func (q *Queries) ListByEmail(ctx context.Context, emails []string) ([]User, error) {
+func (q *Queries) ListByEmail(ctx context.Context, emails []string) ([]UserView, error) {
 	rows, err := q.db.Query(ctx, listByEmail, emails)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []User
+	var items []UserView
 	for rows.Next() {
-		var i User
+		var i UserView
 		if err := rows.Scan(
 			&i.ID,
 			&i.FirstName,
@@ -74,6 +94,7 @@ func (q *Queries) ListByEmail(ctx context.Context, emails []string) ([]User, err
 			&i.Email,
 			&i.PasswordHash,
 			&i.CreatedAt,
+			&i.LedgerCount,
 		); err != nil {
 			return nil, err
 		}

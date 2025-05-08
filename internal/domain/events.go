@@ -3,12 +3,12 @@ package domain
 type (
 	Topic string
 
-	Event[T any] struct {
-		Topic Topic
-		Data  T
+	event[T any] struct {
+		topic Topic
+		data  T
 	}
 
-	GenericEvent interface {
+	Event interface {
 		GetData() any
 		GetTopic() Topic
 	}
@@ -21,14 +21,14 @@ const (
 	TopicUserCreated            Topic = "user.created"
 )
 
-func (e Event[T]) GetTopic() Topic {
-	return e.Topic
+func (e event[T]) GetTopic() Topic {
+	return e.topic
 }
 
-func (e Event[T]) GetData() any {
-	return e.Data
+func (e event[T]) GetData() any {
+	return e.data
 }
 
 var (
-	_ GenericEvent = &Event[any]{}
+	_ Event = &event[any]{}
 )

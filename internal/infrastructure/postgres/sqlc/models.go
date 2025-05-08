@@ -57,3 +57,13 @@ type User struct {
 	PasswordHash string
 	CreatedAt    pgtype.Timestamp
 }
+
+type UserView struct {
+	ID           pgtype.UUID
+	FirstName    string
+	LastName     string
+	Email        string
+	PasswordHash string
+	CreatedAt    pgtype.Timestamp
+	LedgerCount  int64
+}

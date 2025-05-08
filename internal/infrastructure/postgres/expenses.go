@@ -21,25 +21,8 @@ func NewExpenseRepository(client connection) *ExpenseRepository {
 	}
 }
 
-func (r *ExpenseRepository) Create(ctx context.Context, ledgerID domain.ID, createFn func(ledger *domain.Ledger) (*domain.Expense, error)) error {
+func (r *ExpenseRepository) Create(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error {
 	return r.client.transaction(ctx, func(query *sqlc.Queries) error {
-		ledgerModel, err := query.FindLedgerById(ctx, convertID(ledgerID))
-		if err != nil {
-			return fmt.Errorf("finding ledger: %w", err)
-		}
-
-		participants, err := r.client.queries().GetLedgerParticipants(ctx, convertID(ledgerID))
-		if err != nil {
-			return mapLedgerError(err)
-		}
-
-		ledger := mappers.NewLedger(&ledgerModel, participants)
-
-		expense, err := createFn(ledger)
-		if err != nil {
-			return fmt.Errorf("creating expense: %w", err)
-		}
-
 		createExpenseReq := sqlc.CreateExpenseParams{
 			ID:          convertID(expense.ID),
 			LedgerID:    convertID(expense.LedgerID),
@@ -90,7 +73,7 @@ func (r *ExpenseRepository) Find(ctx context.Context, id domain.ID) (*domain.Exp
 		return nil, fmt.Errorf("getting expense records: %w", err)
 	}
 
-	return mappers.NewExpense(&expense, records), nil
+	return mappers.NewExpense(&expense, records)
 }
 
 func (r *ExpenseRepository) GetByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {

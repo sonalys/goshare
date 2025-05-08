@@ -5,7 +5,7 @@ import (
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 )
 
-func NewUser(user sqlc.User) *domain.User {
+func NewUser(user sqlc.UserView) *domain.User {
 	return &domain.User{
 		ID:              newUUID(user.ID),
 		FirstName:       user.FirstName,
@@ -14,10 +14,11 @@ func NewUser(user sqlc.User) *domain.User {
 		IsEmailVerified: false,
 		PasswordHash:    user.PasswordHash,
 		CreatedAt:       user.CreatedAt.Time,
+		LedgersCount:    user.LedgerCount,
 	}
 }
 
-func NewUsers(from []sqlc.User) []domain.User {
+func NewUsers(from []sqlc.UserView) []domain.User {
 	to := make([]domain.User, 0, len(from))
 
 	for i := range from {
