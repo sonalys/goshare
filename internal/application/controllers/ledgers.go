@@ -78,7 +78,7 @@ func (c *Ledgers) Create(ctx context.Context, req CreateLedgerRequest) (resp *Cr
 				ID: event.Data.ID,
 			}
 
-			return &event.Data, c.subscriber.handle(ctx, db, event)
+			return &event.Data, c.subscriber.Handle(ctx, db, event)
 		})
 		if err != nil {
 			return err
@@ -120,7 +120,7 @@ func (c *Ledgers) CreateExpense(ctx context.Context, req CreateExpenseRequest) (
 		if err := c.db.Expense().Create(ctx, req.LedgerID, createFn); err != nil {
 			return err
 		}
-		return c.subscriber.handle(ctx, db, event)
+		return c.subscriber.Handle(ctx, db, event)
 	})
 	switch {
 	case errors.Is(err, domain.ErrUserNotAMember):
@@ -244,7 +244,7 @@ func (c *Ledgers) AddParticipants(ctx context.Context, req AddMembersRequest) er
 			if err != nil {
 				return err
 			}
-			return c.subscriber.handle(ctx, db, convertEvents(events)...)
+			return c.subscriber.Handle(ctx, db, convertEvents(events)...)
 		}
 
 		if err := db.Ledger().Update(ctx, req.LedgerID, updateFn); err != nil {

@@ -1,6 +1,18 @@
 package domain
 
-type Topic string
+type (
+	Topic string
+
+	Event[T any] struct {
+		Topic Topic
+		Data  T
+	}
+
+	GenericEvent interface {
+		GetData() any
+		GetTopic() Topic
+	}
+)
 
 const (
 	TopicLedgerCreated          Topic = "ledger.created"
@@ -9,11 +21,6 @@ const (
 	TopicUserCreated            Topic = "user.created"
 )
 
-type Event[T any] struct {
-	Topic Topic
-	Data  T
-}
-
 func (e Event[T]) GetTopic() Topic {
 	return e.Topic
 }
@@ -21,3 +28,7 @@ func (e Event[T]) GetTopic() Topic {
 func (e Event[T]) GetData() any {
 	return e.Data
 }
+
+var (
+	_ GenericEvent = &Event[any]{}
+)

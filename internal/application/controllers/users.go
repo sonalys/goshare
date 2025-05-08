@@ -92,7 +92,7 @@ func (c *Users) Register(ctx context.Context, req RegisterRequest) (resp *Regist
 			ID: event.Data.ID,
 		}
 
-		return c.subscriber.handle(ctx, c.db, event)
+		return c.subscriber.Handle(ctx, c.db, event)
 	})
 	if err != nil {
 		return nil, slog.ErrorReturn(ctx, "registering new user", err)
