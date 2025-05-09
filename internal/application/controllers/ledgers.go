@@ -15,8 +15,7 @@ import (
 
 type (
 	Ledgers struct {
-		subscriber *Subscriber
-		db         Database
+		db Database
 	}
 
 	CreateLedgerRequest struct {
@@ -82,7 +81,7 @@ func (c *Ledgers) Create(ctx context.Context, req CreateLedgerRequest) (resp *Cr
 			return err
 		}
 
-		return c.subscriber.Handle(ctx, db, user.Events()...)
+		return nil
 	})
 	if err != nil {
 		return nil, slog.ErrorReturn(ctx, "creating ledger", err)
@@ -123,7 +122,7 @@ func (c *Ledgers) CreateExpense(ctx context.Context, req CreateExpenseRequest) (
 			return err
 		}
 
-		return c.subscriber.Handle(ctx, db, ledger.Events()...)
+		return nil
 	})
 	switch {
 	case errors.Is(err, domain.ErrUserNotAMember):
@@ -255,7 +254,7 @@ func (c *Ledgers) AddParticipants(ctx context.Context, req AddMembersRequest) er
 			return err
 		}
 
-		return c.subscriber.Handle(ctx, db, ledger.Events()...)
+		return nil
 	}
 
 	switch err := c.db.Transaction(ctx, transaction); {

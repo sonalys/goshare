@@ -18,8 +18,6 @@ type (
 		LastName        string
 		PasswordHash    string
 		LedgersCount    int64
-
-		events []Event
 	}
 )
 
@@ -78,16 +76,7 @@ func NewUser(req NewUserRequest) (*User, error) {
 		CreatedAt:       time.Now(),
 	}
 
-	user.events = append(user.events, event[User]{
-		topic: TopicUserCreated,
-		data:  user,
-	})
-
 	return &user, nil
-}
-
-func (user *User) Events() []Event {
-	return user.events
 }
 
 func (user *User) CreateLedger(name string) (*Ledger, error) {
@@ -122,11 +111,6 @@ func (user *User) CreateLedger(name string) (*Ledger, error) {
 	}
 
 	user.LedgersCount += 1
-
-	ledger.events = append(ledger.events, event[Ledger]{
-		topic: TopicLedgerCreated,
-		data:  ledger,
-	})
 
 	return &ledger, nil
 }

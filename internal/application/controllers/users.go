@@ -14,7 +14,6 @@ import (
 
 type Users struct {
 	identityEncoder IdentityEncoder
-	subscriber      *Subscriber
 	db              Database
 }
 
@@ -97,7 +96,7 @@ func (c *Users) Register(ctx context.Context, req RegisterRequest) (resp *Regist
 			ID: user.ID,
 		}
 
-		return c.subscriber.Handle(ctx, c.db, user.Events()...)
+		return nil
 	})
 	if err != nil {
 		return nil, slog.ErrorReturn(ctx, "registering new user", err)

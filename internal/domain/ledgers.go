@@ -16,8 +16,6 @@ type (
 		ID           ID
 		Name         string
 		Participants []LedgerParticipant
-
-		events []Event
 	}
 
 	LedgerParticipant struct {
@@ -62,10 +60,6 @@ var (
 	ErrLedgerMaxUsers = fmt.Errorf("ledger reached maximum number of members: %d", LedgerMaxMembers)
 	ErrUserMaxLedgers = fmt.Errorf("user reached the maximum number of ledgers: %d", UserMaxLedgers)
 )
-
-func (l *Ledger) Events() []Event {
-	return l.events
-}
 
 func (req *CreateExpenseRequest) validate() error {
 	var errs FormError
@@ -173,11 +167,6 @@ func (ledger *Ledger) CreateExpense(req CreateExpenseRequest) (*Expense, error) 
 		UpdatedBy:   req.Actor,
 	}
 
-	ledger.events = append(ledger.events, event[Expense]{
-		topic: TopicLedgerExpenseCreated,
-		data:  expense,
-	})
-
 	return &expense, nil
 }
 
@@ -215,15 +204,5 @@ func (ledger *Ledger) AddParticipants(actor ID, participants ...ID) error {
 		return ErrLedgerMaxUsers
 	}
 
-	events := make([]Event, 0, len(newParticipants))
-
-	for i := range newParticipants {
-		events = append(events, event[LedgerParticipant]{
-			topic: TopicLedgerParticipantAdded,
-			data:  newParticipants[i],
-		})
-	}
-
-	ledger.events = append(ledger.events, events...)
 	return nil
 }
