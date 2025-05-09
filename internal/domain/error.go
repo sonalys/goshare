@@ -24,32 +24,29 @@ type (
 		Min int
 	}
 
-	StringError string
+	ErrCause string
 )
 
 const (
-	ErrConflict      = StringError("conflict")
-	ErrForbidden     = StringError("forbidden")
-	ErrInvalidValue  = StringError("invalid value")
-	ErrNotFound      = StringError("not found")
-	ErrRequiredValue = StringError("cannot be empty")
+	ErrCauseInvalid  = ErrCause("invalid")
+	ErrCauseRequired = ErrCause("required")
 )
 
-func NewRequiredFieldError(field string) FieldError {
+func newRequiredFieldError(field string) FieldError {
 	return FieldError{
 		Field: field,
-		Cause: ErrRequiredValue,
+		Cause: ErrCauseRequired,
 	}
 }
 
-func NewInvalidFieldError(field string) FieldError {
+func newInvalidFieldError(field string) FieldError {
 	return FieldError{
 		Field: field,
-		Cause: ErrInvalidValue,
+		Cause: ErrCauseInvalid,
 	}
 }
 
-func NewFieldLengthError(field string, min, max int) FieldError {
+func newFieldLengthError(field string, min, max int) FieldError {
 	return FieldError{
 		Field: field,
 		Cause: &ValueLengthError{Min: min, Max: max},
@@ -67,7 +64,7 @@ func (e FieldError) Unwrap() error {
 func (el FieldErrorList) Unwrap() []error {
 	errs := make([]error, 0, len(el))
 	for _, f := range el {
-		errs = append(errs, f.Cause)
+		errs = append(errs, f)
 	}
 	return errs
 }
@@ -79,17 +76,21 @@ func (el FieldErrorList) Error() string {
 	return fmt.Sprintf("%v", []FieldError(el))
 }
 
-func (e *FormError) Validate() error {
+func (e *ValueLengthError) Error() string {
+	return fmt.Sprintf("value length must be between %d and %d", e.Min, e.Max)
+}
+
+func (e ErrCause) Error() string {
+	return string(e)
+}
+
+func (e *FormError) Close() error {
 	if len(*e) == 0 {
 		return nil
 	}
 	return FieldErrorList(*e)
 }
 
-func (e *ValueLengthError) Error() string {
-	return fmt.Sprintf("value length must be between %d and %d", e.Min, e.Max)
-}
-
-func (e StringError) Error() string {
-	return string(e)
+func (e *FormError) Append(err FieldError) {
+	*e = append(*e, err)
 }

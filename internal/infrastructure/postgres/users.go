@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"slices"
 
+	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/mappers"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
@@ -63,12 +64,12 @@ func (r *UsersRepository) ListByEmail(ctx context.Context, emails []string) ([]d
 		}) {
 			errs = append(errs, domain.FieldError{
 				Field: fmt.Sprintf("emails.%d", idx),
-				Cause: domain.ErrNotFound,
+				Cause: v1.ErrNotFound,
 			})
 		}
 	}
 
-	if err := errs.Validate(); err != nil {
+	if err := errs.Close(); err != nil {
 		return nil, fmt.Errorf("failed to get users by email: %w", err)
 	}
 

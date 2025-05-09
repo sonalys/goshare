@@ -13,6 +13,7 @@ require (
 	github.com/ogen-go/ogen v1.12.0
 	github.com/remychantenay/slog-otel v1.3.2
 	github.com/sonalys/kset v0.4.3
+	github.com/stretchr/testify v1.10.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.58.0
 	go.opentelemetry.io/otel v1.35.0
 	go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc v0.9.0
@@ -61,6 +62,7 @@ require (
 	github.com/pingcap/failpoint v0.0.0-20240528011301-b51a646c7c86 // indirect
 	github.com/pingcap/log v1.1.0 // indirect
 	github.com/pingcap/tidb/pkg/parser v0.0.0-20250324122243-d51e00e5bbf0 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/riza-io/grpc-go v0.2.0 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect

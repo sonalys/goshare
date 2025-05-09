@@ -20,7 +20,7 @@ func (a *API) LedgerExpenseCreate(ctx context.Context, req *handlers.Expense, pa
 	}
 
 	apiReq := controllers.CreateExpenseRequest{
-		Identity:       identity.UserID,
+		Actor:          identity.UserID,
 		LedgerID:       domain.ConvertID(params.LedgerID),
 		Name:           req.Name,
 		ExpenseDate:    req.ExpenseDate,
@@ -61,7 +61,7 @@ func convertUserBalances(userBalances []handlers.ExpenseRecord) ([]domain.Pendin
 		})
 	}
 
-	if err := errs.Validate(); err != nil {
+	if err := errs.Close(); err != nil {
 		return nil, err
 	}
 

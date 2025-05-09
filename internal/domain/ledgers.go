@@ -9,6 +9,11 @@ import (
 	"github.com/sonalys/kset"
 )
 
+const (
+	ExpenseMaxRecords = 100
+	LedgerMaxMembers  = 100
+)
+
 type (
 	Ledger struct {
 		CreatedAt    time.Time
@@ -47,33 +52,19 @@ type (
 	}
 )
 
-const (
-	ExpenseMaxRecords = 100
-	LedgerMaxMembers  = 100
-	UserMaxLedgers    = 5
-
-	ErrUserAlreadyMember = StringError("user is already a member")
-	ErrUserNotAMember    = StringError("user is not a member")
-)
-
-var (
-	ErrLedgerMaxUsers = fmt.Errorf("ledger reached maximum number of members: %d", LedgerMaxMembers)
-	ErrUserMaxLedgers = fmt.Errorf("user reached the maximum number of ledgers: %d", UserMaxLedgers)
-)
-
 func (req *CreateExpenseRequest) validate() error {
 	var errs FormError
 
 	if req.Name == "" {
-		errs = append(errs, NewRequiredFieldError("name"))
+		errs.Append(newRequiredFieldError("name"))
 	}
 
 	if req.ExpenseDate.IsZero() {
-		errs = append(errs, NewRequiredFieldError("expenseDate"))
+		errs.Append(newRequiredFieldError("expenseDate"))
 	}
 
 	if recordsLen := len(req.PendingRecords); recordsLen < 1 || recordsLen > ExpenseMaxRecords {
-		errs = append(errs, NewFieldLengthError("records", 1, ExpenseMaxRecords))
+		errs.Append(newFieldLengthError("records", 1, ExpenseMaxRecords))
 	}
 
 	var totalAmount int32
@@ -83,11 +74,11 @@ func (req *CreateExpenseRequest) validate() error {
 		record := &req.PendingRecords[i]
 
 		if !record.Type.IsValid() {
-			recordErrs = append(recordErrs, NewInvalidFieldError("type"))
+			recordErrs = append(recordErrs, newInvalidFieldError("type"))
 		}
 
 		if record.Amount <= 0 {
-			recordErrs = append(recordErrs, NewFieldLengthError("amount", 1, math.MaxInt32))
+			recordErrs = append(recordErrs, newFieldLengthError("amount", 1, math.MaxInt32))
 		}
 
 		if record.From == record.To {
@@ -97,8 +88,8 @@ func (req *CreateExpenseRequest) validate() error {
 			})
 		}
 
-		if err := recordErrs.Validate(); err != nil {
-			errs = append(errs, FieldError{
+		if err := recordErrs.Close(); err != nil {
+			errs.Append(FieldError{
 				Field: fmt.Sprintf("records[%d]", i),
 				Cause: err,
 			})
@@ -108,7 +99,7 @@ func (req *CreateExpenseRequest) validate() error {
 		if record.Type == RecordTypeDebt {
 			newAmount := totalAmount + record.Amount
 			if newAmount < totalAmount {
-				errs = append(errs, FieldError{
+				errs.Append(FieldError{
 					Cause: errors.New("expense amount overflowed"),
 					Field: "amount",
 				})
@@ -118,12 +109,15 @@ func (req *CreateExpenseRequest) validate() error {
 		}
 	}
 
-	return errs.Validate()
+	return errs.Close()
 }
 
 func (ledger *Ledger) CreateExpense(req CreateExpenseRequest) (*Expense, error) {
 	if !ledger.IsParticipant(req.Actor) {
-		return nil, ErrForbidden
+		return nil, &ErrLedgerUserNotMember{
+			UserID:   req.Actor,
+			LedgerID: ledger.ID,
+		}
 	}
 
 	if err := req.validate(); err != nil {
@@ -154,7 +148,7 @@ func (ledger *Ledger) CreateExpense(req CreateExpenseRequest) (*Expense, error) 
 		})
 	}
 
-	expense := Expense{
+	return &Expense{
 		ID:          NewID(),
 		LedgerID:    ledger.ID,
 		Name:        req.Name,
@@ -165,9 +159,7 @@ func (ledger *Ledger) CreateExpense(req CreateExpenseRequest) (*Expense, error) 
 		CreatedBy:   req.Actor,
 		UpdatedAt:   now,
 		UpdatedBy:   req.Actor,
-	}
-
-	return &expense, nil
+	}, nil
 }
 
 func (ledger *Ledger) IsParticipant(identity ID) bool {
@@ -181,7 +173,10 @@ func (ledger *Ledger) IsParticipant(identity ID) bool {
 
 func (ledger *Ledger) AddParticipants(actor ID, participants ...ID) error {
 	if !ledger.IsParticipant(actor) {
-		return ErrForbidden
+		return &ErrLedgerUserNotMember{
+			UserID:   actor,
+			LedgerID: ledger.ID,
+		}
 	}
 
 	participantsSet := kset.HashMapKeyValue(func(p LedgerParticipant) ID { return p.Identity }, ledger.Participants...)
@@ -201,7 +196,10 @@ func (ledger *Ledger) AddParticipants(actor ID, participants ...ID) error {
 	ledger.Participants = append(ledger.Participants, newParticipants...)
 
 	if len(ledger.Participants) >= LedgerMaxMembers {
-		return ErrLedgerMaxUsers
+		return &ErrLedgerMaxMembers{
+			LedgerID:   ledger.ID,
+			MaxMembers: LedgerMaxMembers,
+		}
 	}
 
 	return nil

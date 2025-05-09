@@ -46,14 +46,18 @@ func (c *Users) Login(ctx context.Context, req LoginRequest) (*LoginResponse, er
 	user, err := c.db.User().FindByEmail(ctx, req.Email)
 	if err != nil {
 		slog.Error(ctx, "could not find user by email", err)
-		return nil, domain.ErrEmailPasswordMismatch
+		return nil, &v1.ErrUserCredentialsMismatch{
+			Email: req.Email,
+		}
 	}
 	span.AddEvent("user found")
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password))
 	if err != nil {
 		slog.Error(ctx, "password hash mismatch", err)
-		return nil, domain.ErrEmailPasswordMismatch
+		return nil, &v1.ErrUserCredentialsMismatch{
+			Email: req.Email,
+		}
 	}
 	span.AddEvent("hash compared")
 

@@ -14,8 +14,8 @@ func (a *API) LedgerCreate(ctx context.Context, req *handlers.LedgerCreateReq) (
 	}
 
 	apiParams := controllers.CreateLedgerRequest{
-		Identity: identity.UserID,
-		Name:     req.Name,
+		Actor: identity.UserID,
+		Name:  req.Name,
 	}
 
 	switch resp, err := a.Ledgers.Create(ctx, apiParams); err {

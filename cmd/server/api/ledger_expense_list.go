@@ -18,7 +18,7 @@ func (a *API) LedgerExpenseList(ctx context.Context, params handlers.LedgerExpen
 	}
 
 	result, err := a.Ledgers.GetExpenses(ctx, controllers.GetExpensesRequest{
-		Identity: identity.UserID,
+		Actor:    identity.UserID,
 		LedgerID: domain.ConvertID(params.LedgerID),
 		Limit:    params.Limit.Or(10),
 		Cursor:   params.Cursor.Or(time.Now()),
@@ -35,7 +35,7 @@ func (a *API) LedgerExpenseList(ctx context.Context, params handlers.LedgerExpen
 			Expenses: mapLedgerExpenseToResponseObject(result.Expenses),
 			Cursor:   cursor,
 		}, nil
-	case errors.Is(err, domain.ErrUserNotAMember):
+	case errors.Is(err, &domain.ErrLedgerUserNotMember{}):
 		return newRespUnauthorized(ctx), nil
 	default:
 		return nil, err

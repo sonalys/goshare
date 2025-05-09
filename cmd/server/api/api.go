@@ -9,6 +9,7 @@ import (
 	"github.com/ogen-go/ogen/ogenerrors"
 	"github.com/ogen-go/ogen/validate"
 	"github.com/sonalys/goshare/cmd/server/handlers"
+	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/application/usecases"
 	"github.com/sonalys/goshare/internal/domain"
 	"go.opentelemetry.io/otel/trace"
@@ -55,7 +56,7 @@ func (a *API) NewError(ctx context.Context, err error) *handlers.ErrorResponseSt
 		})
 	}
 
-	if errors.Is(err, domain.ErrForbidden) {
+	if errors.Is(err, v1.ErrForbidden) {
 		return newErrorResponse(ctx, http.StatusForbidden, handlers.Error{
 			Code:    handlers.ErrorCodeUnauthorized,
 			Message: "not authorized to access resource",
@@ -94,7 +95,7 @@ func (a *API) NewError(ctx context.Context, err error) *handlers.ErrorResponseSt
 		return newErrorResponse(ctx, http.StatusBadRequest, errs...)
 	}
 
-	if errors.Is(err, domain.ErrNotFound) {
+	if errors.Is(err, v1.ErrNotFound) {
 		return newErrorResponse(ctx, http.StatusNotFound, handlers.Error{
 			Code:    handlers.ErrorCodeNotFound,
 			Message: err.Error(),

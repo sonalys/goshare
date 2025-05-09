@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/sonalys/goshare/internal/domain"
+	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 )
 
 func mapError(err error) error {
@@ -12,9 +12,9 @@ func mapError(err error) error {
 	case err == nil:
 		return nil
 	case errors.Is(err, pgx.ErrNoRows):
-		return domain.ErrNotFound
+		return v1.ErrNotFound
 	case isConstraintError(err):
-		return domain.ErrConflict
+		return v1.ErrConflict
 	default:
 		return err
 	}

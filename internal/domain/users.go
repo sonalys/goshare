@@ -19,40 +19,39 @@ type (
 		PasswordHash    string
 		LedgersCount    int64
 	}
+
+	NewUserRequest struct {
+		FirstName string
+		LastName  string
+		Email     string
+		Password  string
+	}
 )
 
 const (
-	ErrEmailAlreadyRegistered = StringError("email already registered")
-	ErrEmailPasswordMismatch  = StringError("email and/or password mismatch")
+	UserMaxLedgers = 5
 )
-
-type NewUserRequest struct {
-	FirstName string
-	LastName  string
-	Email     string
-	Password  string
-}
 
 func (req *NewUserRequest) validate() error {
 	var errs FormError
 
-	if _, err := mail.ParseAddress(req.Email); err != nil {
-		errs = append(errs, NewInvalidFieldError("email"))
-	}
-
 	if req.FirstName == "" {
-		errs = append(errs, NewRequiredFieldError("firstName"))
+		errs.Append(newRequiredFieldError("firstName"))
 	}
 
 	if req.LastName == "" {
-		errs = append(errs, NewRequiredFieldError("lastName"))
+		errs.Append(newRequiredFieldError("lastName"))
 	}
 
 	if pwdLen := len(req.Password); pwdLen < 8 || pwdLen > 72 {
-		errs = append(errs, NewFieldLengthError("password", 8, 72))
+		errs.Append(newFieldLengthError("password", 8, 72))
 	}
 
-	return errs.Validate()
+	if _, err := mail.ParseAddress(req.Email); err != nil {
+		errs.Append(newInvalidFieldError("email"))
+	}
+
+	return errs.Close()
 }
 
 func NewUser(req NewUserRequest) (*User, error) {
@@ -65,7 +64,7 @@ func NewUser(req NewUserRequest) (*User, error) {
 		return nil, fmt.Errorf("could not hash user password: %w", err)
 	}
 
-	user := User{
+	return &User{
 		ID:              NewID(),
 		FirstName:       req.FirstName,
 		LastName:        req.LastName,
@@ -74,27 +73,30 @@ func NewUser(req NewUserRequest) (*User, error) {
 		IsEmailVerified: false,
 		LedgersCount:    0,
 		CreatedAt:       time.Now(),
-	}
-
-	return &user, nil
+	}, nil
 }
 
 func (user *User) CreateLedger(name string) (*Ledger, error) {
 	var errs FormError
 
 	if user.LedgersCount+1 > UserMaxLedgers {
-		return nil, ErrUserMaxLedgers
+		return nil, &ErrUserMaxLedgers{
+			UserID:     user.ID,
+			MaxLedgers: UserMaxLedgers,
+		}
 	}
 
 	if nameLength := len(name); nameLength < 3 || nameLength > 255 {
-		errs = append(errs, NewFieldLengthError("name", 3, 255))
+		errs.Append(newFieldLengthError("name", 3, 255))
 	}
 
-	if err := errs.Validate(); err != nil {
+	if err := errs.Close(); err != nil {
 		return nil, err
 	}
 
-	ledger := Ledger{
+	user.LedgersCount += 1
+
+	return &Ledger{
 		ID:   NewID(),
 		Name: name,
 		Participants: []LedgerParticipant{
@@ -108,9 +110,5 @@ func (user *User) CreateLedger(name string) (*Ledger, error) {
 		},
 		CreatedAt: time.Now(),
 		CreatedBy: user.ID,
-	}
-
-	user.LedgersCount += 1
-
-	return &ledger, nil
+	}, nil
 }

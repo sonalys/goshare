@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/sonalys/goshare/internal/application/controllers"
+	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/domain"
 )
 
@@ -33,9 +34,9 @@ func NewLedgers(controller *controllers.Controller) Ledgers {
 func (l *ledgers) checkAuthorization(ctx context.Context, ledgerID domain.ID, f func(*domain.Ledger) bool) error {
 	ledger, err := l.controller.Ledgers.Find(ctx, ledgerID)
 	switch {
-	case err == nil || errors.Is(err, domain.ErrNotFound):
+	case err == nil || errors.Is(err, v1.ErrNotFound):
 		if err != nil || !f(ledger) {
-			return domain.ErrForbidden
+			return v1.ErrForbidden
 		}
 		return nil
 	default:
@@ -44,7 +45,7 @@ func (l *ledgers) checkAuthorization(ctx context.Context, ledgerID domain.ID, f 
 }
 
 func (l *ledgers) AddParticipants(ctx context.Context, req controllers.AddMembersRequest) error {
-	if err := l.checkAuthorization(ctx, req.LedgerID, func(l *domain.Ledger) bool { return l.CreatedBy == req.Identity }); err != nil {
+	if err := l.checkAuthorization(ctx, req.LedgerID, func(l *domain.Ledger) bool { return l.CreatedBy == req.Actor }); err != nil {
 		return err
 	}
 
@@ -56,7 +57,7 @@ func (l *ledgers) Create(ctx context.Context, req controllers.CreateLedgerReques
 }
 
 func (l *ledgers) CreateExpense(ctx context.Context, req controllers.CreateExpenseRequest) (*controllers.CreateExpenseResponse, error) {
-	if err := l.checkAuthorization(ctx, req.LedgerID, func(l *domain.Ledger) bool { return l.IsParticipant(req.Identity) }); err != nil {
+	if err := l.checkAuthorization(ctx, req.LedgerID, func(l *domain.Ledger) bool { return l.IsParticipant(req.Actor) }); err != nil {
 		return nil, err
 	}
 
@@ -76,7 +77,7 @@ func (l *ledgers) GetByUser(ctx context.Context, identity domain.ID) ([]domain.L
 }
 
 func (l *ledgers) GetExpenses(ctx context.Context, req controllers.GetExpensesRequest) (*controllers.GetExpensesResponse, error) {
-	if err := l.checkAuthorization(ctx, req.LedgerID, func(l *domain.Ledger) bool { return l.IsParticipant(req.Identity) }); err != nil {
+	if err := l.checkAuthorization(ctx, req.LedgerID, func(l *domain.Ledger) bool { return l.IsParticipant(req.Actor) }); err != nil {
 		return nil, err
 	}
 

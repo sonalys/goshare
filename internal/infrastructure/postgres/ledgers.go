@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/mappers"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
@@ -90,9 +91,9 @@ func mapLedgerError(err error) error {
 	case err == nil:
 		return nil
 	case isViolatingConstraint(err, constraintLedgerUniqueParticipant):
-		return domain.ErrUserAlreadyMember
+		return v1.ErrConflict
 	case isViolatingConstraint(err, constraintLedgerParticipantsFK):
-		return domain.ErrNotFound
+		return v1.ErrNotFound
 	default:
 		return mapError(err)
 	}
