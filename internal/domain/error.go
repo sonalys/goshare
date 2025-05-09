@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -16,7 +17,7 @@ type (
 	FieldError struct {
 		Cause    error
 		Field    string
-		Metadata FieldErrorMetadata
+		Metadata *FieldErrorMetadata
 	}
 
 	ValueLengthError struct {
@@ -55,6 +56,11 @@ func newFieldLengthError(field string, min, max int) FieldError {
 
 func (e FieldError) Error() string {
 	return fmt.Sprintf("field '%s': %v", e.Field, e.Cause)
+}
+
+func (e FieldError) Is(err error) bool {
+	var targetErr FieldError
+	return errors.As(err, &targetErr) && e.Field == targetErr.Field && errors.Is(e.Cause, targetErr.Cause)
 }
 
 func (e FieldError) Unwrap() error {

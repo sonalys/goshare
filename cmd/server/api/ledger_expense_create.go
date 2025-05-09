@@ -47,7 +47,7 @@ func convertUserBalances(userBalances []handlers.ExpenseRecord) ([]domain.Pendin
 			errs = append(errs, domain.FieldError{
 				Cause: err,
 				Field: "records",
-				Metadata: domain.FieldErrorMetadata{
+				Metadata: &domain.FieldErrorMetadata{
 					Index: i,
 				},
 			})

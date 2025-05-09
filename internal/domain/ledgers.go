@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"errors"
 	"fmt"
 	"math"
 	"time"
@@ -12,6 +11,10 @@ import (
 const (
 	ExpenseMaxRecords = 100
 	LedgerMaxMembers  = 100
+
+	ErrLedgerFromToMatch  = ErrCause("from and to cannot be the same user")
+	ErrOverflow           = ErrCause("overflow")
+	ErrSettlementMismatch = ErrCause("settlement cannot be greater than debt")
 )
 
 type (
@@ -52,7 +55,7 @@ type (
 	}
 )
 
-func (req *CreateExpenseRequest) validate() error {
+func (req *CreateExpenseRequest) validate(ledger *Ledger) error {
 	var errs FormError
 
 	if req.Name == "" {
@@ -67,25 +70,70 @@ func (req *CreateExpenseRequest) validate() error {
 		errs.Append(newFieldLengthError("records", 1, ExpenseMaxRecords))
 	}
 
-	var totalAmount int32
+	var totalDebt int32
+	var totalSettled int32
+
 	for i := range req.PendingRecords {
 		var recordErrs FormError
 
 		record := &req.PendingRecords[i]
 
 		if !record.Type.IsValid() {
-			recordErrs = append(recordErrs, newInvalidFieldError("type"))
+			recordErrs.Append(newInvalidFieldError("type"))
 		}
 
 		if record.Amount <= 0 {
-			recordErrs = append(recordErrs, newFieldLengthError("amount", 1, math.MaxInt32))
+			recordErrs.Append(newFieldLengthError("amount", 1, math.MaxInt32))
 		}
 
 		if record.From == record.To {
-			recordErrs = append(recordErrs, FieldError{
+			recordErrs.Append(FieldError{
 				Field: "to",
-				Cause: errors.New("from and to cannot be the same user"),
+				Cause: ErrLedgerFromToMatch,
 			})
+		}
+
+		if !ledger.IsParticipant(record.From) {
+			recordErrs.Append(FieldError{
+				Field: "from",
+				Cause: &ErrLedgerUserNotMember{
+					UserID:   record.From,
+					LedgerID: ledger.ID,
+				},
+			})
+		}
+
+		if !ledger.IsParticipant(record.To) {
+			recordErrs.Append(FieldError{
+				Field: "to",
+				Cause: &ErrLedgerUserNotMember{
+					UserID:   record.To,
+					LedgerID: ledger.ID,
+				},
+			})
+		}
+
+		if record.Amount > 0 {
+			switch record.Type {
+			case RecordTypeDebt:
+				newAmount := totalDebt + record.Amount
+				if newAmount < totalDebt {
+					recordErrs.Append(FieldError{
+						Cause: ErrOverflow,
+						Field: "amount",
+					})
+				}
+				totalDebt = newAmount
+			case RecordTypeSettlement:
+				newAmount := totalSettled + record.Amount
+				if newAmount < totalSettled {
+					recordErrs.Append(FieldError{
+						Cause: ErrOverflow,
+						Field: "amount",
+					})
+				}
+				totalSettled = newAmount
+			}
 		}
 
 		if err := recordErrs.Close(); err != nil {
@@ -95,18 +143,13 @@ func (req *CreateExpenseRequest) validate() error {
 			})
 			continue
 		}
+	}
 
-		if record.Type == RecordTypeDebt {
-			newAmount := totalAmount + record.Amount
-			if newAmount < totalAmount {
-				errs.Append(FieldError{
-					Cause: errors.New("expense amount overflowed"),
-					Field: "amount",
-				})
-				break
-			}
-			totalAmount = newAmount
-		}
+	if totalSettled > totalDebt {
+		errs.Append(FieldError{
+			Field: "pendingRecords",
+			Cause: ErrSettlementMismatch,
+		})
 	}
 
 	return errs.Close()
@@ -120,7 +163,7 @@ func (ledger *Ledger) CreateExpense(req CreateExpenseRequest) (*Expense, error) 
 		}
 	}
 
-	if err := req.validate(); err != nil {
+	if err := req.validate(ledger); err != nil {
 		return nil, err
 	}
 
@@ -180,26 +223,38 @@ func (ledger *Ledger) AddParticipants(actor ID, participants ...ID) error {
 	}
 
 	participantsSet := kset.HashMapKeyValue(func(p LedgerParticipant) ID { return p.Identity }, ledger.Participants...)
-	pendingParticipantsSet := kset.HashMapKeyValue(func(p LedgerParticipant) ID { return p.Identity })
+	pendingParticipantsSet := kset.HashMapKey(participants...)
 
-	for _, id := range participants {
-		pendingParticipantsSet.Append(LedgerParticipant{
+	var errs FormError
+	for conflictID := range pendingParticipantsSet.Intersect(participantsSet).Iter() {
+		errs.Append(FieldError{
+			Field: "participants",
+			Cause: &ErrLedgerUserAlreadyMember{
+				UserID:   conflictID,
+				LedgerID: ledger.ID,
+			},
+		})
+	}
+
+	if err := errs.Close(); err != nil {
+		return err
+	}
+
+	if len(ledger.Participants)+pendingParticipantsSet.Len() >= LedgerMaxMembers {
+		return &ErrLedgerMaxMembers{
+			LedgerID:   ledger.ID,
+			MaxMembers: LedgerMaxMembers,
+		}
+	}
+
+	for id := range pendingParticipantsSet.Iter() {
+		ledger.Participants = append(ledger.Participants, LedgerParticipant{
 			ID:        NewID(),
 			Identity:  id,
 			Balance:   0,
 			CreatedAt: time.Now(),
 			CreatedBy: actor,
 		})
-	}
-
-	newParticipants := pendingParticipantsSet.Difference(participantsSet).ToSlice()
-	ledger.Participants = append(ledger.Participants, newParticipants...)
-
-	if len(ledger.Participants) >= LedgerMaxMembers {
-		return &ErrLedgerMaxMembers{
-			LedgerID:   ledger.ID,
-			MaxMembers: LedgerMaxMembers,
-		}
 	}
 
 	return nil
