@@ -6,51 +6,51 @@ package sqlc
 
 import (
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/sonalys/goshare/internal/domain"
 )
 
 type Expense struct {
-	ID          pgtype.UUID
-	LedgerID    pgtype.UUID
+	ID          domain.ID
+	LedgerID    domain.ID
 	Amount      int32
 	Name        string
 	ExpenseDate pgtype.Timestamp
 	CreatedAt   pgtype.Timestamp
-	CreatedBy   pgtype.UUID
+	CreatedBy   domain.ID
 	UpdatedAt   pgtype.Timestamp
-	UpdatedBy   pgtype.UUID
+	UpdatedBy   domain.ID
 }
 
 type ExpenseRecord struct {
-	ID         pgtype.UUID
-	ExpenseID  pgtype.UUID
+	ID         domain.ID
+	ExpenseID  domain.ID
 	RecordType string
 	Amount     int32
-	FromUserID pgtype.UUID
-	ToUserID   pgtype.UUID
+	FromUserID domain.ID
+	ToUserID   domain.ID
 	CreatedAt  pgtype.Timestamp
-	CreatedBy  pgtype.UUID
+	CreatedBy  domain.ID
 	UpdatedAt  pgtype.Timestamp
-	UpdatedBy  pgtype.UUID
+	UpdatedBy  domain.ID
 }
 
 type Ledger struct {
-	ID        pgtype.UUID
+	ID        domain.ID
 	Name      string
 	CreatedAt pgtype.Timestamp
-	CreatedBy pgtype.UUID
+	CreatedBy domain.ID
 }
 
-type LedgerParticipant struct {
-	ID        pgtype.UUID
-	LedgerID  pgtype.UUID
-	UserID    pgtype.UUID
+type LedgerMember struct {
+	UserID    domain.ID
+	LedgerID  domain.ID
 	CreatedAt pgtype.Timestamp
-	CreatedBy pgtype.UUID
+	CreatedBy domain.ID
 	Balance   int32
 }
 
 type User struct {
-	ID           pgtype.UUID
+	ID           domain.ID
 	FirstName    string
 	LastName     string
 	Email        string
@@ -59,7 +59,7 @@ type User struct {
 }
 
 type UserView struct {
-	ID           pgtype.UUID
+	ID           domain.ID
 	FirstName    string
 	LastName     string
 	Email        string

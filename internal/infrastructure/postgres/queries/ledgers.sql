@@ -4,17 +4,22 @@ INSERT INTO ledgers (id,name,created_at,created_by) VALUES ($1,$2,$3,$4);
 -- name: FindLedgerById :one
 SELECT * FROM ledgers WHERE id = $1 FOR UPDATE;
 
--- name: AddUserToLedger :exec
-INSERT INTO ledger_participants (id,ledger_id,user_id,created_at,created_by,balance) VALUES ($1,$2,$3,$4,$5,$6);
+-- name: SaveLedgerMember :exec
+INSERT INTO ledger_members (ledger_id,user_id,created_at,created_by,balance) 
+VALUES ($1,$2,$3,$4,$5) 
+ON CONFLICT(user_id) 
+DO UPDATE
+SET balance = EXCLUDED.balance
+;
 
 -- name: RemoveUserFromLedger :exec
-DELETE FROM ledger_participants WHERE id = $1;
+DELETE FROM ledger_members WHERE user_id = $1;
 
--- name: GetLedgerParticipants :many
-SELECT * FROM ledger_participants WHERE ledger_id = $1;
+-- name: GetLedgerMembers :many
+SELECT * FROM ledger_members WHERE ledger_id = $1;
 
 -- name: GetUserLedgers :many
-SELECT ledgers.* FROM ledgers JOIN ledger_participants ON ledgers.id = ledger_participants.ledger_id WHERE ledger_participants.user_id = $1 ORDER BY ledgers.created_at DESC;
+SELECT ledgers.* FROM ledgers JOIN ledger_members ON ledgers.id = ledger_members.ledger_id WHERE ledger_members.user_id = $1 ORDER BY ledgers.created_at DESC;
 
 -- name: LockLedgerForUpdate :exec
 SELECT * FROM ledgers WHERE id = $1 FOR UPDATE;
@@ -30,3 +35,6 @@ SELECT COUNT(*) FROM ledgers WHERE created_by = $1;
 
 -- name: UpdateLedger :exec
 UPDATE ledgers SET name = $1 WHERE id = $2;
+
+-- name: DeleteMembersNotIn :exec
+DELETE FROM ledger_members WHERE user_id NOT IN ($1::UUID[]);

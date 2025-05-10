@@ -29,21 +29,23 @@ type (
 )
 
 const (
-	ErrCauseInvalid  = ErrCause("invalid")
-	ErrCauseRequired = ErrCause("required")
+	ErrInvalid  = ErrCause("invalid")
+	ErrRequired = ErrCause("required")
+	ErrNotFound = ErrCause("not found")
+	ErrOverflow = ErrCause("overflow")
 )
 
 func newRequiredFieldError(field string) FieldError {
 	return FieldError{
 		Field: field,
-		Cause: ErrCauseRequired,
+		Cause: ErrRequired,
 	}
 }
 
 func newInvalidFieldError(field string) FieldError {
 	return FieldError{
 		Field: field,
-		Cause: ErrCauseInvalid,
+		Cause: ErrInvalid,
 	}
 }
 

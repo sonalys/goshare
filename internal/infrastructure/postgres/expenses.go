@@ -24,33 +24,33 @@ func NewExpenseRepository(client connection) *ExpenseRepository {
 func (r *ExpenseRepository) Create(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error {
 	return r.client.transaction(ctx, func(query *sqlc.Queries) error {
 		createExpenseReq := sqlc.CreateExpenseParams{
-			ID:          convertID(expense.ID),
-			LedgerID:    convertID(expense.LedgerID),
+			ID:          expense.ID,
+			LedgerID:    expense.LedgerID,
 			Amount:      expense.Amount,
 			Name:        expense.Name,
 			ExpenseDate: convertTime(expense.ExpenseDate),
 			CreatedAt:   convertTime(expense.CreatedAt),
-			CreatedBy:   convertID(expense.CreatedBy),
+			CreatedBy:   expense.CreatedBy,
 			UpdatedAt:   convertTime(expense.UpdatedAt),
-			UpdatedBy:   convertID(expense.UpdatedBy),
+			UpdatedBy:   expense.UpdatedBy,
 		}
 
 		if err := query.CreateExpense(ctx, createExpenseReq); err != nil {
 			return fmt.Errorf("creating expense: %w", err)
 		}
 
-		for _, record := range expense.Records {
+		for id, record := range expense.Records {
 			createRecordReq := sqlc.CreateExpenseRecordParams{
-				ID:         convertID(record.ID),
-				ExpenseID:  convertID(expense.ID),
-				FromUserID: convertID(record.From),
-				ToUserID:   convertID(record.To),
+				ID:         id,
+				ExpenseID:  expense.ID,
+				FromUserID: record.From,
+				ToUserID:   record.To,
 				RecordType: record.Type.String(),
 				Amount:     record.Amount,
 				CreatedAt:  convertTime(record.CreatedAt),
-				CreatedBy:  convertID(record.CreatedBy),
+				CreatedBy:  record.CreatedBy,
 				UpdatedAt:  convertTime(record.UpdatedAt),
-				UpdatedBy:  convertID(record.UpdatedBy),
+				UpdatedBy:  record.UpdatedBy,
 			}
 
 			if err := query.CreateExpenseRecord(ctx, createRecordReq); err != nil {
@@ -63,7 +63,7 @@ func (r *ExpenseRepository) Create(ctx context.Context, ledgerID domain.ID, expe
 }
 
 func (r *ExpenseRepository) Find(ctx context.Context, id domain.ID) (*domain.Expense, error) {
-	expense, err := r.client.queries().FindExpenseById(ctx, convertID(id))
+	expense, err := r.client.queries().FindExpenseById(ctx, id)
 	if err != nil {
 		return nil, mapLedgerError(err)
 	}
@@ -78,7 +78,7 @@ func (r *ExpenseRepository) Find(ctx context.Context, id domain.ID) (*domain.Exp
 
 func (r *ExpenseRepository) GetByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
 	expenses, err := r.client.queries().GetLedgerExpenses(ctx, sqlc.GetLedgerExpensesParams{
-		LedgerID:  convertID(ledgerID),
+		LedgerID:  ledgerID,
 		Limit:     limit,
 		CreatedAt: convertTime(cursor),
 	})

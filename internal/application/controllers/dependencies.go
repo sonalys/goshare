@@ -13,7 +13,6 @@ type (
 		Create(ctx context.Context, ledger *domain.Ledger) error
 		Find(ctx context.Context, id domain.ID) (*domain.Ledger, error)
 		GetByUser(ctx context.Context, identity domain.ID) ([]domain.Ledger, error)
-		GetParticipants(ctx context.Context, ledgerID domain.ID) ([]domain.LedgerMember, error)
 		Update(ctx context.Context, ledger *domain.Ledger) error
 	}
 

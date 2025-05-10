@@ -53,8 +53,8 @@ func encodeLedgerExpenseCreateRequest(
 	return nil
 }
 
-func encodeLedgerParticipantAddRequest(
-	req *LedgerParticipantAddReq,
+func encodeLedgerMemberAddRequest(
+	req *LedgerMemberAddReq,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

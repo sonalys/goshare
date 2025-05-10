@@ -9,6 +9,7 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/sonalys/goshare/internal/domain"
 )
 
 const createUser = `-- name: CreateUser :exec
@@ -16,7 +17,7 @@ INSERT INTO users (id,first_name,last_name,email,password_hash,created_at) VALUE
 `
 
 type CreateUserParams struct {
-	ID           pgtype.UUID
+	ID           domain.ID
 	FirstName    string
 	LastName     string
 	Email        string
@@ -40,7 +41,7 @@ const findUser = `-- name: FindUser :one
 SELECT id, first_name, last_name, email, password_hash, created_at, ledger_count FROM user_view WHERE id = $1 FOR UPDATE
 `
 
-func (q *Queries) FindUser(ctx context.Context, id pgtype.UUID) (UserView, error) {
+func (q *Queries) FindUser(ctx context.Context, id domain.ID) (UserView, error) {
 	row := q.db.QueryRow(ctx, findUser, id)
 	var i UserView
 	err := row.Scan(

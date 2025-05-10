@@ -77,18 +77,18 @@ type Invoker interface {
 	//
 	// GET /ledgers
 	LedgerList(ctx context.Context) (*LedgerListOK, error)
-	// LedgerParticipantAdd invokes LedgerParticipantAdd operation.
+	// LedgerMemberAdd invokes LedgerMemberAdd operation.
 	//
 	// Adds a new member to the Ledger.
 	//
-	// POST /ledgers/{ledgerID}/participants
-	LedgerParticipantAdd(ctx context.Context, request *LedgerParticipantAddReq, params LedgerParticipantAddParams) error
-	// LedgerParticipantList invokes LedgerParticipantList operation.
+	// POST /ledgers/{ledgerID}/members
+	LedgerMemberAdd(ctx context.Context, request *LedgerMemberAddReq, params LedgerMemberAddParams) error
+	// LedgerMemberList invokes LedgerMemberList operation.
 	//
-	// Lists all ledger participants and their balances.
+	// Lists all ledger members and their balances.
 	//
-	// GET /ledgers/{ledgerID}/participants
-	LedgerParticipantList(ctx context.Context, params LedgerParticipantListParams) (*LedgerParticipantListOK, error)
+	// GET /ledgers/{ledgerID}/members
+	LedgerMemberList(ctx context.Context, params LedgerMemberListParams) (*LedgerMemberListOK, error)
 	// UserRegister invokes UserRegister operation.
 	//
 	// Registers a new user.
@@ -1042,21 +1042,21 @@ func (c *Client) sendLedgerList(ctx context.Context) (res *LedgerListOK, err err
 	return result, nil
 }
 
-// LedgerParticipantAdd invokes LedgerParticipantAdd operation.
+// LedgerMemberAdd invokes LedgerMemberAdd operation.
 //
 // Adds a new member to the Ledger.
 //
-// POST /ledgers/{ledgerID}/participants
-func (c *Client) LedgerParticipantAdd(ctx context.Context, request *LedgerParticipantAddReq, params LedgerParticipantAddParams) error {
-	_, err := c.sendLedgerParticipantAdd(ctx, request, params)
+// POST /ledgers/{ledgerID}/members
+func (c *Client) LedgerMemberAdd(ctx context.Context, request *LedgerMemberAddReq, params LedgerMemberAddParams) error {
+	_, err := c.sendLedgerMemberAdd(ctx, request, params)
 	return err
 }
 
-func (c *Client) sendLedgerParticipantAdd(ctx context.Context, request *LedgerParticipantAddReq, params LedgerParticipantAddParams) (res *LedgerParticipantAddAccepted, err error) {
+func (c *Client) sendLedgerMemberAdd(ctx context.Context, request *LedgerMemberAddReq, params LedgerMemberAddParams) (res *LedgerMemberAddAccepted, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("LedgerParticipantAdd"),
+		otelogen.OperationID("LedgerMemberAdd"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/ledgers/{ledgerID}/participants"),
+		semconv.HTTPRouteKey.String("/ledgers/{ledgerID}/members"),
 	}
 
 	// Run stopwatch.
@@ -1071,7 +1071,7 @@ func (c *Client) sendLedgerParticipantAdd(ctx context.Context, request *LedgerPa
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, LedgerParticipantAddOperation,
+	ctx, span := c.cfg.Tracer.Start(ctx, LedgerMemberAddOperation,
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -1108,7 +1108,7 @@ func (c *Client) sendLedgerParticipantAdd(ctx context.Context, request *LedgerPa
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/participants"
+	pathParts[2] = "/members"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -1116,7 +1116,7 @@ func (c *Client) sendLedgerParticipantAdd(ctx context.Context, request *LedgerPa
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
 	}
-	if err := encodeLedgerParticipantAddRequest(request, r); err != nil {
+	if err := encodeLedgerMemberAddRequest(request, r); err != nil {
 		return res, errors.Wrap(err, "encode request")
 	}
 
@@ -1125,7 +1125,7 @@ func (c *Client) sendLedgerParticipantAdd(ctx context.Context, request *LedgerPa
 		var satisfied bitset
 		{
 			stage = "Security:CookieAuth"
-			switch err := c.securityCookieAuth(ctx, LedgerParticipantAddOperation, r); {
+			switch err := c.securityCookieAuth(ctx, LedgerMemberAddOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
@@ -1161,7 +1161,7 @@ func (c *Client) sendLedgerParticipantAdd(ctx context.Context, request *LedgerPa
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeLedgerParticipantAddResponse(resp)
+	result, err := decodeLedgerMemberAddResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -1169,21 +1169,21 @@ func (c *Client) sendLedgerParticipantAdd(ctx context.Context, request *LedgerPa
 	return result, nil
 }
 
-// LedgerParticipantList invokes LedgerParticipantList operation.
+// LedgerMemberList invokes LedgerMemberList operation.
 //
-// Lists all ledger participants and their balances.
+// Lists all ledger members and their balances.
 //
-// GET /ledgers/{ledgerID}/participants
-func (c *Client) LedgerParticipantList(ctx context.Context, params LedgerParticipantListParams) (*LedgerParticipantListOK, error) {
-	res, err := c.sendLedgerParticipantList(ctx, params)
+// GET /ledgers/{ledgerID}/members
+func (c *Client) LedgerMemberList(ctx context.Context, params LedgerMemberListParams) (*LedgerMemberListOK, error) {
+	res, err := c.sendLedgerMemberList(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendLedgerParticipantList(ctx context.Context, params LedgerParticipantListParams) (res *LedgerParticipantListOK, err error) {
+func (c *Client) sendLedgerMemberList(ctx context.Context, params LedgerMemberListParams) (res *LedgerMemberListOK, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("LedgerParticipantList"),
+		otelogen.OperationID("LedgerMemberList"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/ledgers/{ledgerID}/participants"),
+		semconv.HTTPRouteKey.String("/ledgers/{ledgerID}/members"),
 	}
 
 	// Run stopwatch.
@@ -1198,7 +1198,7 @@ func (c *Client) sendLedgerParticipantList(ctx context.Context, params LedgerPar
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, LedgerParticipantListOperation,
+	ctx, span := c.cfg.Tracer.Start(ctx, LedgerMemberListOperation,
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -1235,7 +1235,7 @@ func (c *Client) sendLedgerParticipantList(ctx context.Context, params LedgerPar
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/participants"
+	pathParts[2] = "/members"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -1249,7 +1249,7 @@ func (c *Client) sendLedgerParticipantList(ctx context.Context, params LedgerPar
 		var satisfied bitset
 		{
 			stage = "Security:CookieAuth"
-			switch err := c.securityCookieAuth(ctx, LedgerParticipantListOperation, r); {
+			switch err := c.securityCookieAuth(ctx, LedgerMemberListOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
@@ -1285,7 +1285,7 @@ func (c *Client) sendLedgerParticipantList(ctx context.Context, params LedgerPar
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeLedgerParticipantListResponse(resp)
+	result, err := decodeLedgerMemberListResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

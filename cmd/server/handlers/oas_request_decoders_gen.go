@@ -219,8 +219,8 @@ func (s *Server) decodeLedgerExpenseCreateRequest(r *http.Request) (
 	}
 }
 
-func (s *Server) decodeLedgerParticipantAddRequest(r *http.Request) (
-	req *LedgerParticipantAddReq,
+func (s *Server) decodeLedgerMemberAddRequest(r *http.Request) (
+	req *LedgerMemberAddReq,
 	close func() error,
 	rerr error,
 ) {
@@ -259,7 +259,7 @@ func (s *Server) decodeLedgerParticipantAddRequest(r *http.Request) (
 
 		d := jx.DecodeBytes(buf)
 
-		var request LedgerParticipantAddReq
+		var request LedgerMemberAddReq
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err

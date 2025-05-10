@@ -5,24 +5,22 @@ import (
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 )
 
-func NewLedger(ledger *sqlc.Ledger, participants []sqlc.LedgerParticipant) *domain.Ledger {
-	ledgerParticipants := make([]domain.LedgerMember, 0, len(participants))
+func NewLedger(ledger *sqlc.Ledger, members []sqlc.LedgerMember) *domain.Ledger {
+	ledgerMembers := make(map[domain.ID]*domain.LedgerMember, len(members))
 
-	for _, participant := range participants {
-		ledgerParticipants = append(ledgerParticipants, domain.LedgerMember{
-			ID:        newUUID(participant.ID),
-			Identity:  newUUID(participant.UserID),
-			Balance:   participant.Balance,
-			CreatedAt: participant.CreatedAt.Time,
-			CreatedBy: newUUID(participant.CreatedBy),
-		})
+	for _, member := range members {
+		ledgerMembers[member.UserID] = &domain.LedgerMember{
+			Balance:   member.Balance,
+			CreatedAt: member.CreatedAt.Time,
+			CreatedBy: member.CreatedBy,
+		}
 	}
 
 	return &domain.Ledger{
-		ID:        newUUID(ledger.ID),
+		ID:        ledger.ID,
 		Name:      ledger.Name,
-		Members:   ledgerParticipants,
+		Members:   ledgerMembers,
 		CreatedAt: ledger.CreatedAt.Time,
-		CreatedBy: newUUID(ledger.CreatedBy),
+		CreatedBy: ledger.CreatedBy,
 	}
 }

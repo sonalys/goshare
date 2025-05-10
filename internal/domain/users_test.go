@@ -56,7 +56,7 @@ func TestNewUser(t *testing.T) {
 		var targetErr domain.FieldError
 		require.ErrorAs(t, err, &targetErr)
 		assert.Equal(t, "firstName", targetErr.Field)
-		assert.Equal(t, domain.ErrCauseRequired, targetErr.Cause)
+		assert.Equal(t, domain.ErrRequired, targetErr.Cause)
 	})
 
 	t.Run("fail/empty last name", func(t *testing.T) {
@@ -71,7 +71,7 @@ func TestNewUser(t *testing.T) {
 		var targetErr domain.FieldError
 		require.ErrorAs(t, err, &targetErr)
 		assert.Equal(t, "lastName", targetErr.Field)
-		assert.Equal(t, domain.ErrCauseRequired, targetErr.Cause)
+		assert.Equal(t, domain.ErrRequired, targetErr.Cause)
 	})
 
 	t.Run("fail/short password", func(t *testing.T) {
@@ -116,7 +116,7 @@ func TestNewUser(t *testing.T) {
 		var targetErr domain.FieldError
 		require.ErrorAs(t, err, &targetErr)
 		assert.Equal(t, "email", targetErr.Field)
-		assert.Equal(t, domain.ErrCauseInvalid, targetErr.Cause)
+		assert.Equal(t, domain.ErrInvalid, targetErr.Cause)
 	})
 
 	t.Run("fail/invalid email", func(t *testing.T) {
@@ -131,7 +131,7 @@ func TestNewUser(t *testing.T) {
 		var targetErr domain.FieldError
 		require.ErrorAs(t, err, &targetErr)
 		assert.Equal(t, "email", targetErr.Field)
-		assert.Equal(t, domain.ErrCauseInvalid, targetErr.Cause)
+		assert.Equal(t, domain.ErrInvalid, targetErr.Cause)
 	})
 }
 
@@ -153,13 +153,11 @@ func TestUser_CreateLedger(t *testing.T) {
 
 		require.Len(t, ledger.Members, 1)
 
-		participant := ledger.Members[0]
+		member := ledger.Members[user.ID]
 
-		assert.NotZero(t, participant.ID)
-		assert.Equal(t, user.ID, participant.Identity)
-		assert.Zero(t, participant.Balance)
-		assert.NotZero(t, participant.CreatedAt)
-		assert.Equal(t, user.ID, participant.CreatedBy)
+		assert.Zero(t, member.Balance)
+		assert.NotZero(t, member.CreatedAt)
+		assert.Equal(t, user.ID, member.CreatedBy)
 	})
 
 	t.Run("fail/short name", func(t *testing.T) {

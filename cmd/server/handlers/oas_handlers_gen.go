@@ -1476,22 +1476,22 @@ func (s *Server) handleLedgerListRequest(args [0]string, argsEscaped bool, w htt
 	}
 }
 
-// handleLedgerParticipantAddRequest handles LedgerParticipantAdd operation.
+// handleLedgerMemberAddRequest handles LedgerMemberAdd operation.
 //
 // Adds a new member to the Ledger.
 //
-// POST /ledgers/{ledgerID}/participants
-func (s *Server) handleLedgerParticipantAddRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+// POST /ledgers/{ledgerID}/members
+func (s *Server) handleLedgerMemberAddRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("LedgerParticipantAdd"),
+		otelogen.OperationID("LedgerMemberAdd"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/ledgers/{ledgerID}/participants"),
+		semconv.HTTPRouteKey.String("/ledgers/{ledgerID}/members"),
 	}
 
 	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), LedgerParticipantAddOperation,
+	ctx, span := s.cfg.Tracer.Start(r.Context(), LedgerMemberAddOperation,
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -1546,15 +1546,15 @@ func (s *Server) handleLedgerParticipantAddRequest(args [1]string, argsEscaped b
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-			Name: LedgerParticipantAddOperation,
-			ID:   "LedgerParticipantAdd",
+			Name: LedgerMemberAddOperation,
+			ID:   "LedgerMemberAdd",
 		}
 	)
 	{
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityCookieAuth(ctx, LedgerParticipantAddOperation, r)
+			sctx, ok, err := s.securityCookieAuth(ctx, LedgerMemberAddOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
@@ -1596,7 +1596,7 @@ func (s *Server) handleLedgerParticipantAddRequest(args [1]string, argsEscaped b
 			return
 		}
 	}
-	params, err := decodeLedgerParticipantAddParams(args, argsEscaped, r)
+	params, err := decodeLedgerMemberAddParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -1606,7 +1606,7 @@ func (s *Server) handleLedgerParticipantAddRequest(args [1]string, argsEscaped b
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
-	request, close, err := s.decodeLedgerParticipantAddRequest(r)
+	request, close, err := s.decodeLedgerMemberAddRequest(r)
 	if err != nil {
 		err = &ogenerrors.DecodeRequestError{
 			OperationContext: opErrContext,
@@ -1622,13 +1622,13 @@ func (s *Server) handleLedgerParticipantAddRequest(args [1]string, argsEscaped b
 		}
 	}()
 
-	var response *LedgerParticipantAddAccepted
+	var response *LedgerMemberAddAccepted
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
-			OperationName:    LedgerParticipantAddOperation,
+			OperationName:    LedgerMemberAddOperation,
 			OperationSummary: "",
-			OperationID:      "LedgerParticipantAdd",
+			OperationID:      "LedgerMemberAdd",
 			Body:             request,
 			Params: middleware.Parameters{
 				{
@@ -1640,9 +1640,9 @@ func (s *Server) handleLedgerParticipantAddRequest(args [1]string, argsEscaped b
 		}
 
 		type (
-			Request  = *LedgerParticipantAddReq
-			Params   = LedgerParticipantAddParams
-			Response = *LedgerParticipantAddAccepted
+			Request  = *LedgerMemberAddReq
+			Params   = LedgerMemberAddParams
+			Response = *LedgerMemberAddAccepted
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1651,14 +1651,14 @@ func (s *Server) handleLedgerParticipantAddRequest(args [1]string, argsEscaped b
 		](
 			m,
 			mreq,
-			unpackLedgerParticipantAddParams,
+			unpackLedgerMemberAddParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				err = s.h.LedgerParticipantAdd(ctx, request, params)
+				err = s.h.LedgerMemberAdd(ctx, request, params)
 				return response, err
 			},
 		)
 	} else {
-		err = s.h.LedgerParticipantAdd(ctx, request, params)
+		err = s.h.LedgerMemberAdd(ctx, request, params)
 	}
 	if err != nil {
 		if errRes, ok := errors.Into[*ErrorResponseStatusCode](err); ok {
@@ -1677,7 +1677,7 @@ func (s *Server) handleLedgerParticipantAddRequest(args [1]string, argsEscaped b
 		return
 	}
 
-	if err := encodeLedgerParticipantAddResponse(response, w, span); err != nil {
+	if err := encodeLedgerMemberAddResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
@@ -1686,22 +1686,22 @@ func (s *Server) handleLedgerParticipantAddRequest(args [1]string, argsEscaped b
 	}
 }
 
-// handleLedgerParticipantListRequest handles LedgerParticipantList operation.
+// handleLedgerMemberListRequest handles LedgerMemberList operation.
 //
-// Lists all ledger participants and their balances.
+// Lists all ledger members and their balances.
 //
-// GET /ledgers/{ledgerID}/participants
-func (s *Server) handleLedgerParticipantListRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+// GET /ledgers/{ledgerID}/members
+func (s *Server) handleLedgerMemberListRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("LedgerParticipantList"),
+		otelogen.OperationID("LedgerMemberList"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/ledgers/{ledgerID}/participants"),
+		semconv.HTTPRouteKey.String("/ledgers/{ledgerID}/members"),
 	}
 
 	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), LedgerParticipantListOperation,
+	ctx, span := s.cfg.Tracer.Start(r.Context(), LedgerMemberListOperation,
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -1756,15 +1756,15 @@ func (s *Server) handleLedgerParticipantListRequest(args [1]string, argsEscaped 
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-			Name: LedgerParticipantListOperation,
-			ID:   "LedgerParticipantList",
+			Name: LedgerMemberListOperation,
+			ID:   "LedgerMemberList",
 		}
 	)
 	{
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityCookieAuth(ctx, LedgerParticipantListOperation, r)
+			sctx, ok, err := s.securityCookieAuth(ctx, LedgerMemberListOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
@@ -1806,7 +1806,7 @@ func (s *Server) handleLedgerParticipantListRequest(args [1]string, argsEscaped 
 			return
 		}
 	}
-	params, err := decodeLedgerParticipantListParams(args, argsEscaped, r)
+	params, err := decodeLedgerMemberListParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -1817,13 +1817,13 @@ func (s *Server) handleLedgerParticipantListRequest(args [1]string, argsEscaped 
 		return
 	}
 
-	var response *LedgerParticipantListOK
+	var response *LedgerMemberListOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
-			OperationName:    LedgerParticipantListOperation,
+			OperationName:    LedgerMemberListOperation,
 			OperationSummary: "",
-			OperationID:      "LedgerParticipantList",
+			OperationID:      "LedgerMemberList",
 			Body:             nil,
 			Params: middleware.Parameters{
 				{
@@ -1836,8 +1836,8 @@ func (s *Server) handleLedgerParticipantListRequest(args [1]string, argsEscaped 
 
 		type (
 			Request  = struct{}
-			Params   = LedgerParticipantListParams
-			Response = *LedgerParticipantListOK
+			Params   = LedgerMemberListParams
+			Response = *LedgerMemberListOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -1846,14 +1846,14 @@ func (s *Server) handleLedgerParticipantListRequest(args [1]string, argsEscaped 
 		](
 			m,
 			mreq,
-			unpackLedgerParticipantListParams,
+			unpackLedgerMemberListParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.LedgerParticipantList(ctx, params)
+				response, err = s.h.LedgerMemberList(ctx, params)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.LedgerParticipantList(ctx, params)
+		response, err = s.h.LedgerMemberList(ctx, params)
 	}
 	if err != nil {
 		if errRes, ok := errors.Into[*ErrorResponseStatusCode](err); ok {
@@ -1872,7 +1872,7 @@ func (s *Server) handleLedgerParticipantListRequest(args [1]string, argsEscaped 
 		return
 	}
 
-	if err := encodeLedgerParticipantListResponse(response, w, span); err != nil {
+	if err := encodeLedgerMemberListResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)

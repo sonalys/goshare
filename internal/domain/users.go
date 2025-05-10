@@ -99,10 +99,8 @@ func (user *User) CreateLedger(name string) (*Ledger, error) {
 	return &Ledger{
 		ID:   NewID(),
 		Name: name,
-		Members: []LedgerMember{
-			{
-				ID:        NewID(),
-				Identity:  user.ID,
+		Members: map[ID]*LedgerMember{
+			user.ID: {
 				Balance:   0,
 				CreatedAt: time.Now(),
 				CreatedBy: user.ID,

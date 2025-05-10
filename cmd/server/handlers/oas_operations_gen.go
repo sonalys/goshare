@@ -14,7 +14,7 @@ const (
 	LedgerExpenseGetOperation      OperationName = "LedgerExpenseGet"
 	LedgerExpenseListOperation     OperationName = "LedgerExpenseList"
 	LedgerListOperation            OperationName = "LedgerList"
-	LedgerParticipantAddOperation  OperationName = "LedgerParticipantAdd"
-	LedgerParticipantListOperation OperationName = "LedgerParticipantList"
+	LedgerMemberAddOperation  OperationName = "LedgerMemberAdd"
+	LedgerMemberListOperation OperationName = "LedgerMemberList"
 	UserRegisterOperation          OperationName = "UserRegister"
 )

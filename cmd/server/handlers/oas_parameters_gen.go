@@ -403,13 +403,13 @@ func decodeLedgerExpenseListParams(args [1]string, argsEscaped bool, r *http.Req
 	return params, nil
 }
 
-// LedgerParticipantAddParams is parameters of LedgerParticipantAdd operation.
-type LedgerParticipantAddParams struct {
+// LedgerMemberAddParams is parameters of LedgerMemberAdd operation.
+type LedgerMemberAddParams struct {
 	// Ledger ID.
 	LedgerID uuid.UUID
 }
 
-func unpackLedgerParticipantAddParams(packed middleware.Parameters) (params LedgerParticipantAddParams) {
+func unpackLedgerMemberAddParams(packed middleware.Parameters) (params LedgerMemberAddParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "ledgerID",
@@ -420,7 +420,7 @@ func unpackLedgerParticipantAddParams(packed middleware.Parameters) (params Ledg
 	return params
 }
 
-func decodeLedgerParticipantAddParams(args [1]string, argsEscaped bool, r *http.Request) (params LedgerParticipantAddParams, _ error) {
+func decodeLedgerMemberAddParams(args [1]string, argsEscaped bool, r *http.Request) (params LedgerMemberAddParams, _ error) {
 	// Decode path: ledgerID.
 	if err := func() error {
 		param := args[0]
@@ -469,13 +469,13 @@ func decodeLedgerParticipantAddParams(args [1]string, argsEscaped bool, r *http.
 	return params, nil
 }
 
-// LedgerParticipantListParams is parameters of LedgerParticipantList operation.
-type LedgerParticipantListParams struct {
+// LedgerMemberListParams is parameters of LedgerMemberList operation.
+type LedgerMemberListParams struct {
 	// Ledger ID.
 	LedgerID uuid.UUID
 }
 
-func unpackLedgerParticipantListParams(packed middleware.Parameters) (params LedgerParticipantListParams) {
+func unpackLedgerMemberListParams(packed middleware.Parameters) (params LedgerMemberListParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "ledgerID",
@@ -486,7 +486,7 @@ func unpackLedgerParticipantListParams(packed middleware.Parameters) (params Led
 	return params
 }
 
-func decodeLedgerParticipantListParams(args [1]string, argsEscaped bool, r *http.Request) (params LedgerParticipantListParams, _ error) {
+func decodeLedgerMemberListParams(args [1]string, argsEscaped bool, r *http.Request) (params LedgerMemberListParams, _ error) {
 	// Decode path: ledgerID.
 	if err := func() error {
 		param := args[0]

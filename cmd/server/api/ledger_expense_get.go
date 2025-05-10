@@ -30,11 +30,11 @@ func convertExpense(expense *domain.Expense) *handlers.Expense {
 	}
 }
 
-func convertRecords(records []domain.Record) []handlers.ExpenseRecord {
+func convertRecords(records map[domain.ID]*domain.Record) []handlers.ExpenseRecord {
 	result := make([]handlers.ExpenseRecord, 0, len(records))
-	for _, record := range records {
+	for id, record := range records {
 		result = append(result, handlers.ExpenseRecord{
-			ID:         handlers.NewOptUUID(record.ID.UUID()),
+			ID:         handlers.NewOptUUID(id.UUID()),
 			Type:       handlers.ExpenseRecordType(record.Type.String()),
 			FromUserID: record.From.UUID(),
 			ToUserID:   record.To.UUID(),

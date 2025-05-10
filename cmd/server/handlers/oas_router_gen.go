@@ -248,9 +248,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 							}
 
-						case 'p': // Prefix: "participants"
+						case 'p': // Prefix: "members"
 
-							if l := len("participants"); len(elem) >= l && elem[0:l] == "participants" {
+							if l := len("members"); len(elem) >= l && elem[0:l] == "members" {
 								elem = elem[l:]
 							} else {
 								break
@@ -260,11 +260,11 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								// Leaf node.
 								switch r.Method {
 								case "GET":
-									s.handleLedgerParticipantListRequest([1]string{
+									s.handleLedgerMemberListRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								case "POST":
-									s.handleLedgerParticipantAddRequest([1]string{
+									s.handleLedgerMemberAddRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								default:
@@ -610,9 +610,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 
 							}
 
-						case 'p': // Prefix: "participants"
+						case 'p': // Prefix: "members"
 
-							if l := len("participants"); len(elem) >= l && elem[0:l] == "participants" {
+							if l := len("members"); len(elem) >= l && elem[0:l] == "members" {
 								elem = elem[l:]
 							} else {
 								break
@@ -622,18 +622,18 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								// Leaf node.
 								switch method {
 								case "GET":
-									r.name = LedgerParticipantListOperation
+									r.name = LedgerMemberListOperation
 									r.summary = ""
-									r.operationID = "LedgerParticipantList"
-									r.pathPattern = "/ledgers/{ledgerID}/participants"
+									r.operationID = "LedgerMemberList"
+									r.pathPattern = "/ledgers/{ledgerID}/members"
 									r.args = args
 									r.count = 1
 									return r, true
 								case "POST":
-									r.name = LedgerParticipantAddOperation
+									r.name = LedgerMemberAddOperation
 									r.summary = ""
-									r.operationID = "LedgerParticipantAdd"
-									r.pathPattern = "/ledgers/{ledgerID}/participants"
+									r.operationID = "LedgerMemberAdd"
+									r.pathPattern = "/ledgers/{ledgerID}/members"
 									r.args = args
 									r.count = 1
 									return r, true

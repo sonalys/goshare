@@ -213,8 +213,8 @@ func (c *Ledgers) Find(ctx context.Context, ledgerID domain.ID) (*domain.Ledger,
 // TODO(invitations): Here it's a simplification of the user membership process.
 // We can always invert the flow and create invitation links, so the users click themselves
 // We can also send invites through the system and they accept the invite through the API.
-func (c *Ledgers) AddParticipants(ctx context.Context, req AddMembersRequest) error {
-	ctx, span := otel.Tracer.Start(ctx, "ledgers.AddParticipants")
+func (c *Ledgers) AddMembers(ctx context.Context, req AddMembersRequest) error {
+	ctx, span := otel.Tracer.Start(ctx, "ledgers.AddMembers")
 	defer span.End()
 
 	ctx = slog.Context(ctx,
@@ -235,7 +235,7 @@ func (c *Ledgers) AddParticipants(ctx context.Context, req AddMembersRequest) er
 
 		err = ledger.AddMember(req.Actor, kset.Select(func(u domain.User) domain.ID { return u.ID }, users...)...)
 		if err != nil {
-			return slog.ErrorReturn(ctx, "adding participants", err)
+			return slog.ErrorReturn(ctx, "adding members", err)
 		}
 
 		if err := db.Ledger().Update(ctx, ledger); err != nil {
@@ -254,20 +254,20 @@ func (c *Ledgers) AddParticipants(ctx context.Context, req AddMembersRequest) er
 	}
 }
 
-func (c *Ledgers) GetParticipants(ctx context.Context, ledgerID domain.ID) ([]domain.LedgerMember, error) {
-	ctx, span := otel.Tracer.Start(ctx, "ledgers.GetParticipants")
+func (c *Ledgers) GetMembers(ctx context.Context, ledgerID domain.ID) (map[domain.ID]*domain.LedgerMember, error) {
+	ctx, span := otel.Tracer.Start(ctx, "ledgers.GetMembers")
 	defer span.End()
 
 	ctx = slog.Context(ctx,
 		slog.WithStringer("ledger_id", ledgerID),
 	)
 
-	participants, err := c.db.Ledger().GetParticipants(ctx, ledgerID)
+	members, err := c.db.Ledger().Find(ctx, ledgerID)
 	if err != nil {
-		return nil, slog.ErrorReturn(ctx, "failed to get ledger participants balances", err)
+		return nil, slog.ErrorReturn(ctx, "failed to get ledger members balances", err)
 	}
 
-	slog.Info(ctx, "ledger participants balances retrieved")
+	slog.Info(ctx, "ledger members balances retrieved")
 
-	return participants, nil
+	return members.Members, nil
 }

@@ -163,14 +163,14 @@ func encodeLedgerListResponse(response *LedgerListOK, w http.ResponseWriter, spa
 	return nil
 }
 
-func encodeLedgerParticipantAddResponse(response *LedgerParticipantAddAccepted, w http.ResponseWriter, span trace.Span) error {
+func encodeLedgerMemberAddResponse(response *LedgerMemberAddAccepted, w http.ResponseWriter, span trace.Span) error {
 	w.WriteHeader(202)
 	span.SetStatus(codes.Ok, http.StatusText(202))
 
 	return nil
 }
 
-func encodeLedgerParticipantListResponse(response *LedgerParticipantListOK, w http.ResponseWriter, span trace.Span) error {
+func encodeLedgerMemberListResponse(response *LedgerMemberListOK, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(200)
 	span.SetStatus(codes.Ok, http.StatusText(200))

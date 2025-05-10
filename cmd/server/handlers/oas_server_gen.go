@@ -56,18 +56,18 @@ type Handler interface {
 	//
 	// GET /ledgers
 	LedgerList(ctx context.Context) (*LedgerListOK, error)
-	// LedgerParticipantAdd implements LedgerParticipantAdd operation.
+	// LedgerMemberAdd implements LedgerMemberAdd operation.
 	//
 	// Adds a new member to the Ledger.
 	//
-	// POST /ledgers/{ledgerID}/participants
-	LedgerParticipantAdd(ctx context.Context, req *LedgerParticipantAddReq, params LedgerParticipantAddParams) error
-	// LedgerParticipantList implements LedgerParticipantList operation.
+	// POST /ledgers/{ledgerID}/members
+	LedgerMemberAdd(ctx context.Context, req *LedgerMemberAddReq, params LedgerMemberAddParams) error
+	// LedgerMemberList implements LedgerMemberList operation.
 	//
-	// Lists all ledger participants and their balances.
+	// Lists all ledger members and their balances.
 	//
-	// GET /ledgers/{ledgerID}/participants
-	LedgerParticipantList(ctx context.Context, params LedgerParticipantListParams) (*LedgerParticipantListOK, error)
+	// GET /ledgers/{ledgerID}/members
+	LedgerMemberList(ctx context.Context, params LedgerMemberListParams) (*LedgerMemberListOK, error)
 	// UserRegister implements UserRegister operation.
 	//
 	// Registers a new user.

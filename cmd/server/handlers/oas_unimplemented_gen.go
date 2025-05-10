@@ -85,21 +85,21 @@ func (UnimplementedHandler) LedgerList(ctx context.Context) (r *LedgerListOK, _ 
 	return r, ht.ErrNotImplemented
 }
 
-// LedgerParticipantAdd implements LedgerParticipantAdd operation.
+// LedgerMemberAdd implements LedgerMemberAdd operation.
 //
 // Adds a new member to the Ledger.
 //
-// POST /ledgers/{ledgerID}/participants
-func (UnimplementedHandler) LedgerParticipantAdd(ctx context.Context, req *LedgerParticipantAddReq, params LedgerParticipantAddParams) error {
+// POST /ledgers/{ledgerID}/members
+func (UnimplementedHandler) LedgerMemberAdd(ctx context.Context, req *LedgerMemberAddReq, params LedgerMemberAddParams) error {
 	return ht.ErrNotImplemented
 }
 
-// LedgerParticipantList implements LedgerParticipantList operation.
+// LedgerMemberList implements LedgerMemberList operation.
 //
-// Lists all ledger participants and their balances.
+// Lists all ledger members and their balances.
 //
-// GET /ledgers/{ledgerID}/participants
-func (UnimplementedHandler) LedgerParticipantList(ctx context.Context, params LedgerParticipantListParams) (r *LedgerParticipantListOK, _ error) {
+// GET /ledgers/{ledgerID}/members
+func (UnimplementedHandler) LedgerMemberList(ctx context.Context, params LedgerMemberListParams) (r *LedgerMemberListOK, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

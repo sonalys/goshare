@@ -7,10 +7,10 @@ import (
 )
 
 const (
-	constraintParticipantUniqueEmail  = "participant_unique_email"
-	constraintLedgerUniqueParticipant = "ledger_participant_unique"
-	constraintLedgerParticipantsFK    = "ledger_participants_ledger_id_fkey"
-	constraintLedgerRecordsUser       = "ledger_records_user_id_fkey"
+	constraintMemberUniqueEmail  = "member_unique_email"
+	constraintLedgerUniqueMember = "ledger_member_unique"
+	constraintLedgerMembersFK    = "ledger_members_ledger_id_fkey"
+	constraintLedgerRecordsUser  = "ledger_records_user_id_fkey"
 )
 
 func isConstraintError(err error) bool {

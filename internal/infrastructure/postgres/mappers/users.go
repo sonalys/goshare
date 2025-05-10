@@ -7,7 +7,7 @@ import (
 
 func NewUser(user sqlc.UserView) *domain.User {
 	return &domain.User{
-		ID:              newUUID(user.ID),
+		ID:              user.ID,
 		FirstName:       user.FirstName,
 		LastName:        user.LastName,
 		Email:           user.Email,

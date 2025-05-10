@@ -1861,14 +1861,14 @@ func (s *LedgerListOK) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s *LedgerParticipant) Encode(e *jx.Encoder) {
+func (s *LedgerMember) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *LedgerParticipant) encodeFields(e *jx.Encoder) {
+func (s *LedgerMember) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("id")
 		json.EncodeUUID(e, s.ID)
@@ -1891,7 +1891,7 @@ func (s *LedgerParticipant) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfLedgerParticipant = [5]string{
+var jsonFieldsNameOfLedgerMember = [5]string{
 	0: "id",
 	1: "user_id",
 	2: "created_at",
@@ -1899,10 +1899,10 @@ var jsonFieldsNameOfLedgerParticipant = [5]string{
 	4: "balance",
 }
 
-// Decode decodes LedgerParticipant from json.
-func (s *LedgerParticipant) Decode(d *jx.Decoder) error {
+// Decode decodes LedgerMember from json.
+func (s *LedgerMember) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode LedgerParticipant to nil")
+		return errors.New("invalid: unable to decode LedgerMember to nil")
 	}
 	var requiredBitSet [1]uint8
 
@@ -1973,7 +1973,7 @@ func (s *LedgerParticipant) Decode(d *jx.Decoder) error {
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode LedgerParticipant")
+		return errors.Wrap(err, "decode LedgerMember")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
@@ -1990,8 +1990,8 @@ func (s *LedgerParticipant) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfLedgerParticipant) {
-					name = jsonFieldsNameOfLedgerParticipant[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfLedgerMember) {
+					name = jsonFieldsNameOfLedgerMember[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -2012,27 +2012,27 @@ func (s *LedgerParticipant) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *LedgerParticipant) MarshalJSON() ([]byte, error) {
+func (s *LedgerMember) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *LedgerParticipant) UnmarshalJSON(data []byte) error {
+func (s *LedgerMember) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
 // Encode implements json.Marshaler.
-func (s *LedgerParticipantAddReq) Encode(e *jx.Encoder) {
+func (s *LedgerMemberAddReq) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *LedgerParticipantAddReq) encodeFields(e *jx.Encoder) {
+func (s *LedgerMemberAddReq) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("emails")
 		e.ArrStart()
@@ -2043,14 +2043,14 @@ func (s *LedgerParticipantAddReq) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfLedgerParticipantAddReq = [1]string{
+var jsonFieldsNameOfLedgerMemberAddReq = [1]string{
 	0: "emails",
 }
 
-// Decode decodes LedgerParticipantAddReq from json.
-func (s *LedgerParticipantAddReq) Decode(d *jx.Decoder) error {
+// Decode decodes LedgerMemberAddReq from json.
+func (s *LedgerMemberAddReq) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode LedgerParticipantAddReq to nil")
+		return errors.New("invalid: unable to decode LedgerMemberAddReq to nil")
 	}
 	var requiredBitSet [1]uint8
 
@@ -2081,7 +2081,7 @@ func (s *LedgerParticipantAddReq) Decode(d *jx.Decoder) error {
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode LedgerParticipantAddReq")
+		return errors.Wrap(err, "decode LedgerMemberAddReq")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
@@ -2098,8 +2098,8 @@ func (s *LedgerParticipantAddReq) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfLedgerParticipantAddReq) {
-					name = jsonFieldsNameOfLedgerParticipantAddReq[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfLedgerMemberAddReq) {
+					name = jsonFieldsNameOfLedgerMemberAddReq[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -2120,74 +2120,74 @@ func (s *LedgerParticipantAddReq) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *LedgerParticipantAddReq) MarshalJSON() ([]byte, error) {
+func (s *LedgerMemberAddReq) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *LedgerParticipantAddReq) UnmarshalJSON(data []byte) error {
+func (s *LedgerMemberAddReq) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
 // Encode implements json.Marshaler.
-func (s *LedgerParticipantListOK) Encode(e *jx.Encoder) {
+func (s *LedgerMemberListOK) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *LedgerParticipantListOK) encodeFields(e *jx.Encoder) {
+func (s *LedgerMemberListOK) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("participants")
+		e.FieldStart("members")
 		e.ArrStart()
-		for _, elem := range s.Participants {
+		for _, elem := range s.Members {
 			elem.Encode(e)
 		}
 		e.ArrEnd()
 	}
 }
 
-var jsonFieldsNameOfLedgerParticipantListOK = [1]string{
-	0: "participants",
+var jsonFieldsNameOfLedgerMemberListOK = [1]string{
+	0: "members",
 }
 
-// Decode decodes LedgerParticipantListOK from json.
-func (s *LedgerParticipantListOK) Decode(d *jx.Decoder) error {
+// Decode decodes LedgerMemberListOK from json.
+func (s *LedgerMemberListOK) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode LedgerParticipantListOK to nil")
+		return errors.New("invalid: unable to decode LedgerMemberListOK to nil")
 	}
 	var requiredBitSet [1]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "participants":
+		case "members":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				s.Participants = make([]LedgerParticipant, 0)
+				s.Members = make([]LedgerMember, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem LedgerParticipant
+					var elem LedgerMember
 					if err := elem.Decode(d); err != nil {
 						return err
 					}
-					s.Participants = append(s.Participants, elem)
+					s.Members = append(s.Members, elem)
 					return nil
 				}); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"participants\"")
+				return errors.Wrap(err, "decode field \"members\"")
 			}
 		default:
 			return d.Skip()
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode LedgerParticipantListOK")
+		return errors.Wrap(err, "decode LedgerMemberListOK")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
@@ -2204,8 +2204,8 @@ func (s *LedgerParticipantListOK) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfLedgerParticipantListOK) {
-					name = jsonFieldsNameOfLedgerParticipantListOK[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfLedgerMemberListOK) {
+					name = jsonFieldsNameOfLedgerMemberListOK[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -2226,14 +2226,14 @@ func (s *LedgerParticipantListOK) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *LedgerParticipantListOK) MarshalJSON() ([]byte, error) {
+func (s *LedgerMemberListOK) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *LedgerParticipantListOK) UnmarshalJSON(data []byte) error {
+func (s *LedgerMemberListOK) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

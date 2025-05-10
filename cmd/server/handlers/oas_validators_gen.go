@@ -344,7 +344,7 @@ func (s *LedgerListOK) Validate() error {
 	return nil
 }
 
-func (s *LedgerParticipantAddReq) Validate() error {
+func (s *LedgerMemberAddReq) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
 	}
@@ -400,20 +400,20 @@ func (s *LedgerParticipantAddReq) Validate() error {
 	return nil
 }
 
-func (s *LedgerParticipantListOK) Validate() error {
+func (s *LedgerMemberListOK) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
 	}
 
 	var failures []validate.FieldError
 	if err := func() error {
-		if s.Participants == nil {
+		if s.Members == nil {
 			return errors.New("nil is invalid value")
 		}
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "participants",
+			Name:  "members",
 			Error: err,
 		})
 	}

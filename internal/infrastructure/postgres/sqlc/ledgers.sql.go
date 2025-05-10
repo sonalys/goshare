@@ -9,38 +9,14 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/sonalys/goshare/internal/domain"
 )
-
-const addUserToLedger = `-- name: AddUserToLedger :exec
-INSERT INTO ledger_participants (id,ledger_id,user_id,created_at,created_by,balance) VALUES ($1,$2,$3,$4,$5,$6)
-`
-
-type AddUserToLedgerParams struct {
-	ID        pgtype.UUID
-	LedgerID  pgtype.UUID
-	UserID    pgtype.UUID
-	CreatedAt pgtype.Timestamp
-	CreatedBy pgtype.UUID
-	Balance   int32
-}
-
-func (q *Queries) AddUserToLedger(ctx context.Context, arg AddUserToLedgerParams) error {
-	_, err := q.db.Exec(ctx, addUserToLedger,
-		arg.ID,
-		arg.LedgerID,
-		arg.UserID,
-		arg.CreatedAt,
-		arg.CreatedBy,
-		arg.Balance,
-	)
-	return err
-}
 
 const countLedgerUsers = `-- name: CountLedgerUsers :one
 SELECT COUNT(*) FROM ledgers WHERE id = $1
 `
 
-func (q *Queries) CountLedgerUsers(ctx context.Context, id pgtype.UUID) (int64, error) {
+func (q *Queries) CountLedgerUsers(ctx context.Context, id domain.ID) (int64, error) {
 	row := q.db.QueryRow(ctx, countLedgerUsers, id)
 	var count int64
 	err := row.Scan(&count)
@@ -51,7 +27,7 @@ const countUserLedgers = `-- name: CountUserLedgers :one
 SELECT COUNT(*) FROM ledgers WHERE created_by = $1
 `
 
-func (q *Queries) CountUserLedgers(ctx context.Context, createdBy pgtype.UUID) (int64, error) {
+func (q *Queries) CountUserLedgers(ctx context.Context, createdBy domain.ID) (int64, error) {
 	row := q.db.QueryRow(ctx, countUserLedgers, createdBy)
 	var count int64
 	err := row.Scan(&count)
@@ -63,10 +39,10 @@ INSERT INTO ledgers (id,name,created_at,created_by) VALUES ($1,$2,$3,$4)
 `
 
 type CreateLedgerParams struct {
-	ID        pgtype.UUID
+	ID        domain.ID
 	Name      string
 	CreatedAt pgtype.Timestamp
-	CreatedBy pgtype.UUID
+	CreatedBy domain.ID
 }
 
 func (q *Queries) CreateLedger(ctx context.Context, arg CreateLedgerParams) error {
@@ -79,11 +55,20 @@ func (q *Queries) CreateLedger(ctx context.Context, arg CreateLedgerParams) erro
 	return err
 }
 
+const deleteMembersNotIn = `-- name: DeleteMembersNotIn :exec
+DELETE FROM ledger_members WHERE user_id NOT IN ($1::UUID[])
+`
+
+func (q *Queries) DeleteMembersNotIn(ctx context.Context, dollar_1 []domain.ID) error {
+	_, err := q.db.Exec(ctx, deleteMembersNotIn, dollar_1)
+	return err
+}
+
 const findLedgerById = `-- name: FindLedgerById :one
 SELECT id, name, created_at, created_by FROM ledgers WHERE id = $1 FOR UPDATE
 `
 
-func (q *Queries) FindLedgerById(ctx context.Context, id pgtype.UUID) (Ledger, error) {
+func (q *Queries) FindLedgerById(ctx context.Context, id domain.ID) (Ledger, error) {
 	row := q.db.QueryRow(ctx, findLedgerById, id)
 	var i Ledger
 	err := row.Scan(
@@ -95,23 +80,22 @@ func (q *Queries) FindLedgerById(ctx context.Context, id pgtype.UUID) (Ledger, e
 	return i, err
 }
 
-const getLedgerParticipants = `-- name: GetLedgerParticipants :many
-SELECT id, ledger_id, user_id, created_at, created_by, balance FROM ledger_participants WHERE ledger_id = $1
+const getLedgerMembers = `-- name: GetLedgerMembers :many
+SELECT user_id, ledger_id, created_at, created_by, balance FROM ledger_members WHERE ledger_id = $1
 `
 
-func (q *Queries) GetLedgerParticipants(ctx context.Context, ledgerID pgtype.UUID) ([]LedgerParticipant, error) {
-	rows, err := q.db.Query(ctx, getLedgerParticipants, ledgerID)
+func (q *Queries) GetLedgerMembers(ctx context.Context, ledgerID domain.ID) ([]LedgerMember, error) {
+	rows, err := q.db.Query(ctx, getLedgerMembers, ledgerID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []LedgerParticipant
+	var items []LedgerMember
 	for rows.Next() {
-		var i LedgerParticipant
+		var i LedgerMember
 		if err := rows.Scan(
-			&i.ID,
-			&i.LedgerID,
 			&i.UserID,
+			&i.LedgerID,
 			&i.CreatedAt,
 			&i.CreatedBy,
 			&i.Balance,
@@ -127,10 +111,10 @@ func (q *Queries) GetLedgerParticipants(ctx context.Context, ledgerID pgtype.UUI
 }
 
 const getUserLedgers = `-- name: GetUserLedgers :many
-SELECT ledgers.id, ledgers.name, ledgers.created_at, ledgers.created_by FROM ledgers JOIN ledger_participants ON ledgers.id = ledger_participants.ledger_id WHERE ledger_participants.user_id = $1 ORDER BY ledgers.created_at DESC
+SELECT ledgers.id, ledgers.name, ledgers.created_at, ledgers.created_by FROM ledgers JOIN ledger_members ON ledgers.id = ledger_members.ledger_id WHERE ledger_members.user_id = $1 ORDER BY ledgers.created_at DESC
 `
 
-func (q *Queries) GetUserLedgers(ctx context.Context, userID pgtype.UUID) ([]Ledger, error) {
+func (q *Queries) GetUserLedgers(ctx context.Context, userID domain.ID) ([]Ledger, error) {
 	rows, err := q.db.Query(ctx, getUserLedgers, userID)
 	if err != nil {
 		return nil, err
@@ -159,7 +143,7 @@ const lockLedgerForUpdate = `-- name: LockLedgerForUpdate :exec
 SELECT id, name, created_at, created_by FROM ledgers WHERE id = $1 FOR UPDATE
 `
 
-func (q *Queries) LockLedgerForUpdate(ctx context.Context, id pgtype.UUID) error {
+func (q *Queries) LockLedgerForUpdate(ctx context.Context, id domain.ID) error {
 	_, err := q.db.Exec(ctx, lockLedgerForUpdate, id)
 	return err
 }
@@ -168,17 +152,44 @@ const lockUserForUpdate = `-- name: LockUserForUpdate :exec
 SELECT id, first_name, last_name, email, password_hash, created_at FROM users WHERE id = $1 FOR UPDATE
 `
 
-func (q *Queries) LockUserForUpdate(ctx context.Context, id pgtype.UUID) error {
+func (q *Queries) LockUserForUpdate(ctx context.Context, id domain.ID) error {
 	_, err := q.db.Exec(ctx, lockUserForUpdate, id)
 	return err
 }
 
 const removeUserFromLedger = `-- name: RemoveUserFromLedger :exec
-DELETE FROM ledger_participants WHERE id = $1
+DELETE FROM ledger_members WHERE user_id = $1
 `
 
-func (q *Queries) RemoveUserFromLedger(ctx context.Context, id pgtype.UUID) error {
-	_, err := q.db.Exec(ctx, removeUserFromLedger, id)
+func (q *Queries) RemoveUserFromLedger(ctx context.Context, userID domain.ID) error {
+	_, err := q.db.Exec(ctx, removeUserFromLedger, userID)
+	return err
+}
+
+const saveLedgerMember = `-- name: SaveLedgerMember :exec
+INSERT INTO ledger_members (ledger_id,user_id,created_at,created_by,balance) 
+VALUES ($1,$2,$3,$4,$5) 
+ON CONFLICT(user_id) 
+DO UPDATE
+SET balance = EXCLUDED.balance
+`
+
+type SaveLedgerMemberParams struct {
+	LedgerID  domain.ID
+	UserID    domain.ID
+	CreatedAt pgtype.Timestamp
+	CreatedBy domain.ID
+	Balance   int32
+}
+
+func (q *Queries) SaveLedgerMember(ctx context.Context, arg SaveLedgerMemberParams) error {
+	_, err := q.db.Exec(ctx, saveLedgerMember,
+		arg.LedgerID,
+		arg.UserID,
+		arg.CreatedAt,
+		arg.CreatedBy,
+		arg.Balance,
+	)
 	return err
 }
 
@@ -188,7 +199,7 @@ UPDATE ledgers SET name = $1 WHERE id = $2
 
 type UpdateLedgerParams struct {
 	Name string
-	ID   pgtype.UUID
+	ID   domain.ID
 }
 
 func (q *Queries) UpdateLedger(ctx context.Context, arg UpdateLedgerParams) error {

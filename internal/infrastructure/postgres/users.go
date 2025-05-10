@@ -23,7 +23,7 @@ func NewUsersRepository(client connection) *UsersRepository {
 
 func (r *UsersRepository) Create(ctx context.Context, user *domain.User) error {
 	return mapError(r.client.queries().CreateUser(ctx, sqlc.CreateUserParams{
-		ID:           convertID(user.ID),
+		ID:           user.ID,
 		FirstName:    user.FirstName,
 		LastName:     user.LastName,
 		Email:        user.Email,
@@ -33,7 +33,7 @@ func (r *UsersRepository) Create(ctx context.Context, user *domain.User) error {
 }
 
 func (r *UsersRepository) Find(ctx context.Context, id domain.ID) (*domain.User, error) {
-	user, err := r.client.queries().FindUser(ctx, convertID(id))
+	user, err := r.client.queries().FindUser(ctx, id)
 	if err != nil {
 		return nil, mapError(err)
 	}

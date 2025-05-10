@@ -10,36 +10,36 @@ import (
 
 func NewLedgerExpenseSummary(expense *sqlc.Expense) *v1.LedgerExpenseSummary {
 	return &v1.LedgerExpenseSummary{
-		ID:          newUUID(expense.ID),
+		ID:          expense.ID,
 		Amount:      expense.Amount,
 		Name:        expense.Name,
 		ExpenseDate: expense.ExpenseDate.Time,
 		CreatedAt:   expense.CreatedAt.Time,
-		CreatedBy:   newUUID(expense.CreatedBy),
+		CreatedBy:   expense.CreatedBy,
 		UpdatedAt:   expense.UpdatedAt.Time,
-		UpdatedBy:   newUUID(expense.UpdatedBy),
+		UpdatedBy:   expense.UpdatedBy,
 	}
 }
 
 func NewExpense(expense *sqlc.Expense, records []sqlc.ExpenseRecord) (*domain.Expense, error) {
 	result := &domain.Expense{
-		ID:          newUUID(expense.ID),
-		LedgerID:    newUUID(expense.LedgerID),
+		ID:          expense.ID,
+		LedgerID:    expense.LedgerID,
 		Amount:      expense.Amount,
 		Name:        expense.Name,
 		ExpenseDate: expense.ExpenseDate.Time,
 		CreatedAt:   expense.CreatedAt.Time,
-		CreatedBy:   newUUID(expense.CreatedBy),
+		CreatedBy:   expense.CreatedBy,
 		UpdatedAt:   expense.UpdatedAt.Time,
-		UpdatedBy:   newUUID(expense.UpdatedBy),
+		UpdatedBy:   expense.UpdatedBy,
 	}
 
-	for _, record := range records {
-		record, err := NewRecord(&record)
+	for _, recordModel := range records {
+		record, err := NewRecord(&recordModel)
 		if err != nil {
 			return nil, fmt.Errorf("creating record: %w", err)
 		}
-		result.Records = append(result.Records, *record)
+		result.Records[recordModel.ID] = record
 	}
 
 	return result, nil
@@ -51,14 +51,13 @@ func NewRecord(record *sqlc.ExpenseRecord) (*domain.Record, error) {
 		return nil, fmt.Errorf("invalid record type: %w", err)
 	}
 	return &domain.Record{
-		ID:        newUUID(record.ID),
-		From:      newUUID(record.FromUserID),
-		To:        newUUID(record.ToUserID),
+		From:      record.FromUserID,
+		To:        record.ToUserID,
 		Type:      recordType,
 		Amount:    record.Amount,
 		CreatedAt: record.CreatedAt.Time,
-		CreatedBy: newUUID(record.CreatedBy),
+		CreatedBy: record.CreatedBy,
 		UpdatedAt: record.UpdatedAt.Time,
-		UpdatedBy: newUUID(record.UpdatedBy),
+		UpdatedBy: record.UpdatedBy,
 	}, nil
 }

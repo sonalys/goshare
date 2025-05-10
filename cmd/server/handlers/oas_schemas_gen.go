@@ -738,11 +738,11 @@ func (s *LedgerListOK) SetLedgers(val []Ledger) {
 	s.Ledgers = val
 }
 
-// Ref: #/components/schemas/LedgerParticipant
-type LedgerParticipant struct {
+// Ref: #/components/schemas/LedgerMember
+type LedgerMember struct {
 	ID     uuid.UUID `json:"id"`
 	UserID uuid.UUID `json:"user_id"`
-	// Date and time the participant was created.
+	// Date and time the member was created.
 	CreatedAt time.Time `json:"created_at"`
 	// User ID of the creator.
 	CreatedBy uuid.UUID `json:"created_by"`
@@ -751,85 +751,85 @@ type LedgerParticipant struct {
 }
 
 // GetID returns the value of ID.
-func (s *LedgerParticipant) GetID() uuid.UUID {
+func (s *LedgerMember) GetID() uuid.UUID {
 	return s.ID
 }
 
 // GetUserID returns the value of UserID.
-func (s *LedgerParticipant) GetUserID() uuid.UUID {
+func (s *LedgerMember) GetUserID() uuid.UUID {
 	return s.UserID
 }
 
 // GetCreatedAt returns the value of CreatedAt.
-func (s *LedgerParticipant) GetCreatedAt() time.Time {
+func (s *LedgerMember) GetCreatedAt() time.Time {
 	return s.CreatedAt
 }
 
 // GetCreatedBy returns the value of CreatedBy.
-func (s *LedgerParticipant) GetCreatedBy() uuid.UUID {
+func (s *LedgerMember) GetCreatedBy() uuid.UUID {
 	return s.CreatedBy
 }
 
 // GetBalance returns the value of Balance.
-func (s *LedgerParticipant) GetBalance() int32 {
+func (s *LedgerMember) GetBalance() int32 {
 	return s.Balance
 }
 
 // SetID sets the value of ID.
-func (s *LedgerParticipant) SetID(val uuid.UUID) {
+func (s *LedgerMember) SetID(val uuid.UUID) {
 	s.ID = val
 }
 
 // SetUserID sets the value of UserID.
-func (s *LedgerParticipant) SetUserID(val uuid.UUID) {
+func (s *LedgerMember) SetUserID(val uuid.UUID) {
 	s.UserID = val
 }
 
 // SetCreatedAt sets the value of CreatedAt.
-func (s *LedgerParticipant) SetCreatedAt(val time.Time) {
+func (s *LedgerMember) SetCreatedAt(val time.Time) {
 	s.CreatedAt = val
 }
 
 // SetCreatedBy sets the value of CreatedBy.
-func (s *LedgerParticipant) SetCreatedBy(val uuid.UUID) {
+func (s *LedgerMember) SetCreatedBy(val uuid.UUID) {
 	s.CreatedBy = val
 }
 
 // SetBalance sets the value of Balance.
-func (s *LedgerParticipant) SetBalance(val int32) {
+func (s *LedgerMember) SetBalance(val int32) {
 	s.Balance = val
 }
 
-// LedgerParticipantAddAccepted is response for LedgerParticipantAdd operation.
-type LedgerParticipantAddAccepted struct{}
+// LedgerMemberAddAccepted is response for LedgerMemberAdd operation.
+type LedgerMemberAddAccepted struct{}
 
-type LedgerParticipantAddReq struct {
+type LedgerMemberAddReq struct {
 	// Invite up to 99 other users. The limit is by Ledger.
 	Emails []string `json:"emails"`
 }
 
 // GetEmails returns the value of Emails.
-func (s *LedgerParticipantAddReq) GetEmails() []string {
+func (s *LedgerMemberAddReq) GetEmails() []string {
 	return s.Emails
 }
 
 // SetEmails sets the value of Emails.
-func (s *LedgerParticipantAddReq) SetEmails(val []string) {
+func (s *LedgerMemberAddReq) SetEmails(val []string) {
 	s.Emails = val
 }
 
-type LedgerParticipantListOK struct {
-	Participants []LedgerParticipant `json:"participants"`
+type LedgerMemberListOK struct {
+	Members []LedgerMember `json:"members"`
 }
 
-// GetParticipants returns the value of Participants.
-func (s *LedgerParticipantListOK) GetParticipants() []LedgerParticipant {
-	return s.Participants
+// GetMembers returns the value of Members.
+func (s *LedgerMemberListOK) GetMembers() []LedgerMember {
+	return s.Members
 }
 
-// SetParticipants sets the value of Participants.
-func (s *LedgerParticipantListOK) SetParticipants(val []LedgerParticipant) {
-	s.Participants = val
+// SetMembers sets the value of Members.
+func (s *LedgerMemberListOK) SetMembers(val []LedgerMember) {
+	s.Members = val
 }
 
 // NewOptDateTime returns new OptDateTime with value set to v.

@@ -9,6 +9,7 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/sonalys/goshare/internal/domain"
 )
 
 const createExpense = `-- name: CreateExpense :exec
@@ -16,15 +17,15 @@ INSERT INTO expenses (id,ledger_id,amount,name,expense_date,created_at,created_b
 `
 
 type CreateExpenseParams struct {
-	ID          pgtype.UUID
-	LedgerID    pgtype.UUID
+	ID          domain.ID
+	LedgerID    domain.ID
 	Amount      int32
 	Name        string
 	ExpenseDate pgtype.Timestamp
 	CreatedAt   pgtype.Timestamp
-	CreatedBy   pgtype.UUID
+	CreatedBy   domain.ID
 	UpdatedAt   pgtype.Timestamp
-	UpdatedBy   pgtype.UUID
+	UpdatedBy   domain.ID
 }
 
 func (q *Queries) CreateExpense(ctx context.Context, arg CreateExpenseParams) error {
@@ -47,16 +48,16 @@ INSERT INTO expense_records (id,expense_id,record_type,amount,from_user_id,to_us
 `
 
 type CreateExpenseRecordParams struct {
-	ID         pgtype.UUID
-	ExpenseID  pgtype.UUID
+	ID         domain.ID
+	ExpenseID  domain.ID
 	RecordType string
 	Amount     int32
-	FromUserID pgtype.UUID
-	ToUserID   pgtype.UUID
+	FromUserID domain.ID
+	ToUserID   domain.ID
 	CreatedAt  pgtype.Timestamp
-	CreatedBy  pgtype.UUID
+	CreatedBy  domain.ID
 	UpdatedAt  pgtype.Timestamp
-	UpdatedBy  pgtype.UUID
+	UpdatedBy  domain.ID
 }
 
 func (q *Queries) CreateExpenseRecord(ctx context.Context, arg CreateExpenseRecordParams) error {
@@ -79,7 +80,7 @@ const deleteExpense = `-- name: DeleteExpense :exec
 DELETE FROM expenses WHERE id = $1
 `
 
-func (q *Queries) DeleteExpense(ctx context.Context, id pgtype.UUID) error {
+func (q *Queries) DeleteExpense(ctx context.Context, id domain.ID) error {
 	_, err := q.db.Exec(ctx, deleteExpense, id)
 	return err
 }
@@ -88,7 +89,7 @@ const findExpenseById = `-- name: FindExpenseById :one
 SELECT id, ledger_id, amount, name, expense_date, created_at, created_by, updated_at, updated_by FROM expenses WHERE id = $1
 `
 
-func (q *Queries) FindExpenseById(ctx context.Context, id pgtype.UUID) (Expense, error) {
+func (q *Queries) FindExpenseById(ctx context.Context, id domain.ID) (Expense, error) {
 	row := q.db.QueryRow(ctx, findExpenseById, id)
 	var i Expense
 	err := row.Scan(
@@ -109,7 +110,7 @@ const getExpenseRecords = `-- name: GetExpenseRecords :many
 SELECT id, expense_id, record_type, amount, from_user_id, to_user_id, created_at, created_by, updated_at, updated_by FROM expense_records WHERE expense_id = $1 ORDER BY created_at DESC
 `
 
-func (q *Queries) GetExpenseRecords(ctx context.Context, expenseID pgtype.UUID) ([]ExpenseRecord, error) {
+func (q *Queries) GetExpenseRecords(ctx context.Context, expenseID domain.ID) ([]ExpenseRecord, error) {
 	rows, err := q.db.Query(ctx, getExpenseRecords, expenseID)
 	if err != nil {
 		return nil, err
@@ -145,7 +146,7 @@ SELECT id, ledger_id, amount, name, expense_date, created_at, created_by, update
 `
 
 type GetExpensesByLedgerParams struct {
-	LedgerID  pgtype.UUID
+	LedgerID  domain.ID
 	CreatedAt pgtype.Timestamp
 	Limit     int32
 }
@@ -185,7 +186,7 @@ SELECT id, ledger_id, amount, name, expense_date, created_at, created_by, update
 `
 
 type GetLedgerExpensesParams struct {
-	LedgerID  pgtype.UUID
+	LedgerID  domain.ID
 	CreatedAt pgtype.Timestamp
 	Limit     int32
 }

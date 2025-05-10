@@ -11,13 +11,13 @@ import (
 
 type (
 	Ledgers interface {
-		AddParticipants(ctx context.Context, req controllers.AddMembersRequest) error
+		AddMembers(ctx context.Context, req controllers.AddMembersRequest) error
 		Create(ctx context.Context, req controllers.CreateLedgerRequest) (*controllers.CreateLedgerResponse, error)
 		CreateExpense(ctx context.Context, req controllers.CreateExpenseRequest) (*controllers.CreateExpenseResponse, error)
 		FindExpense(ctx context.Context, identity domain.ID, ledgerID domain.ID, expenseID domain.ID) (*domain.Expense, error)
 		GetByUser(ctx context.Context, identity domain.ID) ([]domain.Ledger, error)
 		GetExpenses(ctx context.Context, req controllers.GetExpensesRequest) (*controllers.GetExpensesResponse, error)
-		GetParticipants(ctx context.Context, identity domain.ID, ledgerID domain.ID) ([]domain.LedgerMember, error)
+		GetMembers(ctx context.Context, identity domain.ID, ledgerID domain.ID) (map[domain.ID]*domain.LedgerMember, error)
 	}
 
 	ledgers struct {
@@ -44,12 +44,12 @@ func (l *ledgers) checkAuthorization(ctx context.Context, ledgerID domain.ID, f 
 	}
 }
 
-func (l *ledgers) AddParticipants(ctx context.Context, req controllers.AddMembersRequest) error {
+func (l *ledgers) AddMembers(ctx context.Context, req controllers.AddMembersRequest) error {
 	if err := l.checkAuthorization(ctx, req.LedgerID, func(l *domain.Ledger) bool { return l.CreatedBy == req.Actor }); err != nil {
 		return err
 	}
 
-	return l.controller.Ledgers.AddParticipants(ctx, req)
+	return l.controller.Ledgers.AddMembers(ctx, req)
 }
 
 func (l *ledgers) Create(ctx context.Context, req controllers.CreateLedgerRequest) (*controllers.CreateLedgerResponse, error) {
@@ -57,7 +57,7 @@ func (l *ledgers) Create(ctx context.Context, req controllers.CreateLedgerReques
 }
 
 func (l *ledgers) CreateExpense(ctx context.Context, req controllers.CreateExpenseRequest) (*controllers.CreateExpenseResponse, error) {
-	if err := l.checkAuthorization(ctx, req.LedgerID, func(l *domain.Ledger) bool { return l.IsParticipant(req.Actor) }); err != nil {
+	if err := l.checkAuthorization(ctx, req.LedgerID, func(l *domain.Ledger) bool { return l.IsMember(req.Actor) }); err != nil {
 		return nil, err
 	}
 
@@ -65,7 +65,7 @@ func (l *ledgers) CreateExpense(ctx context.Context, req controllers.CreateExpen
 }
 
 func (l *ledgers) FindExpense(ctx context.Context, identity domain.ID, ledgerID domain.ID, expenseID domain.ID) (*domain.Expense, error) {
-	if err := l.checkAuthorization(ctx, ledgerID, func(l *domain.Ledger) bool { return l.IsParticipant(identity) }); err != nil {
+	if err := l.checkAuthorization(ctx, ledgerID, func(l *domain.Ledger) bool { return l.IsMember(identity) }); err != nil {
 		return nil, err
 	}
 
@@ -77,17 +77,17 @@ func (l *ledgers) GetByUser(ctx context.Context, identity domain.ID) ([]domain.L
 }
 
 func (l *ledgers) GetExpenses(ctx context.Context, req controllers.GetExpensesRequest) (*controllers.GetExpensesResponse, error) {
-	if err := l.checkAuthorization(ctx, req.LedgerID, func(l *domain.Ledger) bool { return l.IsParticipant(req.Actor) }); err != nil {
+	if err := l.checkAuthorization(ctx, req.LedgerID, func(l *domain.Ledger) bool { return l.IsMember(req.Actor) }); err != nil {
 		return nil, err
 	}
 
 	return l.controller.Ledgers.GetExpenses(ctx, req)
 }
 
-func (l *ledgers) GetParticipants(ctx context.Context, identity domain.ID, ledgerID domain.ID) ([]domain.LedgerMember, error) {
-	if err := l.checkAuthorization(ctx, ledgerID, func(l *domain.Ledger) bool { return l.IsParticipant(identity) }); err != nil {
+func (l *ledgers) GetMembers(ctx context.Context, identity domain.ID, ledgerID domain.ID) (map[domain.ID]*domain.LedgerMember, error) {
+	if err := l.checkAuthorization(ctx, ledgerID, func(l *domain.Ledger) bool { return l.IsMember(identity) }); err != nil {
 		return nil, err
 	}
 
-	return l.controller.Ledgers.GetParticipants(ctx, ledgerID)
+	return l.controller.Ledgers.GetMembers(ctx, ledgerID)
 }

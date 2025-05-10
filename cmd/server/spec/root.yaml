@@ -191,10 +191,10 @@ paths:
                     type: string
                     format: uuid
 
-  /ledgers/{ledgerID}/participants:
+  /ledgers/{ledgerID}/members:
     get:
-      operationId: LedgerParticipantList
-      description: Lists all ledger participants and their balances
+      operationId: LedgerMemberList
+      description: Lists all ledger members and their balances
       security:
         - cookieAuth: []
       parameters:
@@ -209,20 +209,20 @@ paths:
         default:
           $ref: "#/components/responses/ErrorResponse"
         '200':
-          description: List of ledger participants
+          description: List of ledger members
           content:
             application/json:
               schema:
                 type: object
                 required:
-                  - participants
+                  - members
                 properties:
-                  participants:
+                  members:
                     type: array
                     items:
-                      $ref: "#/components/schemas/LedgerParticipant"
+                      $ref: "#/components/schemas/LedgerMember"
     post:
-      operationId: LedgerParticipantAdd
+      operationId: LedgerMemberAdd
       description: Adds a new member to the Ledger
       security:
         - cookieAuth: []
@@ -511,25 +511,21 @@ components:
           type: integer
           format: int32
           description: Amount of money involved in the transaction
-    LedgerParticipant:
+    LedgerMember:
       type: object
       required:
-        - id
         - user_id
         - created_at
         - created_by
         - balance
       properties:
-        id:
-          type: string
-          format: uuid
         user_id:
           type: string
           format: uuid
         created_at:
           type: string
           format: date-time
-          description: Date and time the participant was created
+          description: Date and time the member was created
           example: "2020-01-01T00:00:00Z"
         created_by:
           type: string

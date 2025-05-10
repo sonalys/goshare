@@ -810,11 +810,11 @@ func decodeLedgerListResponse(resp *http.Response) (res *LedgerListOK, _ error) 
 	return res, errors.Wrap(defRes, "error")
 }
 
-func decodeLedgerParticipantAddResponse(resp *http.Response) (res *LedgerParticipantAddAccepted, _ error) {
+func decodeLedgerMemberAddResponse(resp *http.Response) (res *LedgerMemberAddAccepted, _ error) {
 	switch resp.StatusCode {
 	case 202:
 		// Code 202.
-		return &LedgerParticipantAddAccepted{}, nil
+		return &LedgerMemberAddAccepted{}, nil
 	}
 	// Convenient error response.
 	defRes, err := func() (res *ErrorResponseStatusCode, err error) {
@@ -870,7 +870,7 @@ func decodeLedgerParticipantAddResponse(resp *http.Response) (res *LedgerPartici
 	return res, errors.Wrap(defRes, "error")
 }
 
-func decodeLedgerParticipantListResponse(resp *http.Response) (res *LedgerParticipantListOK, _ error) {
+func decodeLedgerMemberListResponse(resp *http.Response) (res *LedgerMemberListOK, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -886,7 +886,7 @@ func decodeLedgerParticipantListResponse(resp *http.Response) (res *LedgerPartic
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response LedgerParticipantListOK
+			var response LedgerMemberListOK
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err

@@ -30,10 +30,9 @@ GROUP BY
     u.id;
 
 
-CREATE TABLE ledger_participants (
-    id UUID PRIMARY KEY,
+CREATE TABLE ledger_members (
+    user_id UUID PRIMARY KEY,
     ledger_id UUID NOT NULL,
-    user_id UUID NOT NULL,
     created_at TIMESTAMP NOT NULL,
     created_by UUID NOT NULL,
     balance INTEGER NOT NULL,
@@ -42,7 +41,7 @@ CREATE TABLE ledger_participants (
     FOREIGN KEY (user_id) REFERENCES users (id),
     FOREIGN KEY (created_by) REFERENCES users (id),
 
-    CONSTRAINT ledger_participant_unique UNIQUE (ledger_id, user_id)
+    CONSTRAINT ledger_member_unique UNIQUE (ledger_id, user_id)
 );
 
 CREATE TABLE expenses (
@@ -85,44 +84,4 @@ CREATE TABLE expense_records (
 
     CONSTRAINT expense_record_unique UNIQUE (id, expense_id)
 );
-
--- Function to update balances
-CREATE OR REPLACE FUNCTION update_ledger_participant_balance()
-RETURNS TRIGGER AS $$
-BEGIN
-    IF TG_OP = 'INSERT' THEN
-        UPDATE ledger_participants
-        SET balance = balance - NEW.amount
-        WHERE user_id = NEW.from_user_id AND ledger_id = (SELECT ledger_id FROM expenses WHERE id = NEW.expense_id);
-
-        UPDATE ledger_participants
-        SET balance = balance + NEW.amount
-        WHERE user_id = NEW.to_user_id AND ledger_id = (SELECT ledger_id FROM expenses WHERE id = NEW.expense_id);
-    ELSIF TG_OP = 'UPDATE' THEN
-        UPDATE ledger_participants
-        SET balance = balance + OLD.amount - NEW.amount
-        WHERE user_id = OLD.from_user_id AND ledger_id = (SELECT ledger_id FROM expenses WHERE id = OLD.expense_id);
-
-        UPDATE ledger_participants
-        SET balance = balance - OLD.amount + NEW.amount
-        WHERE user_id = OLD.to_user_id AND ledger_id = (SELECT ledger_id FROM expenses WHERE id = OLD.expense_id);
-    ELSIF TG_OP = 'DELETE' THEN
-        UPDATE ledger_participants
-        SET balance = balance + OLD.amount
-        WHERE user_id = OLD.from_user_id AND ledger_id = (SELECT ledger_id FROM expenses WHERE id = OLD.expense_id);
-
-        UPDATE ledger_participants
-        SET balance = balance - OLD.amount
-        WHERE user_id = OLD.to_user_id AND ledger_id = (SELECT ledger_id FROM expenses WHERE id = OLD.expense_id);
-    END IF;
-
-    RETURN NULL;
-END;
-$$ LANGUAGE plpgsql;
-
--- Trigger for INSERT, UPDATE, DELETE on expense_records
-CREATE TRIGGER trigger_update_ledger_participant_balance
-AFTER INSERT OR UPDATE OR DELETE ON expense_records
-FOR EACH ROW
-EXECUTE FUNCTION update_ledger_participant_balance();
 

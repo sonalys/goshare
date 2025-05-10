@@ -8,7 +8,7 @@ import (
 	"github.com/sonalys/goshare/internal/domain"
 )
 
-func (a *API) LedgerParticipantAdd(ctx context.Context, req *handlers.LedgerParticipantAddReq, params handlers.LedgerParticipantAddParams) error {
+func (a *API) LedgerMemberAdd(ctx context.Context, req *handlers.LedgerMemberAddReq, params handlers.LedgerMemberAddParams) error {
 	identity, err := getIdentity(ctx)
 	if err != nil {
 		return err
@@ -20,5 +20,5 @@ func (a *API) LedgerParticipantAdd(ctx context.Context, req *handlers.LedgerPart
 		Emails:   req.Emails,
 	}
 
-	return a.Ledgers.AddParticipants(ctx, apiParams)
+	return a.Ledgers.AddMembers(ctx, apiParams)
 }

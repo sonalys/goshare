@@ -10,7 +10,6 @@ type (
 		CreatedAt time.Time
 		CreatedBy ID
 		From      ID
-		ID        ID
 		To        ID
 		Type      RecordType
 		UpdatedAt time.Time
@@ -39,7 +38,7 @@ func NewRecordType(s string) (RecordType, error) {
 	case "settlement":
 		return RecordTypeSettlement, nil
 	default:
-		return RecordTypeUnknown, ErrCauseInvalid
+		return RecordTypeUnknown, ErrInvalid
 	}
 }
 

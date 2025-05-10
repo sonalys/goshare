@@ -7,31 +7,30 @@ import (
 	"github.com/sonalys/goshare/internal/domain"
 )
 
-func (a *API) LedgerParticipantList(ctx context.Context, params handlers.LedgerParticipantListParams) (r *handlers.LedgerParticipantListOK, _ error) {
+func (a *API) LedgerMemberList(ctx context.Context, params handlers.LedgerMemberListParams) (r *handlers.LedgerMemberListOK, _ error) {
 	identity, err := getIdentity(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	balances, err := a.Ledgers.GetParticipants(ctx, identity.UserID, domain.ConvertID(params.LedgerID))
+	members, err := a.Ledgers.GetMembers(ctx, identity.UserID, domain.ConvertID(params.LedgerID))
 	if err != nil {
 		return nil, err
 	}
 
-	return &handlers.LedgerParticipantListOK{
-		Participants: mapLedgerParticipantBalanceToResponseObject(balances),
+	return &handlers.LedgerMemberListOK{
+		Members: mapLedgerMemberBalanceToResponseObject(members),
 	}, nil
 }
 
-func mapLedgerParticipantBalanceToResponseObject(balance []domain.LedgerMember) []handlers.LedgerParticipant {
-	var balances []handlers.LedgerParticipant
-	for _, b := range balance {
-		balances = append(balances, handlers.LedgerParticipant{
-			ID:        b.ID.UUID(),
-			UserID:    b.Identity.UUID(),
-			CreatedAt: b.CreatedAt,
-			CreatedBy: b.CreatedBy.UUID(),
-			Balance:   b.Balance,
+func mapLedgerMemberBalanceToResponseObject(members map[domain.ID]*domain.LedgerMember) []handlers.LedgerMember {
+	var balances []handlers.LedgerMember
+	for id, member := range members {
+		balances = append(balances, handlers.LedgerMember{
+			UserID:    id.UUID(),
+			CreatedAt: member.CreatedAt,
+			CreatedBy: member.CreatedBy.UUID(),
+			Balance:   member.Balance,
 		})
 	}
 
