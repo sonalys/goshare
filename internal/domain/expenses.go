@@ -194,13 +194,23 @@ func (e *Expense) CreateRecords(actor ID, ledger *Ledger, records ...PendingReco
 
 func (e *Expense) DeleteRecord(actor ID, ledger *Ledger, recordID ID) error {
 	if !ledger.IsMember(actor) {
-		return &ErrLedgerUserNotMember{
-			UserID:   actor,
-			LedgerID: ledger.ID,
+		return FieldError{
+			Field: "actor",
+			Cause: &ErrLedgerUserNotMember{
+				UserID:   actor,
+				LedgerID: ledger.ID,
+			},
 		}
 	}
 
-	oldRecord, ok := e.Records[recordID]
+	if ledger.ID != e.LedgerID {
+		return FieldError{
+			Field: "ledger",
+			Cause: ErrLedgerMismatch,
+		}
+	}
+
+	record, ok := e.Records[recordID]
 	if !ok {
 		return FieldError{
 			Field: "recordID",
@@ -208,13 +218,13 @@ func (e *Expense) DeleteRecord(actor ID, ledger *Ledger, recordID ID) error {
 		}
 	}
 
-	switch oldRecord.Type {
+	switch record.Type {
 	case RecordTypeDebt:
-		ledger.Members[oldRecord.From].Balance += oldRecord.Amount
-		ledger.Members[oldRecord.To].Balance -= oldRecord.Amount
+		ledger.Members[record.From].Balance += record.Amount
+		ledger.Members[record.To].Balance -= record.Amount
 	case RecordTypeSettlement:
-		ledger.Members[oldRecord.From].Balance -= oldRecord.Amount
-		ledger.Members[oldRecord.To].Balance += oldRecord.Amount
+		ledger.Members[record.From].Balance -= record.Amount
+		ledger.Members[record.To].Balance += record.Amount
 	}
 
 	delete(e.Records, recordID)

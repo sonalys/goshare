@@ -525,3 +525,156 @@ func TestExpense_CreateRecords(t *testing.T) {
 		})
 	})
 }
+
+func TestExpense_DeleteRecord(t *testing.T) {
+	t.Parallel()
+
+	t.Run("pass/debt", func(t *testing.T) {
+		t.Parallel()
+
+		actorID := domain.NewID()
+		memberID := domain.NewID()
+		recordID := domain.NewID()
+
+		ledger := &domain.Ledger{
+			ID: domain.NewID(),
+			Members: map[domain.ID]*domain.LedgerMember{
+				actorID:  {Balance: -1},
+				memberID: {Balance: 1},
+			},
+		}
+
+		expense := domain.Expense{
+			LedgerID: ledger.ID,
+			Records: map[domain.ID]*domain.Record{
+				recordID: {Type: domain.RecordTypeDebt, Amount: 1, From: actorID, To: memberID},
+			},
+		}
+
+		err := expense.DeleteRecord(actorID, ledger, recordID)
+		require.NoError(t, err)
+
+		assert.Empty(t, expense.Records)
+
+		for _, member := range ledger.Members {
+			assert.Zero(t, member.Balance)
+		}
+	})
+
+	t.Run("pass/settlement", func(t *testing.T) {
+		t.Parallel()
+
+		actorID := domain.NewID()
+		memberID := domain.NewID()
+		recordID := domain.NewID()
+
+		ledger := &domain.Ledger{
+			ID: domain.NewID(),
+			Members: map[domain.ID]*domain.LedgerMember{
+				actorID:  {Balance: 1},
+				memberID: {Balance: -1},
+			},
+		}
+
+		expense := domain.Expense{
+			LedgerID: ledger.ID,
+			Records: map[domain.ID]*domain.Record{
+				recordID: {Type: domain.RecordTypeSettlement, Amount: 1, From: actorID, To: memberID},
+			},
+		}
+
+		err := expense.DeleteRecord(actorID, ledger, recordID)
+		require.NoError(t, err)
+
+		assert.Empty(t, expense.Records)
+
+		for _, member := range ledger.Members {
+			assert.Zero(t, member.Balance)
+		}
+	})
+
+	t.Run("fail/actor is not a member", func(t *testing.T) {
+		t.Parallel()
+
+		recordID := domain.NewID()
+		memberID := domain.NewID()
+		actorID := domain.NewID()
+
+		ledger := &domain.Ledger{
+			ID:      domain.NewID(),
+			Members: map[domain.ID]*domain.LedgerMember{},
+		}
+
+		expense := domain.Expense{
+			LedgerID: ledger.ID,
+			Records: map[domain.ID]*domain.Record{
+				recordID: {Type: domain.RecordTypeDebt, Amount: 1, From: actorID, To: memberID},
+			},
+		}
+
+		err := expense.DeleteRecord(actorID, ledger, recordID)
+		require.ErrorIs(t, err, domain.FieldError{
+			Field: "actor",
+			Cause: &domain.ErrLedgerUserNotMember{
+				UserID:   actorID,
+				LedgerID: ledger.ID,
+			},
+		})
+	})
+
+	t.Run("fail/ledger mismatch", func(t *testing.T) {
+		t.Parallel()
+
+		recordID := domain.NewID()
+		memberID := domain.NewID()
+		actorID := domain.NewID()
+
+		ledger := &domain.Ledger{
+			ID: domain.NewID(),
+			Members: map[domain.ID]*domain.LedgerMember{
+				actorID: {},
+			},
+		}
+
+		expense := domain.Expense{
+			LedgerID: domain.NewID(),
+			Records: map[domain.ID]*domain.Record{
+				recordID: {Type: domain.RecordTypeDebt, Amount: 1, From: actorID, To: memberID},
+			},
+		}
+
+		err := expense.DeleteRecord(actorID, ledger, recordID)
+		require.ErrorIs(t, err, domain.FieldError{
+			Field: "ledger",
+			Cause: domain.ErrLedgerMismatch,
+		})
+	})
+
+	t.Run("fail/record not found", func(t *testing.T) {
+		t.Parallel()
+
+		recordID := domain.NewID()
+		memberID := domain.NewID()
+		actorID := domain.NewID()
+
+		ledger := &domain.Ledger{
+			ID: domain.NewID(),
+			Members: map[domain.ID]*domain.LedgerMember{
+				actorID: {},
+			},
+		}
+
+		expense := domain.Expense{
+			LedgerID: ledger.ID,
+			Records: map[domain.ID]*domain.Record{
+				recordID: {Type: domain.RecordTypeDebt, Amount: 1, From: actorID, To: memberID},
+			},
+		}
+
+		err := expense.DeleteRecord(actorID, ledger, domain.NewID())
+		require.ErrorIs(t, err, domain.FieldError{
+			Field: "recordID",
+			Cause: domain.ErrNotFound,
+		})
+	})
+}
