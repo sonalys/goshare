@@ -27,50 +27,52 @@ const (
 	ErrExpenseMaxRecords  = ErrCause("expense reached maximum number of records")
 	ErrSettlementMismatch = ErrCause("settlement cannot be greater than debt")
 	ErrLedgerFromToMatch  = ErrCause("from and to cannot be the equal")
+	ErrLedgerMismatch     = ErrCause("ledger mismatch")
 )
 
-func (e *Expense) TotalDebt() int32 {
-	var totalDebt int32
+func (e *Expense) sumRecords(t RecordType) int32 {
+	var sum int32
 
 	for i := range e.Records {
-		if e.Records[i].Type != RecordTypeDebt {
-			continue
+		if e.Records[i].Type == t {
+			sum += e.Records[i].Amount
 		}
-		totalDebt += e.Records[i].Amount
 	}
 
-	return totalDebt
+	return sum
+}
+
+func (e *Expense) TotalDebt() int32 {
+	return e.sumRecords(RecordTypeDebt)
 }
 
 func (e *Expense) TotalSettled() int32 {
-	var totalSettled int32
-
-	for i := range e.Records {
-		if e.Records[i].Type != RecordTypeSettlement {
-			continue
-		}
-		totalSettled += e.Records[i].Amount
-	}
-
-	return totalSettled
+	return e.sumRecords(RecordTypeSettlement)
 }
 
 func (e *Expense) CreateRecords(actor ID, ledger *Ledger, records ...PendingRecord) error {
-	var errs FormError
-
 	if !ledger.IsMember(actor) {
-		errs.Append(FieldError{
+		return FieldError{
 			Field: "actor",
 			Cause: &ErrLedgerUserNotMember{
 				UserID:   actor,
 				LedgerID: ledger.ID,
 			},
-		})
+		}
 	}
 
-	if recordsLen := len(records); recordsLen < 1 {
-		errs.Append(newRequiredFieldError("records"))
+	if len(records) == 0 {
+		return nil
 	}
+
+	if ledger.ID != e.LedgerID {
+		return FieldError{
+			Field: "ledger",
+			Cause: ErrLedgerMismatch,
+		}
+	}
+
+	var errs FormError
 
 	if len(e.Records)+len(records) > ExpenseMaxRecords {
 		errs.Append(newFieldLengthError("records", 1, ExpenseMaxRecords-len(e.Records)))

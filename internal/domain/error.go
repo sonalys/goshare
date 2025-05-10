@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -61,8 +60,7 @@ func (e FieldError) Error() string {
 }
 
 func (e FieldError) Is(err error) bool {
-	var targetErr FieldError
-	return errors.As(err, &targetErr) && e.Field == targetErr.Field && errors.Is(e.Cause, targetErr.Cause)
+	return e.Error() == err.Error()
 }
 
 func (e FieldError) Unwrap() error {
@@ -86,6 +84,10 @@ func (el FieldErrorList) Error() string {
 
 func (e *ValueLengthError) Error() string {
 	return fmt.Sprintf("value length must be between %d and %d", e.Min, e.Max)
+}
+
+func (e *ValueLengthError) Is(err error) bool {
+	return e.Error() == err.Error()
 }
 
 func (e ErrCause) Error() string {
