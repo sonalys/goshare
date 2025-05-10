@@ -44,7 +44,7 @@ func convertUserBalances(userBalances []handlers.ExpenseRecord) ([]domain.Pendin
 	for i, ub := range userBalances {
 		recordType, err := domain.NewRecordType(string(ub.Type))
 		if err != nil {
-			errs = append(errs, domain.FieldError{
+			errs.Append(domain.FieldError{
 				Cause: err,
 				Field: "records",
 				Metadata: &domain.FieldErrorMetadata{

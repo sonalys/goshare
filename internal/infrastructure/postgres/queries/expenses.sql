@@ -23,4 +23,4 @@ SELECT * FROM expense_records WHERE expense_id = $1 ORDER BY created_at DESC;
 SELECT * FROM expenses WHERE ledger_id = $1 AND created_at < $2 ORDER BY created_at DESC LIMIT $3;
 
 -- name: DeleteExpenseRecordsNotIn :exec
-DELETE FROM expense_records WHERE id NOT IN ($1::UUID[]);
+DELETE FROM expense_records WHERE id != ALL(sqlc.arg('ids')::uuid[]);

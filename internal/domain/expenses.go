@@ -152,13 +152,6 @@ func (e *Expense) CreateRecords(actor ID, ledger *Ledger, records ...PendingReco
 		}
 	}
 
-	if totalSettled > totalDebt {
-		errs.Append(FieldError{
-			Field: "pendingRecords",
-			Cause: ErrSettlementMismatch,
-		})
-	}
-
 	if err := errs.Close(); err != nil {
 		return err
 	}

@@ -21,13 +21,14 @@ func NewUsersRepository(client connection) *UsersRepository {
 	}
 }
 
-func (r *UsersRepository) Create(ctx context.Context, user *domain.User) error {
-	return mapError(r.client.queries().CreateUser(ctx, sqlc.CreateUserParams{
+func (r *UsersRepository) Save(ctx context.Context, user *domain.User) error {
+	return mapError(r.client.queries().SaveUser(ctx, sqlc.SaveUserParams{
 		ID:           user.ID,
 		FirstName:    user.FirstName,
 		LastName:     user.LastName,
 		Email:        user.Email,
 		PasswordHash: user.PasswordHash,
+		LedgerCount:  user.LedgersCount,
 		CreatedAt:    convertTime(user.CreatedAt),
 	}))
 }
@@ -59,7 +60,7 @@ func (r *UsersRepository) ListByEmail(ctx context.Context, emails []string) ([]d
 
 	var errs domain.FormError
 	for idx, email := range emails {
-		if !slices.ContainsFunc(users, func(user sqlc.UserView) bool {
+		if !slices.ContainsFunc(users, func(user sqlc.User) bool {
 			return user.Email == email
 		}) {
 			errs = append(errs, domain.FieldError{

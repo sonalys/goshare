@@ -5,6 +5,7 @@ CREATE TABLE users (
     email TEXT NOT NULL,
     password_hash TEXT NOT NULL,
     created_at TIMESTAMP,
+    ledger_count INTEGER NOT NULL,
 
     CONSTRAINT users_unique_email UNIQUE (email)
 );
@@ -17,17 +18,6 @@ CREATE TABLE ledgers (
 
     FOREIGN KEY (created_by) REFERENCES users (id)
 );
-
-CREATE VIEW user_view AS
-SELECT 
-    u.*,
-    COUNT(l.id) AS ledger_count
-FROM 
-    users u
-LEFT JOIN 
-    ledgers l ON u.id = l.created_by
-GROUP BY 
-    u.id;
 
 
 CREATE TABLE ledger_members (

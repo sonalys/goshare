@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -45,6 +46,9 @@ func (c *Users) Login(ctx context.Context, req LoginRequest) (*LoginResponse, er
 
 	user, err := c.db.User().FindByEmail(ctx, req.Email)
 	if err != nil {
+		if !errors.Is(err, v1.ErrNotFound) {
+			return nil, err
+		}
 		slog.Error(ctx, "could not find user by email", err)
 		return nil, &v1.ErrUserCredentialsMismatch{
 			Email: req.Email,
@@ -92,8 +96,8 @@ func (c *Users) Register(ctx context.Context, req RegisterRequest) (resp *Regist
 			return fmt.Errorf("creating user: %w", err)
 		}
 
-		if err = db.User().Create(ctx, user); err != nil {
-			return fmt.Errorf("storing user: %w", err)
+		if err = db.User().Save(ctx, user); err != nil {
+			return fmt.Errorf("saving user: %w", err)
 		}
 
 		resp = &RegisterResponse{

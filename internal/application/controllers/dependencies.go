@@ -17,7 +17,7 @@ type (
 	}
 
 	UserRepository interface {
-		Create(ctx context.Context, user *domain.User) error
+		Save(ctx context.Context, user *domain.User) error
 		Find(ctx context.Context, id domain.ID) (*domain.User, error)
 		FindByEmail(ctx context.Context, email string) (*domain.User, error)
 		ListByEmail(ctx context.Context, emails []string) ([]domain.User, error)

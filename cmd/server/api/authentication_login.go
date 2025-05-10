@@ -17,17 +17,18 @@ func (a *API) AuthenticationLogin(ctx context.Context, req *handlers.Authenticat
 		Email:    string(req.Email),
 		Password: req.Password,
 	})
-	switch {
-	case err == nil:
+	if err == nil {
 		return &handlers.AuthenticationLoginOK{
 			SetCookie: handlers.NewOptString(fmt.Sprintf("SESSIONID=%s; Path=/; HttpOnly; SameSite=Strict", resp.Token)),
 		}, nil
-	case errors.Is(err, &v1.ErrUserCredentialsMismatch{}):
+	}
+
+	if target := new(v1.ErrUserCredentialsMismatch); errors.As(err, &target) {
 		return nil, newErrorResponse(ctx, http.StatusUnauthorized, handlers.Error{
 			Code:    handlers.ErrorCodeEmailPasswordMismatch,
 			Message: "invalid credentials",
 		})
-	default:
-		return nil, err
 	}
+
+	return nil, err
 }

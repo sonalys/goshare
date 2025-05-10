@@ -56,11 +56,11 @@ func (q *Queries) CreateLedger(ctx context.Context, arg CreateLedgerParams) erro
 }
 
 const deleteMembersNotIn = `-- name: DeleteMembersNotIn :exec
-DELETE FROM ledger_members WHERE user_id NOT IN ($1::UUID[])
+DELETE FROM ledger_members WHERE user_id != ALL($1::uuid[])
 `
 
-func (q *Queries) DeleteMembersNotIn(ctx context.Context, dollar_1 []domain.ID) error {
-	_, err := q.db.Exec(ctx, deleteMembersNotIn, dollar_1)
+func (q *Queries) DeleteMembersNotIn(ctx context.Context, ids []domain.ID) error {
+	_, err := q.db.Exec(ctx, deleteMembersNotIn, ids)
 	return err
 }
 
@@ -149,7 +149,7 @@ func (q *Queries) LockLedgerForUpdate(ctx context.Context, id domain.ID) error {
 }
 
 const lockUserForUpdate = `-- name: LockUserForUpdate :exec
-SELECT id, first_name, last_name, email, password_hash, created_at FROM users WHERE id = $1 FOR UPDATE
+SELECT id, first_name, last_name, email, password_hash, created_at, ledger_count FROM users WHERE id = $1 FOR UPDATE
 `
 
 func (q *Queries) LockUserForUpdate(ctx context.Context, id domain.ID) error {

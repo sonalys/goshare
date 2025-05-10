@@ -56,14 +56,5 @@ type User struct {
 	Email        string
 	PasswordHash string
 	CreatedAt    pgtype.Timestamp
-}
-
-type UserView struct {
-	ID           domain.ID
-	FirstName    string
-	LastName     string
-	Email        string
-	PasswordHash string
-	CreatedAt    pgtype.Timestamp
-	LedgerCount  int64
+	LedgerCount  int32
 }

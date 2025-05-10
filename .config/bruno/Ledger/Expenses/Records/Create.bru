@@ -1,0 +1,29 @@
+meta {
+  name: Create
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{api_url}}/ledgers/:ledger_id/expenses/:expense_id/records
+  body: json
+  auth: inherit
+}
+
+params:path {
+  ledger_id: {{ledger_id}}
+  expense_id: {{expense_id}}
+}
+
+body:json {
+  {
+    "records": [
+      {
+    "type": "debt",
+    "from_user_id": "{{user_id}}",
+    "to_user_id": "{{user_id}}2",
+    "amount": 48
+  }
+    ]
+  }
+}

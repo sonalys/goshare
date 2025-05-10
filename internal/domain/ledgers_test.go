@@ -200,18 +200,6 @@ func TestLedger_CreateExpense(t *testing.T) {
 		assert.Nil(t, expense)
 	})
 
-	t.Run("fail/settlement greater than debt", func(t *testing.T) {
-		t.Parallel()
-		data := factory(func(td *testData) {
-			td.req.PendingRecords[0].Type = domain.RecordTypeSettlement
-			td.req.PendingRecords[0].Amount = math.MaxInt32
-		})
-
-		expense, err := data.ledger.CreateExpense(data.req)
-		require.ErrorIs(t, err, domain.ErrSettlementMismatch)
-		assert.Nil(t, expense)
-	})
-
 	t.Run("fail/name required", func(t *testing.T) {
 		t.Parallel()
 		data := factory(func(td *testData) {

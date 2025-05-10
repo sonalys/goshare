@@ -1,0 +1,17 @@
+meta {
+  name: Delete
+  type: http
+  seq: 1
+}
+
+delete {
+  url: {{api_url}}/ledgers/:ledger_id/expenses/:expense_id/records/:record_id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  ledger_id: {{ledger_id}}
+  expense_id: {{expense_id}}
+  record_id: {{record_id}}
+}

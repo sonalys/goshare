@@ -86,11 +86,11 @@ func (q *Queries) DeleteExpense(ctx context.Context, id domain.ID) error {
 }
 
 const deleteExpenseRecordsNotIn = `-- name: DeleteExpenseRecordsNotIn :exec
-DELETE FROM expense_records WHERE id NOT IN ($1::UUID[])
+DELETE FROM expense_records WHERE id != ALL($1::uuid[])
 `
 
-func (q *Queries) DeleteExpenseRecordsNotIn(ctx context.Context, dollar_1 []domain.ID) error {
-	_, err := q.db.Exec(ctx, deleteExpenseRecordsNotIn, dollar_1)
+func (q *Queries) DeleteExpenseRecordsNotIn(ctx context.Context, ids []domain.ID) error {
+	_, err := q.db.Exec(ctx, deleteExpenseRecordsNotIn, ids)
 	return err
 }
 

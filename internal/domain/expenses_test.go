@@ -489,41 +489,6 @@ func TestExpense_CreateRecords(t *testing.T) {
 			Cause: domain.ErrOverflow,
 		})
 	})
-
-	t.Run("fail/settlement bigger than debt", func(t *testing.T) {
-		t.Parallel()
-
-		actorID := domain.NewID()
-		memberID := domain.NewID()
-
-		ledger := &domain.Ledger{
-			ID: domain.NewID(),
-			Members: map[domain.ID]*domain.LedgerMember{
-				actorID:  {},
-				memberID: {},
-			},
-		}
-
-		expense := domain.Expense{
-			LedgerID: ledger.ID,
-			Records: map[domain.ID]*domain.Record{
-				domain.NewID(): {Type: domain.RecordTypeDebt, Amount: 1},
-			},
-		}
-
-		debt := domain.PendingRecord{
-			Type:   domain.RecordTypeSettlement,
-			From:   memberID,
-			To:     domain.NewID(),
-			Amount: 10,
-		}
-
-		err := expense.CreateRecords(actorID, ledger, debt)
-		require.ErrorIs(t, err, domain.FieldError{
-			Field: "pendingRecords",
-			Cause: domain.ErrSettlementMismatch,
-		})
-	})
 }
 
 func TestExpense_DeleteRecord(t *testing.T) {

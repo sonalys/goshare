@@ -1,11 +1,21 @@
--- name: CreateUser :exec
-INSERT INTO users (id,first_name,last_name,email,password_hash,created_at) VALUES ($1,$2,$3,$4,$5,$6);
+-- name: SaveUser :exec
+INSERT INTO users (id,first_name,last_name,email,password_hash,ledger_count,created_at) 
+VALUES ($1,$2,$3,$4,$5,$6,$7)
+ON CONFLICT (id)
+DO UPDATE
+SET
+first_name = EXCLUDED.first_name,
+last_name = EXCLUDED.last_name,
+email = EXCLUDED.email,
+password_hash = EXCLUDED.password_hash,
+ledger_count = EXCLUDED.ledger_count
+;
 
 -- name: FindUserByEmail :one
-SELECT * FROM user_view WHERE email = $1;
+SELECT * FROM users WHERE email = $1;
 
 -- name: ListByEmail :many
-SELECT * FROM user_view WHERE email = ANY(@emails::text[]);
+SELECT * FROM users WHERE email = ANY(@emails::text[]);
 
 -- name: FindUser :one
-SELECT * FROM user_view WHERE id = $1 FOR UPDATE;
+SELECT * FROM users WHERE id = $1 FOR UPDATE;

@@ -22,18 +22,19 @@ func (a *API) LedgerExpenseRecordCreate(ctx context.Context, req *handlers.Ledge
 	apiReq := controllers.CreateExpenseRecordRequest{
 		Actor:          identity.UserID,
 		LedgerID:       domain.ConvertID(params.LedgerID),
+		ExpenseID:      domain.ConvertID(params.ExpenseID),
 		PendingRecords: pendingRecords,
 	}
 
-	switch resp, err := a.Ledgers.CreateExpenseRecord(ctx, apiReq); err {
-	case nil:
-		return &handlers.Expense{
-			ID:          handlers.NewOptUUID(resp.ID.UUID()),
-			Name:        resp.Name,
-			ExpenseDate: resp.ExpenseDate,
-			Records:     convertRecords(resp.Records),
-		}, nil
-	default:
+	resp, err := a.Ledgers.CreateExpenseRecord(ctx, apiReq)
+	if err != nil {
 		return nil, err
 	}
+
+	return &handlers.Expense{
+		ID:          handlers.NewOptUUID(resp.ID.UUID()),
+		Name:        resp.Name,
+		ExpenseDate: resp.ExpenseDate,
+		Records:     convertRecords(resp.Records),
+	}, nil
 }

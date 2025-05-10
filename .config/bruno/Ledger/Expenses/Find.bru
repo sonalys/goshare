@@ -14,3 +14,7 @@ params:path {
   ledger_id: {{ledger_id}}
   expense_id: {{expense_id}}
 }
+
+vars:post-response {
+  record_id: res?.body?.records?.[0]?.id
+}

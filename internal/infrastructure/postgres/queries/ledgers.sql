@@ -37,4 +37,4 @@ SELECT COUNT(*) FROM ledgers WHERE created_by = $1;
 UPDATE ledgers SET name = $1 WHERE id = $2;
 
 -- name: DeleteMembersNotIn :exec
-DELETE FROM ledger_members WHERE user_id NOT IN ($1::UUID[]);
+DELETE FROM ledger_members WHERE user_id != ALL(sqlc.arg('ids')::uuid[]);

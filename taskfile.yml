@@ -46,7 +46,7 @@ tasks:
     cmd: docker compose -f {{ .COMPOSE_FILE }} up -d --build && docker compose -f {{ .COMPOSE_FILE }} logs -f goshare_migrate goshare
 
   compose-down:
-    cmd: docker compose -f {{ .COMPOSE_FILE }} down
+    cmd: docker compose -f {{ .COMPOSE_FILE }} down -v
 
   compose-db:
     cmd: docker compose -f {{ .COMPOSE_FILE }} up -d postgres

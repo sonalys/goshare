@@ -17,7 +17,7 @@ type (
 		IsEmailVerified bool
 		LastName        string
 		PasswordHash    string
-		LedgersCount    int64
+		LedgersCount    int32
 	}
 
 	NewUserRequest struct {

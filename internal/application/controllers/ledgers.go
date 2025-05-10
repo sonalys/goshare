@@ -80,7 +80,11 @@ func (c *Ledgers) Create(ctx context.Context, req CreateLedgerRequest) (resp *Cr
 			return err
 		}
 
-		return nil
+		resp = &CreateLedgerResponse{
+			ID: ledger.ID,
+		}
+
+		return db.User().Save(ctx, user)
 	})
 	if err != nil {
 		return nil, slog.ErrorReturn(ctx, "creating ledger", err)
@@ -119,6 +123,15 @@ func (c *Ledgers) CreateExpense(ctx context.Context, req CreateExpenseRequest) (
 		err = db.Expense().Create(ctx, req.LedgerID, expense)
 		if err != nil {
 			return err
+		}
+
+		err = db.Ledger().Update(ctx, ledger)
+		if err != nil {
+			return err
+		}
+
+		resp = &CreateExpenseResponse{
+			ID: expense.ID,
 		}
 
 		return nil

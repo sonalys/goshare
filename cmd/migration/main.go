@@ -24,7 +24,7 @@ func main() {
 
 	slog.Info(ctx, "starting migration")
 
-	driver, err := iofs.New(migrations.MigrationsFS, "migrations")
+	driver, err := iofs.New(migrations.MigrationsFS, ".")
 	if err != nil {
 		panic(err)
 	}

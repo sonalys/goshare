@@ -32,6 +32,7 @@ func NewExpense(expense *sqlc.Expense, records []sqlc.ExpenseRecord) (*domain.Ex
 		CreatedBy:   expense.CreatedBy,
 		UpdatedAt:   expense.UpdatedAt.Time,
 		UpdatedBy:   expense.UpdatedBy,
+		Records:     make(map[domain.ID]*domain.Record, len(records)),
 	}
 
 	for _, recordModel := range records {
