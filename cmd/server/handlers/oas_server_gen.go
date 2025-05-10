@@ -56,6 +56,12 @@ type Handler interface {
 	//
 	// POST /ledgers/{ledgerID}/expenses/{expenseID}/records
 	LedgerExpenseRecordCreate(ctx context.Context, req *LedgerExpenseRecordCreateReq, params LedgerExpenseRecordCreateParams) (*Expense, error)
+	// LedgerExpenseRecordDelete implements LedgerExpenseRecordDelete operation.
+	//
+	// Delete an expense record.
+	//
+	// DELETE /ledgers/{ledgerID}/expenses/{expenseID}/records/{recordID}
+	LedgerExpenseRecordDelete(ctx context.Context, params LedgerExpenseRecordDeleteParams) error
 	// LedgerList implements LedgerList operation.
 	//
 	// Lists all ledgers.

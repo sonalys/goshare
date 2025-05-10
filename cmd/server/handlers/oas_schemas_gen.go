@@ -734,6 +734,9 @@ func (s *LedgerExpenseRecordCreateReq) SetRecords(val []ExpenseRecord) {
 	s.Records = val
 }
 
+// LedgerExpenseRecordDeleteOK is response for LedgerExpenseRecordDelete operation.
+type LedgerExpenseRecordDeleteOK struct{}
+
 type LedgerListOK struct {
 	Ledgers []Ledger `json:"ledgers"`
 }

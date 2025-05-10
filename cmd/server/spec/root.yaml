@@ -418,6 +418,40 @@ paths:
               schema:
                 $ref: "#/components/schemas/Expense"
 
+  /ledgers/{ledgerID}/expenses/{expenseID}/records/{recordID}:
+    delete:
+      operationId: LedgerExpenseRecordDelete
+      description: Delete an expense record
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: ledgerID
+          in: path
+          required: true
+          description: Ledger ID
+          schema:
+            type: string
+            format: uuid
+        - name: expenseID
+          in: path
+          required: true
+          description: Expense ID
+          schema:
+            type: string
+            format: uuid
+        - name: recordID
+          in: path
+          required: true
+          description: Expense Record ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+        '200':
+          description: Expense record was deleted
+
 components:
   securitySchemes:
     cookieAuth:

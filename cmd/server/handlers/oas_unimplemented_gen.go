@@ -85,6 +85,15 @@ func (UnimplementedHandler) LedgerExpenseRecordCreate(ctx context.Context, req *
 	return r, ht.ErrNotImplemented
 }
 
+// LedgerExpenseRecordDelete implements LedgerExpenseRecordDelete operation.
+//
+// Delete an expense record.
+//
+// DELETE /ledgers/{ledgerID}/expenses/{expenseID}/records/{recordID}
+func (UnimplementedHandler) LedgerExpenseRecordDelete(ctx context.Context, params LedgerExpenseRecordDeleteParams) error {
+	return ht.ErrNotImplemented
+}
+
 // LedgerList implements LedgerList operation.
 //
 // Lists all ledgers.

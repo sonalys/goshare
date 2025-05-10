@@ -284,6 +284,12 @@ func (c *Ledgers) CreateExpenseRecord(ctx context.Context, req CreateExpenseReco
 	ctx, span := otel.Tracer.Start(ctx, "ledgers.CreateExpenseRecord")
 	defer span.End()
 
+	ctx = slog.Context(ctx,
+		slog.WithStringer("actor", req.Actor),
+		slog.WithStringer("expenseID", req.ExpenseID),
+		slog.WithStringer("ledgerID", req.LedgerID),
+	)
+
 	err = c.db.Transaction(ctx, func(db Database) error {
 		ledger, err := db.Ledger().Find(ctx, req.LedgerID)
 		if err != nil {
@@ -314,5 +320,59 @@ func (c *Ledgers) CreateExpenseRecord(ctx context.Context, req CreateExpenseReco
 		return nil, slog.ErrorReturn(ctx, "creating expense record", err)
 	}
 
+	slog.Info(ctx, "expense records created")
+
 	return
+}
+
+type DeleteExpenseRecordRequest struct {
+	ActorID   domain.ID
+	LedgerID  domain.ID
+	ExpenseID domain.ID
+	RecordID  domain.ID
+}
+
+func (c *Ledgers) DeleteExpenseRecord(ctx context.Context, req DeleteExpenseRecordRequest) error {
+	ctx, span := otel.Tracer.Start(ctx, "ledgers.CreateExpenseRecord")
+	defer span.End()
+
+	ctx = slog.Context(ctx,
+		slog.WithStringer("actor", req.ActorID),
+		slog.WithStringer("ledgerID", req.LedgerID),
+		slog.WithStringer("expenseID", req.ExpenseID),
+		slog.WithStringer("recordID", req.RecordID),
+	)
+
+	err := c.db.Transaction(ctx, func(db Database) error {
+		expense, err := db.Expense().Find(ctx, req.ExpenseID)
+		if err != nil {
+			return fmt.Errorf("finding expense: %w", err)
+		}
+
+		ledger, err := db.Ledger().Find(ctx, req.LedgerID)
+		if err != nil {
+			return fmt.Errorf("finding ledger: %w", err)
+		}
+
+		if err = expense.DeleteRecord(req.ActorID, ledger, req.RecordID); err != nil {
+			return fmt.Errorf("deleting record: %w", err)
+		}
+
+		if err = db.Ledger().Update(ctx, ledger); err != nil {
+			return fmt.Errorf("updating ledger: %w", err)
+		}
+
+		if err = db.Expense().Update(ctx, expense); err != nil {
+			return fmt.Errorf("updating expense: %w", err)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return slog.ErrorReturn(ctx, "deleting expense record", err)
+	}
+
+	slog.Info(ctx, "ledger expense record deleted")
+
+	return nil
 }

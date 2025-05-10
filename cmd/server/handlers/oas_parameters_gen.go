@@ -523,6 +523,180 @@ func decodeLedgerExpenseRecordCreateParams(args [2]string, argsEscaped bool, r *
 	return params, nil
 }
 
+// LedgerExpenseRecordDeleteParams is parameters of LedgerExpenseRecordDelete operation.
+type LedgerExpenseRecordDeleteParams struct {
+	// Ledger ID.
+	LedgerID uuid.UUID
+	// Expense ID.
+	ExpenseID uuid.UUID
+	// Expense Record ID.
+	RecordID uuid.UUID
+}
+
+func unpackLedgerExpenseRecordDeleteParams(packed middleware.Parameters) (params LedgerExpenseRecordDeleteParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "ledgerID",
+			In:   "path",
+		}
+		params.LedgerID = packed[key].(uuid.UUID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "expenseID",
+			In:   "path",
+		}
+		params.ExpenseID = packed[key].(uuid.UUID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "recordID",
+			In:   "path",
+		}
+		params.RecordID = packed[key].(uuid.UUID)
+	}
+	return params
+}
+
+func decodeLedgerExpenseRecordDeleteParams(args [3]string, argsEscaped bool, r *http.Request) (params LedgerExpenseRecordDeleteParams, _ error) {
+	// Decode path: ledgerID.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "ledgerID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.LedgerID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "ledgerID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: expenseID.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "expenseID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.ExpenseID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "expenseID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: recordID.
+	if err := func() error {
+		param := args[2]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[2])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "recordID",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToUUID(val)
+				if err != nil {
+					return err
+				}
+
+				params.RecordID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "recordID",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // LedgerMemberAddParams is parameters of LedgerMemberAdd operation.
 type LedgerMemberAddParams struct {
 	// Ledger ID.
