@@ -27,6 +27,7 @@ type (
 		Create(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error
 		Find(ctx context.Context, id domain.ID) (*domain.Expense, error)
 		GetByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error)
+		Update(ctx context.Context, expense *domain.Expense) error
 	}
 
 	Database interface {

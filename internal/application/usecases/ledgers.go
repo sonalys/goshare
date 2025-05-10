@@ -18,6 +18,7 @@ type (
 		GetByUser(ctx context.Context, identity domain.ID) ([]domain.Ledger, error)
 		GetExpenses(ctx context.Context, req controllers.GetExpensesRequest) (*controllers.GetExpensesResponse, error)
 		GetMembers(ctx context.Context, identity domain.ID, ledgerID domain.ID) (map[domain.ID]*domain.LedgerMember, error)
+		CreateExpenseRecord(ctx context.Context, req controllers.CreateExpenseRecordRequest) (*domain.Expense, error)
 	}
 
 	ledgers struct {
@@ -90,4 +91,12 @@ func (l *ledgers) GetMembers(ctx context.Context, identity domain.ID, ledgerID d
 	}
 
 	return l.controller.Ledgers.GetMembers(ctx, ledgerID)
+}
+
+func (l *ledgers) CreateExpenseRecord(ctx context.Context, req controllers.CreateExpenseRecordRequest) (*domain.Expense, error) {
+	if err := l.checkAuthorization(ctx, req.LedgerID, func(l *domain.Ledger) bool { return l.IsMember(req.Actor) }); err != nil {
+		return nil, err
+	}
+
+	return l.controller.Ledgers.CreateExpenseRecord(ctx, req)
 }

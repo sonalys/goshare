@@ -61,7 +61,7 @@ type Invoker interface {
 	LedgerExpenseCreate(ctx context.Context, request *Expense, params LedgerExpenseCreateParams) (*LedgerExpenseCreateOK, error)
 	// LedgerExpenseGet invokes LedgerExpenseGet operation.
 	//
-	// Retrieves an expense record.
+	// Retrieves an expense.
 	//
 	// GET /ledgers/{ledgerID}/expenses/{expenseID}
 	LedgerExpenseGet(ctx context.Context, params LedgerExpenseGetParams) (*Expense, error)
@@ -70,7 +70,13 @@ type Invoker interface {
 	// Lists all expenses in the ledger.
 	//
 	// GET /ledgers/{ledgerID}/expenses
-	LedgerExpenseList(ctx context.Context, params LedgerExpenseListParams) (LedgerExpenseListRes, error)
+	LedgerExpenseList(ctx context.Context, params LedgerExpenseListParams) (*LedgerExpenseListOK, error)
+	// LedgerExpenseRecordCreate invokes LedgerExpenseRecordCreate operation.
+	//
+	// Creates a new expense record.
+	//
+	// POST /ledgers/{ledgerID}/expenses/{expenseID}/records
+	LedgerExpenseRecordCreate(ctx context.Context, request *LedgerExpenseRecordCreateReq, params LedgerExpenseRecordCreateParams) (*Expense, error)
 	// LedgerList invokes LedgerList operation.
 	//
 	// Lists all ledgers.
@@ -635,7 +641,7 @@ func (c *Client) sendLedgerExpenseCreate(ctx context.Context, request *Expense, 
 
 // LedgerExpenseGet invokes LedgerExpenseGet operation.
 //
-// Retrieves an expense record.
+// Retrieves an expense.
 //
 // GET /ledgers/{ledgerID}/expenses/{expenseID}
 func (c *Client) LedgerExpenseGet(ctx context.Context, params LedgerExpenseGetParams) (*Expense, error) {
@@ -780,12 +786,12 @@ func (c *Client) sendLedgerExpenseGet(ctx context.Context, params LedgerExpenseG
 // Lists all expenses in the ledger.
 //
 // GET /ledgers/{ledgerID}/expenses
-func (c *Client) LedgerExpenseList(ctx context.Context, params LedgerExpenseListParams) (LedgerExpenseListRes, error) {
+func (c *Client) LedgerExpenseList(ctx context.Context, params LedgerExpenseListParams) (*LedgerExpenseListOK, error) {
 	res, err := c.sendLedgerExpenseList(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendLedgerExpenseList(ctx context.Context, params LedgerExpenseListParams) (res LedgerExpenseListRes, err error) {
+func (c *Client) sendLedgerExpenseList(ctx context.Context, params LedgerExpenseListParams) (res *LedgerExpenseListOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("LedgerExpenseList"),
 		semconv.HTTPRequestMethodKey.String("GET"),
@@ -930,6 +936,152 @@ func (c *Client) sendLedgerExpenseList(ctx context.Context, params LedgerExpense
 
 	stage = "DecodeResponse"
 	result, err := decodeLedgerExpenseListResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// LedgerExpenseRecordCreate invokes LedgerExpenseRecordCreate operation.
+//
+// Creates a new expense record.
+//
+// POST /ledgers/{ledgerID}/expenses/{expenseID}/records
+func (c *Client) LedgerExpenseRecordCreate(ctx context.Context, request *LedgerExpenseRecordCreateReq, params LedgerExpenseRecordCreateParams) (*Expense, error) {
+	res, err := c.sendLedgerExpenseRecordCreate(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendLedgerExpenseRecordCreate(ctx context.Context, request *LedgerExpenseRecordCreateReq, params LedgerExpenseRecordCreateParams) (res *Expense, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("LedgerExpenseRecordCreate"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/ledgers/{ledgerID}/expenses/{expenseID}/records"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, LedgerExpenseRecordCreateOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/ledgers/"
+	{
+		// Encode "ledgerID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "ledgerID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.LedgerID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/expenses/"
+	{
+		// Encode "expenseID" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "expenseID",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ExpenseID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/records"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeLedgerExpenseRecordCreateRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:CookieAuth"
+			switch err := c.securityCookieAuth(ctx, LedgerExpenseRecordCreateOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"CookieAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeLedgerExpenseRecordCreateResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

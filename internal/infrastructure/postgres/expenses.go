@@ -3,6 +3,8 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"maps"
+	"slices"
 	"time"
 
 	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
@@ -92,4 +94,42 @@ func (r *ExpenseRepository) GetByLedger(ctx context.Context, ledgerID domain.ID,
 	}
 
 	return result, nil
+}
+
+func (r *ExpenseRepository) Update(ctx context.Context, expense *domain.Expense) error {
+	return r.client.transaction(ctx, func(q *sqlc.Queries) error {
+		if err := q.DeleteExpenseRecordsNotIn(ctx, slices.Collect(maps.Keys(expense.Records))); err != nil {
+			return err
+		}
+
+		err := q.UpdateExpense(ctx, sqlc.UpdateExpenseParams{
+			ID:          expense.ID,
+			Amount:      expense.Amount,
+			Name:        expense.Name,
+			ExpenseDate: convertTime(expense.ExpenseDate),
+			UpdatedAt:   convertTime(expense.UpdatedAt),
+			UpdatedBy:   expense.UpdatedBy,
+		})
+		if err != nil {
+			return err
+		}
+
+		for id, record := range expense.Records {
+			if err := q.CreateExpenseRecord(ctx, sqlc.CreateExpenseRecordParams{
+				ID:         id,
+				ExpenseID:  expense.ID,
+				RecordType: record.Type.String(),
+				Amount:     record.Amount,
+				FromUserID: record.From,
+				ToUserID:   record.To,
+				CreatedAt:  convertTime(record.CreatedAt),
+				CreatedBy:  record.CreatedBy,
+				UpdatedAt:  convertTime(record.UpdatedAt),
+				UpdatedBy:  record.UpdatedBy,
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }

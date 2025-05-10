@@ -340,8 +340,6 @@ func (s *ErrorResponseStatusCode) SetResponse(val ErrorResponse) {
 	s.Response = val
 }
 
-func (*ErrorResponseStatusCode) ledgerExpenseListRes() {}
-
 // Ref: #/components/schemas/Expense
 type Expense struct {
 	// Unique identifier for the expense.
@@ -722,7 +720,19 @@ func (s *LedgerExpenseListOK) SetExpenses(val []ExpenseSummary) {
 	s.Expenses = val
 }
 
-func (*LedgerExpenseListOK) ledgerExpenseListRes() {}
+type LedgerExpenseRecordCreateReq struct {
+	Records []ExpenseRecord `json:"records"`
+}
+
+// GetRecords returns the value of Records.
+func (s *LedgerExpenseRecordCreateReq) GetRecords() []ExpenseRecord {
+	return s.Records
+}
+
+// SetRecords sets the value of Records.
+func (s *LedgerExpenseRecordCreateReq) SetRecords(val []ExpenseRecord) {
+	s.Records = val
+}
 
 type LedgerListOK struct {
 	Ledgers []Ledger `json:"ledgers"`
@@ -740,7 +750,6 @@ func (s *LedgerListOK) SetLedgers(val []Ledger) {
 
 // Ref: #/components/schemas/LedgerMember
 type LedgerMember struct {
-	ID     uuid.UUID `json:"id"`
 	UserID uuid.UUID `json:"user_id"`
 	// Date and time the member was created.
 	CreatedAt time.Time `json:"created_at"`
@@ -748,11 +757,6 @@ type LedgerMember struct {
 	CreatedBy uuid.UUID `json:"created_by"`
 	// User's balance in the ledger.
 	Balance int32 `json:"balance"`
-}
-
-// GetID returns the value of ID.
-func (s *LedgerMember) GetID() uuid.UUID {
-	return s.ID
 }
 
 // GetUserID returns the value of UserID.
@@ -773,11 +777,6 @@ func (s *LedgerMember) GetCreatedBy() uuid.UUID {
 // GetBalance returns the value of Balance.
 func (s *LedgerMember) GetBalance() int32 {
 	return s.Balance
-}
-
-// SetID sets the value of ID.
-func (s *LedgerMember) SetID(val uuid.UUID) {
-	s.ID = val
 }
 
 // SetUserID sets the value of UserID.

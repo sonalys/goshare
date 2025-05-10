@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/sonalys/goshare/internal/application/pkg/otel"
@@ -270,4 +271,48 @@ func (c *Ledgers) GetMembers(ctx context.Context, ledgerID domain.ID) (map[domai
 	slog.Info(ctx, "ledger members balances retrieved")
 
 	return members.Members, nil
+}
+
+type CreateExpenseRecordRequest struct {
+	Actor          domain.ID
+	LedgerID       domain.ID
+	ExpenseID      domain.ID
+	PendingRecords []domain.PendingRecord
+}
+
+func (c *Ledgers) CreateExpenseRecord(ctx context.Context, req CreateExpenseRecordRequest) (resp *domain.Expense, err error) {
+	ctx, span := otel.Tracer.Start(ctx, "ledgers.CreateExpenseRecord")
+	defer span.End()
+
+	err = c.db.Transaction(ctx, func(db Database) error {
+		ledger, err := db.Ledger().Find(ctx, req.LedgerID)
+		if err != nil {
+			return fmt.Errorf("fetching ledger: %w", err)
+		}
+
+		expense, err := db.Expense().Find(ctx, req.ExpenseID)
+		if err != nil {
+			return fmt.Errorf("fetching expense: %w", err)
+		}
+
+		if err := expense.CreateRecords(req.Actor, ledger, req.PendingRecords...); err != nil {
+			return fmt.Errorf("appending new records: %w", err)
+		}
+
+		if err := db.Ledger().Update(ctx, ledger); err != nil {
+			return fmt.Errorf("updating ledger: %w", err)
+		}
+
+		if err := db.Expense().Update(ctx, expense); err != nil {
+			return fmt.Errorf("updating expense: %w", err)
+		}
+
+		resp = expense
+		return nil
+	})
+	if err != nil {
+		return nil, slog.ErrorReturn(ctx, "creating expense record", err)
+	}
+
+	return
 }

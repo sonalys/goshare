@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"github.com/sonalys/goshare/cmd/server/handlers"
@@ -11,7 +10,7 @@ import (
 	"github.com/sonalys/goshare/internal/domain"
 )
 
-func (a *API) LedgerExpenseList(ctx context.Context, params handlers.LedgerExpenseListParams) (handlers.LedgerExpenseListRes, error) {
+func (a *API) LedgerExpenseList(ctx context.Context, params handlers.LedgerExpenseListParams) (*handlers.LedgerExpenseListOK, error) {
 	identity, err := getIdentity(ctx)
 	if err != nil {
 		return nil, err
@@ -35,8 +34,6 @@ func (a *API) LedgerExpenseList(ctx context.Context, params handlers.LedgerExpen
 			Expenses: mapLedgerExpenseToResponseObject(result.Expenses),
 			Cursor:   cursor,
 		}, nil
-	case errors.Is(err, &domain.ErrLedgerUserNotMember{}):
-		return newRespUnauthorized(ctx), nil
 	default:
 		return nil, err
 	}

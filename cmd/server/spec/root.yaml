@@ -348,7 +348,7 @@ paths:
   /ledgers/{ledgerID}/expenses/{expenseID}:
     get:
       operationId: LedgerExpenseGet
-      description: Retrieves an expense record
+      description: Retrieves an expense
       security:
         - cookieAuth: []
       parameters:
@@ -371,6 +371,48 @@ paths:
           $ref: "#/components/responses/ErrorResponse"
         '200':
           description: Expense was retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Expense"
+
+  /ledgers/{ledgerID}/expenses/{expenseID}/records:
+    post:
+      operationId: LedgerExpenseRecordCreate
+      description: Creates a new expense record
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: ledgerID
+          in: path
+          required: true
+          description: Ledger ID
+          schema:
+            type: string
+            format: uuid
+        - name: expenseID
+          in: path
+          required: true
+          description: Expense ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                records:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/ExpenseRecord"
+      responses:
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+        '200':
+          description: Expense record was created
           content:
             application/json:
               schema:

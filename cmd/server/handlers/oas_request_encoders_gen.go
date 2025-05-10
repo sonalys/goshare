@@ -53,6 +53,20 @@ func encodeLedgerExpenseCreateRequest(
 	return nil
 }
 
+func encodeLedgerExpenseRecordCreateRequest(
+	req *LedgerExpenseRecordCreateReq,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeLedgerMemberAddRequest(
 	req *LedgerMemberAddReq,
 	r *http.Request,

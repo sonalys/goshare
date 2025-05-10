@@ -40,7 +40,7 @@ type Handler interface {
 	LedgerExpenseCreate(ctx context.Context, req *Expense, params LedgerExpenseCreateParams) (*LedgerExpenseCreateOK, error)
 	// LedgerExpenseGet implements LedgerExpenseGet operation.
 	//
-	// Retrieves an expense record.
+	// Retrieves an expense.
 	//
 	// GET /ledgers/{ledgerID}/expenses/{expenseID}
 	LedgerExpenseGet(ctx context.Context, params LedgerExpenseGetParams) (*Expense, error)
@@ -49,7 +49,13 @@ type Handler interface {
 	// Lists all expenses in the ledger.
 	//
 	// GET /ledgers/{ledgerID}/expenses
-	LedgerExpenseList(ctx context.Context, params LedgerExpenseListParams) (LedgerExpenseListRes, error)
+	LedgerExpenseList(ctx context.Context, params LedgerExpenseListParams) (*LedgerExpenseListOK, error)
+	// LedgerExpenseRecordCreate implements LedgerExpenseRecordCreate operation.
+	//
+	// Creates a new expense record.
+	//
+	// POST /ledgers/{ledgerID}/expenses/{expenseID}/records
+	LedgerExpenseRecordCreate(ctx context.Context, req *LedgerExpenseRecordCreateReq, params LedgerExpenseRecordCreateParams) (*Expense, error)
 	// LedgerList implements LedgerList operation.
 	//
 	// Lists all ledgers.

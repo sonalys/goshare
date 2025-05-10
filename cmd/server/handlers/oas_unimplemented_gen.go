@@ -60,7 +60,7 @@ func (UnimplementedHandler) LedgerExpenseCreate(ctx context.Context, req *Expens
 
 // LedgerExpenseGet implements LedgerExpenseGet operation.
 //
-// Retrieves an expense record.
+// Retrieves an expense.
 //
 // GET /ledgers/{ledgerID}/expenses/{expenseID}
 func (UnimplementedHandler) LedgerExpenseGet(ctx context.Context, params LedgerExpenseGetParams) (r *Expense, _ error) {
@@ -72,7 +72,16 @@ func (UnimplementedHandler) LedgerExpenseGet(ctx context.Context, params LedgerE
 // Lists all expenses in the ledger.
 //
 // GET /ledgers/{ledgerID}/expenses
-func (UnimplementedHandler) LedgerExpenseList(ctx context.Context, params LedgerExpenseListParams) (r LedgerExpenseListRes, _ error) {
+func (UnimplementedHandler) LedgerExpenseList(ctx context.Context, params LedgerExpenseListParams) (r *LedgerExpenseListOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// LedgerExpenseRecordCreate implements LedgerExpenseRecordCreate operation.
+//
+// Creates a new expense record.
+//
+// POST /ledgers/{ledgerID}/expenses/{expenseID}/records
+func (UnimplementedHandler) LedgerExpenseRecordCreate(ctx context.Context, req *LedgerExpenseRecordCreateReq, params LedgerExpenseRecordCreateParams) (r *Expense, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

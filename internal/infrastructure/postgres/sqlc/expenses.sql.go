@@ -44,7 +44,7 @@ func (q *Queries) CreateExpense(ctx context.Context, arg CreateExpenseParams) er
 }
 
 const createExpenseRecord = `-- name: CreateExpenseRecord :exec
-INSERT INTO expense_records (id,expense_id,record_type,amount,from_user_id,to_user_id,created_at,created_by,updated_at,updated_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+INSERT INTO expense_records (id,expense_id,record_type,amount,from_user_id,to_user_id,created_at,created_by,updated_at,updated_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT(id) DO NOTHING
 `
 
 type CreateExpenseRecordParams struct {
@@ -82,6 +82,15 @@ DELETE FROM expenses WHERE id = $1
 
 func (q *Queries) DeleteExpense(ctx context.Context, id domain.ID) error {
 	_, err := q.db.Exec(ctx, deleteExpense, id)
+	return err
+}
+
+const deleteExpenseRecordsNotIn = `-- name: DeleteExpenseRecordsNotIn :exec
+DELETE FROM expense_records WHERE id NOT IN ($1::UUID[])
+`
+
+func (q *Queries) DeleteExpenseRecordsNotIn(ctx context.Context, dollar_1 []domain.ID) error {
+	_, err := q.db.Exec(ctx, deleteExpenseRecordsNotIn, dollar_1)
 	return err
 }
 
@@ -222,10 +231,26 @@ func (q *Queries) GetLedgerExpenses(ctx context.Context, arg GetLedgerExpensesPa
 }
 
 const updateExpense = `-- name: UpdateExpense :exec
-UPDATE expenses SET amount = $$, name = $$, expense_date = $$, updated_at = $$, updated_by = $$ WHERE id = $$
+UPDATE expenses SET amount = $1, name = $2, expense_date = $3, updated_at = $4, updated_by = $5 WHERE id = $6
 `
 
-func (q *Queries) UpdateExpense(ctx context.Context) error {
-	_, err := q.db.Exec(ctx, updateExpense)
+type UpdateExpenseParams struct {
+	Amount      int32
+	Name        string
+	ExpenseDate pgtype.Timestamp
+	UpdatedAt   pgtype.Timestamp
+	UpdatedBy   domain.ID
+	ID          domain.ID
+}
+
+func (q *Queries) UpdateExpense(ctx context.Context, arg UpdateExpenseParams) error {
+	_, err := q.db.Exec(ctx, updateExpense,
+		arg.Amount,
+		arg.Name,
+		arg.ExpenseDate,
+		arg.UpdatedAt,
+		arg.UpdatedBy,
+		arg.ID,
+	)
 	return err
 }

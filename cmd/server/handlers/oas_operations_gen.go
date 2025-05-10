@@ -6,15 +6,16 @@ package handlers
 type OperationName = string
 
 const (
-	AuthenticationLoginOperation   OperationName = "AuthenticationLogin"
-	AuthenticationWhoAmIOperation  OperationName = "AuthenticationWhoAmI"
-	HealthcheckOperation           OperationName = "Healthcheck"
-	LedgerCreateOperation          OperationName = "LedgerCreate"
-	LedgerExpenseCreateOperation   OperationName = "LedgerExpenseCreate"
-	LedgerExpenseGetOperation      OperationName = "LedgerExpenseGet"
-	LedgerExpenseListOperation     OperationName = "LedgerExpenseList"
-	LedgerListOperation            OperationName = "LedgerList"
-	LedgerMemberAddOperation  OperationName = "LedgerMemberAdd"
-	LedgerMemberListOperation OperationName = "LedgerMemberList"
-	UserRegisterOperation          OperationName = "UserRegister"
+	AuthenticationLoginOperation       OperationName = "AuthenticationLogin"
+	AuthenticationWhoAmIOperation      OperationName = "AuthenticationWhoAmI"
+	HealthcheckOperation               OperationName = "Healthcheck"
+	LedgerCreateOperation              OperationName = "LedgerCreate"
+	LedgerExpenseCreateOperation       OperationName = "LedgerExpenseCreate"
+	LedgerExpenseGetOperation          OperationName = "LedgerExpenseGet"
+	LedgerExpenseListOperation         OperationName = "LedgerExpenseList"
+	LedgerExpenseRecordCreateOperation OperationName = "LedgerExpenseRecordCreate"
+	LedgerListOperation                OperationName = "LedgerList"
+	LedgerMemberAddOperation           OperationName = "LedgerMemberAdd"
+	LedgerMemberListOperation          OperationName = "LedgerMemberList"
+	UserRegisterOperation              OperationName = "UserRegister"
 )
