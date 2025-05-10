@@ -19,14 +19,14 @@ const (
 
 type (
 	Ledger struct {
-		CreatedAt    time.Time
-		CreatedBy    ID
-		ID           ID
-		Name         string
-		Participants []LedgerParticipant
+		CreatedAt time.Time
+		CreatedBy ID
+		ID        ID
+		Name      string
+		Members   []LedgerMember
 	}
 
-	LedgerParticipant struct {
+	LedgerMember struct {
 		Balance   int32
 		CreatedAt time.Time
 		CreatedBy ID
@@ -206,7 +206,7 @@ func (ledger *Ledger) CreateExpense(req CreateExpenseRequest) (*Expense, error) 
 }
 
 func (ledger *Ledger) IsParticipant(identity ID) bool {
-	for _, p := range ledger.Participants {
+	for _, p := range ledger.Members {
 		if p.Identity == identity {
 			return true
 		}
@@ -214,7 +214,7 @@ func (ledger *Ledger) IsParticipant(identity ID) bool {
 	return false
 }
 
-func (ledger *Ledger) AddParticipants(actor ID, participants ...ID) error {
+func (ledger *Ledger) AddMember(actor ID, members ...ID) error {
 	if !ledger.IsParticipant(actor) {
 		return &ErrLedgerUserNotMember{
 			UserID:   actor,
@@ -222,11 +222,11 @@ func (ledger *Ledger) AddParticipants(actor ID, participants ...ID) error {
 		}
 	}
 
-	participantsSet := kset.HashMapKeyValue(func(p LedgerParticipant) ID { return p.Identity }, ledger.Participants...)
-	pendingParticipantsSet := kset.HashMapKey(participants...)
+	currentMembersSet := kset.HashMapKeyValue(func(p LedgerMember) ID { return p.Identity }, ledger.Members...)
+	pendingMembersSet := kset.HashMapKey(members...)
 
 	var errs FormError
-	for conflictID := range pendingParticipantsSet.Intersect(participantsSet).Iter() {
+	for conflictID := range pendingMembersSet.Intersect(currentMembersSet).Iter() {
 		errs.Append(FieldError{
 			Field: "participants",
 			Cause: &ErrLedgerUserAlreadyMember{
@@ -240,15 +240,15 @@ func (ledger *Ledger) AddParticipants(actor ID, participants ...ID) error {
 		return err
 	}
 
-	if len(ledger.Participants)+pendingParticipantsSet.Len() >= LedgerMaxMembers {
+	if len(ledger.Members)+pendingMembersSet.Len() >= LedgerMaxMembers {
 		return &ErrLedgerMaxMembers{
 			LedgerID:   ledger.ID,
 			MaxMembers: LedgerMaxMembers,
 		}
 	}
 
-	for id := range pendingParticipantsSet.Iter() {
-		ledger.Participants = append(ledger.Participants, LedgerParticipant{
+	for id := range pendingMembersSet.Iter() {
+		ledger.Members = append(ledger.Members, LedgerMember{
 			ID:        NewID(),
 			Identity:  id,
 			Balance:   0,

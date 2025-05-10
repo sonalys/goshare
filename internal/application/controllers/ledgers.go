@@ -233,7 +233,7 @@ func (c *Ledgers) AddParticipants(ctx context.Context, req AddMembersRequest) er
 			return slog.ErrorReturn(ctx, "failed to find ledger", err)
 		}
 
-		err = ledger.AddParticipants(req.Actor, kset.Select(func(u domain.User) domain.ID { return u.ID }, users...)...)
+		err = ledger.AddMember(req.Actor, kset.Select(func(u domain.User) domain.ID { return u.ID }, users...)...)
 		if err != nil {
 			return slog.ErrorReturn(ctx, "adding participants", err)
 		}
@@ -254,7 +254,7 @@ func (c *Ledgers) AddParticipants(ctx context.Context, req AddMembersRequest) er
 	}
 }
 
-func (c *Ledgers) GetParticipants(ctx context.Context, ledgerID domain.ID) ([]domain.LedgerParticipant, error) {
+func (c *Ledgers) GetParticipants(ctx context.Context, ledgerID domain.ID) ([]domain.LedgerMember, error) {
 	ctx, span := otel.Tracer.Start(ctx, "ledgers.GetParticipants")
 	defer span.End()
 

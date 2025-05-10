@@ -23,14 +23,14 @@ func (r *LedgerRepository) Update(ctx context.Context, ledger *domain.Ledger) er
 
 		currentParticipants := kset.HashMapKey(
 			kset.Select(
-				func(p domain.LedgerParticipant) uuid.UUID { return p.ID.UUID() },
-				ledger.Participants...,
+				func(p domain.LedgerMember) uuid.UUID { return p.ID.UUID() },
+				ledger.Members...,
 			)...,
 		)
 
 		newParticipants := kset.HashMapKeyValue(
-			func(p domain.LedgerParticipant) uuid.UUID { return p.ID.UUID() },
-			ledger.Participants...,
+			func(p domain.LedgerMember) uuid.UUID { return p.ID.UUID() },
+			ledger.Members...,
 		)
 
 		for participant := range newParticipants.Difference(currentParticipants).Iter() {
@@ -66,12 +66,12 @@ func (r *LedgerRepository) Update(ctx context.Context, ledger *domain.Ledger) er
 	})
 }
 
-func (r *LedgerRepository) GetParticipants(ctx context.Context, ledgerID domain.ID) ([]domain.LedgerParticipant, error) {
+func (r *LedgerRepository) GetParticipants(ctx context.Context, ledgerID domain.ID) ([]domain.LedgerMember, error) {
 	participants, err := r.client.queries().GetLedgerParticipants(ctx, convertID(ledgerID))
 	if err != nil {
 		return nil, mapLedgerError(err)
 	}
-	result := make([]domain.LedgerParticipant, 0, len(participants))
+	result := make([]domain.LedgerMember, 0, len(participants))
 	for _, participant := range participants {
 		result = append(result, *mappers.NewLedgerParticipant(&participant))
 	}

@@ -10,6 +10,8 @@ import (
 )
 
 func TestNewUser(t *testing.T) {
+	t.Parallel()
+
 	factory := func(hooks ...func(req *domain.NewUserRequest)) domain.NewUserRequest {
 		req := domain.NewUserRequest{
 			FirstName: "First",
@@ -26,6 +28,7 @@ func TestNewUser(t *testing.T) {
 	}
 
 	t.Run("pass", func(t *testing.T) {
+		t.Parallel()
 		req := factory()
 
 		got, err := domain.NewUser(req)
@@ -41,7 +44,8 @@ func TestNewUser(t *testing.T) {
 		assert.NotZero(t, got.CreatedAt)
 	})
 
-	t.Run("error/empty first name", func(t *testing.T) {
+	t.Run("fail/empty first name", func(t *testing.T) {
+		t.Parallel()
 		req := factory(func(req *domain.NewUserRequest) {
 			req.FirstName = ""
 		})
@@ -55,7 +59,8 @@ func TestNewUser(t *testing.T) {
 		assert.Equal(t, domain.ErrCauseRequired, targetErr.Cause)
 	})
 
-	t.Run("error/empty last name", func(t *testing.T) {
+	t.Run("fail/empty last name", func(t *testing.T) {
+		t.Parallel()
 		req := factory(func(req *domain.NewUserRequest) {
 			req.LastName = ""
 		})
@@ -69,7 +74,8 @@ func TestNewUser(t *testing.T) {
 		assert.Equal(t, domain.ErrCauseRequired, targetErr.Cause)
 	})
 
-	t.Run("error/short password", func(t *testing.T) {
+	t.Run("fail/short password", func(t *testing.T) {
+		t.Parallel()
 		req := factory(func(req *domain.NewUserRequest) {
 			req.Password = ""
 		})
@@ -83,7 +89,8 @@ func TestNewUser(t *testing.T) {
 		assert.Equal(t, &domain.ValueLengthError{Min: 8, Max: 72}, targetErr.Cause)
 	})
 
-	t.Run("error/long password", func(t *testing.T) {
+	t.Run("fail/long password", func(t *testing.T) {
+		t.Parallel()
 		req := factory(func(req *domain.NewUserRequest) {
 			req.Password = strings.Repeat("a", 73)
 		})
@@ -97,7 +104,8 @@ func TestNewUser(t *testing.T) {
 		assert.Equal(t, &domain.ValueLengthError{Min: 8, Max: 72}, targetErr.Cause)
 	})
 
-	t.Run("error/empty email", func(t *testing.T) {
+	t.Run("fail/empty email", func(t *testing.T) {
+		t.Parallel()
 		req := factory(func(req *domain.NewUserRequest) {
 			req.Email = ""
 		})
@@ -111,7 +119,8 @@ func TestNewUser(t *testing.T) {
 		assert.Equal(t, domain.ErrCauseInvalid, targetErr.Cause)
 	})
 
-	t.Run("error/invalid email", func(t *testing.T) {
+	t.Run("fail/invalid email", func(t *testing.T) {
+		t.Parallel()
 		req := factory(func(req *domain.NewUserRequest) {
 			req.Email = "invalid@"
 		})
@@ -127,6 +136,7 @@ func TestNewUser(t *testing.T) {
 }
 
 func TestUser_CreateLedger(t *testing.T) {
+	t.Parallel()
 	t.Run("pass", func(t *testing.T) {
 		user := domain.User{
 			ID: domain.NewID(),
@@ -141,9 +151,9 @@ func TestUser_CreateLedger(t *testing.T) {
 		assert.NotZero(t, ledger.CreatedAt)
 		assert.Equal(t, user.ID, ledger.CreatedBy)
 
-		require.Len(t, ledger.Participants, 1)
+		require.Len(t, ledger.Members, 1)
 
-		participant := ledger.Participants[0]
+		participant := ledger.Members[0]
 
 		assert.NotZero(t, participant.ID)
 		assert.Equal(t, user.ID, participant.Identity)
@@ -152,7 +162,8 @@ func TestUser_CreateLedger(t *testing.T) {
 		assert.Equal(t, user.ID, participant.CreatedBy)
 	})
 
-	t.Run("error/short name", func(t *testing.T) {
+	t.Run("fail/short name", func(t *testing.T) {
+		t.Parallel()
 		user := domain.User{
 			ID: domain.NewID(),
 		}
@@ -166,7 +177,8 @@ func TestUser_CreateLedger(t *testing.T) {
 		assert.Equal(t, &domain.ValueLengthError{Min: 3, Max: 255}, targetErr.Cause)
 	})
 
-	t.Run("error/long name", func(t *testing.T) {
+	t.Run("fail/long name", func(t *testing.T) {
+		t.Parallel()
 		user := domain.User{
 			ID: domain.NewID(),
 		}
@@ -180,7 +192,8 @@ func TestUser_CreateLedger(t *testing.T) {
 		assert.Equal(t, &domain.ValueLengthError{Min: 3, Max: 255}, targetErr.Cause)
 	})
 
-	t.Run("error/user max ledgers", func(t *testing.T) {
+	t.Run("fail/user max ledgers", func(t *testing.T) {
+		t.Parallel()
 		user := domain.User{
 			ID:           domain.NewID(),
 			LedgersCount: domain.UserMaxLedgers,

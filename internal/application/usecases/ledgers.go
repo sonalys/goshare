@@ -17,7 +17,7 @@ type (
 		FindExpense(ctx context.Context, identity domain.ID, ledgerID domain.ID, expenseID domain.ID) (*domain.Expense, error)
 		GetByUser(ctx context.Context, identity domain.ID) ([]domain.Ledger, error)
 		GetExpenses(ctx context.Context, req controllers.GetExpensesRequest) (*controllers.GetExpensesResponse, error)
-		GetParticipants(ctx context.Context, identity domain.ID, ledgerID domain.ID) ([]domain.LedgerParticipant, error)
+		GetParticipants(ctx context.Context, identity domain.ID, ledgerID domain.ID) ([]domain.LedgerMember, error)
 	}
 
 	ledgers struct {
@@ -84,7 +84,7 @@ func (l *ledgers) GetExpenses(ctx context.Context, req controllers.GetExpensesRe
 	return l.controller.Ledgers.GetExpenses(ctx, req)
 }
 
-func (l *ledgers) GetParticipants(ctx context.Context, identity domain.ID, ledgerID domain.ID) ([]domain.LedgerParticipant, error) {
+func (l *ledgers) GetParticipants(ctx context.Context, identity domain.ID, ledgerID domain.ID) ([]domain.LedgerMember, error) {
 	if err := l.checkAuthorization(ctx, ledgerID, func(l *domain.Ledger) bool { return l.IsParticipant(identity) }); err != nil {
 		return nil, err
 	}

@@ -11,6 +11,8 @@ import (
 )
 
 func TestLedger_CreateExpense(t *testing.T) {
+	t.Parallel()
+
 	type testData struct {
 		ledger *domain.Ledger
 		req    domain.CreateExpenseRequest
@@ -21,7 +23,8 @@ func TestLedger_CreateExpense(t *testing.T) {
 		memberID := domain.NewID()
 		td := testData{
 			ledger: &domain.Ledger{
-				Participants: []domain.LedgerParticipant{
+				ID: domain.NewID(),
+				Members: []domain.LedgerMember{
 					{Identity: actorID},
 					{Identity: memberID},
 				},
@@ -49,6 +52,7 @@ func TestLedger_CreateExpense(t *testing.T) {
 	}
 
 	t.Run("pass", func(t *testing.T) {
+		t.Parallel()
 		data := factory()
 
 		expense, err := data.ledger.CreateExpense(data.req)
@@ -56,7 +60,8 @@ func TestLedger_CreateExpense(t *testing.T) {
 		require.NotNil(t, expense)
 	})
 
-	t.Run("error/actor is not a participant", func(t *testing.T) {
+	t.Run("fail/actor is not a participant", func(t *testing.T) {
+		t.Parallel()
 		data := factory(func(td *testData) {
 			td.req.Actor = domain.NewID()
 		})
@@ -71,7 +76,8 @@ func TestLedger_CreateExpense(t *testing.T) {
 		assert.Equal(t, data.ledger.ID, targetErr.LedgerID)
 	})
 
-	t.Run("error/from is not a participant", func(t *testing.T) {
+	t.Run("fail/from is not a participant", func(t *testing.T) {
+		t.Parallel()
 		data := factory(func(td *testData) {
 			td.req.PendingRecords[0].From = domain.NewID()
 		})
@@ -86,7 +92,8 @@ func TestLedger_CreateExpense(t *testing.T) {
 		assert.Equal(t, data.ledger.ID, targetErr.LedgerID)
 	})
 
-	t.Run("error/to is not a participant", func(t *testing.T) {
+	t.Run("fail/to is not a participant", func(t *testing.T) {
+		t.Parallel()
 		data := factory(func(td *testData) {
 			td.req.PendingRecords[0].To = domain.NewID()
 		})
@@ -101,7 +108,8 @@ func TestLedger_CreateExpense(t *testing.T) {
 		assert.Equal(t, data.ledger.ID, targetErr.LedgerID)
 	})
 
-	t.Run("error/from and to must be different", func(t *testing.T) {
+	t.Run("fail/from and to must be different", func(t *testing.T) {
+		t.Parallel()
 		data := factory(func(td *testData) {
 			td.req.PendingRecords[0].To = td.req.PendingRecords[0].From
 		})
@@ -111,7 +119,8 @@ func TestLedger_CreateExpense(t *testing.T) {
 		assert.Nil(t, expense)
 	})
 
-	t.Run("error/expense type is invalid", func(t *testing.T) {
+	t.Run("fail/expense type is invalid", func(t *testing.T) {
+		t.Parallel()
 		data := factory(func(td *testData) {
 			td.req.PendingRecords[0].Type = domain.RecordTypeUnknown
 		})
@@ -121,7 +130,8 @@ func TestLedger_CreateExpense(t *testing.T) {
 		assert.Nil(t, expense)
 	})
 
-	t.Run("error/expense amount is negative", func(t *testing.T) {
+	t.Run("fail/expense amount is negative", func(t *testing.T) {
+		t.Parallel()
 		data := factory(func(td *testData) {
 			td.req.PendingRecords[0].Amount = -1
 		})
@@ -135,7 +145,8 @@ func TestLedger_CreateExpense(t *testing.T) {
 		assert.Equal(t, targetErr.Min, 1)
 	})
 
-	t.Run("error/expense amount is zero", func(t *testing.T) {
+	t.Run("fail/expense amount is zero", func(t *testing.T) {
+		t.Parallel()
 		data := factory(func(td *testData) {
 			td.req.PendingRecords[0].Amount = 0
 		})
@@ -149,7 +160,8 @@ func TestLedger_CreateExpense(t *testing.T) {
 		assert.Equal(t, targetErr.Min, 1)
 	})
 
-	t.Run("error/debt overflow", func(t *testing.T) {
+	t.Run("fail/debt overflow", func(t *testing.T) {
+		t.Parallel()
 		data := factory(func(td *testData) {
 			td.req.PendingRecords[0].Amount = math.MaxInt32
 			td.req.PendingRecords = append(td.req.PendingRecords, domain.PendingRecord{
@@ -165,7 +177,26 @@ func TestLedger_CreateExpense(t *testing.T) {
 		assert.Nil(t, expense)
 	})
 
-	t.Run("error/settlement greater than debt", func(t *testing.T) {
+	t.Run("fail/settlement overflow", func(t *testing.T) {
+		t.Parallel()
+		data := factory(func(td *testData) {
+			td.req.PendingRecords[0].Amount = math.MaxInt32
+			td.req.PendingRecords[0].Type = domain.RecordTypeSettlement
+			td.req.PendingRecords = append(td.req.PendingRecords, domain.PendingRecord{
+				From:   td.req.PendingRecords[0].From,
+				To:     td.req.PendingRecords[0].To,
+				Type:   domain.RecordTypeSettlement,
+				Amount: 1,
+			})
+		})
+
+		expense, err := data.ledger.CreateExpense(data.req)
+		require.ErrorIs(t, err, domain.ErrOverflow)
+		assert.Nil(t, expense)
+	})
+
+	t.Run("fail/settlement greater than debt", func(t *testing.T) {
+		t.Parallel()
 		data := factory(func(td *testData) {
 			td.req.PendingRecords[0].Type = domain.RecordTypeSettlement
 			td.req.PendingRecords[0].Amount = math.MaxInt32
@@ -175,20 +206,145 @@ func TestLedger_CreateExpense(t *testing.T) {
 		require.ErrorIs(t, err, domain.ErrSettlementMismatch)
 		assert.Nil(t, expense)
 	})
+
+	t.Run("fail/name required", func(t *testing.T) {
+		t.Parallel()
+		data := factory(func(td *testData) {
+			td.req.Name = ""
+		})
+
+		expense, err := data.ledger.CreateExpense(data.req)
+		assert.Nil(t, expense)
+		require.Error(t, err)
+		assert.ErrorIs(t, err, domain.ErrCauseRequired)
+	})
+
+	t.Run("fail/expenseDate required", func(t *testing.T) {
+		t.Parallel()
+		data := factory(func(td *testData) {
+			td.req.ExpenseDate = time.Time{}
+		})
+
+		expense, err := data.ledger.CreateExpense(data.req)
+		assert.Nil(t, expense)
+		require.Error(t, err)
+		assert.ErrorIs(t, err, domain.ErrCauseRequired)
+	})
+
+	t.Run("fail/no records", func(t *testing.T) {
+		t.Parallel()
+		data := factory(func(td *testData) {
+			td.req.PendingRecords = nil
+		})
+
+		expense, err := data.ledger.CreateExpense(data.req)
+		assert.Nil(t, expense)
+		require.Error(t, err)
+
+		var targetErr *domain.ValueLengthError
+		require.ErrorAs(t, err, &targetErr)
+		assert.Equal(t, targetErr.Min, 1)
+		assert.Equal(t, targetErr.Max, domain.ExpenseMaxRecords)
+	})
+
+	t.Run("fail/too many records", func(t *testing.T) {
+		t.Parallel()
+		data := factory(func(td *testData) {
+			td.req.PendingRecords = nil
+
+			for range domain.ExpenseMaxRecords + 1 {
+				td.req.PendingRecords = append(td.req.PendingRecords, domain.PendingRecord{})
+			}
+		})
+
+		expense, err := data.ledger.CreateExpense(data.req)
+		assert.Nil(t, expense)
+		require.Error(t, err)
+
+		var targetErr *domain.ValueLengthError
+		require.ErrorAs(t, err, &targetErr)
+		assert.Equal(t, targetErr.Min, 1)
+		assert.Equal(t, targetErr.Max, domain.ExpenseMaxRecords)
+	})
 }
 
-func TestLedger_AddParticipants(t *testing.T) {
+func TestLedger_AddMember(t *testing.T) {
+	t.Parallel()
+
 	t.Run("pass", func(t *testing.T) {
+		t.Parallel()
 		actor := domain.NewID()
 		ledger := &domain.Ledger{
-			Participants: []domain.LedgerParticipant{
+			Members: []domain.LedgerMember{
 				{
 					Identity: actor,
 				},
 			},
 		}
 
-		err := ledger.AddParticipants(actor, domain.NewID())
+		err := ledger.AddMember(actor, domain.NewID())
 		require.NoError(t, err)
+	})
+
+	t.Run("fail/actor not a member", func(t *testing.T) {
+		t.Parallel()
+		actor := domain.NewID()
+		ledger := &domain.Ledger{
+			Members: []domain.LedgerMember{},
+		}
+
+		err := ledger.AddMember(actor, domain.NewID())
+		require.Error(t, err)
+
+		var targetErr *domain.ErrLedgerUserNotMember
+		require.ErrorAs(t, err, &targetErr)
+		assert.Equal(t, actor, targetErr.UserID)
+		assert.Equal(t, ledger.ID, targetErr.LedgerID)
+	})
+
+	t.Run("fail/already a member", func(t *testing.T) {
+		t.Parallel()
+		actor := domain.NewID()
+		ledger := &domain.Ledger{
+			ID: domain.NewID(),
+			Members: []domain.LedgerMember{
+				{
+					Identity: actor,
+				},
+			},
+		}
+
+		err := ledger.AddMember(actor, actor)
+		require.Error(t, err)
+
+		var targetErr *domain.ErrLedgerUserAlreadyMember
+		require.ErrorAs(t, err, &targetErr)
+		assert.Equal(t, actor, targetErr.UserID)
+		assert.Equal(t, ledger.ID, targetErr.LedgerID)
+	})
+
+	t.Run("fail/maximum member capacity", func(t *testing.T) {
+		t.Parallel()
+		actor := domain.NewID()
+		ledger := &domain.Ledger{
+			ID: domain.NewID(),
+			Members: []domain.LedgerMember{
+				{
+					Identity: actor,
+				},
+			},
+		}
+
+		for range domain.LedgerMaxMembers - 1 {
+			ledger.Members = append(ledger.Members, domain.LedgerMember{Identity: domain.NewID()})
+		}
+
+		err := ledger.AddMember(actor, domain.NewID())
+		require.Error(t, err)
+
+		var targetErr *domain.ErrLedgerMaxMembers
+		require.ErrorAs(t, err, &targetErr)
+		assert.Equal(t, ledger.ID, targetErr.LedgerID)
+		assert.Equal(t, domain.LedgerMaxMembers, targetErr.MaxMembers)
 	})
 }

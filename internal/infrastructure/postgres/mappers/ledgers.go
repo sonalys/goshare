@@ -6,10 +6,10 @@ import (
 )
 
 func NewLedger(ledger *sqlc.Ledger, participants []sqlc.LedgerParticipant) *domain.Ledger {
-	ledgerParticipants := make([]domain.LedgerParticipant, 0, len(participants))
+	ledgerParticipants := make([]domain.LedgerMember, 0, len(participants))
 
 	for _, participant := range participants {
-		ledgerParticipants = append(ledgerParticipants, domain.LedgerParticipant{
+		ledgerParticipants = append(ledgerParticipants, domain.LedgerMember{
 			ID:        newUUID(participant.ID),
 			Identity:  newUUID(participant.UserID),
 			Balance:   participant.Balance,
@@ -19,10 +19,10 @@ func NewLedger(ledger *sqlc.Ledger, participants []sqlc.LedgerParticipant) *doma
 	}
 
 	return &domain.Ledger{
-		ID:           newUUID(ledger.ID),
-		Name:         ledger.Name,
-		Participants: ledgerParticipants,
-		CreatedAt:    ledger.CreatedAt.Time,
-		CreatedBy:    newUUID(ledger.CreatedBy),
+		ID:        newUUID(ledger.ID),
+		Name:      ledger.Name,
+		Members:   ledgerParticipants,
+		CreatedAt: ledger.CreatedAt.Time,
+		CreatedBy: newUUID(ledger.CreatedBy),
 	}
 }

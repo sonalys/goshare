@@ -99,7 +99,7 @@ func (user *User) CreateLedger(name string) (*Ledger, error) {
 	return &Ledger{
 		ID:   NewID(),
 		Name: name,
-		Participants: []LedgerParticipant{
+		Members: []LedgerMember{
 			{
 				ID:        NewID(),
 				Identity:  user.ID,

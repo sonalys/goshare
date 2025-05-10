@@ -23,7 +23,7 @@ func (a *API) LedgerParticipantList(ctx context.Context, params handlers.LedgerP
 	}, nil
 }
 
-func mapLedgerParticipantBalanceToResponseObject(balance []domain.LedgerParticipant) []handlers.LedgerParticipant {
+func mapLedgerParticipantBalanceToResponseObject(balance []domain.LedgerMember) []handlers.LedgerParticipant {
 	var balances []handlers.LedgerParticipant
 	for _, b := range balance {
 		balances = append(balances, handlers.LedgerParticipant{

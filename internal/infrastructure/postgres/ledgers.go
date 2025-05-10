@@ -37,7 +37,7 @@ func (r *LedgerRepository) Create(ctx context.Context, ledger *domain.Ledger) er
 			return fmt.Errorf("failed to create ledger: %w", err)
 		}
 
-		for _, participant := range ledger.Participants {
+		for _, participant := range ledger.Members {
 			addReq := sqlc.AddUserToLedgerParams{
 				ID:        convertID(participant.ID),
 				LedgerID:  createLedgerReq.ID,

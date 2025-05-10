@@ -5,8 +5,8 @@ import (
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 )
 
-func NewLedgerParticipant(user *sqlc.LedgerParticipant) *domain.LedgerParticipant {
-	return &domain.LedgerParticipant{
+func NewLedgerParticipant(user *sqlc.LedgerParticipant) *domain.LedgerMember {
+	return &domain.LedgerMember{
 		ID:        newUUID(user.ID),
 		Identity:  newUUID(user.UserID),
 		Balance:   user.Balance,
