@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/sonalys/goshare/cmd/server/handlers"
-	"github.com/sonalys/goshare/internal/application/controllers"
+	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
 	"github.com/sonalys/goshare/internal/domain"
 )
 
@@ -19,7 +19,7 @@ func (a *API) LedgerExpenseCreate(ctx context.Context, req *handlers.Expense, pa
 		return nil, err
 	}
 
-	apiReq := controllers.CreateExpenseRequest{
+	apiReq := usercontroller.CreateExpenseRequest{
 		Actor:          identity.UserID,
 		LedgerID:       domain.ConvertID(params.LedgerID),
 		Name:           req.Name,
@@ -27,7 +27,7 @@ func (a *API) LedgerExpenseCreate(ctx context.Context, req *handlers.Expense, pa
 		PendingRecords: pendingRecords,
 	}
 
-	switch resp, err := a.Ledgers.CreateExpense(ctx, apiReq); err {
+	switch resp, err := a.UserController.CreateExpense(ctx, apiReq); err {
 	case nil:
 		return &handlers.LedgerExpenseCreateOK{
 			ID: resp.ID.UUID(),

@@ -32,7 +32,7 @@ func NewHandler(client *api.API, repositories *repositories, serviceName string)
 	finder := middlewares.MakeRouteFinder(handler)
 
 	return middlewares.Wrap(handler,
-		middlewares.Instrument(serviceName, finder, otel.Provider{}),
+		middlewares.Instrument(serviceName, finder, otel.Provider),
 		middlewares.Recoverer,
 		middlewares.LogRequests(finder),
 	)

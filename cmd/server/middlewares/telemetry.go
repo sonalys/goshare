@@ -10,8 +10,8 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-// Metrics wraps TracerProvider and MeterProvider.
-type Metrics interface {
+// Provider wraps TracerProvider and MeterProvider.
+type Provider interface {
 	TracerProvider() trace.TracerProvider
 	MeterProvider() metric.MeterProvider
 	TextMapPropagator() propagation.TextMapPropagator
@@ -39,12 +39,12 @@ func MakeRouteFinder[R Route, S Server[R]](server S) RouteFinder {
 }
 
 // Instrument setups otelhttp.
-func Instrument(serviceName string, find RouteFinder, m Metrics) Middleware {
+func Instrument(serviceName string, find RouteFinder, provider Provider) Middleware {
 	return func(h http.Handler) http.Handler {
 		return otelhttp.NewHandler(h, "",
-			otelhttp.WithPropagators(m.TextMapPropagator()),
-			otelhttp.WithTracerProvider(m.TracerProvider()),
-			otelhttp.WithMeterProvider(m.MeterProvider()),
+			otelhttp.WithPropagators(provider.TextMapPropagator()),
+			otelhttp.WithTracerProvider(provider.TracerProvider()),
+			otelhttp.WithMeterProvider(provider.MeterProvider()),
 			otelhttp.WithMessageEvents(otelhttp.ReadEvents, otelhttp.WriteEvents),
 			otelhttp.WithServerName(serviceName),
 			otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string {

@@ -5,33 +5,56 @@ import (
 	"errors"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/sonalys/goshare/internal/application/controllers"
+	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/pkg/slog"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 )
 
-type pgxConn interface {
-	sqlc.DBTX
-	Begin(ctx context.Context) (pgx.Tx, error)
-}
+type (
+	pgxConn interface {
+		sqlc.DBTX
+		Begin(ctx context.Context) (pgx.Tx, error)
+	}
 
-type conn[T pgxConn] struct {
-	conn T
-}
+	conn[T pgxConn] struct {
+		conn T
+	}
 
-func (c *conn[T]) Ledger() controllers.LedgerRepository {
+	queries[T pgxConn]      struct{ conn[T] }
+	repositories[T pgxConn] struct{ conn[T] }
+)
+
+func (c *repositories[T]) Ledger() application.LedgerRepository {
 	return &LedgerRepository{
 		client: c,
 	}
 }
 
-func (c *conn[T]) User() controllers.UserRepository {
+func (c *repositories[T]) User() application.UserRepository {
 	return &UsersRepository{
 		client: c,
 	}
 }
 
-func (c *conn[T]) Expense() controllers.ExpenseRepository {
+func (c *repositories[T]) Expense() application.ExpenseRepository {
+	return &ExpenseRepository{
+		client: c,
+	}
+}
+
+func (c *queries[T]) Ledger() application.LedgerQueries {
+	return &LedgerRepository{
+		client: c,
+	}
+}
+
+func (c *queries[T]) User() application.UserQueries {
+	return &UsersRepository{
+		client: c,
+	}
+}
+
+func (c *queries[T]) Expense() application.ExpenseQueries {
 	return &ExpenseRepository{
 		client: c,
 	}
@@ -59,7 +82,7 @@ func (c *conn[T]) transaction(ctx context.Context, f func(*sqlc.Queries) error) 
 	return tx.Commit(ctx)
 }
 
-func (c *conn[T]) Transaction(ctx context.Context, f func(controllers.Database) error) error {
+func (c *conn[T]) Transaction(ctx context.Context, f func(application.Repositories) error) error {
 	tx, err := c.conn.Begin(ctx)
 	if err != nil {
 		return err
@@ -70,7 +93,9 @@ func (c *conn[T]) Transaction(ctx context.Context, f func(controllers.Database) 
 		}
 	}()
 
-	if err := f(&conn[pgx.Tx]{conn: tx}); err != nil {
+	if err := f(&repositories[pgx.Tx]{
+		conn[pgx.Tx]{conn: tx},
+	}); err != nil {
 		return err
 	}
 

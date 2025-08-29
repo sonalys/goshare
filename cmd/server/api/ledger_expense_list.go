@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/sonalys/goshare/cmd/server/handlers"
-	"github.com/sonalys/goshare/internal/application/controllers"
+	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
 	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/domain"
 )
@@ -16,7 +16,7 @@ func (a *API) LedgerExpenseList(ctx context.Context, params handlers.LedgerExpen
 		return nil, err
 	}
 
-	result, err := a.Ledgers.GetExpenses(ctx, controllers.GetExpensesRequest{
+	result, err := a.UserController.GetExpenses(ctx, usercontroller.GetExpensesRequest{
 		Actor:    identity.UserID,
 		LedgerID: domain.ConvertID(params.LedgerID),
 		Limit:    params.Limit.Or(10),

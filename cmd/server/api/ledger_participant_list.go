@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/sonalys/goshare/cmd/server/handlers"
+	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
 	"github.com/sonalys/goshare/internal/domain"
 )
 
@@ -13,7 +14,10 @@ func (a *API) LedgerMemberList(ctx context.Context, params handlers.LedgerMember
 		return nil, err
 	}
 
-	members, err := a.Ledgers.GetMembers(ctx, identity.UserID, domain.ConvertID(params.LedgerID))
+	members, err := a.UserController.GetMembers(ctx, usercontroller.GetMembersRequest{
+		Actor:    identity.UserID,
+		LedgerID: domain.ConvertID(params.LedgerID),
+	})
 	if err != nil {
 		return nil, err
 	}

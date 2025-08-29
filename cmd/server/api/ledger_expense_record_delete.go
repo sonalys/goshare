@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/sonalys/goshare/cmd/server/handlers"
-	"github.com/sonalys/goshare/internal/application/controllers"
+	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
 	"github.com/sonalys/goshare/internal/domain"
 )
 
@@ -14,12 +14,12 @@ func (a *API) LedgerExpenseRecordDelete(ctx context.Context, params handlers.Led
 		return err
 	}
 
-	apiReq := controllers.DeleteExpenseRecordRequest{
+	apiReq := usercontroller.DeleteExpenseRecordRequest{
 		ActorID:   identity.UserID,
 		LedgerID:  domain.ConvertID(params.LedgerID),
 		ExpenseID: domain.ConvertID(params.ExpenseID),
 		RecordID:  domain.ConvertID(params.RecordID),
 	}
 
-	return a.Ledgers.DeleteExpenseRecord(ctx, apiReq)
+	return a.UserController.DeleteExpenseRecord(ctx, apiReq)
 }

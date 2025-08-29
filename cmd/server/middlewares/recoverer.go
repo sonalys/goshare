@@ -20,7 +20,7 @@ func Recoverer(next http.Handler) http.Handler {
 			}
 
 			stackTrace := string(debug.Stack())
-			slog.Error(r.Context(), "panic recovered", nil, slog.WithAny("r", rec), slog.WithString("stack_trace", stackTrace))
+			slog.Error(r.Context(), "panic recovered", nil, slog.With("r", rec), slog.WithString("stack_trace", stackTrace))
 			w.WriteHeader(http.StatusInternalServerError)
 
 			var traceID trace.TraceID

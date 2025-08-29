@@ -1,4 +1,4 @@
-package controllers
+package application
 
 import (
 	"context"
@@ -9,44 +9,65 @@ import (
 )
 
 type (
-	LedgerRepository interface {
-		Create(ctx context.Context, ledger *domain.Ledger) error
+	LedgerQueries interface {
 		Find(ctx context.Context, id domain.ID) (*domain.Ledger, error)
 		GetByUser(ctx context.Context, identity domain.ID) ([]domain.Ledger, error)
+	}
+
+	LedgerCommands interface {
+		Create(ctx context.Context, ledger *domain.Ledger) error
 		Update(ctx context.Context, ledger *domain.Ledger) error
 	}
 
-	UserRepository interface {
-		Save(ctx context.Context, user *domain.User) error
+	LedgerRepository interface {
+		LedgerQueries
+		LedgerCommands
+	}
+
+	UserQueries interface {
 		Find(ctx context.Context, id domain.ID) (*domain.User, error)
 		FindByEmail(ctx context.Context, email string) (*domain.User, error)
 		ListByEmail(ctx context.Context, emails []string) ([]domain.User, error)
 	}
 
-	ExpenseRepository interface {
-		Create(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error
+	UserCommands interface {
+		Save(ctx context.Context, user *domain.User) error
+	}
+
+	UserRepository interface {
+		UserQueries
+		UserCommands
+	}
+
+	ExpenseQueries interface {
 		Find(ctx context.Context, id domain.ID) (*domain.Expense, error)
 		GetByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error)
+	}
+
+	ExpenseCommands interface {
+		Create(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error
 		Update(ctx context.Context, expense *domain.Expense) error
 	}
 
+	ExpenseRepository interface {
+		ExpenseQueries
+		ExpenseCommands
+	}
+
 	Database interface {
-		Repositories
-		Transaction(ctx context.Context, f func(db Database) error) error
+		Queries
+		Transaction(ctx context.Context, f func(db Repositories) error) error
+	}
+
+	Queries interface {
+		Expense() ExpenseQueries
+		Ledger() LedgerQueries
+		User() UserQueries
 	}
 
 	Repositories interface {
 		Expense() ExpenseRepository
 		Ledger() LedgerRepository
 		User() UserRepository
-	}
-
-	IdentityEncoder interface {
-		Encode(identity *v1.Identity) (string, error)
-	}
-
-	Dependencies struct {
-		Database
-		IdentityEncoder
 	}
 )

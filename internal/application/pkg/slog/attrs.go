@@ -13,7 +13,7 @@ func WithError(err error) slog.Attr {
 	return slog.Any("error", err.Error())
 }
 
-func WithAny(key string, value any) slog.Attr {
+func With(key string, value any) slog.Attr {
 	return slog.Any(key, value)
 }
 

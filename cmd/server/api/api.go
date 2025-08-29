@@ -9,8 +9,9 @@ import (
 	"github.com/ogen-go/ogen/ogenerrors"
 	"github.com/ogen-go/ogen/validate"
 	"github.com/sonalys/goshare/cmd/server/handlers"
+	"github.com/sonalys/goshare/internal/application/controllers/identitycontroller"
+	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
 	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
-	"github.com/sonalys/goshare/internal/application/usecases"
 	"github.com/sonalys/goshare/internal/domain"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -18,18 +19,18 @@ import (
 type (
 	API struct {
 		handlers.UnimplementedHandler
-		usecases.Users
-		usecases.Ledgers
+		IdentityController *identitycontroller.Controller
+		UserController     *usercontroller.Controller
 	}
 )
 
 func New(
-	users usecases.Users,
-	ledgers usecases.Ledgers,
+	identityController *identitycontroller.Controller,
+	userController *usercontroller.Controller,
 ) *API {
 	return &API{
-		Users:   users,
-		Ledgers: ledgers,
+		IdentityController: identityController,
+		UserController:     userController,
 	}
 }
 

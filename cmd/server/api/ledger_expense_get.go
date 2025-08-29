@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/sonalys/goshare/cmd/server/handlers"
+	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
 	"github.com/sonalys/goshare/internal/domain"
 )
 
@@ -13,7 +14,11 @@ func (a *API) LedgerExpenseGet(ctx context.Context, params handlers.LedgerExpens
 		return nil, err
 	}
 
-	expense, err := a.Ledgers.FindExpense(ctx, identity.UserID, domain.ConvertID(params.LedgerID), domain.ConvertID(params.ExpenseID))
+	expense, err := a.UserController.FindExpense(ctx, usercontroller.FindExpenseRequest{
+		Actor:     identity.UserID,
+		LedgerID:  domain.ConvertID(params.LedgerID),
+		ExpenseID: domain.ConvertID(params.ExpenseID),
+	})
 	if err != nil {
 		return nil, err
 	}

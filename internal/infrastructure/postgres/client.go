@@ -14,7 +14,7 @@ type connection interface {
 }
 
 type Postgres struct {
-	*conn[*pgxpool.Pool]
+	*queries[*pgxpool.Pool]
 }
 
 func New(ctx context.Context, connStr string) (*Postgres, error) {
@@ -31,8 +31,10 @@ func New(ctx context.Context, connStr string) (*Postgres, error) {
 	}
 
 	return &Postgres{
-		conn: &conn[*pgxpool.Pool]{
-			conn: dbpool,
+		&queries[*pgxpool.Pool]{
+			conn[*pgxpool.Pool]{
+				conn: dbpool,
+			},
 		},
 	}, nil
 }

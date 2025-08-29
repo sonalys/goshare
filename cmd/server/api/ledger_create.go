@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/sonalys/goshare/cmd/server/handlers"
-	"github.com/sonalys/goshare/internal/application/controllers"
+	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
 )
 
 func (a *API) LedgerCreate(ctx context.Context, req *handlers.LedgerCreateReq) (r *handlers.LedgerCreateOK, _ error) {
@@ -13,12 +13,12 @@ func (a *API) LedgerCreate(ctx context.Context, req *handlers.LedgerCreateReq) (
 		return nil, err
 	}
 
-	apiParams := controllers.CreateLedgerRequest{
+	apiParams := usercontroller.CreateLedgerRequest{
 		Actor: identity.UserID,
 		Name:  req.Name,
 	}
 
-	switch resp, err := a.Ledgers.Create(ctx, apiParams); err {
+	switch resp, err := a.UserController.Create(ctx, apiParams); err {
 	case nil:
 		return &handlers.LedgerCreateOK{
 			ID: resp.ID.UUID(),

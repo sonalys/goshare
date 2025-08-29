@@ -1,20 +1,23 @@
-package controllers
+package usercontroller
 
 import (
 	"context"
 	"fmt"
 	"time"
 
-	"github.com/sonalys/goshare/internal/application/pkg/otel"
+	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/pkg/slog"
 	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/kset"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type (
-	Ledgers struct {
-		db Database
+	LedgerController struct {
+		db     application.Database
+		tracer trace.Tracer
 	}
 
 	CreateLedgerRequest struct {
@@ -57,15 +60,17 @@ type (
 	}
 )
 
-func (c *Ledgers) Create(ctx context.Context, req CreateLedgerRequest) (resp *CreateLedgerResponse, err error) {
-	ctx, span := otel.Tracer.Start(ctx, "ledgers.Create")
+func (c *LedgerController) Create(ctx context.Context, req CreateLedgerRequest) (resp *CreateLedgerResponse, err error) {
+	ctx, span := c.tracer.Start(ctx, "create",
+		trace.WithAttributes(
+			attribute.Stringer("actor_id", req.Actor),
+		),
+	)
 	defer span.End()
 
-	ctx = slog.Context(ctx, slog.WithStringer("actor", req.Actor))
+	slog.Debug(ctx, "creating ledger", slog.With("req", req))
 
-	slog.Debug(ctx, "creating ledger", slog.WithAny("req", req))
-
-	err = c.db.Transaction(ctx, func(db Database) error {
+	err = c.db.Transaction(ctx, func(db application.Repositories) error {
 		user, err := db.User().Find(ctx, req.Actor)
 		if err != nil {
 			return err
@@ -95,19 +100,19 @@ func (c *Ledgers) Create(ctx context.Context, req CreateLedgerRequest) (resp *Cr
 	return
 }
 
-func (c *Ledgers) CreateExpense(ctx context.Context, req CreateExpenseRequest) (resp *CreateExpenseResponse, err error) {
-	ctx, span := otel.Tracer.Start(ctx, "ledgers.CreateExpense")
+func (c *LedgerController) CreateExpense(ctx context.Context, req CreateExpenseRequest) (resp *CreateExpenseResponse, err error) {
+	ctx, span := c.tracer.Start(ctx, "createExpense",
+		trace.WithAttributes(
+			attribute.Stringer("actor_id", req.Actor),
+			attribute.Stringer("ledger_id", req.LedgerID),
+		),
+	)
 	defer span.End()
 
-	ctx = slog.Context(ctx,
-		slog.WithStringer("actor", req.Actor),
-		slog.WithStringer("ledger_id", req.LedgerID),
-	)
-
-	err = c.db.Transaction(ctx, func(db Database) error {
+	err = c.db.Transaction(ctx, func(db application.Repositories) error {
 		ledger, err := db.Ledger().Find(ctx, req.LedgerID)
 		if err != nil {
-			return err
+			return fmt.Errorf("finding ledger: %w", err)
 		}
 
 		expense, err := ledger.CreateExpense(domain.CreateExpenseRequest{
@@ -117,17 +122,15 @@ func (c *Ledgers) CreateExpense(ctx context.Context, req CreateExpenseRequest) (
 			PendingRecords: req.PendingRecords,
 		})
 		if err != nil {
-			return err
+			return fmt.Errorf("creating expense: %w", err)
 		}
 
-		err = db.Expense().Create(ctx, req.LedgerID, expense)
-		if err != nil {
-			return err
+		if err = db.Expense().Create(ctx, req.LedgerID, expense); err != nil {
+			return fmt.Errorf("saving expense: %w", err)
 		}
 
-		err = db.Ledger().Update(ctx, ledger)
-		if err != nil {
-			return err
+		if err = db.Ledger().Update(ctx, ledger); err != nil {
+			return fmt.Errorf("saving ledger: %w", err)
 		}
 
 		resp = &CreateExpenseResponse{
@@ -143,16 +146,23 @@ func (c *Ledgers) CreateExpense(ctx context.Context, req CreateExpenseRequest) (
 	return
 }
 
-func (c *Ledgers) FindExpense(ctx context.Context, ledgerID domain.ID, expenseID domain.ID) (*domain.Expense, error) {
-	ctx, span := otel.Tracer.Start(ctx, "ledgers.FindExpense")
+type FindExpenseRequest struct {
+	Actor     domain.ID
+	LedgerID  domain.ID
+	ExpenseID domain.ID
+}
+
+func (c *LedgerController) FindExpense(ctx context.Context, req FindExpenseRequest) (*domain.Expense, error) {
+	ctx, span := c.tracer.Start(ctx, "findExpense",
+		trace.WithAttributes(
+			attribute.Stringer("actor_id", req.Actor),
+			attribute.Stringer("ledger_id", req.LedgerID),
+			attribute.Stringer("expense_id", req.ExpenseID),
+		),
+	)
 	defer span.End()
 
-	ctx = slog.Context(ctx,
-		slog.WithStringer("ledger_id", ledgerID),
-		slog.WithStringer("expense_id", expenseID),
-	)
-
-	expense, err := c.db.Expense().Find(ctx, expenseID)
+	expense, err := c.db.Expense().Find(ctx, req.ExpenseID)
 	if err != nil {
 		return nil, slog.ErrorReturn(ctx, "failed to get ledger expense", err)
 	}
@@ -162,16 +172,16 @@ func (c *Ledgers) FindExpense(ctx context.Context, ledgerID domain.ID, expenseID
 	return expense, nil
 }
 
-func (c *Ledgers) GetExpenses(ctx context.Context, req GetExpensesRequest) (*GetExpensesResponse, error) {
-	ctx, span := otel.Tracer.Start(ctx, "ledgers.GetExpenses")
+func (c *LedgerController) GetExpenses(ctx context.Context, req GetExpensesRequest) (*GetExpensesResponse, error) {
+	ctx, span := c.tracer.Start(ctx, "getExpenses",
+		trace.WithAttributes(
+			attribute.Stringer("actor_id", req.Actor),
+			attribute.Stringer("ledger_id", req.LedgerID),
+		),
+	)
 	defer span.End()
 
 	req.Limit = max(1, req.Limit)
-
-	ctx = slog.Context(ctx,
-		slog.WithStringer("actor", req.Actor),
-		slog.WithStringer("ledger_id", req.LedgerID),
-	)
 
 	expenses, err := c.db.Expense().GetByLedger(ctx, req.LedgerID, req.Cursor, req.Limit+1)
 	if err != nil {
@@ -196,13 +206,15 @@ func (c *Ledgers) GetExpenses(ctx context.Context, req GetExpensesRequest) (*Get
 	}, nil
 }
 
-func (c *Ledgers) GetByIdentity(ctx context.Context, identity domain.ID) ([]domain.Ledger, error) {
-	ctx, span := otel.Tracer.Start(ctx, "ledgers.ListByUser")
+func (c *LedgerController) GetByIdentity(ctx context.Context, actor domain.ID) ([]domain.Ledger, error) {
+	ctx, span := c.tracer.Start(ctx, "getByIdentity",
+		trace.WithAttributes(
+			attribute.Stringer("actor_id", actor),
+		),
+	)
 	defer span.End()
 
-	ctx = slog.Context(ctx, slog.WithStringer("actor", identity))
-
-	ledgers, err := c.db.Ledger().GetByUser(ctx, identity)
+	ledgers, err := c.db.Ledger().GetByUser(ctx, actor)
 	if err != nil {
 		return nil, slog.ErrorReturn(ctx, "failed to list ledgers", err)
 	}
@@ -210,13 +222,21 @@ func (c *Ledgers) GetByIdentity(ctx context.Context, identity domain.ID) ([]doma
 	return ledgers, nil
 }
 
-func (c *Ledgers) Find(ctx context.Context, ledgerID domain.ID) (*domain.Ledger, error) {
-	ctx, span := otel.Tracer.Start(ctx, "ledgers.Find")
+type FindLedgerRequest struct {
+	Actor    domain.ID
+	LedgerID domain.ID
+}
+
+func (c *LedgerController) Find(ctx context.Context, req FindLedgerRequest) (*domain.Ledger, error) {
+	ctx, span := c.tracer.Start(ctx, "find",
+		trace.WithAttributes(
+			attribute.Stringer("actor_id", req.Actor),
+			attribute.Stringer("ledger_id", req.LedgerID),
+		),
+	)
 	defer span.End()
 
-	ctx = slog.Context(ctx, slog.WithStringer("ledgerID", ledgerID))
-
-	ledger, err := c.db.Ledger().Find(ctx, ledgerID)
+	ledger, err := c.db.Ledger().Find(ctx, req.LedgerID)
 	if err != nil {
 		return nil, slog.ErrorReturn(ctx, "failed to list ledgers", err)
 	}
@@ -227,16 +247,16 @@ func (c *Ledgers) Find(ctx context.Context, ledgerID domain.ID) (*domain.Ledger,
 // TODO(invitations): Here it's a simplification of the user membership process.
 // We can always invert the flow and create invitation links, so the users click themselves
 // We can also send invites through the system and they accept the invite through the API.
-func (c *Ledgers) AddMembers(ctx context.Context, req AddMembersRequest) error {
-	ctx, span := otel.Tracer.Start(ctx, "ledgers.AddMembers")
+func (c *LedgerController) AddMembers(ctx context.Context, req AddMembersRequest) error {
+	ctx, span := c.tracer.Start(ctx, "addMembers",
+		trace.WithAttributes(
+			attribute.Stringer("actor_id", req.Actor),
+			attribute.Stringer("ledger_id", req.LedgerID),
+		),
+	)
 	defer span.End()
 
-	ctx = slog.Context(ctx,
-		slog.WithStringer("actor", req.Actor),
-		slog.WithStringer("ledger_id", req.LedgerID),
-	)
-
-	transaction := func(db Database) error {
+	transaction := func(db application.Repositories) error {
 		users, err := db.User().ListByEmail(ctx, req.Emails)
 		if err != nil {
 			return slog.ErrorReturn(ctx, "failed to get users", err)
@@ -268,15 +288,21 @@ func (c *Ledgers) AddMembers(ctx context.Context, req AddMembersRequest) error {
 	}
 }
 
-func (c *Ledgers) GetMembers(ctx context.Context, ledgerID domain.ID) (map[domain.ID]*domain.LedgerMember, error) {
-	ctx, span := otel.Tracer.Start(ctx, "ledgers.GetMembers")
+type GetMembersRequest struct {
+	Actor    domain.ID
+	LedgerID domain.ID
+}
+
+func (c *LedgerController) GetMembers(ctx context.Context, req GetMembersRequest) (map[domain.ID]*domain.LedgerMember, error) {
+	ctx, span := c.tracer.Start(ctx, "getMembers",
+		trace.WithAttributes(
+			attribute.Stringer("actor_id", req.Actor),
+			attribute.Stringer("ledger_id", req.LedgerID),
+		),
+	)
 	defer span.End()
 
-	ctx = slog.Context(ctx,
-		slog.WithStringer("ledger_id", ledgerID),
-	)
-
-	members, err := c.db.Ledger().Find(ctx, ledgerID)
+	members, err := c.db.Ledger().Find(ctx, req.LedgerID)
 	if err != nil {
 		return nil, slog.ErrorReturn(ctx, "failed to get ledger members balances", err)
 	}
@@ -293,17 +319,17 @@ type CreateExpenseRecordRequest struct {
 	PendingRecords []domain.PendingRecord
 }
 
-func (c *Ledgers) CreateExpenseRecord(ctx context.Context, req CreateExpenseRecordRequest) (resp *domain.Expense, err error) {
-	ctx, span := otel.Tracer.Start(ctx, "ledgers.CreateExpenseRecord")
+func (c *LedgerController) CreateExpenseRecord(ctx context.Context, req CreateExpenseRecordRequest) (resp *domain.Expense, err error) {
+	ctx, span := c.tracer.Start(ctx, "createExpenseRecord",
+		trace.WithAttributes(
+			attribute.Stringer("actor_id", req.Actor),
+			attribute.Stringer("ledger_id", req.LedgerID),
+			attribute.Stringer("expense_id", req.ExpenseID),
+		),
+	)
 	defer span.End()
 
-	ctx = slog.Context(ctx,
-		slog.WithStringer("actor", req.Actor),
-		slog.WithStringer("expenseID", req.ExpenseID),
-		slog.WithStringer("ledgerID", req.LedgerID),
-	)
-
-	err = c.db.Transaction(ctx, func(db Database) error {
+	err = c.db.Transaction(ctx, func(db application.Repositories) error {
 		ledger, err := db.Ledger().Find(ctx, req.LedgerID)
 		if err != nil {
 			return fmt.Errorf("fetching ledger: %w", err)
@@ -345,18 +371,18 @@ type DeleteExpenseRecordRequest struct {
 	RecordID  domain.ID
 }
 
-func (c *Ledgers) DeleteExpenseRecord(ctx context.Context, req DeleteExpenseRecordRequest) error {
-	ctx, span := otel.Tracer.Start(ctx, "ledgers.CreateExpenseRecord")
+func (c *LedgerController) DeleteExpenseRecord(ctx context.Context, req DeleteExpenseRecordRequest) error {
+	ctx, span := c.tracer.Start(ctx, "createExpenseRecord",
+		trace.WithAttributes(
+			attribute.Stringer("actor_id", req.ActorID),
+			attribute.Stringer("ledger_id", req.LedgerID),
+			attribute.Stringer("expense_id", req.ExpenseID),
+			attribute.Stringer("record_id", req.RecordID),
+		),
+	)
 	defer span.End()
 
-	ctx = slog.Context(ctx,
-		slog.WithStringer("actor", req.ActorID),
-		slog.WithStringer("ledgerID", req.LedgerID),
-		slog.WithStringer("expenseID", req.ExpenseID),
-		slog.WithStringer("recordID", req.RecordID),
-	)
-
-	err := c.db.Transaction(ctx, func(db Database) error {
+	err := c.db.Transaction(ctx, func(db application.Repositories) error {
 		expense, err := db.Expense().Find(ctx, req.ExpenseID)
 		if err != nil {
 			return fmt.Errorf("finding expense: %w", err)

@@ -24,17 +24,19 @@ var (
 	Logger = global.Logger(name)
 )
 
-type Provider struct{}
+type provider struct{}
 
-func (tp Provider) TracerProvider() trace.TracerProvider {
+var Provider = provider{}
+
+func (tp provider) TracerProvider() trace.TracerProvider {
 	return otel.GetTracerProvider()
 }
 
-func (tp Provider) MeterProvider() metric.MeterProvider {
+func (tp provider) MeterProvider() metric.MeterProvider {
 	return otel.GetMeterProvider()
 }
 
-func (tp Provider) TextMapPropagator() propagation.TextMapPropagator {
+func (tp provider) TextMapPropagator() propagation.TextMapPropagator {
 	return otel.GetTextMapPropagator()
 }
 
@@ -63,14 +65,16 @@ func Initialize(ctx context.Context, endpoint, version string) (shutdown func(co
 	// Create resource.
 	res, err := newResource(version)
 	if err != nil {
-		panic(err)
+		handleErr(err)
+		return
 	}
 
 	// Create a logger provider.
 	// You can pass this instance directly when creating bridges.
 	loggerProvider, err := newLoggerProvider(ctx, endpoint, res)
 	if err != nil {
-		panic(err)
+		handleErr(err)
+		return
 	}
 	global.SetLoggerProvider(loggerProvider)
 

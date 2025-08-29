@@ -10,11 +10,11 @@ import (
 	"time"
 
 	"github.com/sonalys/goshare/cmd/server/api"
-	"github.com/sonalys/goshare/internal/application/controllers"
+	"github.com/sonalys/goshare/internal/application/controllers/identitycontroller"
+	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
 	"github.com/sonalys/goshare/internal/application/pkg/otel"
 	"github.com/sonalys/goshare/internal/application/pkg/secrets"
 	"github.com/sonalys/goshare/internal/application/pkg/slog"
-	"github.com/sonalys/goshare/internal/application/usecases"
 )
 
 var version string = "dev"
@@ -45,14 +45,19 @@ func main() {
 
 	infrastructure := loadInfrastructure(ctx, secrets)
 	repositories := loadRepositories(secrets, infrastructure)
-	controllers := controllers.New(controllers.Dependencies{
+
+	userController := usercontroller.New(usercontroller.Dependencies{
+		Database: repositories.Database,
+	})
+
+	identityController := identitycontroller.New(identitycontroller.Dependencies{
 		Database:        repositories.Database,
 		IdentityEncoder: repositories.JWTRepository,
 	})
 
 	api := api.New(
-		usecases.NewUsers(controllers.Users),
-		usecases.NewLedgers(controllers),
+		identityController,
+		userController,
 	)
 	handler := NewHandler(api, repositories, cfg.ServiceName)
 
