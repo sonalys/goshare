@@ -1,5 +1,7 @@
 package secrets
 
+import "os"
+
 type Secrets struct {
 	PostgresConn string
 	JWTSignKey   []byte
@@ -7,7 +9,7 @@ type Secrets struct {
 
 func LoadSecrets() Secrets {
 	secrets := Secrets{
-		PostgresConn: "postgresql://user:password@localhost:5432/goshare?sslmode=disable",
+		PostgresConn: os.Getenv("POSTGRES_CONN"),
 		JWTSignKey:   []byte("my-super-secret-key"),
 	}
 

@@ -23,7 +23,7 @@ func loadConfigFromEnv(ctx context.Context) Config {
 		AddrPort:          ":8080",
 		ReadTimeout:       10 * time.Second,
 		EnableTelemetry:   true,
-		TelemetryEndpoint: "jaeger:4317",
+		TelemetryEndpoint: os.Getenv("JAEGER_CONN"),
 	}
 
 	if serviceName, ok := os.LookupEnv("SERVICE_NAME"); ok {

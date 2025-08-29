@@ -13,3 +13,8 @@ get {
 params:path {
   ledger_id: {{ledger_id}}
 }
+
+vars:post-response {
+  participant1: res.body.members[0].user_id
+  participant2: res.body.members[1].user_id
+}

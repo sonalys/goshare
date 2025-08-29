@@ -3,8 +3,10 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/sonalys/goshare/internal/application/pkg/slog"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 )
 
@@ -28,6 +30,19 @@ func New(ctx context.Context, connStr string) (*Postgres, error) {
 	dbpool, err := pgxpool.NewWithConfig(ctx, cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create connection pool: %w", err)
+	}
+
+	for {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+
+		if dbpool.Ping(ctx) == nil {
+			break
+		}
+
+		slog.Info(ctx, "waiting for postgres connection")
+		time.Sleep(time.Second)
 	}
 
 	return &Postgres{

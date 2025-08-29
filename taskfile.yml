@@ -7,6 +7,8 @@ env:
   GO_VERSION: 1.24
   VERSION: 0.1.0
   CGO_ENABLED: 0
+  POSTGRES_CONN: postgresql://user:password@postgres:5432/goshare?sslmode=disable
+  JAEGER_CONN: jaeger:4317
 
 tasks:
   build-server:
@@ -23,6 +25,9 @@ tasks:
     deps: [build-server,build-migration]
 
   dev:
+    env:
+      POSTGRES_CONN: postgresql://user:password@localhost:5432/goshare?sslmode=disable
+      JAEGER_CONN: localhost:4317
     cmd: go run ./cmd/server/...
 
   migrate:
@@ -50,6 +55,9 @@ tasks:
 
   compose-db:
     cmd: docker compose -f {{ .COMPOSE_FILE }} up -d postgres
+
+  compose-infra:
+    cmd: docker compose -f {{ .COMPOSE_FILE }} up -d postgres grafana jaeger
 
   enter-db:
     cmd: docker exec -it postgres psql -U user goshare

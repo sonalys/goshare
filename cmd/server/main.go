@@ -24,7 +24,7 @@ func init() {
 }
 
 func main() {
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill)
 	defer cancel()
 
 	cfg := loadConfigFromEnv(ctx)
@@ -66,6 +66,8 @@ func main() {
 	go server.ServeHTTP(ctx)
 
 	<-ctx.Done()
+
+	slog.Info(ctx, "shutdown signal received")
 
 	shutdown(
 		server.Shutdown,
