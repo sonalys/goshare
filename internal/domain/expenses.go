@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math"
 	"time"
+
+	"github.com/sonalys/goshare/internal/utils/genericmath"
 )
 
 type (
@@ -24,10 +26,10 @@ type (
 const (
 	ExpenseMaxRecords = 100
 
-	ErrExpenseMaxRecords  = ErrCause("expense reached maximum number of records")
-	ErrSettlementMismatch = ErrCause("settlement cannot be greater than debt")
-	ErrLedgerFromToMatch  = ErrCause("from and to cannot be the equal")
-	ErrLedgerMismatch     = ErrCause("ledger mismatch")
+	ErrExpenseMaxRecords  = Cause("expense reached maximum number of records")
+	ErrSettlementMismatch = Cause("settlement cannot be greater than debt")
+	ErrLedgerFromToMatch  = Cause("from and to cannot be the equal")
+	ErrLedgerMismatch     = Cause("ledger mismatch")
 )
 
 func (e *Expense) sumRecords(t RecordType) int32 {
@@ -50,19 +52,15 @@ func (e *Expense) TotalSettled() int32 {
 	return e.sumRecords(RecordTypeSettlement)
 }
 
-func (e *Expense) CreateRecords(actor ID, ledger *Ledger, records ...PendingRecord) error {
+func (e *Expense) validateCreateRecords(actor ID, ledger *Ledger, records ...PendingRecord) error {
 	if !ledger.IsMember(actor) {
 		return FieldError{
 			Field: "actor",
-			Cause: &ErrLedgerUserNotMember{
+			Cause: ErrLedgerUserNotMember{
 				UserID:   actor,
 				LedgerID: ledger.ID,
 			},
 		}
-	}
-
-	if len(records) == 0 {
-		return nil
 	}
 
 	if ledger.ID != e.LedgerID {
@@ -72,38 +70,46 @@ func (e *Expense) CreateRecords(actor ID, ledger *Ledger, records ...PendingReco
 		}
 	}
 
-	var errs FormError
+	var errs Form
 
-	if len(e.Records)+len(records) > ExpenseMaxRecords {
-		errs.Append(newFieldLengthError("records", 1, ExpenseMaxRecords-len(e.Records)))
+	if recordsLen := len(records); len(e.Records)+recordsLen > ExpenseMaxRecords {
+		errs.Append(
+			FieldError{
+				Cause: fmt.Errorf("%w: %w", ErrExpenseMaxRecords, RangeError{
+					Min: 0,
+					Max: genericmath.Max(ExpenseMaxRecords-(len(e.Records)+recordsLen), 0),
+				}),
+				Field: "records",
+			},
+		)
 	}
 
 	totalDebt := e.TotalDebt()
 	totalSettled := e.TotalSettled()
 
 	for i := range records {
-		var recordErrs FormError
+		var recordsForm Form
 		record := &records[i]
 
 		if !record.Type.IsValid() {
-			recordErrs.Append(newInvalidFieldError("type"))
+			recordsForm.Append(newInvalidFieldError("type"))
 		}
 
 		if record.Amount <= 0 {
-			recordErrs.Append(newFieldLengthError("amount", 1, math.MaxInt32))
+			recordsForm.Append(newFieldLengthError("amount", 1, math.MaxInt32))
 		}
 
 		if record.From == record.To {
-			recordErrs.Append(FieldError{
+			recordsForm.Append(FieldError{
 				Field: "to",
 				Cause: ErrLedgerFromToMatch,
 			})
 		}
 
 		if !ledger.IsMember(record.From) {
-			recordErrs.Append(FieldError{
+			recordsForm.Append(FieldError{
 				Field: "from",
-				Cause: &ErrLedgerUserNotMember{
+				Cause: ErrLedgerUserNotMember{
 					UserID:   record.From,
 					LedgerID: ledger.ID,
 				},
@@ -111,9 +117,9 @@ func (e *Expense) CreateRecords(actor ID, ledger *Ledger, records ...PendingReco
 		}
 
 		if !ledger.IsMember(record.To) {
-			recordErrs.Append(FieldError{
+			recordsForm.Append(FieldError{
 				Field: "to",
-				Cause: &ErrLedgerUserNotMember{
+				Cause: ErrLedgerUserNotMember{
 					UserID:   record.To,
 					LedgerID: ledger.ID,
 				},
@@ -125,8 +131,8 @@ func (e *Expense) CreateRecords(actor ID, ledger *Ledger, records ...PendingReco
 			case RecordTypeDebt:
 				newAmount := totalDebt + record.Amount
 				if newAmount < totalDebt {
-					recordErrs.Append(FieldError{
-						Cause: ErrOverflow,
+					recordsForm.Append(FieldError{
+						Cause: CauseOverflow,
 						Field: "amount",
 					})
 				}
@@ -134,8 +140,8 @@ func (e *Expense) CreateRecords(actor ID, ledger *Ledger, records ...PendingReco
 			case RecordTypeSettlement:
 				newAmount := totalSettled + record.Amount
 				if newAmount < totalSettled {
-					recordErrs.Append(FieldError{
-						Cause: ErrOverflow,
+					recordsForm.Append(FieldError{
+						Cause: CauseOverflow,
 						Field: "amount",
 					})
 				}
@@ -143,7 +149,7 @@ func (e *Expense) CreateRecords(actor ID, ledger *Ledger, records ...PendingReco
 			}
 		}
 
-		if err := recordErrs.Close(); err != nil {
+		if err := recordsForm.Close(); err != nil {
 			errs.Append(FieldError{
 				Field: fmt.Sprintf("records[%d]", i),
 				Cause: err,
@@ -152,11 +158,14 @@ func (e *Expense) CreateRecords(actor ID, ledger *Ledger, records ...PendingReco
 		}
 	}
 
-	if err := errs.Close(); err != nil {
+	return errs.Close()
+}
+
+func (e *Expense) CreateRecords(actor ID, ledger *Ledger, records ...PendingRecord) error {
+	if err := e.validateCreateRecords(actor, ledger, records...); err != nil {
 		return err
 	}
 
-	e.Amount = totalDebt
 	now := time.Now()
 
 	for i := range records {
@@ -182,14 +191,16 @@ func (e *Expense) CreateRecords(actor ID, ledger *Ledger, records ...PendingReco
 		}
 	}
 
+	e.Amount = e.TotalDebt()
+
 	return nil
 }
 
-func (e *Expense) DeleteRecord(actor ID, ledger *Ledger, recordID ID) error {
+func (e *Expense) validateDeleteRecord(actor ID, ledger *Ledger, recordID ID) error {
 	if !ledger.IsMember(actor) {
 		return FieldError{
 			Field: "actor",
-			Cause: &ErrLedgerUserNotMember{
+			Cause: ErrLedgerUserNotMember{
 				UserID:   actor,
 				LedgerID: ledger.ID,
 			},
@@ -203,15 +214,22 @@ func (e *Expense) DeleteRecord(actor ID, ledger *Ledger, recordID ID) error {
 		}
 	}
 
-	record, ok := e.Records[recordID]
-	if !ok {
+	if _, ok := e.Records[recordID]; !ok {
 		return FieldError{
 			Field: "recordID",
-			Cause: ErrNotFound,
+			Cause: CauseNotFound,
 		}
 	}
 
-	switch record.Type {
+	return nil
+}
+
+func (e *Expense) DeleteRecord(actor ID, ledger *Ledger, recordID ID) error {
+	if err := e.validateDeleteRecord(actor, ledger, recordID); err != nil {
+		return err
+	}
+
+	switch record := e.Records[recordID]; record.Type {
 	case RecordTypeDebt:
 		ledger.Members[record.From].Balance += record.Amount
 		ledger.Members[record.To].Balance -= record.Amount

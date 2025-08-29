@@ -38,7 +38,7 @@ func (a *API) LedgerExpenseCreate(ctx context.Context, req *handlers.Expense, pa
 }
 
 func convertUserBalances(userBalances []handlers.ExpenseRecord) ([]domain.PendingRecord, error) {
-	var errs domain.FormError
+	var errs domain.Form
 
 	balances := make([]domain.PendingRecord, 0, len(userBalances))
 	for i, ub := range userBalances {

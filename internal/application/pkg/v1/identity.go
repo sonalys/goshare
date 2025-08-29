@@ -9,5 +9,5 @@ type Identity struct {
 }
 
 const (
-	ErrAuthenticationExpired = domain.ErrCause("authentication expired")
+	ErrAuthenticationExpired = domain.Cause("authentication expired")
 )

@@ -33,7 +33,7 @@ type (
 )
 
 func (req *CreateExpenseRequest) validate() error {
-	var errs FormError
+	var errs Form
 
 	if req.Name == "" {
 		errs.Append(newRequiredFieldError("name"))
@@ -52,7 +52,7 @@ func (req *CreateExpenseRequest) validate() error {
 
 func (ledger *Ledger) CreateExpense(req CreateExpenseRequest) (*Expense, error) {
 	if !ledger.IsMember(req.Actor) {
-		return nil, &ErrLedgerUserNotMember{
+		return nil, ErrLedgerUserNotMember{
 			UserID:   req.Actor,
 			LedgerID: ledger.ID,
 		}
@@ -91,20 +91,20 @@ func (ledger *Ledger) IsMember(identity ID) bool {
 
 func (ledger *Ledger) AddMember(actor ID, newMembers ...ID) error {
 	if !ledger.IsMember(actor) {
-		return &ErrLedgerUserNotMember{
+		return ErrLedgerUserNotMember{
 			UserID:   actor,
 			LedgerID: ledger.ID,
 		}
 	}
 
-	var errs FormError
+	var errs Form
 	for _, id := range newMembers {
 		if !ledger.IsMember(id) {
 			continue
 		}
 		errs.Append(FieldError{
 			Field: "members",
-			Cause: &ErrLedgerUserAlreadyMember{
+			Cause: ErrLedgerUserAlreadyMember{
 				UserID:   id,
 				LedgerID: ledger.ID,
 			},
@@ -116,7 +116,7 @@ func (ledger *Ledger) AddMember(actor ID, newMembers ...ID) error {
 	}
 
 	if len(ledger.Members)+len(newMembers) >= LedgerMaxMembers {
-		return &ErrLedgerMaxMembers{
+		return ErrLedgerMaxMembers{
 			LedgerID:   ledger.ID,
 			MaxMembers: LedgerMaxMembers,
 		}

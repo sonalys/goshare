@@ -58,7 +58,7 @@ func (r *UsersRepository) ListByEmail(ctx context.Context, emails []string) ([]d
 		return nil, mapError(err)
 	}
 
-	var errs domain.FormError
+	var errs domain.Form
 	for idx, email := range emails {
 		if !slices.ContainsFunc(users, func(user sqlc.User) bool {
 			return user.Email == email

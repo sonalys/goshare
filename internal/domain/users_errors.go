@@ -9,6 +9,6 @@ type (
 	}
 )
 
-func (e *ErrUserMaxLedgers) Error() string {
+func (e ErrUserMaxLedgers) Error() string {
 	return fmt.Sprintf("user '%s' has reached maximum number of ledgers: %d", e.UserID, e.MaxLedgers)
 }

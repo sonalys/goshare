@@ -33,7 +33,7 @@ const (
 )
 
 func (req *NewUserRequest) validate() error {
-	var errs FormError
+	var errs Form
 
 	if req.FirstName == "" {
 		errs.Append(newRequiredFieldError("firstName"))
@@ -77,10 +77,10 @@ func NewUser(req NewUserRequest) (*User, error) {
 }
 
 func (user *User) CreateLedger(name string) (*Ledger, error) {
-	var errs FormError
+	var errs Form
 
 	if user.LedgersCount+1 > UserMaxLedgers {
-		return nil, &ErrUserMaxLedgers{
+		return nil, ErrUserMaxLedgers{
 			UserID:     user.ID,
 			MaxLedgers: UserMaxLedgers,
 		}

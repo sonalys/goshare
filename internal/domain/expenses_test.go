@@ -166,7 +166,7 @@ func TestExpense_CreateRecords(t *testing.T) {
 		require.ErrorAs(t, err, &targetErr)
 
 		assert.Equal(t, "actor", targetErr.Field)
-		assert.Equal(t, &domain.ErrLedgerUserNotMember{
+		assert.Equal(t, domain.ErrLedgerUserNotMember{
 			UserID:   actorID,
 			LedgerID: ledger.ID,
 		}, targetErr.Cause)
@@ -224,7 +224,7 @@ func TestExpense_CreateRecords(t *testing.T) {
 
 		expense := domain.Expense{
 			LedgerID: ledger.ID,
-			Records:  make(map[domain.ID]*domain.Record, len(domain.ErrExpenseMaxRecords)),
+			Records:  make(map[domain.ID]*domain.Record, domain.ExpenseMaxRecords),
 		}
 
 		for range domain.ExpenseMaxRecords {
@@ -239,13 +239,7 @@ func TestExpense_CreateRecords(t *testing.T) {
 		}
 
 		err := expense.CreateRecords(actorID, ledger, debt)
-		require.ErrorIs(t, err, domain.FieldError{
-			Field: "records",
-			Cause: &domain.ValueLengthError{
-				Min: 1,
-				Max: 0,
-			},
-		})
+		require.ErrorIs(t, err, domain.ErrExpenseMaxRecords)
 	})
 
 	t.Run("fail/invalid record type", func(t *testing.T) {
@@ -277,7 +271,7 @@ func TestExpense_CreateRecords(t *testing.T) {
 		err := expense.CreateRecords(actorID, ledger, debt)
 		require.ErrorIs(t, err, domain.FieldError{
 			Field: "type",
-			Cause: domain.ErrInvalid,
+			Cause: domain.CauseInvalid,
 		})
 	})
 
@@ -310,7 +304,7 @@ func TestExpense_CreateRecords(t *testing.T) {
 		err := expense.CreateRecords(actorID, ledger, debt)
 		require.ErrorIs(t, err, domain.FieldError{
 			Field: "amount",
-			Cause: &domain.ValueLengthError{
+			Cause: domain.RangeError{
 				Min: 1,
 				Max: math.MaxInt32,
 			},
@@ -377,7 +371,7 @@ func TestExpense_CreateRecords(t *testing.T) {
 		err := expense.CreateRecords(actorID, ledger, debt)
 		require.ErrorIs(t, err, domain.FieldError{
 			Field: "from",
-			Cause: &domain.ErrLedgerUserNotMember{
+			Cause: domain.ErrLedgerUserNotMember{
 				UserID:   debt.From,
 				LedgerID: ledger.ID,
 			},
@@ -413,7 +407,7 @@ func TestExpense_CreateRecords(t *testing.T) {
 		err := expense.CreateRecords(actorID, ledger, debt)
 		require.ErrorIs(t, err, domain.FieldError{
 			Field: "to",
-			Cause: &domain.ErrLedgerUserNotMember{
+			Cause: domain.ErrLedgerUserNotMember{
 				UserID:   debt.To,
 				LedgerID: ledger.ID,
 			},
@@ -451,7 +445,7 @@ func TestExpense_CreateRecords(t *testing.T) {
 		err := expense.CreateRecords(actorID, ledger, debt)
 		require.ErrorIs(t, err, domain.FieldError{
 			Field: "amount",
-			Cause: domain.ErrOverflow,
+			Cause: domain.CauseOverflow,
 		})
 	})
 
@@ -486,7 +480,7 @@ func TestExpense_CreateRecords(t *testing.T) {
 		err := expense.CreateRecords(actorID, ledger, debt)
 		require.ErrorIs(t, err, domain.FieldError{
 			Field: "amount",
-			Cause: domain.ErrOverflow,
+			Cause: domain.CauseOverflow,
 		})
 	})
 }
@@ -580,7 +574,7 @@ func TestExpense_DeleteRecord(t *testing.T) {
 		err := expense.DeleteRecord(actorID, ledger, recordID)
 		require.ErrorIs(t, err, domain.FieldError{
 			Field: "actor",
-			Cause: &domain.ErrLedgerUserNotMember{
+			Cause: domain.ErrLedgerUserNotMember{
 				UserID:   actorID,
 				LedgerID: ledger.ID,
 			},
@@ -639,7 +633,7 @@ func TestExpense_DeleteRecord(t *testing.T) {
 		err := expense.DeleteRecord(actorID, ledger, domain.NewID())
 		require.ErrorIs(t, err, domain.FieldError{
 			Field: "recordID",
-			Cause: domain.ErrNotFound,
+			Cause: domain.CauseNotFound,
 		})
 	})
 }

@@ -7,8 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-//  Replace "your_module_name" with your actual module name
-
 func TestNewRecordType(t *testing.T) {
 	t.Parallel()
 

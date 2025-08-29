@@ -75,7 +75,7 @@ func TestLedger_CreateExpense(t *testing.T) {
 		require.Error(t, err)
 		assert.Nil(t, expense)
 
-		var targetErr *domain.ErrLedgerUserNotMember
+		var targetErr domain.ErrLedgerUserNotMember
 		require.ErrorAs(t, err, &targetErr)
 		assert.Equal(t, data.req.Actor, targetErr.UserID)
 		assert.Equal(t, data.ledger.ID, targetErr.LedgerID)
@@ -91,7 +91,7 @@ func TestLedger_CreateExpense(t *testing.T) {
 		require.Error(t, err)
 		assert.Nil(t, expense)
 
-		var targetErr *domain.ErrLedgerUserNotMember
+		var targetErr domain.ErrLedgerUserNotMember
 		require.ErrorAs(t, err, &targetErr)
 		assert.Equal(t, data.req.PendingRecords[0].From, targetErr.UserID)
 		assert.Equal(t, data.ledger.ID, targetErr.LedgerID)
@@ -107,7 +107,7 @@ func TestLedger_CreateExpense(t *testing.T) {
 		require.Error(t, err)
 		assert.Nil(t, expense)
 
-		var targetErr *domain.ErrLedgerUserNotMember
+		var targetErr domain.ErrLedgerUserNotMember
 		require.ErrorAs(t, err, &targetErr)
 		assert.Equal(t, data.req.PendingRecords[0].To, targetErr.UserID)
 		assert.Equal(t, data.ledger.ID, targetErr.LedgerID)
@@ -131,7 +131,7 @@ func TestLedger_CreateExpense(t *testing.T) {
 		})
 
 		expense, err := data.ledger.CreateExpense(data.req)
-		require.ErrorIs(t, err, domain.ErrInvalid)
+		require.ErrorIs(t, err, domain.CauseInvalid)
 		assert.Nil(t, expense)
 	})
 
@@ -145,7 +145,7 @@ func TestLedger_CreateExpense(t *testing.T) {
 		require.Error(t, err)
 		assert.Nil(t, expense)
 
-		var targetErr *domain.ValueLengthError
+		var targetErr domain.RangeError
 		require.ErrorAs(t, err, &targetErr)
 		assert.Equal(t, targetErr.Min, 1)
 	})
@@ -160,7 +160,7 @@ func TestLedger_CreateExpense(t *testing.T) {
 		require.Error(t, err)
 		assert.Nil(t, expense)
 
-		var targetErr *domain.ValueLengthError
+		var targetErr domain.RangeError
 		require.ErrorAs(t, err, &targetErr)
 		assert.Equal(t, targetErr.Min, 1)
 	})
@@ -178,7 +178,7 @@ func TestLedger_CreateExpense(t *testing.T) {
 		})
 
 		expense, err := data.ledger.CreateExpense(data.req)
-		require.ErrorIs(t, err, domain.ErrOverflow)
+		require.ErrorIs(t, err, domain.CauseOverflow)
 		assert.Nil(t, expense)
 	})
 
@@ -196,7 +196,7 @@ func TestLedger_CreateExpense(t *testing.T) {
 		})
 
 		expense, err := data.ledger.CreateExpense(data.req)
-		require.ErrorIs(t, err, domain.ErrOverflow)
+		require.ErrorIs(t, err, domain.CauseOverflow)
 		assert.Nil(t, expense)
 	})
 
@@ -209,7 +209,7 @@ func TestLedger_CreateExpense(t *testing.T) {
 		expense, err := data.ledger.CreateExpense(data.req)
 		assert.Nil(t, expense)
 		require.Error(t, err)
-		assert.ErrorIs(t, err, domain.ErrRequired)
+		assert.ErrorIs(t, err, domain.CauseRequired)
 	})
 
 	t.Run("fail/expenseDate required", func(t *testing.T) {
@@ -221,7 +221,7 @@ func TestLedger_CreateExpense(t *testing.T) {
 		expense, err := data.ledger.CreateExpense(data.req)
 		assert.Nil(t, expense)
 		require.Error(t, err)
-		assert.ErrorIs(t, err, domain.ErrRequired)
+		assert.ErrorIs(t, err, domain.CauseRequired)
 	})
 
 	t.Run("fail/no records", func(t *testing.T) {
@@ -234,7 +234,7 @@ func TestLedger_CreateExpense(t *testing.T) {
 		assert.Nil(t, expense)
 		require.Error(t, err)
 
-		var targetErr *domain.ValueLengthError
+		var targetErr domain.RangeError
 		require.ErrorAs(t, err, &targetErr)
 		assert.Equal(t, targetErr.Min, 1)
 		assert.Equal(t, targetErr.Max, domain.ExpenseMaxRecords)
@@ -254,7 +254,7 @@ func TestLedger_CreateExpense(t *testing.T) {
 		assert.Nil(t, expense)
 		require.Error(t, err)
 
-		var targetErr *domain.ValueLengthError
+		var targetErr domain.RangeError
 		require.ErrorAs(t, err, &targetErr)
 		assert.Equal(t, targetErr.Min, 1)
 		assert.Equal(t, targetErr.Max, domain.ExpenseMaxRecords)
@@ -287,7 +287,7 @@ func TestLedger_AddMember(t *testing.T) {
 		err := ledger.AddMember(actor, domain.NewID())
 		require.Error(t, err)
 
-		var targetErr *domain.ErrLedgerUserNotMember
+		var targetErr domain.ErrLedgerUserNotMember
 		require.ErrorAs(t, err, &targetErr)
 		assert.Equal(t, actor, targetErr.UserID)
 		assert.Equal(t, ledger.ID, targetErr.LedgerID)
@@ -306,7 +306,7 @@ func TestLedger_AddMember(t *testing.T) {
 		err := ledger.AddMember(actorID, actorID)
 		require.Error(t, err)
 
-		var targetErr *domain.ErrLedgerUserAlreadyMember
+		var targetErr domain.ErrLedgerUserAlreadyMember
 		require.ErrorAs(t, err, &targetErr)
 		assert.Equal(t, actorID, targetErr.UserID)
 		assert.Equal(t, ledger.ID, targetErr.LedgerID)
@@ -329,7 +329,7 @@ func TestLedger_AddMember(t *testing.T) {
 		err := ledger.AddMember(actorID, domain.NewID())
 		require.Error(t, err)
 
-		var targetErr *domain.ErrLedgerMaxMembers
+		var targetErr domain.ErrLedgerMaxMembers
 		require.ErrorAs(t, err, &targetErr)
 		assert.Equal(t, ledger.ID, targetErr.LedgerID)
 		assert.Equal(t, domain.LedgerMaxMembers, targetErr.MaxMembers)

@@ -38,7 +38,7 @@ func NewRecordType(s string) (RecordType, error) {
 	case "settlement":
 		return RecordTypeSettlement, nil
 	default:
-		return RecordTypeUnknown, ErrInvalid
+		return RecordTypeUnknown, CauseInvalid
 	}
 }
 

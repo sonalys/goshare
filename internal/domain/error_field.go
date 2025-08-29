@@ -1,14 +1,11 @@
 package domain
 
 import (
+	"errors"
 	"fmt"
 )
 
 type (
-	FieldErrorList []FieldError
-
-	FormError FieldErrorList
-
 	FieldErrorMetadata struct {
 		Index int
 	}
@@ -19,39 +16,27 @@ type (
 		Metadata *FieldErrorMetadata
 	}
 
-	ValueLengthError struct {
-		Max int
-		Min int
-	}
-
-	ErrCause string
-)
-
-const (
-	ErrInvalid  = ErrCause("invalid")
-	ErrRequired = ErrCause("required")
-	ErrNotFound = ErrCause("not found")
-	ErrOverflow = ErrCause("overflow")
+	FieldErrorList []FieldError
 )
 
 func newRequiredFieldError(field string) FieldError {
 	return FieldError{
 		Field: field,
-		Cause: ErrRequired,
+		Cause: CauseRequired,
 	}
 }
 
 func newInvalidFieldError(field string) FieldError {
 	return FieldError{
 		Field: field,
-		Cause: ErrInvalid,
+		Cause: CauseInvalid,
 	}
 }
 
 func newFieldLengthError(field string, min, max int) FieldError {
 	return FieldError{
 		Field: field,
-		Cause: &ValueLengthError{Min: min, Max: max},
+		Cause: RangeError{Min: min, Max: max},
 	}
 }
 
@@ -59,8 +44,9 @@ func (e FieldError) Error() string {
 	return fmt.Sprintf("field '%s': %v", e.Field, e.Cause)
 }
 
-func (e FieldError) Is(err error) bool {
-	return e.Error() == err.Error()
+func (e FieldError) Is(target error) bool {
+	cast, ok := target.(FieldError)
+	return ok && e.Field == cast.Field && errors.Is(e.Cause, cast.Cause)
 }
 
 func (e FieldError) Unwrap() error {
@@ -80,27 +66,4 @@ func (el FieldErrorList) Error() string {
 		return el[0].Error()
 	}
 	return fmt.Sprintf("%v", []FieldError(el))
-}
-
-func (e *ValueLengthError) Error() string {
-	return fmt.Sprintf("value length must be between %d and %d", e.Min, e.Max)
-}
-
-func (e *ValueLengthError) Is(err error) bool {
-	return e.Error() == err.Error()
-}
-
-func (e ErrCause) Error() string {
-	return string(e)
-}
-
-func (e *FormError) Close() error {
-	if len(*e) == 0 {
-		return nil
-	}
-	return FieldErrorList(*e)
-}
-
-func (e *FormError) Append(err FieldError) {
-	*e = append(*e, err)
 }
