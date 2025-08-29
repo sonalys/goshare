@@ -56,7 +56,7 @@ type (
 
 	Database interface {
 		Queries
-		Transaction(ctx context.Context, f func(db Repositories) error) error
+		Transaction(ctx context.Context, f func(tx Repositories) error) error
 	}
 
 	Queries interface {

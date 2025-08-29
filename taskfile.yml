@@ -21,6 +21,17 @@ tasks:
     generates:
       - bin/migration
 
+  tidy:
+    cmd: >
+      go mod tidy
+      $(cd .tools/ogen; go mod tidy)
+      $(cd .tools/sqlc; go mod tidy)
+
+  upgrade_tools:
+    cmd: >
+      $(cd .tools/ogen; go get -tool github.com/ogen-go/ogen/cmd/ogen@latest)
+      $(cd .tools/sqlc; go get -tool github.com/sqlc-dev/sqlc/cmd/sqlc@latest)
+
   build:
     deps: [build-server,build-migration]
 
@@ -37,10 +48,10 @@ tasks:
     cmd: go run ./cmd/migration/...
 
   generate-sql:
-    cmd: go tool sqlc -f .config/.sqlc.yaml generate
+    cmd: go tool -modfile=.tools/sqlc/go.mod sqlc -f .config/.sqlc.yaml generate
 
   generate-openapi:
-    cmd: go tool ogen -package handlers --target cmd/server/handlers --clean cmd/server/spec/root.yaml
+    cmd: go tool -modfile=.tools/ogen/go.mod ogen -package handlers --target cmd/server/handlers --clean cmd/server/spec/root.yaml
     sources:
       - cmd/server/spec/root.yaml
 

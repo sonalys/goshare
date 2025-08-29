@@ -26,7 +26,7 @@ func (c *Controller) Register(ctx context.Context, req RegisterRequest) (resp *R
 	ctx, span := c.tracer.Start(ctx, "register")
 	defer span.End()
 
-	err = c.db.Transaction(ctx, func(db application.Repositories) error {
+	err = c.db.Transaction(ctx, func(tx application.Repositories) error {
 		user, err := domain.NewUser(domain.NewUserRequest{
 			FirstName: req.FirstName,
 			LastName:  req.LastName,
@@ -37,7 +37,7 @@ func (c *Controller) Register(ctx context.Context, req RegisterRequest) (resp *R
 			return fmt.Errorf("creating user: %w", err)
 		}
 
-		if err = db.User().Save(ctx, user); err != nil {
+		if err = tx.User().Save(ctx, user); err != nil {
 			return fmt.Errorf("saving user: %w", err)
 		}
 
