@@ -26,11 +26,13 @@ tasks:
       go mod tidy
       $(cd .tools/ogen; go mod tidy)
       $(cd .tools/sqlc; go mod tidy)
+      $(cd .tools/mockery; go mod tidy)
 
   upgrade_tools:
     cmd: >
       $(cd .tools/ogen; go get -tool github.com/ogen-go/ogen/cmd/ogen@latest)
       $(cd .tools/sqlc; go get -tool github.com/sqlc-dev/sqlc/cmd/sqlc@latest)
+      $(cd .tools/mockery; go get -tool github.com/vektra/mockery/v3@latest)
 
   build:
     deps: [build-server,build-migration]
@@ -54,6 +56,11 @@ tasks:
     cmd: go tool -modfile=.tools/ogen/go.mod ogen -package handlers --target cmd/server/handlers --clean cmd/server/spec/root.yaml
     sources:
       - cmd/server/spec/root.yaml
+
+  generate-mocks:
+    cmd: >
+      rm -rf mocks;
+      go tool -modfile=.tools/mockery/go.mod mockery --config .config/.mockery.yaml
 
   compose-server:
     cmd: docker compose -f {{ .COMPOSE_FILE }} up -d --build goshare && docker compose -f {{ .COMPOSE_FILE }} logs -f goshare_migrate goshare

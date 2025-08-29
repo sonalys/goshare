@@ -1,0 +1,13 @@
+dir: 'mocks/{{ .SrcPackagePath | trimPrefix "github.com/sonalys/goshare" | replaceAll "internal" "internal_" }}'
+filename: mocks.gen.go
+force-file-write: false
+formatter: goimports
+log-level: info
+structname: '{{.Mock}}{{.InterfaceName}}'
+pkgname: '{{.SrcPackageName}}'
+template: matryer
+packages:
+  github.com/sonalys/goshare/internal:
+    config:
+      all: true
+      recursive: true
