@@ -50,5 +50,10 @@ func (c *Controller) Register(ctx context.Context, req RegisterRequest) (resp *R
 	if err != nil {
 		return nil, slog.ErrorReturn(ctx, "registering new user", err)
 	}
+
+	slog.Info(ctx, "user registered",
+		slog.WithStringer("user_id", resp.ID),
+	)
+
 	return
 }

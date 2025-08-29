@@ -27,7 +27,7 @@ func (a *API) LedgerExpenseCreate(ctx context.Context, req *handlers.Expense, pa
 		PendingRecords: pendingRecords,
 	}
 
-	switch resp, err := a.UserController.CreateExpense(ctx, apiReq); err {
+	switch resp, err := a.UserController.Expenses().Create(ctx, apiReq); err {
 	case nil:
 		return &handlers.LedgerExpenseCreateOK{
 			ID: resp.ID.UUID(),

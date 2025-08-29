@@ -18,7 +18,7 @@ func (a *API) LedgerCreate(ctx context.Context, req *handlers.LedgerCreateReq) (
 		Name:  req.Name,
 	}
 
-	switch resp, err := a.UserController.Create(ctx, apiParams); err {
+	switch resp, err := a.UserController.Ledgers().Create(ctx, apiParams); err {
 	case nil:
 		return &handlers.LedgerCreateOK{
 			ID: resp.ID.UUID(),

@@ -21,5 +21,5 @@ func (a *API) LedgerExpenseRecordDelete(ctx context.Context, params handlers.Led
 		RecordID:  domain.ConvertID(params.RecordID),
 	}
 
-	return a.UserController.DeleteExpenseRecord(ctx, apiReq)
+	return a.UserController.Records().Delete(ctx, apiReq)
 }

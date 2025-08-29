@@ -53,7 +53,7 @@ func (e *Expense) TotalSettled() int32 {
 }
 
 func (e *Expense) validateCreateRecords(actor ID, ledger *Ledger, records ...PendingRecord) error {
-	if !ledger.IsMember(actor) {
+	if !ledger.HasMember(actor) {
 		return FieldError{
 			Field: "actor",
 			Cause: ErrLedgerUserNotMember{
@@ -106,7 +106,7 @@ func (e *Expense) validateCreateRecords(actor ID, ledger *Ledger, records ...Pen
 			})
 		}
 
-		if !ledger.IsMember(record.From) {
+		if !ledger.HasMember(record.From) {
 			recordsForm.Append(FieldError{
 				Field: "from",
 				Cause: ErrLedgerUserNotMember{
@@ -116,7 +116,7 @@ func (e *Expense) validateCreateRecords(actor ID, ledger *Ledger, records ...Pen
 			})
 		}
 
-		if !ledger.IsMember(record.To) {
+		if !ledger.HasMember(record.To) {
 			recordsForm.Append(FieldError{
 				Field: "to",
 				Cause: ErrLedgerUserNotMember{
@@ -197,7 +197,7 @@ func (e *Expense) CreateRecords(actor ID, ledger *Ledger, records ...PendingReco
 }
 
 func (e *Expense) validateDeleteRecord(actor ID, ledger *Ledger, recordID ID) error {
-	if !ledger.IsMember(actor) {
+	if !ledger.HasMember(actor) {
 		return FieldError{
 			Field: "actor",
 			Cause: ErrLedgerUserNotMember{

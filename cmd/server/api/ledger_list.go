@@ -13,7 +13,7 @@ func (a *API) LedgerList(ctx context.Context) (*handlers.LedgerListOK, error) {
 		return nil, err
 	}
 
-	ledgers, err := a.UserController.GetByIdentity(ctx, identity.UserID)
+	ledgers, err := a.UserController.ListByUser(ctx, identity.UserID)
 	if err != nil {
 		return nil, err
 	}

@@ -1,0 +1,64 @@
+package usercontroller
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/sonalys/goshare/internal/application"
+	"github.com/sonalys/goshare/internal/application/pkg/slog"
+	"github.com/sonalys/goshare/internal/domain"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
+)
+
+type DeleteExpenseRecordRequest struct {
+	ActorID   domain.ID
+	LedgerID  domain.ID
+	ExpenseID domain.ID
+	RecordID  domain.ID
+}
+
+func (c *recordsController) Delete(ctx context.Context, req DeleteExpenseRecordRequest) error {
+	ctx, span := c.tracer.Start(ctx, "delete",
+		trace.WithAttributes(
+			attribute.Stringer("actor_id", req.ActorID),
+			attribute.Stringer("ledger_id", req.LedgerID),
+			attribute.Stringer("expense_id", req.ExpenseID),
+			attribute.Stringer("record_id", req.RecordID),
+		),
+	)
+	defer span.End()
+
+	err := c.db.Transaction(ctx, func(db application.Repositories) error {
+		expense, err := db.Expense().Find(ctx, req.ExpenseID)
+		if err != nil {
+			return fmt.Errorf("finding expense: %w", err)
+		}
+
+		ledger, err := db.Ledger().Find(ctx, req.LedgerID)
+		if err != nil {
+			return fmt.Errorf("finding ledger: %w", err)
+		}
+
+		if err = expense.DeleteRecord(req.ActorID, ledger, req.RecordID); err != nil {
+			return fmt.Errorf("deleting record: %w", err)
+		}
+
+		if err = db.Ledger().Update(ctx, ledger); err != nil {
+			return fmt.Errorf("updating ledger: %w", err)
+		}
+
+		if err = db.Expense().Update(ctx, expense); err != nil {
+			return fmt.Errorf("updating expense: %w", err)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return slog.ErrorReturn(ctx, "deleting expense record", err)
+	}
+
+	slog.Info(ctx, "ledger expense record deleted")
+
+	return nil
+}

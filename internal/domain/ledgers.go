@@ -51,7 +51,7 @@ func (req *CreateExpenseRequest) validate() error {
 }
 
 func (ledger *Ledger) CreateExpense(req CreateExpenseRequest) (*Expense, error) {
-	if !ledger.IsMember(req.Actor) {
+	if !ledger.HasMember(req.Actor) {
 		return nil, ErrLedgerUserNotMember{
 			UserID:   req.Actor,
 			LedgerID: ledger.ID,
@@ -84,13 +84,13 @@ func (ledger *Ledger) CreateExpense(req CreateExpenseRequest) (*Expense, error) 
 	return expense, nil
 }
 
-func (ledger *Ledger) IsMember(identity ID) bool {
+func (ledger *Ledger) HasMember(identity ID) bool {
 	_, ok := ledger.Members[identity]
 	return ok
 }
 
 func (ledger *Ledger) AddMember(actor ID, newMembers ...ID) error {
-	if !ledger.IsMember(actor) {
+	if !ledger.HasMember(actor) {
 		return ErrLedgerUserNotMember{
 			UserID:   actor,
 			LedgerID: ledger.ID,
@@ -99,7 +99,7 @@ func (ledger *Ledger) AddMember(actor ID, newMembers ...ID) error {
 
 	var errs Form
 	for _, id := range newMembers {
-		if !ledger.IsMember(id) {
+		if !ledger.HasMember(id) {
 			continue
 		}
 		errs.Append(FieldError{
@@ -131,4 +131,8 @@ func (ledger *Ledger) AddMember(actor ID, newMembers ...ID) error {
 	}
 
 	return nil
+}
+
+func (ledger *Ledger) CanView(actor ID) bool {
+	return ledger.CreatedBy == actor || ledger.HasMember(actor)
 }

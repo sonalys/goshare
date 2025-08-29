@@ -26,7 +26,7 @@ func (a *API) LedgerExpenseRecordCreate(ctx context.Context, req *handlers.Ledge
 		PendingRecords: pendingRecords,
 	}
 
-	resp, err := a.UserController.CreateExpenseRecord(ctx, apiReq)
+	resp, err := a.UserController.Records().Create(ctx, apiReq)
 	if err != nil {
 		return nil, err
 	}

@@ -14,7 +14,7 @@ func (a *API) LedgerMemberList(ctx context.Context, params handlers.LedgerMember
 		return nil, err
 	}
 
-	members, err := a.UserController.GetMembers(ctx, usercontroller.GetMembersRequest{
+	members, err := a.UserController.ListMembers(ctx, usercontroller.ListMembersRequest{
 		Actor:    identity.UserID,
 		LedgerID: domain.ConvertID(params.LedgerID),
 	})
