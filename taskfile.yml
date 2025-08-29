@@ -28,9 +28,12 @@ tasks:
     env:
       POSTGRES_CONN: postgresql://user:password@localhost:5432/goshare?sslmode=disable
       JAEGER_CONN: localhost:4317
-    cmd: go run ./cmd/server/...
+    cmd: go run ./cmd/server/... | docker compose -f {{ .COMPOSE_FILE }} run --rm -T promtail
 
   migrate:
+    env:
+      POSTGRES_CONN: postgresql://user:password@localhost:5432/goshare?sslmode=disable
+      JAEGER_CONN: localhost:4317
     cmd: go run ./cmd/migration/...
 
   generate-sql:
@@ -51,13 +54,18 @@ tasks:
     cmd: docker compose -f {{ .COMPOSE_FILE }} up -d --build && docker compose -f {{ .COMPOSE_FILE }} logs -f goshare_migrate goshare
 
   compose-down:
+    args:
+      services
     cmd: docker compose -f {{ .COMPOSE_FILE }} down -v
 
   compose-db:
     cmd: docker compose -f {{ .COMPOSE_FILE }} up -d postgres
 
+  compose-down-infra:
+    cmd: docker compose -f {{ .COMPOSE_FILE }} down -v postgres jaeger promtail loki grafana
+
   compose-infra:
-    cmd: docker compose -f {{ .COMPOSE_FILE }} up -d postgres grafana jaeger
+    cmd: docker compose -f {{ .COMPOSE_FILE }} up -d postgres jaeger promtail loki grafana
 
   enter-db:
     cmd: docker exec -it postgres psql -U user goshare

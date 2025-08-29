@@ -45,9 +45,6 @@ func (tp provider) TextMapPropagator() propagation.TextMapPropagator {
 func Initialize(ctx context.Context, endpoint, version string) (shutdown func(context.Context) error, err error) {
 	var shutdownFuncs []func(context.Context) error
 
-	// shutdown calls cleanup functions registered via shutdownFuncs.
-	// The errors from the calls are joined.
-	// Each registered cleanup will be invoked once.
 	shutdown = func(ctx context.Context) error {
 		var err error
 		for _, fn := range shutdownFuncs {
@@ -57,20 +54,16 @@ func Initialize(ctx context.Context, endpoint, version string) (shutdown func(co
 		return err
 	}
 
-	// handleErr calls shutdown for cleanup and makes sure that all errors are returned.
 	handleErr := func(inErr error) {
 		err = errors.Join(inErr, shutdown(ctx))
 	}
 
-	// Create resource.
 	res, err := newResource(version)
 	if err != nil {
 		handleErr(err)
 		return
 	}
 
-	// Create a logger provider.
-	// You can pass this instance directly when creating bridges.
 	loggerProvider, err := newLoggerProvider(ctx, endpoint, res)
 	if err != nil {
 		handleErr(err)
@@ -80,11 +73,9 @@ func Initialize(ctx context.Context, endpoint, version string) (shutdown func(co
 
 	shutdownFuncs = append(shutdownFuncs, loggerProvider.Shutdown)
 
-	// Set up propagator.
 	prop := newPropagator()
 	otel.SetTextMapPropagator(prop)
 
-	// Set up trace provider.
 	tracerProvider, err := newTraceProvider(ctx, endpoint, res)
 	if err != nil {
 		handleErr(err)

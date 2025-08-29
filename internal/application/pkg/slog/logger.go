@@ -8,6 +8,7 @@ import (
 
 	"github.com/lmittmann/tint"
 	slogotel "github.com/remychantenay/slog-otel"
+	"golang.org/x/term"
 )
 
 const (
@@ -18,13 +19,25 @@ const (
 	LevelPanic
 )
 
+func isTerminal() bool {
+	return term.IsTerminal(int(os.Stdout.Fd()))
+}
+
 func Init(level slog.Level) {
+	var handler slog.Handler = slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: level,
+	})
+
+	if isTerminal() {
+		handler = tint.NewHandler(os.Stdout, &tint.Options{
+			Level: level,
+		})
+	}
+
 	slog.SetLogLoggerLevel(level)
 	internalHandler := &fieldFormatterHandler{
 		Next: slogotel.OtelHandler{
-			Next: tint.NewHandler(os.Stdout, &tint.Options{
-				Level: level,
-			}),
+			Next: handler,
 		},
 	}
 	logger := slog.New(internalHandler)
