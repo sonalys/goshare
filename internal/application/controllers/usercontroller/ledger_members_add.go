@@ -6,6 +6,7 @@ import (
 
 	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/pkg/slog"
+	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/kset"
 	"go.opentelemetry.io/otel/attribute"
@@ -39,7 +40,7 @@ func (c *ledgerController) MembersAdd(ctx context.Context, req AddMembersRequest
 		}
 
 		if !ledger.CanManageMembers(req.ActorID) {
-			return fmt.Errorf("authorizing member management: %w", application.ErrUnauthorized)
+			return fmt.Errorf("authorizing member management: %w", v1.ErrForbidden)
 		}
 
 		users, err := db.User().ListByEmail(ctx, req.Emails)

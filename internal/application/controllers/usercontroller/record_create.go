@@ -6,6 +6,7 @@ import (
 
 	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/pkg/slog"
+	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/domain"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -37,7 +38,7 @@ func (c *recordsController) Create(ctx context.Context, req CreateExpenseRecordR
 		}
 
 		if !ledger.CanManageExpenses(req.ActorID) {
-			return fmt.Errorf("authorizing expenses management: %w", application.ErrUnauthorized)
+			return fmt.Errorf("authorizing expenses management: %w", v1.ErrForbidden)
 		}
 
 		expense, err := db.Expense().Get(ctx, req.ExpenseID)

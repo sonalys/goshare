@@ -6,6 +6,7 @@ import (
 
 	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/pkg/slog"
+	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/domain"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -41,7 +42,7 @@ func (c *recordsController) Delete(ctx context.Context, req DeleteExpenseRecordR
 		}
 
 		if !ledger.CanManageExpenses(req.ActorID) {
-			return fmt.Errorf("authorizing expenses management: %w", application.ErrUnauthorized)
+			return fmt.Errorf("authorizing expenses management: %w", v1.ErrForbidden)
 		}
 
 		if err = expense.DeleteRecord(req.ActorID, ledger, req.RecordID); err != nil {
