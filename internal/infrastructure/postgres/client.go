@@ -8,6 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/pkg/slog"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
 )
 
 type Postgres struct {
@@ -41,9 +42,15 @@ func New(ctx context.Context, connStr string) (*Postgres, error) {
 }
 
 func (c *Postgres) Transaction(ctx context.Context, f func(application.Repositories) error) error {
-	return c.transaction(ctx, func(q connection) error {
+	return c.transaction(ctx, func(q *sqlcgen.Queries) error {
 		return f(c.readWrite())
 	})
+}
+
+func (c *Postgres) readWrite() *readWriteRepository {
+	return &readWriteRepository{
+		connection: c,
+	}
 }
 
 func (c *Postgres) Ledger() application.LedgerQueries {

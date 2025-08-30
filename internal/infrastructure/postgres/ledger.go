@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/sonalys/goshare/internal/domain"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
 )
 
 var ledgerConstraintMapping = map[string]error{
@@ -25,7 +26,7 @@ func NewLedgerRepository(client connection) *LedgerRepository {
 	}
 }
 
-func (r *LedgerRepository) transaction(ctx context.Context, f func(q connection) error) error {
+func (r *LedgerRepository) transaction(ctx context.Context, f func(q *sqlcgen.Queries) error) error {
 	return ledgerError(r.client.transaction(ctx, f))
 }
 

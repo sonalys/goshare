@@ -9,9 +9,7 @@ import (
 )
 
 func (r *LedgerRepository) Create(ctx context.Context, ledger *domain.Ledger) error {
-	return r.transaction(ctx, func(conn connection) error {
-		query := conn.queries()
-
+	return r.transaction(ctx, func(query *sqlcgen.Queries) error {
 		createLedgerReq := sqlcgen.CreateLedgerParams{
 			ID:        ledger.ID,
 			Name:      ledger.Name,

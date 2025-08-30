@@ -11,9 +11,7 @@ import (
 )
 
 func (r *LedgerRepository) Update(ctx context.Context, ledger *domain.Ledger) error {
-	return r.transaction(ctx, func(conn connection) error {
-		query := conn.queries()
-
+	return r.transaction(ctx, func(query *sqlcgen.Queries) error {
 		updateLedgerParams := sqlcgen.UpdateLedgerParams{
 			ID:   ledger.ID,
 			Name: ledger.Name,

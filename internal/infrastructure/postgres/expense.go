@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/sonalys/goshare/internal/domain"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
 )
 
 var expenseConstraintMapping = map[string]error{
@@ -22,7 +23,7 @@ type ExpenseRepository struct {
 	client connection
 }
 
-func (r *ExpenseRepository) transaction(ctx context.Context, f func(q connection) error) error {
+func (r *ExpenseRepository) transaction(ctx context.Context, f func(q *sqlcgen.Queries) error) error {
 	return expenseError(r.client.transaction(ctx, f))
 }
 

@@ -11,9 +11,7 @@ import (
 )
 
 func (r *ExpenseRepository) Update(ctx context.Context, expense *domain.Expense) error {
-	return r.transaction(ctx, func(conn connection) error {
-		query := conn.queries()
-
+	return r.transaction(ctx, func(query *sqlcgen.Queries) error {
 		if err := query.DeleteExpenseRecordsNotIn(ctx, slices.Collect(maps.Keys(expense.Records))); err != nil {
 			return fmt.Errorf("deleting records: %w", err)
 		}

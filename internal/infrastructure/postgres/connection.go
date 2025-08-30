@@ -12,9 +12,8 @@ import (
 
 type (
 	connection interface {
-		transaction(ctx context.Context, f func(q connection) error) error
+		transaction(ctx context.Context, f func(q *sqlcgen.Queries) error) error
 		queries() *sqlcgen.Queries
-		readWrite() *readWriteRepository
 	}
 
 	pgxConn interface {
@@ -51,7 +50,7 @@ func (c *conn[T]) queries() *sqlcgen.Queries {
 	return sqlcgen.New(c.conn)
 }
 
-func (c *conn[T]) transaction(ctx context.Context, f func(connection) error) error {
+func (c *conn[T]) transaction(ctx context.Context, f func(*sqlcgen.Queries) error) error {
 	tx, err := c.conn.Begin(ctx)
 	if err != nil {
 		return err
@@ -62,15 +61,9 @@ func (c *conn[T]) transaction(ctx context.Context, f func(connection) error) err
 		}
 	}()
 
-	if err := f(&conn[pgx.Tx]{conn: tx}); err != nil {
+	if err := f(sqlcgen.New(tx)); err != nil {
 		return err
 	}
 
 	return tx.Commit(ctx)
-}
-
-func (c *conn[T]) readWrite() *readWriteRepository {
-	return &readWriteRepository{
-		connection: c,
-	}
 }
