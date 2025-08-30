@@ -5,15 +5,14 @@ import (
 	"errors"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/pkg/slog"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
 )
 
 type (
-	connection interface {
-		transaction(ctx context.Context, f func(q *sqlcgen.Queries) error) error
-		queries() *sqlcgen.Queries
+	Connection interface {
+		Transaction(ctx context.Context, f func(q Connection) error) error
+		Queries() *sqlcgen.Queries
 	}
 
 	pgxConn interface {
@@ -24,33 +23,13 @@ type (
 	conn[T pgxConn] struct {
 		conn T
 	}
-
-	readWriteRepository struct{ connection }
 )
 
-func (c *readWriteRepository) Ledger() application.LedgerRepository {
-	return &LedgerRepository{
-		client: c.connection,
-	}
-}
-
-func (c *readWriteRepository) User() application.UserRepository {
-	return &UsersRepository{
-		client: c.connection,
-	}
-}
-
-func (c *readWriteRepository) Expense() application.ExpenseRepository {
-	return &ExpenseRepository{
-		client: c.connection,
-	}
-}
-
-func (c *conn[T]) queries() *sqlcgen.Queries {
+func (c *conn[T]) Queries() *sqlcgen.Queries {
 	return sqlcgen.New(c.conn)
 }
 
-func (c *conn[T]) transaction(ctx context.Context, f func(*sqlcgen.Queries) error) error {
+func (c *conn[T]) Transaction(ctx context.Context, f func(Connection) error) error {
 	tx, err := c.conn.Begin(ctx)
 	if err != nil {
 		return err
@@ -61,7 +40,7 @@ func (c *conn[T]) transaction(ctx context.Context, f func(*sqlcgen.Queries) erro
 		}
 	}()
 
-	if err := f(sqlcgen.New(tx)); err != nil {
+	if err := f(&conn[pgx.Tx]{conn: tx}); err != nil {
 		return err
 	}
 

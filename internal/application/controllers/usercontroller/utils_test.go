@@ -4,20 +4,20 @@ import (
 	"context"
 	"testing"
 
-	"github.com/sonalys/goshare/internal/application"
-	applicationmock "github.com/sonalys/goshare/mocks/internal_/application"
+	"github.com/sonalys/goshare/internal/ports"
+	portsmock "github.com/sonalys/goshare/mocks/internal_/ports"
 )
 
 type repositoryMock struct {
-	user    applicationmock.UserRepository
-	ledger  applicationmock.LedgerRepository
-	expense applicationmock.ExpenseRepository
+	user    portsmock.UserRepository
+	ledger  portsmock.LedgerRepository
+	expense portsmock.ExpenseRepository
 }
 
 type databaseMock struct {
 	repositories *repositoryMock
 	tx           *repositoryMock
-	db           applicationmock.Database
+	db           portsmock.LocalDatabase
 }
 
 func setupDatabaseMock(_ *testing.T) *databaseMock {
@@ -27,15 +27,15 @@ func setupDatabaseMock(_ *testing.T) *databaseMock {
 	return &databaseMock{
 		repositories: &repositories,
 		tx:           &tx,
-		db: applicationmock.Database{
-			ExpenseFunc: func() application.ExpenseQueries { return &repositories.expense },
-			LedgerFunc:  func() application.LedgerQueries { return &repositories.ledger },
-			UserFunc:    func() application.UserQueries { return &repositories.user },
-			TransactionFunc: func(ctx context.Context, f func(tx application.Repositories) error) error {
-				return f(&applicationmock.Repositories{
-					ExpenseFunc: func() application.ExpenseRepository { return &tx.expense },
-					LedgerFunc:  func() application.LedgerRepository { return &tx.ledger },
-					UserFunc:    func() application.UserRepository { return &tx.user },
+		db: portsmock.LocalDatabase{
+			ExpenseFunc: func() ports.ExpenseQueries { return &repositories.expense },
+			LedgerFunc:  func() ports.LedgerQueries { return &repositories.ledger },
+			UserFunc:    func() ports.UserQueries { return &repositories.user },
+			TransactionFunc: func(ctx context.Context, f func(tx ports.Repositories) error) error {
+				return f(&portsmock.Repositories{
+					ExpenseFunc: func() ports.ExpenseRepository { return &tx.expense },
+					LedgerFunc:  func() ports.LedgerRepository { return &tx.ledger },
+					UserFunc:    func() ports.UserRepository { return &tx.user },
 				})
 			},
 		},

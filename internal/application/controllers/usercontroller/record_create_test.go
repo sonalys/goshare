@@ -70,7 +70,7 @@ func Test_Record_Create(t *testing.T) {
 		}
 
 		controller := usercontroller.New(usercontroller.Dependencies{
-			Database: &mocks.db.db,
+			LocalDatabase: &mocks.db.db,
 		})
 
 		return controller, mocks

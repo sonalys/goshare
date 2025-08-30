@@ -7,7 +7,7 @@ import (
 	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 )
 
-func defaultErrorMapping(err error) error {
+func DefaultErrorMapping(err error) error {
 	switch {
 	case err == nil:
 		return nil

@@ -49,7 +49,7 @@ func Test_Ledger_Create(t *testing.T) {
 		}
 
 		controller := usercontroller.New(usercontroller.Dependencies{
-			Database: &mocks.db.db,
+			LocalDatabase: &mocks.db.db,
 		})
 
 		return controller, mocks

@@ -1,4 +1,4 @@
-package postgres
+package repositories
 
 import (
 	"context"
@@ -8,12 +8,12 @@ import (
 )
 
 func (r *LedgerRepository) Get(ctx context.Context, id domain.ID) (*domain.Ledger, error) {
-	ledger, err := r.client.queries().GetLedgerById(ctx, id)
+	ledger, err := r.client.Queries().GetLedgerById(ctx, id)
 	if err != nil {
 		return nil, ledgerError(err)
 	}
 
-	members, err := r.client.queries().GetLedgerMembers(ctx, id)
+	members, err := r.client.Queries().GetLedgerMembers(ctx, id)
 	if err != nil {
 		return nil, ledgerError(err)
 	}

@@ -1,11 +1,11 @@
-package postgres
+package repositories
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/sonalys/goshare/internal/domain"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres"
 )
 
 var expenseConstraintMapping = map[string]error{
@@ -20,17 +20,23 @@ var expenseConstraintMapping = map[string]error{
 }
 
 type ExpenseRepository struct {
-	client connection
+	conn postgres.Connection
 }
 
-func (r *ExpenseRepository) transaction(ctx context.Context, f func(q *sqlcgen.Queries) error) error {
-	return expenseError(r.client.transaction(ctx, f))
+func newExpenseRepository(conn postgres.Connection) *ExpenseRepository {
+	return &ExpenseRepository{
+		conn: conn,
+	}
+}
+
+func (r *ExpenseRepository) transaction(ctx context.Context, f func(q postgres.Connection) error) error {
+	return expenseError(r.conn.Transaction(ctx, f))
 }
 
 func expenseError(err error) error {
-	if err := constraintErrorMap(err, expenseConstraintMapping); err != nil {
+	if err := postgres.MapConstraintError(err, expenseConstraintMapping); err != nil {
 		return err
 	}
 
-	return defaultErrorMapping(err)
+	return postgres.DefaultErrorMapping(err)
 }

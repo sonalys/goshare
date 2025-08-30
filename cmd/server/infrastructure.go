@@ -9,7 +9,7 @@ import (
 )
 
 type infrastructure struct {
-	postgres *postgres.Postgres
+	postgresConnection postgres.Connection
 }
 
 func loadInfrastructure(ctx context.Context, secrets secrets.Secrets) *infrastructure {
@@ -18,6 +18,6 @@ func loadInfrastructure(ctx context.Context, secrets secrets.Secrets) *infrastru
 		panic(fmt.Errorf("failed to load Postgres infrastructure: %w", err))
 	}
 	return &infrastructure{
-		postgres: postgresClient,
+		postgresConnection: postgresClient,
 	}
 }

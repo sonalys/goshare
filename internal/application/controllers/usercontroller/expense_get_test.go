@@ -48,7 +48,7 @@ func Test_Expense_Get(t *testing.T) {
 		}
 
 		controller := usercontroller.New(usercontroller.Dependencies{
-			Database: &mocks.db.db,
+			LocalDatabase: &mocks.db.db,
 		})
 
 		return controller, mocks

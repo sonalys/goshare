@@ -12,7 +12,7 @@ import (
 	"github.com/sonalys/goshare/internal/application/pkg/slog"
 )
 
-func NewHandler(client *api.API, repositories *repositories, serviceName string) http.Handler {
+func NewHandler(client *api.API, repositories *repos, serviceName string) http.Handler {
 	securityHandler := api.NewSecurityHandler(repositories.JWTRepository)
 
 	handler, _ := handlers.NewServer(client, securityHandler,

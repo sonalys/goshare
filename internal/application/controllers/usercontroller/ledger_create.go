@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/pkg/slog"
 	"github.com/sonalys/goshare/internal/domain"
+	"github.com/sonalys/goshare/internal/ports"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -32,7 +32,7 @@ func (c *ledgerController) Create(ctx context.Context, req CreateLedgerRequest) 
 
 	slog.Debug(ctx, "creating ledger", slog.With("req", req))
 
-	err = c.db.Transaction(ctx, func(db application.Repositories) error {
+	err = c.db.Transaction(ctx, func(db ports.Repositories) error {
 		user, err := db.User().Get(ctx, req.ActorID)
 		if err != nil {
 			return fmt.Errorf("finding user% w", err)

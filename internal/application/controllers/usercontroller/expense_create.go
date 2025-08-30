@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/pkg/slog"
 	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/domain"
+	"github.com/sonalys/goshare/internal/ports"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -38,7 +38,7 @@ func (c *expenseController) Create(ctx context.Context, req CreateExpenseRequest
 
 	slog.Debug(ctx, "creating expense", slog.With("req", req))
 
-	err = c.db.Transaction(ctx, func(db application.Repositories) error {
+	err = c.db.Transaction(ctx, func(db ports.Repositories) error {
 		ledger, err := db.Ledger().Get(ctx, req.LedgerID)
 		if err != nil {
 			return fmt.Errorf("finding ledger: %w", err)

@@ -1,4 +1,4 @@
-package postgres
+package repositories
 
 import (
 	"context"
@@ -11,9 +11,9 @@ import (
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
 )
 
-func (r *UsersRepository) ListByEmail(ctx context.Context, emails []string) ([]domain.User, error) {
+func (r *UserRepository) ListByEmail(ctx context.Context, emails []string) ([]domain.User, error) {
 	emails = slices.Compact(emails)
-	users, err := r.client.queries().ListByEmail(ctx, emails)
+	users, err := r.conn.Queries().ListByEmail(ctx, emails)
 	if err != nil {
 		return nil, mapUserErrors(err)
 	}

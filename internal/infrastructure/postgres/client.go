@@ -6,18 +6,10 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/pkg/slog"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
 )
 
-type Postgres struct {
-	connection
-}
-
-var _ application.Database = &Postgres{}
-
-func New(ctx context.Context, connStr string) (*Postgres, error) {
+func New(ctx context.Context, connStr string) (Connection, error) {
 	cfg, err := pgxpool.ParseConfig(connStr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse connStr: %w", err)
@@ -34,41 +26,9 @@ func New(ctx context.Context, connStr string) (*Postgres, error) {
 		return nil, fmt.Errorf("waiting for postgres connection: %w", err)
 	}
 
-	return &Postgres{
-		connection: &conn[*pgxpool.Pool]{
-			conn: dbpool,
-		},
+	return &conn[*pgxpool.Pool]{
+		conn: dbpool,
 	}, nil
-}
-
-func (c *Postgres) Transaction(ctx context.Context, f func(application.Repositories) error) error {
-	return c.transaction(ctx, func(q *sqlcgen.Queries) error {
-		return f(c.readWrite())
-	})
-}
-
-func (c *Postgres) readWrite() *readWriteRepository {
-	return &readWriteRepository{
-		connection: c,
-	}
-}
-
-func (c *Postgres) Ledger() application.LedgerQueries {
-	return &LedgerRepository{
-		client: c,
-	}
-}
-
-func (c *Postgres) User() application.UserQueries {
-	return &UsersRepository{
-		client: c,
-	}
-}
-
-func (c *Postgres) Expense() application.ExpenseQueries {
-	return &ExpenseRepository{
-		client: c,
-	}
 }
 
 func wait(ctx context.Context, conn *pgxpool.Pool) error {

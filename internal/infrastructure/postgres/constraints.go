@@ -14,7 +14,7 @@ func isConstraintError(err error) bool {
 	return false
 }
 
-func constraintErrorMap(err error, mapper map[string]error) error {
+func MapConstraintError(err error, mapper map[string]error) error {
 	pgErr := new(pgconn.PgError)
 	if !errors.As(err, &pgErr) || pgErr.Code != "23505" {
 		return nil

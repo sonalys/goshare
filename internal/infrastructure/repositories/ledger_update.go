@@ -1,4 +1,4 @@
-package postgres
+package repositories
 
 import (
 	"context"
@@ -7,11 +7,14 @@ import (
 	"slices"
 
 	"github.com/sonalys/goshare/internal/domain"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
 )
 
 func (r *LedgerRepository) Update(ctx context.Context, ledger *domain.Ledger) error {
-	return r.transaction(ctx, func(query *sqlcgen.Queries) error {
+	return r.transaction(ctx, func(conn postgres.Connection) error {
+		query := conn.Queries()
+
 		updateLedgerParams := sqlcgen.UpdateLedgerParams{
 			ID:   ledger.ID,
 			Name: ledger.Name,
@@ -30,7 +33,7 @@ func (r *LedgerRepository) Update(ctx context.Context, ledger *domain.Ledger) er
 			err := query.CreateLedgerMember(ctx, sqlcgen.CreateLedgerMemberParams{
 				LedgerID:  ledger.ID,
 				UserID:    id,
-				CreatedAt: convertTime(member.CreatedAt),
+				CreatedAt: postgres.ConvertTime(member.CreatedAt),
 				CreatedBy: member.CreatedBy,
 				Balance:   member.Balance,
 			})

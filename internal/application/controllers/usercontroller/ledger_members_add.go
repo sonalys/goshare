@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/pkg/slog"
 	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/domain"
+	"github.com/sonalys/goshare/internal/ports"
 	"github.com/sonalys/kset"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -33,7 +33,7 @@ func (c *ledgerController) MembersAdd(ctx context.Context, req AddMembersRequest
 
 	slog.Debug(ctx, "adding ledger member", slog.With("req", req))
 
-	transaction := func(db application.Repositories) error {
+	transaction := func(db ports.Repositories) error {
 		ledger, err := db.Ledger().Get(ctx, req.LedgerID)
 		if err != nil {
 			return fmt.Errorf("getting ledger: %w", err)

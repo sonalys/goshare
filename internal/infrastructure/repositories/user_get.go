@@ -1,4 +1,4 @@
-package postgres
+package repositories
 
 import (
 	"context"
@@ -7,8 +7,8 @@ import (
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/mappers"
 )
 
-func (r *UsersRepository) Get(ctx context.Context, id domain.ID) (*domain.User, error) {
-	user, err := r.client.queries().GetUser(ctx, id)
+func (r *UserRepository) Get(ctx context.Context, id domain.ID) (*domain.User, error) {
+	user, err := r.conn.Queries().GetUser(ctx, id)
 	if err != nil {
 		return nil, mapUserErrors(err)
 	}
@@ -16,8 +16,8 @@ func (r *UsersRepository) Get(ctx context.Context, id domain.ID) (*domain.User, 
 	return mappers.NewUser(user), nil
 }
 
-func (r *UsersRepository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
-	user, err := r.client.queries().GetUserByEmail(ctx, email)
+func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
+	user, err := r.conn.Queries().GetUserByEmail(ctx, email)
 	if err != nil {
 		return nil, mapUserErrors(err)
 	}

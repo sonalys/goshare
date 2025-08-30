@@ -1,24 +1,27 @@
-package postgres
+package repositories
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/sonalys/goshare/internal/domain"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
 )
 
 func (r *ExpenseRepository) Create(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error {
-	return r.transaction(ctx, func(query *sqlcgen.Queries) error {
+	return r.transaction(ctx, func(conn postgres.Connection) error {
+		query := conn.Queries()
+
 		createExpenseReq := sqlcgen.CreateExpenseParams{
 			ID:          expense.ID,
 			LedgerID:    expense.LedgerID,
 			Amount:      expense.Amount,
 			Name:        expense.Name,
-			ExpenseDate: convertTime(expense.ExpenseDate),
-			CreatedAt:   convertTime(expense.CreatedAt),
+			ExpenseDate: postgres.ConvertTime(expense.ExpenseDate),
+			CreatedAt:   postgres.ConvertTime(expense.CreatedAt),
 			CreatedBy:   expense.CreatedBy,
-			UpdatedAt:   convertTime(expense.UpdatedAt),
+			UpdatedAt:   postgres.ConvertTime(expense.UpdatedAt),
 			UpdatedBy:   expense.UpdatedBy,
 		}
 
@@ -34,9 +37,9 @@ func (r *ExpenseRepository) Create(ctx context.Context, ledgerID domain.ID, expe
 				ToUserID:   record.To,
 				RecordType: record.Type.String(),
 				Amount:     record.Amount,
-				CreatedAt:  convertTime(record.CreatedAt),
+				CreatedAt:  postgres.ConvertTime(record.CreatedAt),
 				CreatedBy:  record.CreatedBy,
-				UpdatedAt:  convertTime(record.UpdatedAt),
+				UpdatedAt:  postgres.ConvertTime(record.UpdatedAt),
 				UpdatedBy:  record.UpdatedBy,
 			}
 

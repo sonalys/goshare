@@ -1,4 +1,4 @@
-package postgres
+package repositories
 
 import (
 	"context"
@@ -7,15 +7,16 @@ import (
 
 	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/domain"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/mappers"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
 )
 
 func (r *ExpenseRepository) ListByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
-	expenses, err := r.client.queries().GetLedgerExpenses(ctx, sqlcgen.GetLedgerExpensesParams{
+	expenses, err := r.conn.Queries().GetLedgerExpenses(ctx, sqlcgen.GetLedgerExpensesParams{
 		LedgerID:  ledgerID,
 		Limit:     limit,
-		CreatedAt: convertTime(cursor),
+		CreatedAt: postgres.ConvertTime(cursor),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("getting ledger expenses: %w", err)

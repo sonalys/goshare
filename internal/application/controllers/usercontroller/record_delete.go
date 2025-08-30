@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/pkg/slog"
 	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/domain"
+	"github.com/sonalys/goshare/internal/ports"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -30,7 +30,7 @@ func (c *recordsController) Delete(ctx context.Context, req DeleteExpenseRecordR
 	)
 	defer span.End()
 
-	err := c.db.Transaction(ctx, func(db application.Repositories) error {
+	err := c.db.Transaction(ctx, func(db ports.Repositories) error {
 		ledger, err := db.Ledger().Get(ctx, req.LedgerID)
 		if err != nil {
 			return fmt.Errorf("getting ledger: %w", err)

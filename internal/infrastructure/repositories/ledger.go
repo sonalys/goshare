@@ -1,11 +1,11 @@
-package postgres
+package repositories
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/sonalys/goshare/internal/domain"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres"
 )
 
 var ledgerConstraintMapping = map[string]error{
@@ -17,23 +17,23 @@ var ledgerConstraintMapping = map[string]error{
 }
 
 type LedgerRepository struct {
-	client connection
+	client postgres.Connection
 }
 
-func NewLedgerRepository(client connection) *LedgerRepository {
+func newLedgerRepository(client postgres.Connection) *LedgerRepository {
 	return &LedgerRepository{
 		client: client,
 	}
 }
 
-func (r *LedgerRepository) transaction(ctx context.Context, f func(q *sqlcgen.Queries) error) error {
-	return ledgerError(r.client.transaction(ctx, f))
+func (r *LedgerRepository) transaction(ctx context.Context, f func(q postgres.Connection) error) error {
+	return ledgerError(r.client.Transaction(ctx, f))
 }
 
 func ledgerError(err error) error {
-	if err := constraintErrorMap(err, ledgerConstraintMapping); err != nil {
+	if err := postgres.MapConstraintError(err, ledgerConstraintMapping); err != nil {
 		return err
 	}
 
-	return defaultErrorMapping(err)
+	return postgres.DefaultErrorMapping(err)
 }

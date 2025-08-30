@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/pkg/slog"
 	"github.com/sonalys/goshare/internal/domain"
+	"github.com/sonalys/goshare/internal/ports"
 )
 
 type (
@@ -26,7 +26,7 @@ func (c *Controller) Register(ctx context.Context, req RegisterRequest) (resp *R
 	ctx, span := c.tracer.Start(ctx, "register")
 	defer span.End()
 
-	err = c.db.Transaction(ctx, func(tx application.Repositories) error {
+	err = c.db.Transaction(ctx, func(tx ports.Repositories) error {
 		user, err := domain.NewUser(domain.NewUserRequest{
 			FirstName: req.FirstName,
 			LastName:  req.LastName,

@@ -1,19 +1,22 @@
-package postgres
+package repositories
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/sonalys/goshare/internal/domain"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
 )
 
 func (r *LedgerRepository) Create(ctx context.Context, ledger *domain.Ledger) error {
-	return r.transaction(ctx, func(query *sqlcgen.Queries) error {
+	return r.transaction(ctx, func(conn postgres.Connection) error {
+		query := conn.Queries()
+
 		createLedgerReq := sqlcgen.CreateLedgerParams{
 			ID:        ledger.ID,
 			Name:      ledger.Name,
-			CreatedAt: convertTime(ledger.CreatedAt),
+			CreatedAt: postgres.ConvertTime(ledger.CreatedAt),
 			CreatedBy: ledger.CreatedBy,
 		}
 
@@ -25,7 +28,7 @@ func (r *LedgerRepository) Create(ctx context.Context, ledger *domain.Ledger) er
 			addReq := sqlcgen.CreateLedgerMemberParams{
 				UserID:    id,
 				LedgerID:  createLedgerReq.ID,
-				CreatedAt: convertTime(member.CreatedAt),
+				CreatedAt: postgres.ConvertTime(member.CreatedAt),
 				CreatedBy: member.CreatedBy,
 				Balance:   member.Balance,
 			}

@@ -16,15 +16,15 @@ func New(dep Dependencies) *Controller {
 	traceProvider := otel.Provider.TracerProvider()
 	return &Controller{
 		ledgerController: &ledgerController{
-			db:     dep.Database,
+			db:     dep.LocalDatabase,
 			tracer: traceProvider.Tracer("userController.ledger"),
 		},
 		recordsController: &recordsController{
-			db:     dep.Database,
+			db:     dep.LocalDatabase,
 			tracer: traceProvider.Tracer("userController.record"),
 		},
 		expenseController: &expenseController{
-			db:     dep.Database,
+			db:     dep.LocalDatabase,
 			tracer: traceProvider.Tracer("userController.expense"),
 		},
 	}

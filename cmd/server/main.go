@@ -47,11 +47,11 @@ func main() {
 	repositories := loadRepositories(secrets, infrastructure)
 
 	userController := usercontroller.New(usercontroller.Dependencies{
-		Database: repositories.Database,
+		LocalDatabase: repositories.Database,
 	})
 
 	identityController := identitycontroller.New(identitycontroller.Dependencies{
-		Database:        repositories.Database,
+		LocalDatabase:   repositories.Database,
 		IdentityEncoder: repositories.JWTRepository,
 	})
 

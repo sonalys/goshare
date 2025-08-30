@@ -1,4 +1,4 @@
-package postgres
+package repositories
 
 import (
 	"context"
@@ -9,12 +9,12 @@ import (
 )
 
 func (r *ExpenseRepository) Get(ctx context.Context, id domain.ID) (*domain.Expense, error) {
-	expense, err := r.client.queries().GetExpenseById(ctx, id)
+	expense, err := r.conn.Queries().GetExpenseById(ctx, id)
 	if err != nil {
 		return nil, ledgerError(err)
 	}
 
-	records, err := r.client.queries().GetExpenseRecords(ctx, expense.ID)
+	records, err := r.conn.Queries().GetExpenseRecords(ctx, expense.ID)
 	if err != nil {
 		return nil, fmt.Errorf("getting expense records: %w", err)
 	}
