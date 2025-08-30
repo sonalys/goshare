@@ -22,12 +22,14 @@ func NewLedgerRepository(client connection) *LedgerRepository {
 	}
 }
 
-func (r *LedgerRepository) transaction(ctx context.Context, f func(q *sqlc.Queries) error) error {
+func (r *LedgerRepository) transaction(ctx context.Context, f func(q connection) error) error {
 	return mapLedgerError(r.client.transaction(ctx, f))
 }
 
 func (r *LedgerRepository) Create(ctx context.Context, ledger *domain.Ledger) error {
-	return r.transaction(ctx, func(query *sqlc.Queries) error {
+	return r.transaction(ctx, func(conn connection) error {
+		query := conn.queries()
+
 		createLedgerReq := sqlc.CreateLedgerParams{
 			ID:        ledger.ID,
 			Name:      ledger.Name,
@@ -89,7 +91,9 @@ func (r *LedgerRepository) ListByUser(ctx context.Context, userID domain.ID) ([]
 }
 
 func (r *LedgerRepository) Update(ctx context.Context, ledger *domain.Ledger) error {
-	return r.transaction(ctx, func(query *sqlc.Queries) error {
+	return r.transaction(ctx, func(conn connection) error {
+		query := conn.queries()
+
 		updateLedgerParams := sqlc.UpdateLedgerParams{
 			ID:   ledger.ID,
 			Name: ledger.Name,

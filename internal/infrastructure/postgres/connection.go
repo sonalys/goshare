@@ -20,41 +20,40 @@ type (
 		conn T
 	}
 
-	queries[T pgxConn]      struct{ conn[T] }
-	repositories[T pgxConn] struct{ conn[T] }
+	readWriteRepository struct{ connection }
 )
 
-func (c *repositories[T]) Ledger() application.LedgerRepository {
+func (c *readWriteRepository) Ledger() application.LedgerRepository {
 	return &LedgerRepository{
-		client: c,
+		client: c.connection,
 	}
 }
 
-func (c *repositories[T]) User() application.UserRepository {
+func (c *readWriteRepository) User() application.UserRepository {
 	return &UsersRepository{
-		client: c,
+		client: c.connection,
 	}
 }
 
-func (c *repositories[T]) Expense() application.ExpenseRepository {
+func (c *readWriteRepository) Expense() application.ExpenseRepository {
 	return &ExpenseRepository{
-		client: c,
+		client: c.connection,
 	}
 }
 
-func (c *queries[T]) Ledger() application.LedgerQueries {
+func (c *conn[T]) Ledger() application.LedgerQueries {
 	return &LedgerRepository{
 		client: c,
 	}
 }
 
-func (c *queries[T]) User() application.UserQueries {
+func (c *conn[T]) User() application.UserQueries {
 	return &UsersRepository{
 		client: c,
 	}
 }
 
-func (c *queries[T]) Expense() application.ExpenseQueries {
+func (c *conn[T]) Expense() application.ExpenseQueries {
 	return &ExpenseRepository{
 		client: c,
 	}
@@ -64,7 +63,7 @@ func (c *conn[T]) queries() *sqlc.Queries {
 	return sqlc.New(c.conn)
 }
 
-func (c *conn[T]) transaction(ctx context.Context, f func(*sqlc.Queries) error) error {
+func (c *conn[T]) transaction(ctx context.Context, f func(connection) error) error {
 	tx, err := c.conn.Begin(ctx)
 	if err != nil {
 		return err
@@ -75,29 +74,15 @@ func (c *conn[T]) transaction(ctx context.Context, f func(*sqlc.Queries) error) 
 		}
 	}()
 
-	if err := f(sqlc.New(tx)); err != nil {
+	if err := f(&conn[pgx.Tx]{conn: tx}); err != nil {
 		return err
 	}
 
 	return tx.Commit(ctx)
 }
 
-func (c *conn[T]) Transaction(ctx context.Context, f func(application.Repositories) error) error {
-	tx, err := c.conn.Begin(ctx)
-	if err != nil {
-		return err
+func (c *conn[T]) readWrite() *readWriteRepository {
+	return &readWriteRepository{
+		connection: c,
 	}
-	defer func() {
-		if err := tx.Rollback(ctx); err != nil && !errors.Is(err, pgx.ErrTxClosed) {
-			slog.Error(ctx, "failed to rollback transaction", err)
-		}
-	}()
-
-	if err := f(&repositories[pgx.Tx]{
-		conn[pgx.Tx]{conn: tx},
-	}); err != nil {
-		return err
-	}
-
-	return tx.Commit(ctx)
 }

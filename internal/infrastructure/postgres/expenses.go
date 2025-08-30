@@ -24,7 +24,9 @@ func NewExpenseRepository(client connection) *ExpenseRepository {
 }
 
 func (r *ExpenseRepository) Create(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error {
-	return r.client.transaction(ctx, func(query *sqlc.Queries) error {
+	return r.client.transaction(ctx, func(conn connection) error {
+		query := conn.queries()
+
 		createExpenseReq := sqlc.CreateExpenseParams{
 			ID:          expense.ID,
 			LedgerID:    expense.LedgerID,
@@ -97,12 +99,14 @@ func (r *ExpenseRepository) ListByLedger(ctx context.Context, ledgerID domain.ID
 }
 
 func (r *ExpenseRepository) Update(ctx context.Context, expense *domain.Expense) error {
-	return r.client.transaction(ctx, func(q *sqlc.Queries) error {
-		if err := q.DeleteExpenseRecordsNotIn(ctx, slices.Collect(maps.Keys(expense.Records))); err != nil {
+	return r.client.transaction(ctx, func(conn connection) error {
+		query := conn.queries()
+
+		if err := query.DeleteExpenseRecordsNotIn(ctx, slices.Collect(maps.Keys(expense.Records))); err != nil {
 			return err
 		}
 
-		err := q.UpdateExpense(ctx, sqlc.UpdateExpenseParams{
+		err := query.UpdateExpense(ctx, sqlc.UpdateExpenseParams{
 			ID:          expense.ID,
 			Amount:      expense.Amount,
 			Name:        expense.Name,
@@ -115,7 +119,7 @@ func (r *ExpenseRepository) Update(ctx context.Context, expense *domain.Expense)
 		}
 
 		for id, record := range expense.Records {
-			if err := q.CreateExpenseRecord(ctx, sqlc.CreateExpenseRecordParams{
+			if err := query.CreateExpenseRecord(ctx, sqlc.CreateExpenseRecordParams{
 				ID:         id,
 				ExpenseID:  expense.ID,
 				RecordType: record.Type.String(),
