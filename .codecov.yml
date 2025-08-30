@@ -1,0 +1,12 @@
+ignore:
+  - internal/application/pkg/**
+  - **/*.gen.go
+coverage:
+  status:
+    project:
+      default:
+        target: 80%
+        threshold: 0.5%
+    patch:
+      default:
+        target: 80%
