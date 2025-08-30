@@ -102,6 +102,12 @@ tasks:
   build:
     deps: [build-server,build-migration]
 
+  start:
+    env:
+      POSTGRES_CONN: postgresql://user:password@localhost:5432/goshare?sslmode=disable
+      JAEGER_CONN: localhost:4317
+    cmd: go run ./cmd/server/...
+
   dev:
     env:
       POSTGRES_CONN: postgresql://user:password@localhost:5432/goshare?sslmode=disable

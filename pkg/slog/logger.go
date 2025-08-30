@@ -35,10 +35,8 @@ func Init(level slog.Level) {
 	}
 
 	slog.SetLogLoggerLevel(level)
-	internalHandler := &fieldFormatterHandler{
-		Next: slogotel.OtelHandler{
-			Next: handler,
-		},
+	internalHandler := slogotel.OtelHandler{
+		Next: handler,
 	}
 	logger := slog.New(internalHandler)
 	slog.SetDefault(logger)

@@ -24,17 +24,15 @@ func init() {
 }
 
 func main() {
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill)
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
 	cfg := loadConfigFromEnv(ctx)
 
-	ctx = slog.Context(ctx,
+	slog.Info(ctx, "starting server",
 		slog.WithString("version", version),
 		slog.WithString("service_name", cfg.ServiceName),
 	)
-
-	slog.Info(ctx, "starting server")
 
 	telemetryShutdown, err := otel.Initialize(ctx, cfg.TelemetryEndpoint, version)
 	if err != nil {
@@ -59,9 +57,8 @@ func main() {
 		identityController,
 		userController,
 	)
-	handler := NewHandler(router, repositories, cfg.ServiceName)
-
-	server := NewServer(cfg, handler)
+	handler := setupHandler(ctx, router, repositories)
+	server := setupServer(cfg, handler)
 
 	go server.ServeHTTP(ctx)
 

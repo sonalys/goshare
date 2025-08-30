@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"github.com/sonalys/goshare/internal/application/controllers/identitycontroller"
+	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
-	v1 "github.com/sonalys/goshare/pkg/v1"
 )
 
 func (a *Router) UserRegister(ctx context.Context, req *server.UserRegisterReq) (r *server.UserRegisterOK, _ error) {
@@ -23,12 +23,12 @@ func (a *Router) UserRegister(ctx context.Context, req *server.UserRegisterReq) 
 		return &server.UserRegisterOK{
 			ID: resp.ID.UUID(),
 		}, nil
-	case errors.Is(err, v1.ErrConflict):
+	case errors.Is(err, domain.ErrUserAlreadyRegistered):
 		return nil, &server.ErrorResponseStatusCode{
 			StatusCode: http.StatusConflict,
 			Response: server.ErrorResponse{
 				Errors: []server.Error{
-					server.Error{
+					{
 						Code:    server.ErrorCodeInvalidField,
 						Message: "already registered",
 						Metadata: server.NewOptErrorMetadata(server.ErrorMetadata{

@@ -7,14 +7,20 @@ import (
 
 	"github.com/sonalys/goshare/internal/infrastructure/http/middlewares"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
+	"github.com/sonalys/goshare/pkg/otel"
 	"github.com/sonalys/goshare/pkg/slog"
 )
 
-func NewHandler(client server.Handler, repositories *repos, serviceName string) http.Handler {
+func setupHandler(ctx context.Context, client server.Handler, repositories *repos) http.Handler {
 	securityMiddleware := middlewares.NewSecurityHandler(repositories.JWTRepository)
 
-	handler, _ := server.NewServer(client, securityMiddleware,
+	handler, err := server.NewServer(client, securityMiddleware,
 		server.WithPathPrefix("/api/v1"),
+		server.WithTracerProvider(otel.Provider.TracerProvider()),
+		server.WithMiddleware(
+			middlewares.Recoverer,
+			middlewares.Logger,
+		),
 		server.WithErrorHandler(func(ctx context.Context, w http.ResponseWriter, r *http.Request, err error) {
 			resp := client.NewError(ctx, err)
 
@@ -26,9 +32,9 @@ func NewHandler(client server.Handler, repositories *repos, serviceName string) 
 			}
 		}),
 	)
+	if err != nil {
+		slog.Panic(ctx, "creating http api handler", slog.WithError(err))
+	}
 
-	return middlewares.Wrap(handler,
-		middlewares.Recoverer,
-		middlewares.LogRequests,
-	)
+	return handler
 }

@@ -1,69 +1,39 @@
 package middlewares
 
 import (
-	"net/http"
-	"time"
-
+	"github.com/google/uuid"
+	"github.com/ogen-go/ogen/middleware"
+	"github.com/sonalys/goshare/internal/infrastructure/http/server"
 	"github.com/sonalys/goshare/pkg/slog"
+	"go.opentelemetry.io/otel/trace"
 )
 
-type responseWriter struct {
-	http.ResponseWriter
-	status      int
-	wroteHeader bool
-}
+func Logger(req middleware.Request, next middleware.Next) (resp middleware.Response, err error) {
+	ctx := req.Context
 
-func wrapResponseWriter(w http.ResponseWriter) *responseWriter {
-	return &responseWriter{ResponseWriter: w}
-}
-
-func (rw *responseWriter) Status() int {
-	return rw.status
-}
-
-func (rw *responseWriter) WriteHeader(code int) {
-	if rw.wroteHeader {
-		return
+	fields := []any{
+		slog.WithString("operation_id", req.OperationID),
 	}
 
-	rw.status = code
-	rw.ResponseWriter.WriteHeader(code)
-	rw.wroteHeader = true
-}
+	slog.Info(ctx, "request received", fields...)
 
-func LogRequests(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-
-		slog.Info(ctx, "request received",
-			slog.WithString("method", r.Method),
-			slog.WithString("url", r.URL.String()),
-			slog.WithString("remote_addr", r.RemoteAddr),
-		)
-
-		rw := wrapResponseWriter(w)
-
-		t1 := time.Now()
-
-		defer func() {
-			status := rw.Status()
-
-			ctx = slog.Context(ctx,
-				slog.WithString("method", r.Method),
-				slog.WithString("url", r.URL.String()),
-				slog.WithString("remote_addr", r.RemoteAddr),
-				slog.WithInt("status", rw.Status()),
-				slog.WithDuration("duration", time.Since(t1)),
+	resp, err = next(req)
+	switch err := err.(type) {
+	case nil:
+		if tresp, ok := resp.Type.(interface{ GetStatusCode() int }); ok {
+			fields = append(fields,
+				slog.WithInt("status_code", tresp.GetStatusCode()),
 			)
+		}
+	case *server.ErrorResponseStatusCode:
+		var traceID trace.TraceID
+		if span := trace.SpanFromContext(ctx); span != nil {
+			traceID = span.SpanContext().TraceID()
+		}
+		err.Response.TraceID = uuid.UUID(traceID)
+	}
 
-			if status >= 400 {
-				slog.Error(ctx, "request failed", nil)
-				return
-			}
+	slog.Info(ctx, "request completed", fields...)
 
-			slog.Info(ctx, "request completed")
-		}()
-
-		next.ServeHTTP(rw, r)
-	})
+	return
 }

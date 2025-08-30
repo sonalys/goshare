@@ -35,7 +35,7 @@ func (c *ledgerController) Create(ctx context.Context, req CreateLedgerRequest) 
 	err = c.db.Transaction(ctx, func(db ports.Repositories) error {
 		user, err := db.User().Get(ctx, req.ActorID)
 		if err != nil {
-			return fmt.Errorf("finding user% w", err)
+			return fmt.Errorf("finding user: %w", err)
 		}
 
 		ledger, err := user.CreateLedger(req.Name)
@@ -44,7 +44,7 @@ func (c *ledgerController) Create(ctx context.Context, req CreateLedgerRequest) 
 		}
 
 		if err := db.Ledger().Create(ctx, ledger); err != nil {
-			return fmt.Errorf("saving ledger %w", err)
+			return fmt.Errorf("saving ledger: %w", err)
 		}
 
 		resp = &CreateLedgerResponse{

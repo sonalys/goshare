@@ -11,7 +11,7 @@ type Server struct {
 	httpServer *http.Server
 }
 
-func NewServer(cfg Config, handler http.Handler) *Server {
+func setupServer(cfg Config, handler http.Handler) *Server {
 	httpServer := http.Server{
 		Addr:        cfg.AddrPort,
 		ReadTimeout: cfg.ReadTimeout,

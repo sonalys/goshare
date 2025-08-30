@@ -51,15 +51,6 @@ func newErrorResponse(ctx context.Context, statusCode int, errs ...server.Error)
 }
 
 func (a *Router) NewError(ctx context.Context, err error) *server.ErrorResponseStatusCode {
-	if resp, ok := err.(*server.ErrorResponseStatusCode); ok {
-		var traceID trace.TraceID
-		if span := trace.SpanFromContext(ctx); span != nil {
-			traceID = span.SpanContext().TraceID()
-		}
-		resp.Response.TraceID = uuid.UUID(traceID)
-		return resp
-	}
-
 	if target := new(ogenerrors.SecurityError); errors.As(err, &target) {
 		return newErrorResponse(ctx, http.StatusUnauthorized, server.Error{
 			Code:    server.ErrorCodeUnauthorized,
