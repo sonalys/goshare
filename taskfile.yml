@@ -12,6 +12,9 @@ env:
   JAEGER_CONN: jaeger:4317
 
 tasks:
+  lint:
+    cmd: go tool -modfile=.tools/golangci-lint/go.mod golangci-lint run
+
   test-coverage:
     cmd: go tool -modfile=.tools/gotestsum/go.mod gotestsum --hide-summary=skipped -- -cover -v ./...
 
