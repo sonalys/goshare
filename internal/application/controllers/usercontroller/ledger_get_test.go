@@ -5,7 +5,9 @@ import (
 	"testing"
 
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
+	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/domain"
+	"github.com/sonalys/goshare/internal/utils/testfixtures"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -27,9 +29,15 @@ func Test_Ledger_Get(t *testing.T) {
 			db: setupDatabaseMock(t),
 		}
 
+		user := testfixtures.User(t)
+		user.ID = td.ActorID
+
+		ledger := testfixtures.Ledger(t, user)
+		ledger.ID = td.LedgerID
+
 		mocks.db.repositories.ledger.GetFunc = func(ctx context.Context, id domain.ID) (*domain.Ledger, error) {
 			assert.Equal(t, td.LedgerID, id)
-			return &domain.Ledger{}, nil
+			return ledger, nil
 		}
 
 		controller := usercontroller.New(usercontroller.Dependencies{
@@ -48,6 +56,18 @@ func Test_Ledger_Get(t *testing.T) {
 		resp, err := controller.Ledgers().Get(ctx, td)
 		require.NoError(t, err)
 		assert.NotNil(t, resp)
+	})
+
+	t.Run("fail/user is not authorized to view ledger", func(t *testing.T) {
+		ctx := t.Context()
+
+		td := createTestData()
+		controller, _ := setup(t, td)
+		td.ActorID = domain.NewID()
+
+		resp, err := controller.Ledgers().Get(ctx, td)
+		require.ErrorIs(t, err, v1.ErrForbidden)
+		assert.Nil(t, resp)
 	})
 
 	t.Run("fail/ledger repository error", func(t *testing.T) {

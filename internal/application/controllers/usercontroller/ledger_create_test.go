@@ -6,6 +6,7 @@ import (
 
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
 	"github.com/sonalys/goshare/internal/domain"
+	"github.com/sonalys/goshare/internal/utils/testfixtures"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -27,9 +28,12 @@ func Test_Ledger_Create(t *testing.T) {
 			db: setupDatabaseMock(t),
 		}
 
+		user := testfixtures.User(t)
+		user.ID = td.ActorID
+
 		mocks.db.tx.user.GetFunc = func(ctx context.Context, id domain.ID) (*domain.User, error) {
 			assert.Equal(t, td.ActorID, id)
-			return &domain.User{}, nil
+			return user, nil
 		}
 
 		mocks.db.tx.ledger.CreateFunc = func(ctx context.Context, ledger *domain.Ledger) error {
@@ -37,8 +41,10 @@ func Test_Ledger_Create(t *testing.T) {
 			return nil
 		}
 
+		previousLedgerCount := user.LedgersCount
+
 		mocks.db.tx.user.SaveFunc = func(ctx context.Context, user *domain.User) error {
-			assert.EqualValues(t, 1, user.LedgersCount)
+			assert.EqualValues(t, previousLedgerCount+1, user.LedgersCount)
 			return nil
 		}
 
