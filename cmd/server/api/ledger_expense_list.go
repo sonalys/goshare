@@ -22,21 +22,20 @@ func (a *API) LedgerExpenseList(ctx context.Context, params handlers.LedgerExpen
 		Limit:    params.Limit.Or(10),
 		Cursor:   params.Cursor.Or(time.Now()),
 	})
-	switch {
-	case err == nil:
-		var cursor handlers.OptDateTime
-
-		if result.Cursor != nil {
-			cursor = handlers.NewOptDateTime(*result.Cursor)
-		}
-
-		return &handlers.LedgerExpenseListOK{
-			Expenses: mapLedgerExpenseToResponseObject(result.Expenses),
-			Cursor:   cursor,
-		}, nil
-	default:
+	if err != nil {
 		return nil, err
 	}
+
+	var cursor handlers.OptDateTime
+
+	if result.Cursor != nil {
+		cursor = handlers.NewOptDateTime(*result.Cursor)
+	}
+
+	return &handlers.LedgerExpenseListOK{
+		Expenses: mapLedgerExpenseToResponseObject(result.Expenses),
+		Cursor:   cursor,
+	}, nil
 }
 
 func mapLedgerExpenseToResponseObject(expenses []v1.LedgerExpenseSummary) []handlers.ExpenseSummary {
