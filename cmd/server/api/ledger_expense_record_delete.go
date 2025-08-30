@@ -15,7 +15,7 @@ func (a *API) LedgerExpenseRecordDelete(ctx context.Context, params handlers.Led
 	}
 
 	apiReq := usercontroller.DeleteExpenseRecordRequest{
-		ActorID:   identity.UserID,
+		Actor:     identity.UserID,
 		LedgerID:  domain.ConvertID(params.LedgerID),
 		ExpenseID: domain.ConvertID(params.ExpenseID),
 		RecordID:  domain.ConvertID(params.RecordID),

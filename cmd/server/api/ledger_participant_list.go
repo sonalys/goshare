@@ -14,7 +14,7 @@ func (a *API) LedgerMemberList(ctx context.Context, params handlers.LedgerMember
 		return nil, err
 	}
 
-	members, err := a.UserController.MembersList(ctx, usercontroller.ListMembersRequest{
+	ledger, err := a.UserController.Ledgers().Get(ctx, usercontroller.GetLedgerRequest{
 		Actor:    identity.UserID,
 		LedgerID: domain.ConvertID(params.LedgerID),
 	})
@@ -23,7 +23,7 @@ func (a *API) LedgerMemberList(ctx context.Context, params handlers.LedgerMember
 	}
 
 	return &handlers.LedgerMemberListOK{
-		Members: mapLedgerMemberBalanceToResponseObject(members),
+		Members: mapLedgerMemberBalanceToResponseObject(ledger.Members),
 	}, nil
 }
 

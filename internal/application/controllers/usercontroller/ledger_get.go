@@ -3,6 +3,7 @@ package usercontroller
 import (
 	"context"
 
+	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/pkg/slog"
 	"github.com/sonalys/goshare/internal/domain"
 	"go.opentelemetry.io/otel/attribute"
@@ -26,6 +27,10 @@ func (c *ledgerController) Get(ctx context.Context, req GetLedgerRequest) (*doma
 	ledger, err := c.db.Ledger().Get(ctx, req.LedgerID)
 	if err != nil {
 		return nil, slog.ErrorReturn(ctx, "listing ledgers", err)
+	}
+
+	if !ledger.CanView(req.Actor) {
+		return nil, slog.ErrorReturn(ctx, "authorizing ledger view", application.ErrUnauthorized)
 	}
 
 	return ledger, nil

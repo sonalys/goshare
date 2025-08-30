@@ -2,6 +2,7 @@ package usercontroller
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/pkg/slog"
@@ -32,33 +33,38 @@ func (c *ledgerController) MembersAdd(ctx context.Context, req AddMembersRequest
 	slog.Debug(ctx, "adding ledger member", slog.With("req", req))
 
 	transaction := func(db application.Repositories) error {
-		users, err := db.User().ListByEmail(ctx, req.Emails)
-		if err != nil {
-			return slog.ErrorReturn(ctx, "getting users", err)
-		}
-
 		ledger, err := db.Ledger().Get(ctx, req.LedgerID)
 		if err != nil {
-			return slog.ErrorReturn(ctx, "finding ledger", err)
+			return fmt.Errorf("getting ledger: %w", err)
 		}
 
-		err = ledger.AddMember(req.Actor, kset.Select(func(u domain.User) domain.ID { return u.ID }, users...)...)
+		if !ledger.CanManageMembers(req.Actor) {
+			return fmt.Errorf("authorizing member management: %w", application.ErrUnauthorized)
+		}
+
+		users, err := db.User().ListByEmail(ctx, req.Emails)
 		if err != nil {
-			return slog.ErrorReturn(ctx, "adding members", err)
+			return fmt.Errorf("finding new members: %w", err)
+		}
+
+		newMemberIDs := kset.Select(func(u domain.User) domain.ID { return u.ID }, users...)
+
+		if err = ledger.AddMember(req.Actor, newMemberIDs...); err != nil {
+			return fmt.Errorf("adding members: %w", err)
 		}
 
 		if err := db.Ledger().Update(ctx, ledger); err != nil {
-			return err
+			return fmt.Errorf("saving ledger: %w", err)
 		}
 
 		return nil
 	}
 
-	switch err := c.db.Transaction(ctx, transaction); {
-	case err == nil:
-		slog.Info(ctx, "added users to ledger")
-		return nil
-	default:
-		return slog.ErrorReturn(ctx, "adding ledger member", err)
+	if err := c.db.Transaction(ctx, transaction); err != nil {
+		return slog.ErrorReturn(ctx, "commiting transaction", err)
 	}
+
+	slog.Info(ctx, "added new members to ledger")
+
+	return nil
 }

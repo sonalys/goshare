@@ -36,6 +36,10 @@ func (c *recordsController) Create(ctx context.Context, req CreateExpenseRecordR
 			return fmt.Errorf("fetching ledger: %w", err)
 		}
 
+		if !ledger.CanManageExpenses(req.Actor) {
+			return fmt.Errorf("authorizing expenses management: %w", application.ErrUnauthorized)
+		}
+
 		expense, err := db.Expense().Get(ctx, req.ExpenseID)
 		if err != nil {
 			return fmt.Errorf("fetching expense: %w", err)
@@ -57,7 +61,7 @@ func (c *recordsController) Create(ctx context.Context, req CreateExpenseRecordR
 		return nil
 	})
 	if err != nil {
-		return nil, slog.ErrorReturn(ctx, "creating expense record", err)
+		return nil, slog.ErrorReturn(ctx, "commiting transaction", err)
 	}
 
 	slog.Info(ctx, "expense records created")

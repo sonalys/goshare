@@ -3,6 +3,8 @@ package domain
 import (
 	"fmt"
 	"time"
+
+	"github.com/sonalys/kset"
 )
 
 const (
@@ -97,6 +99,9 @@ func (ledger *Ledger) AddMember(actor ID, newMembers ...ID) error {
 		}
 	}
 
+	// Deduplicate values using hashmap.
+	newMembers = kset.HashMapKey(newMembers...).ToSlice()
+
 	var errs Form
 	for _, id := range newMembers {
 		if !ledger.HasMember(id) {
@@ -134,5 +139,13 @@ func (ledger *Ledger) AddMember(actor ID, newMembers ...ID) error {
 }
 
 func (ledger *Ledger) CanView(actor ID) bool {
+	return ledger.CreatedBy == actor || ledger.HasMember(actor)
+}
+
+func (ledger *Ledger) CanManageMembers(actor ID) bool {
+	return ledger.CreatedBy == actor || ledger.HasMember(actor)
+}
+
+func (ledger *Ledger) CanManageExpenses(actor ID) bool {
 	return ledger.CreatedBy == actor || ledger.HasMember(actor)
 }
