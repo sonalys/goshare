@@ -12,9 +12,9 @@ import (
 	"github.com/sonalys/goshare/cmd/server/api"
 	"github.com/sonalys/goshare/internal/application/controllers/identitycontroller"
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
-	"github.com/sonalys/goshare/internal/application/pkg/otel"
-	"github.com/sonalys/goshare/internal/application/pkg/secrets"
-	"github.com/sonalys/goshare/internal/application/pkg/slog"
+	"github.com/sonalys/goshare/pkg/otel"
+	"github.com/sonalys/goshare/pkg/secrets"
+	"github.com/sonalys/goshare/pkg/slog"
 )
 
 var version string = "dev"

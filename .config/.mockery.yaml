@@ -1,4 +1,4 @@
-dir: 'mocks/{{ .SrcPackagePath | trimPrefix "github.com/sonalys/goshare" | replaceAll "internal" "internal_" }}'
+dir: 'internal/mocks/{{ .SrcPackagePath | trimPrefix "github.com/sonalys/goshare/internal" }}mock'
 filename: mocks.gen.go
 force-file-write: false
 formatter: goimports

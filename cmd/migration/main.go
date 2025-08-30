@@ -7,9 +7,9 @@ import (
 
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"github.com/sonalys/goshare/internal/application/pkg/secrets"
-	"github.com/sonalys/goshare/internal/application/pkg/slog"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/migrations"
+	"github.com/sonalys/goshare/pkg/secrets"
+	"github.com/sonalys/goshare/pkg/slog"
 )
 
 func init() {

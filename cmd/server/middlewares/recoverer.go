@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/sonalys/goshare/cmd/server/handlers"
-	"github.com/sonalys/goshare/internal/application/pkg/slog"
+	"github.com/sonalys/goshare/pkg/slog"
 	"go.opentelemetry.io/otel/trace"
 )
 

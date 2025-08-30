@@ -124,7 +124,7 @@ tasks:
 
   generate-mocks:
     cmd: >
-      rm -rf mocks;
+      rm -rf internal/mocks;
       $MOCKERY
 
   compose-server:

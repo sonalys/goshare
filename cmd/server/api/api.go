@@ -11,8 +11,8 @@ import (
 	"github.com/sonalys/goshare/cmd/server/handlers"
 	"github.com/sonalys/goshare/internal/application/controllers/identitycontroller"
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
-	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/domain"
+	v1 "github.com/sonalys/goshare/pkg/v1"
 	"go.opentelemetry.io/otel/trace"
 )
 

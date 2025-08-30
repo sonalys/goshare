@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/sonalys/goshare/internal/application/pkg/jwt"
-	"github.com/sonalys/goshare/internal/application/pkg/secrets"
 	"github.com/sonalys/goshare/internal/infrastructure/repositories"
+	"github.com/sonalys/goshare/pkg/jwt"
+	"github.com/sonalys/goshare/pkg/secrets"
 )
 
 type repos struct {

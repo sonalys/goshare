@@ -3,9 +3,9 @@ package mappers
 import (
 	"fmt"
 
-	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	domain "github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
+	v1 "github.com/sonalys/goshare/pkg/v1"
 )
 
 func NewLedgerExpenseSummary(expense *sqlcgen.Expense) *v1.LedgerExpenseSummary {

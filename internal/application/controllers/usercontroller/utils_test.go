@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/sonalys/goshare/internal/mocks/portsmock"
 	"github.com/sonalys/goshare/internal/ports"
-	portsmock "github.com/sonalys/goshare/mocks/internal_/ports"
 )
 
 type repositoryMock struct {

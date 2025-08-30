@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/domain"
+	v1 "github.com/sonalys/goshare/pkg/v1"
 )
 
 type (

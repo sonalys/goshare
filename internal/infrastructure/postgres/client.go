@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/sonalys/goshare/internal/application/pkg/slog"
+	"github.com/sonalys/goshare/pkg/slog"
 )
 
 func New(ctx context.Context, connStr string) (Connection, error) {

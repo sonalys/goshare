@@ -5,7 +5,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/sonalys/goshare/internal/utils/genericmath"
+	"github.com/sonalys/goshare/pkg/genericmath"
 )
 
 type (

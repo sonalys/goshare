@@ -9,9 +9,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/ports"
+	"github.com/sonalys/goshare/pkg/v1"
 )
 
 // Ensure that ExpenseQueries does implement ports.ExpenseQueries.

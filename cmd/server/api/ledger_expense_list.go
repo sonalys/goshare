@@ -6,8 +6,8 @@ import (
 
 	"github.com/sonalys/goshare/cmd/server/handlers"
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
-	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/domain"
+	v1 "github.com/sonalys/goshare/pkg/v1"
 )
 
 func (a *API) LedgerExpenseList(ctx context.Context, params handlers.LedgerExpenseListParams) (*handlers.LedgerExpenseListOK, error) {

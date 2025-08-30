@@ -8,8 +8,8 @@ import (
 	"github.com/sonalys/goshare/cmd/server/api"
 	"github.com/sonalys/goshare/cmd/server/handlers"
 	"github.com/sonalys/goshare/cmd/server/middlewares"
-	"github.com/sonalys/goshare/internal/application/pkg/otel"
-	"github.com/sonalys/goshare/internal/application/pkg/slog"
+	"github.com/sonalys/goshare/pkg/otel"
+	"github.com/sonalys/goshare/pkg/slog"
 )
 
 func NewHandler(client *api.API, repositories *repos, serviceName string) http.Handler {

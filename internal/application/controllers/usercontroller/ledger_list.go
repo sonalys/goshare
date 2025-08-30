@@ -3,8 +3,8 @@ package usercontroller
 import (
 	"context"
 
-	"github.com/sonalys/goshare/internal/application/pkg/slog"
 	"github.com/sonalys/goshare/internal/domain"
+	"github.com/sonalys/goshare/pkg/slog"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 )

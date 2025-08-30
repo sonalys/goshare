@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/sonalys/goshare/internal/application/pkg/slog"
-	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/ports"
+	"github.com/sonalys/goshare/pkg/slog"
+	v1 "github.com/sonalys/goshare/pkg/v1"
 	"github.com/sonalys/kset"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"

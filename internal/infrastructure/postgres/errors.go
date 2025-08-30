@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/jackc/pgx/v5"
-	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
+	v1 "github.com/sonalys/goshare/pkg/v1"
 )
 
 func DefaultErrorMapping(err error) error {

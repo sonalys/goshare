@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/sonalys/goshare/internal/application/pkg/slog"
-	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
+	"github.com/sonalys/goshare/pkg/slog"
+	v1 "github.com/sonalys/goshare/pkg/v1"
 	"golang.org/x/crypto/bcrypt"
 )
 

@@ -8,7 +8,7 @@ import (
 	"sync"
 
 	"github.com/sonalys/goshare/internal/application/controllers/identitycontroller"
-	"github.com/sonalys/goshare/internal/application/pkg/v1"
+	"github.com/sonalys/goshare/pkg/v1"
 )
 
 // Ensure that IdentityEncoder does implement identitycontroller.IdentityEncoder.

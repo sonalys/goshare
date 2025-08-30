@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/sonalys/goshare/internal/application/pkg/secrets"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres"
+	"github.com/sonalys/goshare/pkg/secrets"
 )
 
 type infrastructure struct {

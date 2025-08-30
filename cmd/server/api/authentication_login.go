@@ -8,7 +8,7 @@ import (
 
 	"github.com/sonalys/goshare/cmd/server/handlers"
 	"github.com/sonalys/goshare/internal/application/controllers/identitycontroller"
-	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
+	v1 "github.com/sonalys/goshare/pkg/v1"
 )
 
 // Login implements handlers.StrictServerInterface.
