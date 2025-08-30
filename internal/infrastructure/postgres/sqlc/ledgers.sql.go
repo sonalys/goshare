@@ -64,11 +64,11 @@ func (q *Queries) DeleteMembersNotIn(ctx context.Context, ids []domain.ID) error
 	return err
 }
 
-const findLedgerById = `-- name: FindLedgerById :one
+const findLedgerById = `-- name: GetLedgerById :one
 SELECT id, name, created_at, created_by FROM ledgers WHERE id = $1 FOR UPDATE
 `
 
-func (q *Queries) FindLedgerById(ctx context.Context, id domain.ID) (Ledger, error) {
+func (q *Queries) GetLedgerById(ctx context.Context, id domain.ID) (Ledger, error) {
 	row := q.db.QueryRow(ctx, findLedgerById, id)
 	var i Ledger
 	err := row.Scan(

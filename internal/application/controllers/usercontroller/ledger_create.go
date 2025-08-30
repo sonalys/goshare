@@ -33,7 +33,7 @@ func (c *ledgerController) Create(ctx context.Context, req CreateLedgerRequest) 
 	slog.Debug(ctx, "creating ledger", slog.With("req", req))
 
 	err = c.db.Transaction(ctx, func(db application.Repositories) error {
-		user, err := db.User().Find(ctx, req.Actor)
+		user, err := db.User().Get(ctx, req.Actor)
 		if err != nil {
 			return fmt.Errorf("finding user% w", err)
 		}

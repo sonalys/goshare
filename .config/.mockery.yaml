@@ -7,6 +7,7 @@ structname: '{{.InterfaceName}}'
 pkgname: '{{.SrcPackageName}}mock'
 template: matryer
 packages:
+  github.com/sonalys/goshare/internal/infrastructure/postgres:
   github.com/sonalys/goshare/internal:
     config:
       all: true

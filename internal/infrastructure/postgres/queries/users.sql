@@ -11,11 +11,11 @@ password_hash = EXCLUDED.password_hash,
 ledger_count = EXCLUDED.ledger_count
 ;
 
--- name: FindUserByEmail :one
+-- name: GetUserByEmail :one
 SELECT * FROM users WHERE email = $1;
 
 -- name: ListByEmail :many
 SELECT * FROM users WHERE email = ANY(@emails::text[]);
 
--- name: FindUser :one
+-- name: GetUser :one
 SELECT * FROM users WHERE id = $1 FOR UPDATE;

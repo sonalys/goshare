@@ -4,7 +4,7 @@ INSERT INTO expenses (id,ledger_id,amount,name,expense_date,created_at,created_b
 -- name: GetLedgerExpenses :many
 SELECT * FROM expenses WHERE ledger_id = $1 AND created_at < $2 ORDER BY created_at DESC LIMIT $3;
 
--- name: FindExpenseById :one
+-- name: GetExpenseById :one
 SELECT * FROM expenses WHERE id = $1;
 
 -- name: UpdateExpense :exec

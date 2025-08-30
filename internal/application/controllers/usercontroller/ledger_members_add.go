@@ -20,8 +20,8 @@ type AddMembersRequest struct {
 // TODO(invitations): Here it's a simplification of the user membership process.
 // We can always invert the flow and create invitation links, so the users click themselves
 // We can also send invites through the system and they accept the invite through the API.
-func (c *ledgerController) AddMembers(ctx context.Context, req AddMembersRequest) error {
-	ctx, span := c.tracer.Start(ctx, "addMembers",
+func (c *ledgerController) MembersAdd(ctx context.Context, req AddMembersRequest) error {
+	ctx, span := c.tracer.Start(ctx, "membersAdd",
 		trace.WithAttributes(
 			attribute.Stringer("actor_id", req.Actor),
 			attribute.Stringer("ledger_id", req.LedgerID),
@@ -37,7 +37,7 @@ func (c *ledgerController) AddMembers(ctx context.Context, req AddMembersRequest
 			return slog.ErrorReturn(ctx, "getting users", err)
 		}
 
-		ledger, err := db.Ledger().Find(ctx, req.LedgerID)
+		ledger, err := db.Ledger().Get(ctx, req.LedgerID)
 		if err != nil {
 			return slog.ErrorReturn(ctx, "finding ledger", err)
 		}

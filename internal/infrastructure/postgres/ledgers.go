@@ -57,8 +57,8 @@ func (r *LedgerRepository) Create(ctx context.Context, ledger *domain.Ledger) er
 	})
 }
 
-func (r *LedgerRepository) Find(ctx context.Context, id domain.ID) (*domain.Ledger, error) {
-	ledger, err := r.client.queries().FindLedgerById(ctx, id)
+func (r *LedgerRepository) Get(ctx context.Context, id domain.ID) (*domain.Ledger, error) {
+	ledger, err := r.client.queries().GetLedgerById(ctx, id)
 	if err != nil {
 		return nil, mapLedgerError(err)
 	}
@@ -71,7 +71,7 @@ func (r *LedgerRepository) Find(ctx context.Context, id domain.ID) (*domain.Ledg
 	return mappers.NewLedger(&ledger, members), nil
 }
 
-func (r *LedgerRepository) GetByUser(ctx context.Context, userID domain.ID) ([]domain.Ledger, error) {
+func (r *LedgerRepository) ListByUser(ctx context.Context, userID domain.ID) ([]domain.Ledger, error) {
 	ledgers, err := r.client.queries().GetUserLedgers(ctx, userID)
 	if err != nil {
 		return nil, mapLedgerError(err)

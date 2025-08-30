@@ -25,7 +25,7 @@ func (c *expenseController) Get(ctx context.Context, req GetExpenseRequest) (*do
 	)
 	defer span.End()
 
-	expense, err := c.db.Expense().Find(ctx, req.ExpenseID)
+	expense, err := c.db.Expense().Get(ctx, req.ExpenseID)
 	if err != nil {
 		return nil, slog.ErrorReturn(ctx, "getting expense", err)
 	}

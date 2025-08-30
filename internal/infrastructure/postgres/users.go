@@ -33,8 +33,8 @@ func (r *UsersRepository) Save(ctx context.Context, user *domain.User) error {
 	}))
 }
 
-func (r *UsersRepository) Find(ctx context.Context, id domain.ID) (*domain.User, error) {
-	user, err := r.client.queries().FindUser(ctx, id)
+func (r *UsersRepository) Get(ctx context.Context, id domain.ID) (*domain.User, error) {
+	user, err := r.client.queries().GetUser(ctx, id)
 	if err != nil {
 		return nil, mapError(err)
 	}
@@ -42,8 +42,8 @@ func (r *UsersRepository) Find(ctx context.Context, id domain.ID) (*domain.User,
 	return mappers.NewUser(user), nil
 }
 
-func (r *UsersRepository) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
-	user, err := r.client.queries().FindUserByEmail(ctx, email)
+func (r *UsersRepository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
+	user, err := r.client.queries().GetUserByEmail(ctx, email)
 	if err != nil {
 		return nil, mapError(err)
 	}

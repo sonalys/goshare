@@ -17,7 +17,7 @@ func (c *ledgerController) ListByUser(ctx context.Context, actor domain.ID) ([]d
 	)
 	defer span.End()
 
-	ledgers, err := c.db.Ledger().GetByUser(ctx, actor)
+	ledgers, err := c.db.Ledger().ListByUser(ctx, actor)
 	if err != nil {
 		return nil, slog.ErrorReturn(ctx, "listing ledgers", err)
 	}

@@ -15,8 +15,8 @@ type ListMembersRequest struct {
 	LedgerID domain.ID
 }
 
-func (c *ledgerController) ListMembers(ctx context.Context, req ListMembersRequest) (map[domain.ID]*domain.LedgerMember, error) {
-	ctx, span := c.tracer.Start(ctx, "listMembers",
+func (c *ledgerController) MembersList(ctx context.Context, req ListMembersRequest) (map[domain.ID]*domain.LedgerMember, error) {
+	ctx, span := c.tracer.Start(ctx, "membersList",
 		trace.WithAttributes(
 			attribute.Stringer("actor_id", req.Actor),
 			attribute.Stringer("ledger_id", req.LedgerID),
@@ -24,7 +24,7 @@ func (c *ledgerController) ListMembers(ctx context.Context, req ListMembersReque
 	)
 	defer span.End()
 
-	ledger, err := c.db.Ledger().Find(ctx, req.LedgerID)
+	ledger, err := c.db.Ledger().Get(ctx, req.LedgerID)
 	if err != nil {
 		return nil, slog.ErrorReturn(ctx, "listing members balance", err)
 	}

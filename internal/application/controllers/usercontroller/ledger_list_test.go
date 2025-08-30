@@ -10,26 +10,23 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_Ledger_Get(t *testing.T) {
+func Test_Ledger_ListByUser(t *testing.T) {
 	type testSetup struct {
 		db *databaseMock
 	}
 
-	createTestData := func() usercontroller.GetLedgerRequest {
-		return usercontroller.GetLedgerRequest{
-			Actor:    domain.NewID(),
-			LedgerID: domain.NewID(),
-		}
+	createTestData := func() domain.ID {
+		return domain.NewID()
 	}
 
-	setup := func(t *testing.T, td usercontroller.GetLedgerRequest) (*usercontroller.Controller, testSetup) {
+	setup := func(t *testing.T, td domain.ID) (*usercontroller.Controller, testSetup) {
 		mocks := testSetup{
 			db: setupDatabaseMock(t),
 		}
 
-		mocks.db.repositories.ledger.GetFunc = func(ctx context.Context, id domain.ID) (*domain.Ledger, error) {
-			assert.Equal(t, td.LedgerID, id)
-			return &domain.Ledger{}, nil
+		mocks.db.repositories.ledger.ListByUserFunc = func(ctx context.Context, identity domain.ID) ([]domain.Ledger, error) {
+			assert.Equal(t, td, identity)
+			return []domain.Ledger{}, nil
 		}
 
 		controller := usercontroller.New(usercontroller.Dependencies{
@@ -45,7 +42,7 @@ func Test_Ledger_Get(t *testing.T) {
 
 		controller, _ := setup(t, td)
 
-		resp, err := controller.Ledgers().Get(ctx, td)
+		resp, err := controller.Ledgers().ListByUser(ctx, td)
 		require.NoError(t, err)
 		assert.NotNil(t, resp)
 	})
@@ -56,12 +53,11 @@ func Test_Ledger_Get(t *testing.T) {
 
 		controller, mocks := setup(t, td)
 
-		mocks.db.repositories.ledger.GetFunc = func(ctx context.Context, id domain.ID) (*domain.Ledger, error) {
-			assert.Equal(t, td.LedgerID, id)
+		mocks.db.repositories.ledger.ListByUserFunc = func(ctx context.Context, identity domain.ID) ([]domain.Ledger, error) {
 			return nil, assert.AnError
 		}
 
-		resp, err := controller.Ledgers().Get(ctx, td)
+		resp, err := controller.Ledgers().ListByUser(ctx, td)
 		require.ErrorIs(t, err, assert.AnError)
 		assert.Nil(t, resp)
 	})

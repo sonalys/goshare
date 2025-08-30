@@ -27,7 +27,7 @@ func Test_Ledger_Create(t *testing.T) {
 			db: setupDatabaseMock(t),
 		}
 
-		mocks.db.tx.user.FindFunc = func(ctx context.Context, id domain.ID) (*domain.User, error) {
+		mocks.db.tx.user.GetFunc = func(ctx context.Context, id domain.ID) (*domain.User, error) {
 			assert.Equal(t, td.Actor, id)
 			return &domain.User{}, nil
 		}
@@ -66,7 +66,7 @@ func Test_Ledger_Create(t *testing.T) {
 		td := createTestData()
 		controller, mocks := setup(t, td)
 
-		mocks.db.tx.user.FindFunc = func(ctx context.Context, id domain.ID) (*domain.User, error) {
+		mocks.db.tx.user.GetFunc = func(ctx context.Context, id domain.ID) (*domain.User, error) {
 			assert.Equal(t, td.Actor, id)
 			return nil, assert.AnError
 		}

@@ -26,7 +26,7 @@ func (c *Controller) Login(ctx context.Context, req LoginRequest) (*LoginRespons
 	ctx, span := c.tracer.Start(ctx, "login")
 	defer span.End()
 
-	user, err := c.db.User().FindByEmail(ctx, req.Email)
+	user, err := c.db.User().GetByEmail(ctx, req.Email)
 	if err != nil {
 		if !errors.Is(err, v1.ErrNotFound) {
 			return nil, err

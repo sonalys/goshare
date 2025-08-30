@@ -1,7 +1,7 @@
 -- name: CreateLedger :exec
 INSERT INTO ledgers (id,name,created_at,created_by) VALUES ($1,$2,$3,$4);
 
--- name: FindLedgerById :one
+-- name: GetLedgerById :one
 SELECT * FROM ledgers WHERE id = $1 FOR UPDATE;
 
 -- name: SaveLedgerMember :exec

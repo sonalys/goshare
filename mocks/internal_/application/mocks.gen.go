@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/sonalys/goshare/internal/application"
-	"github.com/sonalys/goshare/internal/application/pkg/v1"
+	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/domain"
 )
 
@@ -24,11 +24,11 @@ var _ application.LedgerQueries = &LedgerQueries{}
 //
 //		// make and configure a mocked application.LedgerQueries
 //		mockedLedgerQueries := &LedgerQueries{
-//			FindFunc: func(ctx context.Context, id domain.ID) (*domain.Ledger, error) {
-//				panic("mock out the Find method")
+//			GetFunc: func(ctx context.Context, id domain.ID) (*domain.Ledger, error) {
+//				panic("mock out the Get method")
 //			},
-//			GetByUserFunc: func(ctx context.Context, identity domain.ID) ([]domain.Ledger, error) {
-//				panic("mock out the GetByUser method")
+//			ListByUserFunc: func(ctx context.Context, identity domain.ID) ([]domain.Ledger, error) {
+//				panic("mock out the ListByUser method")
 //			},
 //		}
 //
@@ -37,37 +37,37 @@ var _ application.LedgerQueries = &LedgerQueries{}
 //
 //	}
 type LedgerQueries struct {
-	// FindFunc mocks the Find method.
-	FindFunc func(ctx context.Context, id domain.ID) (*domain.Ledger, error)
+	// GetFunc mocks the Get method.
+	GetFunc func(ctx context.Context, id domain.ID) (*domain.Ledger, error)
 
-	// GetByUserFunc mocks the GetByUser method.
-	GetByUserFunc func(ctx context.Context, identity domain.ID) ([]domain.Ledger, error)
+	// ListByUserFunc mocks the ListByUser method.
+	ListByUserFunc func(ctx context.Context, identity domain.ID) ([]domain.Ledger, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// Find holds details about calls to the Find method.
-		Find []struct {
+		// Get holds details about calls to the Get method.
+		Get []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// ID is the id argument value.
 			ID domain.ID
 		}
-		// GetByUser holds details about calls to the GetByUser method.
-		GetByUser []struct {
+		// ListByUser holds details about calls to the ListByUser method.
+		ListByUser []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// Identity is the identity argument value.
 			Identity domain.ID
 		}
 	}
-	lockFind      sync.RWMutex
-	lockGetByUser sync.RWMutex
+	lockGet        sync.RWMutex
+	lockListByUser sync.RWMutex
 }
 
-// Find calls FindFunc.
-func (mock *LedgerQueries) Find(ctx context.Context, id domain.ID) (*domain.Ledger, error) {
-	if mock.FindFunc == nil {
-		panic("LedgerQueries.FindFunc: method is nil but LedgerQueries.Find was just called")
+// Get calls GetFunc.
+func (mock *LedgerQueries) Get(ctx context.Context, id domain.ID) (*domain.Ledger, error) {
+	if mock.GetFunc == nil {
+		panic("LedgerQueries.GetFunc: method is nil but LedgerQueries.Get was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
@@ -76,17 +76,17 @@ func (mock *LedgerQueries) Find(ctx context.Context, id domain.ID) (*domain.Ledg
 		Ctx: ctx,
 		ID:  id,
 	}
-	mock.lockFind.Lock()
-	mock.calls.Find = append(mock.calls.Find, callInfo)
-	mock.lockFind.Unlock()
-	return mock.FindFunc(ctx, id)
+	mock.lockGet.Lock()
+	mock.calls.Get = append(mock.calls.Get, callInfo)
+	mock.lockGet.Unlock()
+	return mock.GetFunc(ctx, id)
 }
 
-// FindCalls gets all the calls that were made to Find.
+// GetCalls gets all the calls that were made to Get.
 // Check the length with:
 //
-//	len(mockedLedgerQueries.FindCalls())
-func (mock *LedgerQueries) FindCalls() []struct {
+//	len(mockedLedgerQueries.GetCalls())
+func (mock *LedgerQueries) GetCalls() []struct {
 	Ctx context.Context
 	ID  domain.ID
 } {
@@ -94,16 +94,16 @@ func (mock *LedgerQueries) FindCalls() []struct {
 		Ctx context.Context
 		ID  domain.ID
 	}
-	mock.lockFind.RLock()
-	calls = mock.calls.Find
-	mock.lockFind.RUnlock()
+	mock.lockGet.RLock()
+	calls = mock.calls.Get
+	mock.lockGet.RUnlock()
 	return calls
 }
 
-// GetByUser calls GetByUserFunc.
-func (mock *LedgerQueries) GetByUser(ctx context.Context, identity domain.ID) ([]domain.Ledger, error) {
-	if mock.GetByUserFunc == nil {
-		panic("LedgerQueries.GetByUserFunc: method is nil but LedgerQueries.GetByUser was just called")
+// ListByUser calls ListByUserFunc.
+func (mock *LedgerQueries) ListByUser(ctx context.Context, identity domain.ID) ([]domain.Ledger, error) {
+	if mock.ListByUserFunc == nil {
+		panic("LedgerQueries.ListByUserFunc: method is nil but LedgerQueries.ListByUser was just called")
 	}
 	callInfo := struct {
 		Ctx      context.Context
@@ -112,17 +112,17 @@ func (mock *LedgerQueries) GetByUser(ctx context.Context, identity domain.ID) ([
 		Ctx:      ctx,
 		Identity: identity,
 	}
-	mock.lockGetByUser.Lock()
-	mock.calls.GetByUser = append(mock.calls.GetByUser, callInfo)
-	mock.lockGetByUser.Unlock()
-	return mock.GetByUserFunc(ctx, identity)
+	mock.lockListByUser.Lock()
+	mock.calls.ListByUser = append(mock.calls.ListByUser, callInfo)
+	mock.lockListByUser.Unlock()
+	return mock.ListByUserFunc(ctx, identity)
 }
 
-// GetByUserCalls gets all the calls that were made to GetByUser.
+// ListByUserCalls gets all the calls that were made to ListByUser.
 // Check the length with:
 //
-//	len(mockedLedgerQueries.GetByUserCalls())
-func (mock *LedgerQueries) GetByUserCalls() []struct {
+//	len(mockedLedgerQueries.ListByUserCalls())
+func (mock *LedgerQueries) ListByUserCalls() []struct {
 	Ctx      context.Context
 	Identity domain.ID
 } {
@@ -130,9 +130,9 @@ func (mock *LedgerQueries) GetByUserCalls() []struct {
 		Ctx      context.Context
 		Identity domain.ID
 	}
-	mock.lockGetByUser.RLock()
-	calls = mock.calls.GetByUser
-	mock.lockGetByUser.RUnlock()
+	mock.lockListByUser.RLock()
+	calls = mock.calls.ListByUser
+	mock.lockListByUser.RUnlock()
 	return calls
 }
 
@@ -271,11 +271,11 @@ var _ application.LedgerRepository = &LedgerRepository{}
 //			CreateFunc: func(ctx context.Context, ledger *domain.Ledger) error {
 //				panic("mock out the Create method")
 //			},
-//			FindFunc: func(ctx context.Context, id domain.ID) (*domain.Ledger, error) {
-//				panic("mock out the Find method")
+//			GetFunc: func(ctx context.Context, id domain.ID) (*domain.Ledger, error) {
+//				panic("mock out the Get method")
 //			},
-//			GetByUserFunc: func(ctx context.Context, identity domain.ID) ([]domain.Ledger, error) {
-//				panic("mock out the GetByUser method")
+//			ListByUserFunc: func(ctx context.Context, identity domain.ID) ([]domain.Ledger, error) {
+//				panic("mock out the ListByUser method")
 //			},
 //			UpdateFunc: func(ctx context.Context, ledger *domain.Ledger) error {
 //				panic("mock out the Update method")
@@ -290,11 +290,11 @@ type LedgerRepository struct {
 	// CreateFunc mocks the Create method.
 	CreateFunc func(ctx context.Context, ledger *domain.Ledger) error
 
-	// FindFunc mocks the Find method.
-	FindFunc func(ctx context.Context, id domain.ID) (*domain.Ledger, error)
+	// GetFunc mocks the Get method.
+	GetFunc func(ctx context.Context, id domain.ID) (*domain.Ledger, error)
 
-	// GetByUserFunc mocks the GetByUser method.
-	GetByUserFunc func(ctx context.Context, identity domain.ID) ([]domain.Ledger, error)
+	// ListByUserFunc mocks the ListByUser method.
+	ListByUserFunc func(ctx context.Context, identity domain.ID) ([]domain.Ledger, error)
 
 	// UpdateFunc mocks the Update method.
 	UpdateFunc func(ctx context.Context, ledger *domain.Ledger) error
@@ -308,15 +308,15 @@ type LedgerRepository struct {
 			// Ledger is the ledger argument value.
 			Ledger *domain.Ledger
 		}
-		// Find holds details about calls to the Find method.
-		Find []struct {
+		// Get holds details about calls to the Get method.
+		Get []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// ID is the id argument value.
 			ID domain.ID
 		}
-		// GetByUser holds details about calls to the GetByUser method.
-		GetByUser []struct {
+		// ListByUser holds details about calls to the ListByUser method.
+		ListByUser []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// Identity is the identity argument value.
@@ -330,10 +330,10 @@ type LedgerRepository struct {
 			Ledger *domain.Ledger
 		}
 	}
-	lockCreate    sync.RWMutex
-	lockFind      sync.RWMutex
-	lockGetByUser sync.RWMutex
-	lockUpdate    sync.RWMutex
+	lockCreate     sync.RWMutex
+	lockGet        sync.RWMutex
+	lockListByUser sync.RWMutex
+	lockUpdate     sync.RWMutex
 }
 
 // Create calls CreateFunc.
@@ -372,10 +372,10 @@ func (mock *LedgerRepository) CreateCalls() []struct {
 	return calls
 }
 
-// Find calls FindFunc.
-func (mock *LedgerRepository) Find(ctx context.Context, id domain.ID) (*domain.Ledger, error) {
-	if mock.FindFunc == nil {
-		panic("LedgerRepository.FindFunc: method is nil but LedgerRepository.Find was just called")
+// Get calls GetFunc.
+func (mock *LedgerRepository) Get(ctx context.Context, id domain.ID) (*domain.Ledger, error) {
+	if mock.GetFunc == nil {
+		panic("LedgerRepository.GetFunc: method is nil but LedgerRepository.Get was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
@@ -384,17 +384,17 @@ func (mock *LedgerRepository) Find(ctx context.Context, id domain.ID) (*domain.L
 		Ctx: ctx,
 		ID:  id,
 	}
-	mock.lockFind.Lock()
-	mock.calls.Find = append(mock.calls.Find, callInfo)
-	mock.lockFind.Unlock()
-	return mock.FindFunc(ctx, id)
+	mock.lockGet.Lock()
+	mock.calls.Get = append(mock.calls.Get, callInfo)
+	mock.lockGet.Unlock()
+	return mock.GetFunc(ctx, id)
 }
 
-// FindCalls gets all the calls that were made to Find.
+// GetCalls gets all the calls that were made to Get.
 // Check the length with:
 //
-//	len(mockedLedgerRepository.FindCalls())
-func (mock *LedgerRepository) FindCalls() []struct {
+//	len(mockedLedgerRepository.GetCalls())
+func (mock *LedgerRepository) GetCalls() []struct {
 	Ctx context.Context
 	ID  domain.ID
 } {
@@ -402,16 +402,16 @@ func (mock *LedgerRepository) FindCalls() []struct {
 		Ctx context.Context
 		ID  domain.ID
 	}
-	mock.lockFind.RLock()
-	calls = mock.calls.Find
-	mock.lockFind.RUnlock()
+	mock.lockGet.RLock()
+	calls = mock.calls.Get
+	mock.lockGet.RUnlock()
 	return calls
 }
 
-// GetByUser calls GetByUserFunc.
-func (mock *LedgerRepository) GetByUser(ctx context.Context, identity domain.ID) ([]domain.Ledger, error) {
-	if mock.GetByUserFunc == nil {
-		panic("LedgerRepository.GetByUserFunc: method is nil but LedgerRepository.GetByUser was just called")
+// ListByUser calls ListByUserFunc.
+func (mock *LedgerRepository) ListByUser(ctx context.Context, identity domain.ID) ([]domain.Ledger, error) {
+	if mock.ListByUserFunc == nil {
+		panic("LedgerRepository.ListByUserFunc: method is nil but LedgerRepository.ListByUser was just called")
 	}
 	callInfo := struct {
 		Ctx      context.Context
@@ -420,17 +420,17 @@ func (mock *LedgerRepository) GetByUser(ctx context.Context, identity domain.ID)
 		Ctx:      ctx,
 		Identity: identity,
 	}
-	mock.lockGetByUser.Lock()
-	mock.calls.GetByUser = append(mock.calls.GetByUser, callInfo)
-	mock.lockGetByUser.Unlock()
-	return mock.GetByUserFunc(ctx, identity)
+	mock.lockListByUser.Lock()
+	mock.calls.ListByUser = append(mock.calls.ListByUser, callInfo)
+	mock.lockListByUser.Unlock()
+	return mock.ListByUserFunc(ctx, identity)
 }
 
-// GetByUserCalls gets all the calls that were made to GetByUser.
+// ListByUserCalls gets all the calls that were made to ListByUser.
 // Check the length with:
 //
-//	len(mockedLedgerRepository.GetByUserCalls())
-func (mock *LedgerRepository) GetByUserCalls() []struct {
+//	len(mockedLedgerRepository.ListByUserCalls())
+func (mock *LedgerRepository) ListByUserCalls() []struct {
 	Ctx      context.Context
 	Identity domain.ID
 } {
@@ -438,9 +438,9 @@ func (mock *LedgerRepository) GetByUserCalls() []struct {
 		Ctx      context.Context
 		Identity domain.ID
 	}
-	mock.lockGetByUser.RLock()
-	calls = mock.calls.GetByUser
-	mock.lockGetByUser.RUnlock()
+	mock.lockListByUser.RLock()
+	calls = mock.calls.ListByUser
+	mock.lockListByUser.RUnlock()
 	return calls
 }
 
@@ -490,11 +490,11 @@ var _ application.UserQueries = &UserQueries{}
 //
 //		// make and configure a mocked application.UserQueries
 //		mockedUserQueries := &UserQueries{
-//			FindFunc: func(ctx context.Context, id domain.ID) (*domain.User, error) {
-//				panic("mock out the Find method")
+//			GetFunc: func(ctx context.Context, id domain.ID) (*domain.User, error) {
+//				panic("mock out the Get method")
 //			},
-//			FindByEmailFunc: func(ctx context.Context, email string) (*domain.User, error) {
-//				panic("mock out the FindByEmail method")
+//			GetByEmailFunc: func(ctx context.Context, email string) (*domain.User, error) {
+//				panic("mock out the GetByEmail method")
 //			},
 //			ListByEmailFunc: func(ctx context.Context, emails []string) ([]domain.User, error) {
 //				panic("mock out the ListByEmail method")
@@ -506,26 +506,26 @@ var _ application.UserQueries = &UserQueries{}
 //
 //	}
 type UserQueries struct {
-	// FindFunc mocks the Find method.
-	FindFunc func(ctx context.Context, id domain.ID) (*domain.User, error)
+	// GetFunc mocks the Get method.
+	GetFunc func(ctx context.Context, id domain.ID) (*domain.User, error)
 
-	// FindByEmailFunc mocks the FindByEmail method.
-	FindByEmailFunc func(ctx context.Context, email string) (*domain.User, error)
+	// GetByEmailFunc mocks the GetByEmail method.
+	GetByEmailFunc func(ctx context.Context, email string) (*domain.User, error)
 
 	// ListByEmailFunc mocks the ListByEmail method.
 	ListByEmailFunc func(ctx context.Context, emails []string) ([]domain.User, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// Find holds details about calls to the Find method.
-		Find []struct {
+		// Get holds details about calls to the Get method.
+		Get []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// ID is the id argument value.
 			ID domain.ID
 		}
-		// FindByEmail holds details about calls to the FindByEmail method.
-		FindByEmail []struct {
+		// GetByEmail holds details about calls to the GetByEmail method.
+		GetByEmail []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// Email is the email argument value.
@@ -539,15 +539,15 @@ type UserQueries struct {
 			Emails []string
 		}
 	}
-	lockFind        sync.RWMutex
-	lockFindByEmail sync.RWMutex
+	lockGet         sync.RWMutex
+	lockGetByEmail  sync.RWMutex
 	lockListByEmail sync.RWMutex
 }
 
-// Find calls FindFunc.
-func (mock *UserQueries) Find(ctx context.Context, id domain.ID) (*domain.User, error) {
-	if mock.FindFunc == nil {
-		panic("UserQueries.FindFunc: method is nil but UserQueries.Find was just called")
+// Get calls GetFunc.
+func (mock *UserQueries) Get(ctx context.Context, id domain.ID) (*domain.User, error) {
+	if mock.GetFunc == nil {
+		panic("UserQueries.GetFunc: method is nil but UserQueries.Get was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
@@ -556,17 +556,17 @@ func (mock *UserQueries) Find(ctx context.Context, id domain.ID) (*domain.User, 
 		Ctx: ctx,
 		ID:  id,
 	}
-	mock.lockFind.Lock()
-	mock.calls.Find = append(mock.calls.Find, callInfo)
-	mock.lockFind.Unlock()
-	return mock.FindFunc(ctx, id)
+	mock.lockGet.Lock()
+	mock.calls.Get = append(mock.calls.Get, callInfo)
+	mock.lockGet.Unlock()
+	return mock.GetFunc(ctx, id)
 }
 
-// FindCalls gets all the calls that were made to Find.
+// GetCalls gets all the calls that were made to Get.
 // Check the length with:
 //
-//	len(mockedUserQueries.FindCalls())
-func (mock *UserQueries) FindCalls() []struct {
+//	len(mockedUserQueries.GetCalls())
+func (mock *UserQueries) GetCalls() []struct {
 	Ctx context.Context
 	ID  domain.ID
 } {
@@ -574,16 +574,16 @@ func (mock *UserQueries) FindCalls() []struct {
 		Ctx context.Context
 		ID  domain.ID
 	}
-	mock.lockFind.RLock()
-	calls = mock.calls.Find
-	mock.lockFind.RUnlock()
+	mock.lockGet.RLock()
+	calls = mock.calls.Get
+	mock.lockGet.RUnlock()
 	return calls
 }
 
-// FindByEmail calls FindByEmailFunc.
-func (mock *UserQueries) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
-	if mock.FindByEmailFunc == nil {
-		panic("UserQueries.FindByEmailFunc: method is nil but UserQueries.FindByEmail was just called")
+// GetByEmail calls GetByEmailFunc.
+func (mock *UserQueries) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
+	if mock.GetByEmailFunc == nil {
+		panic("UserQueries.GetByEmailFunc: method is nil but UserQueries.GetByEmail was just called")
 	}
 	callInfo := struct {
 		Ctx   context.Context
@@ -592,17 +592,17 @@ func (mock *UserQueries) FindByEmail(ctx context.Context, email string) (*domain
 		Ctx:   ctx,
 		Email: email,
 	}
-	mock.lockFindByEmail.Lock()
-	mock.calls.FindByEmail = append(mock.calls.FindByEmail, callInfo)
-	mock.lockFindByEmail.Unlock()
-	return mock.FindByEmailFunc(ctx, email)
+	mock.lockGetByEmail.Lock()
+	mock.calls.GetByEmail = append(mock.calls.GetByEmail, callInfo)
+	mock.lockGetByEmail.Unlock()
+	return mock.GetByEmailFunc(ctx, email)
 }
 
-// FindByEmailCalls gets all the calls that were made to FindByEmail.
+// GetByEmailCalls gets all the calls that were made to GetByEmail.
 // Check the length with:
 //
-//	len(mockedUserQueries.FindByEmailCalls())
-func (mock *UserQueries) FindByEmailCalls() []struct {
+//	len(mockedUserQueries.GetByEmailCalls())
+func (mock *UserQueries) GetByEmailCalls() []struct {
 	Ctx   context.Context
 	Email string
 } {
@@ -610,9 +610,9 @@ func (mock *UserQueries) FindByEmailCalls() []struct {
 		Ctx   context.Context
 		Email string
 	}
-	mock.lockFindByEmail.RLock()
-	calls = mock.calls.FindByEmail
-	mock.lockFindByEmail.RUnlock()
+	mock.lockGetByEmail.RLock()
+	calls = mock.calls.GetByEmail
+	mock.lockGetByEmail.RUnlock()
 	return calls
 }
 
@@ -734,11 +734,11 @@ var _ application.UserRepository = &UserRepository{}
 //
 //		// make and configure a mocked application.UserRepository
 //		mockedUserRepository := &UserRepository{
-//			FindFunc: func(ctx context.Context, id domain.ID) (*domain.User, error) {
-//				panic("mock out the Find method")
+//			GetFunc: func(ctx context.Context, id domain.ID) (*domain.User, error) {
+//				panic("mock out the Get method")
 //			},
-//			FindByEmailFunc: func(ctx context.Context, email string) (*domain.User, error) {
-//				panic("mock out the FindByEmail method")
+//			GetByEmailFunc: func(ctx context.Context, email string) (*domain.User, error) {
+//				panic("mock out the GetByEmail method")
 //			},
 //			ListByEmailFunc: func(ctx context.Context, emails []string) ([]domain.User, error) {
 //				panic("mock out the ListByEmail method")
@@ -753,11 +753,11 @@ var _ application.UserRepository = &UserRepository{}
 //
 //	}
 type UserRepository struct {
-	// FindFunc mocks the Find method.
-	FindFunc func(ctx context.Context, id domain.ID) (*domain.User, error)
+	// GetFunc mocks the Get method.
+	GetFunc func(ctx context.Context, id domain.ID) (*domain.User, error)
 
-	// FindByEmailFunc mocks the FindByEmail method.
-	FindByEmailFunc func(ctx context.Context, email string) (*domain.User, error)
+	// GetByEmailFunc mocks the GetByEmail method.
+	GetByEmailFunc func(ctx context.Context, email string) (*domain.User, error)
 
 	// ListByEmailFunc mocks the ListByEmail method.
 	ListByEmailFunc func(ctx context.Context, emails []string) ([]domain.User, error)
@@ -767,15 +767,15 @@ type UserRepository struct {
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// Find holds details about calls to the Find method.
-		Find []struct {
+		// Get holds details about calls to the Get method.
+		Get []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// ID is the id argument value.
 			ID domain.ID
 		}
-		// FindByEmail holds details about calls to the FindByEmail method.
-		FindByEmail []struct {
+		// GetByEmail holds details about calls to the GetByEmail method.
+		GetByEmail []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// Email is the email argument value.
@@ -796,16 +796,16 @@ type UserRepository struct {
 			User *domain.User
 		}
 	}
-	lockFind        sync.RWMutex
-	lockFindByEmail sync.RWMutex
+	lockGet         sync.RWMutex
+	lockGetByEmail  sync.RWMutex
 	lockListByEmail sync.RWMutex
 	lockSave        sync.RWMutex
 }
 
-// Find calls FindFunc.
-func (mock *UserRepository) Find(ctx context.Context, id domain.ID) (*domain.User, error) {
-	if mock.FindFunc == nil {
-		panic("UserRepository.FindFunc: method is nil but UserRepository.Find was just called")
+// Get calls GetFunc.
+func (mock *UserRepository) Get(ctx context.Context, id domain.ID) (*domain.User, error) {
+	if mock.GetFunc == nil {
+		panic("UserRepository.GetFunc: method is nil but UserRepository.Get was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
@@ -814,17 +814,17 @@ func (mock *UserRepository) Find(ctx context.Context, id domain.ID) (*domain.Use
 		Ctx: ctx,
 		ID:  id,
 	}
-	mock.lockFind.Lock()
-	mock.calls.Find = append(mock.calls.Find, callInfo)
-	mock.lockFind.Unlock()
-	return mock.FindFunc(ctx, id)
+	mock.lockGet.Lock()
+	mock.calls.Get = append(mock.calls.Get, callInfo)
+	mock.lockGet.Unlock()
+	return mock.GetFunc(ctx, id)
 }
 
-// FindCalls gets all the calls that were made to Find.
+// GetCalls gets all the calls that were made to Get.
 // Check the length with:
 //
-//	len(mockedUserRepository.FindCalls())
-func (mock *UserRepository) FindCalls() []struct {
+//	len(mockedUserRepository.GetCalls())
+func (mock *UserRepository) GetCalls() []struct {
 	Ctx context.Context
 	ID  domain.ID
 } {
@@ -832,16 +832,16 @@ func (mock *UserRepository) FindCalls() []struct {
 		Ctx context.Context
 		ID  domain.ID
 	}
-	mock.lockFind.RLock()
-	calls = mock.calls.Find
-	mock.lockFind.RUnlock()
+	mock.lockGet.RLock()
+	calls = mock.calls.Get
+	mock.lockGet.RUnlock()
 	return calls
 }
 
-// FindByEmail calls FindByEmailFunc.
-func (mock *UserRepository) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
-	if mock.FindByEmailFunc == nil {
-		panic("UserRepository.FindByEmailFunc: method is nil but UserRepository.FindByEmail was just called")
+// GetByEmail calls GetByEmailFunc.
+func (mock *UserRepository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
+	if mock.GetByEmailFunc == nil {
+		panic("UserRepository.GetByEmailFunc: method is nil but UserRepository.GetByEmail was just called")
 	}
 	callInfo := struct {
 		Ctx   context.Context
@@ -850,17 +850,17 @@ func (mock *UserRepository) FindByEmail(ctx context.Context, email string) (*dom
 		Ctx:   ctx,
 		Email: email,
 	}
-	mock.lockFindByEmail.Lock()
-	mock.calls.FindByEmail = append(mock.calls.FindByEmail, callInfo)
-	mock.lockFindByEmail.Unlock()
-	return mock.FindByEmailFunc(ctx, email)
+	mock.lockGetByEmail.Lock()
+	mock.calls.GetByEmail = append(mock.calls.GetByEmail, callInfo)
+	mock.lockGetByEmail.Unlock()
+	return mock.GetByEmailFunc(ctx, email)
 }
 
-// FindByEmailCalls gets all the calls that were made to FindByEmail.
+// GetByEmailCalls gets all the calls that were made to GetByEmail.
 // Check the length with:
 //
-//	len(mockedUserRepository.FindByEmailCalls())
-func (mock *UserRepository) FindByEmailCalls() []struct {
+//	len(mockedUserRepository.GetByEmailCalls())
+func (mock *UserRepository) GetByEmailCalls() []struct {
 	Ctx   context.Context
 	Email string
 } {
@@ -868,9 +868,9 @@ func (mock *UserRepository) FindByEmailCalls() []struct {
 		Ctx   context.Context
 		Email string
 	}
-	mock.lockFindByEmail.RLock()
-	calls = mock.calls.FindByEmail
-	mock.lockFindByEmail.RUnlock()
+	mock.lockGetByEmail.RLock()
+	calls = mock.calls.GetByEmail
+	mock.lockGetByEmail.RUnlock()
 	return calls
 }
 
@@ -956,11 +956,11 @@ var _ application.ExpenseQueries = &ExpenseQueries{}
 //
 //		// make and configure a mocked application.ExpenseQueries
 //		mockedExpenseQueries := &ExpenseQueries{
-//			FindFunc: func(ctx context.Context, id domain.ID) (*domain.Expense, error) {
-//				panic("mock out the Find method")
+//			GetFunc: func(ctx context.Context, id domain.ID) (*domain.Expense, error) {
+//				panic("mock out the Get method")
 //			},
-//			GetByLedgerFunc: func(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
-//				panic("mock out the GetByLedger method")
+//			ListByLedgerFunc: func(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
+//				panic("mock out the ListByLedger method")
 //			},
 //		}
 //
@@ -969,23 +969,23 @@ var _ application.ExpenseQueries = &ExpenseQueries{}
 //
 //	}
 type ExpenseQueries struct {
-	// FindFunc mocks the Find method.
-	FindFunc func(ctx context.Context, id domain.ID) (*domain.Expense, error)
+	// GetFunc mocks the Get method.
+	GetFunc func(ctx context.Context, id domain.ID) (*domain.Expense, error)
 
-	// GetByLedgerFunc mocks the GetByLedger method.
-	GetByLedgerFunc func(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error)
+	// ListByLedgerFunc mocks the ListByLedger method.
+	ListByLedgerFunc func(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// Find holds details about calls to the Find method.
-		Find []struct {
+		// Get holds details about calls to the Get method.
+		Get []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// ID is the id argument value.
 			ID domain.ID
 		}
-		// GetByLedger holds details about calls to the GetByLedger method.
-		GetByLedger []struct {
+		// ListByLedger holds details about calls to the ListByLedger method.
+		ListByLedger []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// LedgerID is the ledgerID argument value.
@@ -996,14 +996,14 @@ type ExpenseQueries struct {
 			Limit int32
 		}
 	}
-	lockFind        sync.RWMutex
-	lockGetByLedger sync.RWMutex
+	lockGet          sync.RWMutex
+	lockListByLedger sync.RWMutex
 }
 
-// Find calls FindFunc.
-func (mock *ExpenseQueries) Find(ctx context.Context, id domain.ID) (*domain.Expense, error) {
-	if mock.FindFunc == nil {
-		panic("ExpenseQueries.FindFunc: method is nil but ExpenseQueries.Find was just called")
+// Get calls GetFunc.
+func (mock *ExpenseQueries) Get(ctx context.Context, id domain.ID) (*domain.Expense, error) {
+	if mock.GetFunc == nil {
+		panic("ExpenseQueries.GetFunc: method is nil but ExpenseQueries.Get was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
@@ -1012,17 +1012,17 @@ func (mock *ExpenseQueries) Find(ctx context.Context, id domain.ID) (*domain.Exp
 		Ctx: ctx,
 		ID:  id,
 	}
-	mock.lockFind.Lock()
-	mock.calls.Find = append(mock.calls.Find, callInfo)
-	mock.lockFind.Unlock()
-	return mock.FindFunc(ctx, id)
+	mock.lockGet.Lock()
+	mock.calls.Get = append(mock.calls.Get, callInfo)
+	mock.lockGet.Unlock()
+	return mock.GetFunc(ctx, id)
 }
 
-// FindCalls gets all the calls that were made to Find.
+// GetCalls gets all the calls that were made to Get.
 // Check the length with:
 //
-//	len(mockedExpenseQueries.FindCalls())
-func (mock *ExpenseQueries) FindCalls() []struct {
+//	len(mockedExpenseQueries.GetCalls())
+func (mock *ExpenseQueries) GetCalls() []struct {
 	Ctx context.Context
 	ID  domain.ID
 } {
@@ -1030,16 +1030,16 @@ func (mock *ExpenseQueries) FindCalls() []struct {
 		Ctx context.Context
 		ID  domain.ID
 	}
-	mock.lockFind.RLock()
-	calls = mock.calls.Find
-	mock.lockFind.RUnlock()
+	mock.lockGet.RLock()
+	calls = mock.calls.Get
+	mock.lockGet.RUnlock()
 	return calls
 }
 
-// GetByLedger calls GetByLedgerFunc.
-func (mock *ExpenseQueries) GetByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
-	if mock.GetByLedgerFunc == nil {
-		panic("ExpenseQueries.GetByLedgerFunc: method is nil but ExpenseQueries.GetByLedger was just called")
+// ListByLedger calls ListByLedgerFunc.
+func (mock *ExpenseQueries) ListByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
+	if mock.ListByLedgerFunc == nil {
+		panic("ExpenseQueries.ListByLedgerFunc: method is nil but ExpenseQueries.ListByLedger was just called")
 	}
 	callInfo := struct {
 		Ctx      context.Context
@@ -1052,17 +1052,17 @@ func (mock *ExpenseQueries) GetByLedger(ctx context.Context, ledgerID domain.ID,
 		Cursor:   cursor,
 		Limit:    limit,
 	}
-	mock.lockGetByLedger.Lock()
-	mock.calls.GetByLedger = append(mock.calls.GetByLedger, callInfo)
-	mock.lockGetByLedger.Unlock()
-	return mock.GetByLedgerFunc(ctx, ledgerID, cursor, limit)
+	mock.lockListByLedger.Lock()
+	mock.calls.ListByLedger = append(mock.calls.ListByLedger, callInfo)
+	mock.lockListByLedger.Unlock()
+	return mock.ListByLedgerFunc(ctx, ledgerID, cursor, limit)
 }
 
-// GetByLedgerCalls gets all the calls that were made to GetByLedger.
+// ListByLedgerCalls gets all the calls that were made to ListByLedger.
 // Check the length with:
 //
-//	len(mockedExpenseQueries.GetByLedgerCalls())
-func (mock *ExpenseQueries) GetByLedgerCalls() []struct {
+//	len(mockedExpenseQueries.ListByLedgerCalls())
+func (mock *ExpenseQueries) ListByLedgerCalls() []struct {
 	Ctx      context.Context
 	LedgerID domain.ID
 	Cursor   time.Time
@@ -1074,9 +1074,9 @@ func (mock *ExpenseQueries) GetByLedgerCalls() []struct {
 		Cursor   time.Time
 		Limit    int32
 	}
-	mock.lockGetByLedger.RLock()
-	calls = mock.calls.GetByLedger
-	mock.lockGetByLedger.RUnlock()
+	mock.lockListByLedger.RLock()
+	calls = mock.calls.ListByLedger
+	mock.lockListByLedger.RUnlock()
 	return calls
 }
 
@@ -1221,11 +1221,11 @@ var _ application.ExpenseRepository = &ExpenseRepository{}
 //			CreateFunc: func(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error {
 //				panic("mock out the Create method")
 //			},
-//			FindFunc: func(ctx context.Context, id domain.ID) (*domain.Expense, error) {
-//				panic("mock out the Find method")
+//			GetFunc: func(ctx context.Context, id domain.ID) (*domain.Expense, error) {
+//				panic("mock out the Get method")
 //			},
-//			GetByLedgerFunc: func(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
-//				panic("mock out the GetByLedger method")
+//			ListByLedgerFunc: func(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
+//				panic("mock out the ListByLedger method")
 //			},
 //			UpdateFunc: func(ctx context.Context, expense *domain.Expense) error {
 //				panic("mock out the Update method")
@@ -1240,11 +1240,11 @@ type ExpenseRepository struct {
 	// CreateFunc mocks the Create method.
 	CreateFunc func(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error
 
-	// FindFunc mocks the Find method.
-	FindFunc func(ctx context.Context, id domain.ID) (*domain.Expense, error)
+	// GetFunc mocks the Get method.
+	GetFunc func(ctx context.Context, id domain.ID) (*domain.Expense, error)
 
-	// GetByLedgerFunc mocks the GetByLedger method.
-	GetByLedgerFunc func(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error)
+	// ListByLedgerFunc mocks the ListByLedger method.
+	ListByLedgerFunc func(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error)
 
 	// UpdateFunc mocks the Update method.
 	UpdateFunc func(ctx context.Context, expense *domain.Expense) error
@@ -1260,15 +1260,15 @@ type ExpenseRepository struct {
 			// Expense is the expense argument value.
 			Expense *domain.Expense
 		}
-		// Find holds details about calls to the Find method.
-		Find []struct {
+		// Get holds details about calls to the Get method.
+		Get []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// ID is the id argument value.
 			ID domain.ID
 		}
-		// GetByLedger holds details about calls to the GetByLedger method.
-		GetByLedger []struct {
+		// ListByLedger holds details about calls to the ListByLedger method.
+		ListByLedger []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// LedgerID is the ledgerID argument value.
@@ -1286,10 +1286,10 @@ type ExpenseRepository struct {
 			Expense *domain.Expense
 		}
 	}
-	lockCreate      sync.RWMutex
-	lockFind        sync.RWMutex
-	lockGetByLedger sync.RWMutex
-	lockUpdate      sync.RWMutex
+	lockCreate       sync.RWMutex
+	lockGet          sync.RWMutex
+	lockListByLedger sync.RWMutex
+	lockUpdate       sync.RWMutex
 }
 
 // Create calls CreateFunc.
@@ -1332,10 +1332,10 @@ func (mock *ExpenseRepository) CreateCalls() []struct {
 	return calls
 }
 
-// Find calls FindFunc.
-func (mock *ExpenseRepository) Find(ctx context.Context, id domain.ID) (*domain.Expense, error) {
-	if mock.FindFunc == nil {
-		panic("ExpenseRepository.FindFunc: method is nil but ExpenseRepository.Find was just called")
+// Get calls GetFunc.
+func (mock *ExpenseRepository) Get(ctx context.Context, id domain.ID) (*domain.Expense, error) {
+	if mock.GetFunc == nil {
+		panic("ExpenseRepository.GetFunc: method is nil but ExpenseRepository.Get was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
@@ -1344,17 +1344,17 @@ func (mock *ExpenseRepository) Find(ctx context.Context, id domain.ID) (*domain.
 		Ctx: ctx,
 		ID:  id,
 	}
-	mock.lockFind.Lock()
-	mock.calls.Find = append(mock.calls.Find, callInfo)
-	mock.lockFind.Unlock()
-	return mock.FindFunc(ctx, id)
+	mock.lockGet.Lock()
+	mock.calls.Get = append(mock.calls.Get, callInfo)
+	mock.lockGet.Unlock()
+	return mock.GetFunc(ctx, id)
 }
 
-// FindCalls gets all the calls that were made to Find.
+// GetCalls gets all the calls that were made to Get.
 // Check the length with:
 //
-//	len(mockedExpenseRepository.FindCalls())
-func (mock *ExpenseRepository) FindCalls() []struct {
+//	len(mockedExpenseRepository.GetCalls())
+func (mock *ExpenseRepository) GetCalls() []struct {
 	Ctx context.Context
 	ID  domain.ID
 } {
@@ -1362,16 +1362,16 @@ func (mock *ExpenseRepository) FindCalls() []struct {
 		Ctx context.Context
 		ID  domain.ID
 	}
-	mock.lockFind.RLock()
-	calls = mock.calls.Find
-	mock.lockFind.RUnlock()
+	mock.lockGet.RLock()
+	calls = mock.calls.Get
+	mock.lockGet.RUnlock()
 	return calls
 }
 
-// GetByLedger calls GetByLedgerFunc.
-func (mock *ExpenseRepository) GetByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
-	if mock.GetByLedgerFunc == nil {
-		panic("ExpenseRepository.GetByLedgerFunc: method is nil but ExpenseRepository.GetByLedger was just called")
+// ListByLedger calls ListByLedgerFunc.
+func (mock *ExpenseRepository) ListByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
+	if mock.ListByLedgerFunc == nil {
+		panic("ExpenseRepository.ListByLedgerFunc: method is nil but ExpenseRepository.ListByLedger was just called")
 	}
 	callInfo := struct {
 		Ctx      context.Context
@@ -1384,17 +1384,17 @@ func (mock *ExpenseRepository) GetByLedger(ctx context.Context, ledgerID domain.
 		Cursor:   cursor,
 		Limit:    limit,
 	}
-	mock.lockGetByLedger.Lock()
-	mock.calls.GetByLedger = append(mock.calls.GetByLedger, callInfo)
-	mock.lockGetByLedger.Unlock()
-	return mock.GetByLedgerFunc(ctx, ledgerID, cursor, limit)
+	mock.lockListByLedger.Lock()
+	mock.calls.ListByLedger = append(mock.calls.ListByLedger, callInfo)
+	mock.lockListByLedger.Unlock()
+	return mock.ListByLedgerFunc(ctx, ledgerID, cursor, limit)
 }
 
-// GetByLedgerCalls gets all the calls that were made to GetByLedger.
+// ListByLedgerCalls gets all the calls that were made to ListByLedger.
 // Check the length with:
 //
-//	len(mockedExpenseRepository.GetByLedgerCalls())
-func (mock *ExpenseRepository) GetByLedgerCalls() []struct {
+//	len(mockedExpenseRepository.ListByLedgerCalls())
+func (mock *ExpenseRepository) ListByLedgerCalls() []struct {
 	Ctx      context.Context
 	LedgerID domain.ID
 	Cursor   time.Time
@@ -1406,9 +1406,9 @@ func (mock *ExpenseRepository) GetByLedgerCalls() []struct {
 		Cursor   time.Time
 		Limit    int32
 	}
-	mock.lockGetByLedger.RLock()
-	calls = mock.calls.GetByLedger
-	mock.lockGetByLedger.RUnlock()
+	mock.lockListByLedger.RLock()
+	calls = mock.calls.ListByLedger
+	mock.lockListByLedger.RUnlock()
 	return calls
 }
 

@@ -31,12 +31,12 @@ func (c *recordsController) Create(ctx context.Context, req CreateExpenseRecordR
 	slog.Debug(ctx, "creating expense record", slog.With("req", req))
 
 	err = c.db.Transaction(ctx, func(db application.Repositories) error {
-		ledger, err := db.Ledger().Find(ctx, req.LedgerID)
+		ledger, err := db.Ledger().Get(ctx, req.LedgerID)
 		if err != nil {
 			return fmt.Errorf("fetching ledger: %w", err)
 		}
 
-		expense, err := db.Expense().Find(ctx, req.ExpenseID)
+		expense, err := db.Expense().Get(ctx, req.ExpenseID)
 		if err != nil {
 			return fmt.Errorf("fetching expense: %w", err)
 		}

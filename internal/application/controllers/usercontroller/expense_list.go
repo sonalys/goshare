@@ -36,7 +36,7 @@ func (c *expenseController) List(ctx context.Context, req ListExpensesRequest) (
 
 	req.Limit = max(1, req.Limit)
 
-	expenses, err := c.db.Expense().GetByLedger(ctx, req.LedgerID, req.Cursor, req.Limit+1)
+	expenses, err := c.db.Expense().ListByLedger(ctx, req.LedgerID, req.Cursor, req.Limit+1)
 	if err != nil {
 		return nil, slog.ErrorReturn(ctx, "listing expenses", err)
 	}

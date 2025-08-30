@@ -20,5 +20,5 @@ func (a *API) LedgerMemberAdd(ctx context.Context, req *handlers.LedgerMemberAdd
 		Emails:   req.Emails,
 	}
 
-	return a.UserController.AddMembers(ctx, apiParams)
+	return a.UserController.MembersAdd(ctx, apiParams)
 }

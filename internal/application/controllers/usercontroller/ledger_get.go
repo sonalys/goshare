@@ -23,7 +23,7 @@ func (c *ledgerController) Get(ctx context.Context, req GetLedgerRequest) (*doma
 	)
 	defer span.End()
 
-	ledger, err := c.db.Ledger().Find(ctx, req.LedgerID)
+	ledger, err := c.db.Ledger().Get(ctx, req.LedgerID)
 	if err != nil {
 		return nil, slog.ErrorReturn(ctx, "listing ledgers", err)
 	}

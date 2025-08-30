@@ -64,8 +64,8 @@ func (r *ExpenseRepository) Create(ctx context.Context, ledgerID domain.ID, expe
 	})
 }
 
-func (r *ExpenseRepository) Find(ctx context.Context, id domain.ID) (*domain.Expense, error) {
-	expense, err := r.client.queries().FindExpenseById(ctx, id)
+func (r *ExpenseRepository) Get(ctx context.Context, id domain.ID) (*domain.Expense, error) {
+	expense, err := r.client.queries().GetExpenseById(ctx, id)
 	if err != nil {
 		return nil, mapLedgerError(err)
 	}
@@ -78,7 +78,7 @@ func (r *ExpenseRepository) Find(ctx context.Context, id domain.ID) (*domain.Exp
 	return mappers.NewExpense(&expense, records)
 }
 
-func (r *ExpenseRepository) GetByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
+func (r *ExpenseRepository) ListByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
 	expenses, err := r.client.queries().GetLedgerExpenses(ctx, sqlc.GetLedgerExpensesParams{
 		LedgerID:  ledgerID,
 		Limit:     limit,

@@ -30,12 +30,12 @@ func (c *recordsController) Delete(ctx context.Context, req DeleteExpenseRecordR
 	defer span.End()
 
 	err := c.db.Transaction(ctx, func(db application.Repositories) error {
-		expense, err := db.Expense().Find(ctx, req.ExpenseID)
+		expense, err := db.Expense().Get(ctx, req.ExpenseID)
 		if err != nil {
 			return fmt.Errorf("finding expense: %w", err)
 		}
 
-		ledger, err := db.Ledger().Find(ctx, req.LedgerID)
+		ledger, err := db.Ledger().Get(ctx, req.LedgerID)
 		if err != nil {
 			return fmt.Errorf("finding ledger: %w", err)
 		}

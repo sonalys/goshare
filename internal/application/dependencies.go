@@ -10,8 +10,8 @@ import (
 
 type (
 	LedgerQueries interface {
-		Find(ctx context.Context, id domain.ID) (*domain.Ledger, error)
-		GetByUser(ctx context.Context, identity domain.ID) ([]domain.Ledger, error)
+		Get(ctx context.Context, id domain.ID) (*domain.Ledger, error)
+		ListByUser(ctx context.Context, identity domain.ID) ([]domain.Ledger, error)
 	}
 
 	LedgerCommands interface {
@@ -25,8 +25,8 @@ type (
 	}
 
 	UserQueries interface {
-		Find(ctx context.Context, id domain.ID) (*domain.User, error)
-		FindByEmail(ctx context.Context, email string) (*domain.User, error)
+		Get(ctx context.Context, id domain.ID) (*domain.User, error)
+		GetByEmail(ctx context.Context, email string) (*domain.User, error)
 		ListByEmail(ctx context.Context, emails []string) ([]domain.User, error)
 	}
 
@@ -40,8 +40,8 @@ type (
 	}
 
 	ExpenseQueries interface {
-		Find(ctx context.Context, id domain.ID) (*domain.Expense, error)
-		GetByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error)
+		Get(ctx context.Context, id domain.ID) (*domain.Expense, error)
+		ListByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error)
 	}
 
 	ExpenseCommands interface {
