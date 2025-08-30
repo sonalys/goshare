@@ -5,19 +5,17 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/sonalys/goshare/cmd/server/api"
-	"github.com/sonalys/goshare/cmd/server/handlers"
-	"github.com/sonalys/goshare/cmd/server/middlewares"
-	"github.com/sonalys/goshare/pkg/otel"
+	"github.com/sonalys/goshare/internal/infrastructure/http/middlewares"
+	"github.com/sonalys/goshare/internal/infrastructure/http/server"
 	"github.com/sonalys/goshare/pkg/slog"
 )
 
-func NewHandler(client *api.API, repositories *repos, serviceName string) http.Handler {
-	securityHandler := api.NewSecurityHandler(repositories.JWTRepository)
+func NewHandler(client server.Handler, repositories *repos, serviceName string) http.Handler {
+	securityMiddleware := middlewares.NewSecurityHandler(repositories.JWTRepository)
 
-	handler, _ := handlers.NewServer(client, securityHandler,
-		handlers.WithPathPrefix("/api/v1"),
-		handlers.WithErrorHandler(func(ctx context.Context, w http.ResponseWriter, r *http.Request, err error) {
+	handler, _ := server.NewServer(client, securityMiddleware,
+		server.WithPathPrefix("/api/v1"),
+		server.WithErrorHandler(func(ctx context.Context, w http.ResponseWriter, r *http.Request, err error) {
 			resp := client.NewError(ctx, err)
 
 			w.WriteHeader(resp.StatusCode)
@@ -29,11 +27,8 @@ func NewHandler(client *api.API, repositories *repos, serviceName string) http.H
 		}),
 	)
 
-	finder := middlewares.MakeRouteFinder(handler)
-
 	return middlewares.Wrap(handler,
-		middlewares.Instrument(serviceName, finder, otel.Provider),
 		middlewares.Recoverer,
-		middlewares.LogRequests(finder),
+		middlewares.LogRequests,
 	)
 }

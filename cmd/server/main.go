@@ -9,9 +9,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/sonalys/goshare/cmd/server/api"
 	"github.com/sonalys/goshare/internal/application/controllers/identitycontroller"
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
+	"github.com/sonalys/goshare/internal/infrastructure/http/router"
 	"github.com/sonalys/goshare/pkg/otel"
 	"github.com/sonalys/goshare/pkg/secrets"
 	"github.com/sonalys/goshare/pkg/slog"
@@ -55,11 +55,11 @@ func main() {
 		IdentityEncoder: repositories.JWTRepository,
 	})
 
-	api := api.New(
+	router := router.New(
 		identityController,
 		userController,
 	)
-	handler := NewHandler(api, repositories, cfg.ServiceName)
+	handler := NewHandler(router, repositories, cfg.ServiceName)
 
 	server := NewServer(cfg, handler)
 
