@@ -17,8 +17,8 @@ func Test_Ledger_Create(t *testing.T) {
 
 	createTestData := func() usercontroller.CreateLedgerRequest {
 		return usercontroller.CreateLedgerRequest{
-			Actor: domain.NewID(),
-			Name:  domain.NewID().String(),
+			ActorID: domain.NewID(),
+			Name:    domain.NewID().String(),
 		}
 	}
 
@@ -28,7 +28,7 @@ func Test_Ledger_Create(t *testing.T) {
 		}
 
 		mocks.db.tx.user.GetFunc = func(ctx context.Context, id domain.ID) (*domain.User, error) {
-			assert.Equal(t, td.Actor, id)
+			assert.Equal(t, td.ActorID, id)
 			return &domain.User{}, nil
 		}
 
@@ -67,7 +67,7 @@ func Test_Ledger_Create(t *testing.T) {
 		controller, mocks := setup(t, td)
 
 		mocks.db.tx.user.GetFunc = func(ctx context.Context, id domain.ID) (*domain.User, error) {
-			assert.Equal(t, td.Actor, id)
+			assert.Equal(t, td.ActorID, id)
 			return nil, assert.AnError
 		}
 

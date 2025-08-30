@@ -12,7 +12,7 @@ import (
 )
 
 type DeleteExpenseRecordRequest struct {
-	Actor     domain.ID
+	ActorID   domain.ID
 	LedgerID  domain.ID
 	ExpenseID domain.ID
 	RecordID  domain.ID
@@ -21,7 +21,7 @@ type DeleteExpenseRecordRequest struct {
 func (c *recordsController) Delete(ctx context.Context, req DeleteExpenseRecordRequest) error {
 	ctx, span := c.tracer.Start(ctx, "delete",
 		trace.WithAttributes(
-			attribute.Stringer("actor_id", req.Actor),
+			attribute.Stringer("actor_id", req.ActorID),
 			attribute.Stringer("ledger_id", req.LedgerID),
 			attribute.Stringer("expense_id", req.ExpenseID),
 			attribute.Stringer("record_id", req.RecordID),
@@ -40,11 +40,11 @@ func (c *recordsController) Delete(ctx context.Context, req DeleteExpenseRecordR
 			return fmt.Errorf("finding ledger: %w", err)
 		}
 
-		if !ledger.CanManageExpenses(req.Actor) {
+		if !ledger.CanManageExpenses(req.ActorID) {
 			return fmt.Errorf("authorizing expenses management: %w", application.ErrUnauthorized)
 		}
 
-		if err = expense.DeleteRecord(req.Actor, ledger, req.RecordID); err != nil {
+		if err = expense.DeleteRecord(req.ActorID, ledger, req.RecordID); err != nil {
 			return fmt.Errorf("deleting record: %w", err)
 		}
 

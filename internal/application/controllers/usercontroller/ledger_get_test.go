@@ -17,7 +17,7 @@ func Test_Ledger_Get(t *testing.T) {
 
 	createTestData := func() usercontroller.GetLedgerRequest {
 		return usercontroller.GetLedgerRequest{
-			Actor:    domain.NewID(),
+			ActorID:  domain.NewID(),
 			LedgerID: domain.NewID(),
 		}
 	}

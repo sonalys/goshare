@@ -20,7 +20,7 @@ func (a *API) LedgerExpenseRecordCreate(ctx context.Context, req *handlers.Ledge
 	}
 
 	apiReq := usercontroller.CreateExpenseRecordRequest{
-		Actor:          identity.UserID,
+		ActorID:        identity.UserID,
 		LedgerID:       domain.ConvertID(params.LedgerID),
 		ExpenseID:      domain.ConvertID(params.ExpenseID),
 		PendingRecords: pendingRecords,

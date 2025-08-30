@@ -13,7 +13,7 @@ import (
 )
 
 type AddMembersRequest struct {
-	Actor    domain.ID
+	ActorID  domain.ID
 	LedgerID domain.ID
 	Emails   []string
 }
@@ -24,7 +24,7 @@ type AddMembersRequest struct {
 func (c *ledgerController) MembersAdd(ctx context.Context, req AddMembersRequest) error {
 	ctx, span := c.tracer.Start(ctx, "membersAdd",
 		trace.WithAttributes(
-			attribute.Stringer("actor_id", req.Actor),
+			attribute.Stringer("actor_id", req.ActorID),
 			attribute.Stringer("ledger_id", req.LedgerID),
 		),
 	)
@@ -38,7 +38,7 @@ func (c *ledgerController) MembersAdd(ctx context.Context, req AddMembersRequest
 			return fmt.Errorf("getting ledger: %w", err)
 		}
 
-		if !ledger.CanManageMembers(req.Actor) {
+		if !ledger.CanManageMembers(req.ActorID) {
 			return fmt.Errorf("authorizing member management: %w", application.ErrUnauthorized)
 		}
 
@@ -49,7 +49,7 @@ func (c *ledgerController) MembersAdd(ctx context.Context, req AddMembersRequest
 
 		newMemberIDs := kset.Select(func(u domain.User) domain.ID { return u.ID }, users...)
 
-		if err = ledger.AddMember(req.Actor, newMemberIDs...); err != nil {
+		if err = ledger.AddMember(req.ActorID, newMemberIDs...); err != nil {
 			return fmt.Errorf("adding members: %w", err)
 		}
 

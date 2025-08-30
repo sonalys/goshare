@@ -12,7 +12,7 @@ import (
 )
 
 type CreateExpenseRecordRequest struct {
-	Actor          domain.ID
+	ActorID        domain.ID
 	LedgerID       domain.ID
 	ExpenseID      domain.ID
 	PendingRecords []domain.PendingRecord
@@ -21,7 +21,7 @@ type CreateExpenseRecordRequest struct {
 func (c *recordsController) Create(ctx context.Context, req CreateExpenseRecordRequest) (resp *domain.Expense, err error) {
 	ctx, span := c.tracer.Start(ctx, "create",
 		trace.WithAttributes(
-			attribute.Stringer("actor_id", req.Actor),
+			attribute.Stringer("actor_id", req.ActorID),
 			attribute.Stringer("ledger_id", req.LedgerID),
 			attribute.Stringer("expense_id", req.ExpenseID),
 		),
@@ -36,7 +36,7 @@ func (c *recordsController) Create(ctx context.Context, req CreateExpenseRecordR
 			return fmt.Errorf("fetching ledger: %w", err)
 		}
 
-		if !ledger.CanManageExpenses(req.Actor) {
+		if !ledger.CanManageExpenses(req.ActorID) {
 			return fmt.Errorf("authorizing expenses management: %w", application.ErrUnauthorized)
 		}
 
@@ -45,7 +45,7 @@ func (c *recordsController) Create(ctx context.Context, req CreateExpenseRecordR
 			return fmt.Errorf("fetching expense: %w", err)
 		}
 
-		if err := expense.CreateRecords(req.Actor, ledger, req.PendingRecords...); err != nil {
+		if err := expense.CreateRecords(req.ActorID, ledger, req.PendingRecords...); err != nil {
 			return fmt.Errorf("appending new records: %w", err)
 		}
 

@@ -15,7 +15,7 @@ func (a *API) LedgerMemberAdd(ctx context.Context, req *handlers.LedgerMemberAdd
 	}
 
 	apiParams := usercontroller.AddMembersRequest{
-		Actor:    identity.UserID,
+		ActorID:  identity.UserID,
 		LedgerID: domain.ConvertID(params.LedgerID),
 		Emails:   req.Emails,
 	}

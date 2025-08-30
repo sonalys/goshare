@@ -13,8 +13,8 @@ import (
 
 type (
 	CreateLedgerRequest struct {
-		Actor domain.ID
-		Name  string
+		ActorID domain.ID
+		Name    string
 	}
 
 	CreateLedgerResponse struct {
@@ -25,7 +25,7 @@ type (
 func (c *ledgerController) Create(ctx context.Context, req CreateLedgerRequest) (resp *CreateLedgerResponse, err error) {
 	ctx, span := c.tracer.Start(ctx, "create",
 		trace.WithAttributes(
-			attribute.Stringer("actor_id", req.Actor),
+			attribute.Stringer("actor_id", req.ActorID),
 		),
 	)
 	defer span.End()
@@ -33,7 +33,7 @@ func (c *ledgerController) Create(ctx context.Context, req CreateLedgerRequest) 
 	slog.Debug(ctx, "creating ledger", slog.With("req", req))
 
 	err = c.db.Transaction(ctx, func(db application.Repositories) error {
-		user, err := db.User().Get(ctx, req.Actor)
+		user, err := db.User().Get(ctx, req.ActorID)
 		if err != nil {
 			return fmt.Errorf("finding user% w", err)
 		}

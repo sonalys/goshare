@@ -9,15 +9,15 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-func (c *ledgerController) ListByUser(ctx context.Context, actor domain.ID) ([]domain.Ledger, error) {
+func (c *ledgerController) ListByUser(ctx context.Context, actorID domain.ID) ([]domain.Ledger, error) {
 	ctx, span := c.tracer.Start(ctx, "listbyUser",
 		trace.WithAttributes(
-			attribute.Stringer("actor_id", actor),
+			attribute.Stringer("actor_id", actorID),
 		),
 	)
 	defer span.End()
 
-	ledgers, err := c.db.Ledger().ListByUser(ctx, actor)
+	ledgers, err := c.db.Ledger().ListByUser(ctx, actorID)
 	if err != nil {
 		return nil, slog.ErrorReturn(ctx, "listing ledgers", err)
 	}

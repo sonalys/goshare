@@ -11,14 +11,14 @@ import (
 )
 
 type GetLedgerRequest struct {
-	Actor    domain.ID
+	ActorID  domain.ID
 	LedgerID domain.ID
 }
 
 func (c *ledgerController) Get(ctx context.Context, req GetLedgerRequest) (*domain.Ledger, error) {
 	ctx, span := c.tracer.Start(ctx, "get",
 		trace.WithAttributes(
-			attribute.Stringer("actor_id", req.Actor),
+			attribute.Stringer("actor_id", req.ActorID),
 			attribute.Stringer("ledger_id", req.LedgerID),
 		),
 	)
@@ -29,7 +29,7 @@ func (c *ledgerController) Get(ctx context.Context, req GetLedgerRequest) (*doma
 		return nil, slog.ErrorReturn(ctx, "listing ledgers", err)
 	}
 
-	if !ledger.CanView(req.Actor) {
+	if !ledger.CanView(req.ActorID) {
 		return nil, slog.ErrorReturn(ctx, "authorizing ledger view", application.ErrUnauthorized)
 	}
 
