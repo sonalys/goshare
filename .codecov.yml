@@ -1,6 +1,7 @@
 ignore:
   - internal/application/pkg/**
   - **/*.gen.go
+  - cmd/**
 coverage:
   status:
     project:
