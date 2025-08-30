@@ -3,8 +3,8 @@ filename: mocks.gen.go
 force-file-write: false
 formatter: goimports
 log-level: info
-structname: '{{.Mock}}{{.InterfaceName}}'
-pkgname: '{{.SrcPackageName}}'
+structname: '{{.InterfaceName}}'
+pkgname: '{{.SrcPackageName}}mock'
 template: matryer
 packages:
   github.com/sonalys/goshare/internal:

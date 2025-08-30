@@ -2,7 +2,7 @@
 // github.com/vektra/mockery
 // template: matryer
 
-package application
+package applicationmock
 
 import (
 	"context"
@@ -14,16 +14,16 @@ import (
 	"github.com/sonalys/goshare/internal/domain"
 )
 
-// Ensure that MockLedgerQueries does implement application.LedgerQueries.
+// Ensure that LedgerQueries does implement application.LedgerQueries.
 // If this is not the case, regenerate this file with mockery.
-var _ application.LedgerQueries = &MockLedgerQueries{}
+var _ application.LedgerQueries = &LedgerQueries{}
 
-// MockLedgerQueries is a mock implementation of application.LedgerQueries.
+// LedgerQueries is a mock implementation of application.LedgerQueries.
 //
 //	func TestSomethingThatUsesLedgerQueries(t *testing.T) {
 //
 //		// make and configure a mocked application.LedgerQueries
-//		mockedLedgerQueries := &MockLedgerQueries{
+//		mockedLedgerQueries := &LedgerQueries{
 //			FindFunc: func(ctx context.Context, id domain.ID) (*domain.Ledger, error) {
 //				panic("mock out the Find method")
 //			},
@@ -36,7 +36,7 @@ var _ application.LedgerQueries = &MockLedgerQueries{}
 //		// and then make assertions.
 //
 //	}
-type MockLedgerQueries struct {
+type LedgerQueries struct {
 	// FindFunc mocks the Find method.
 	FindFunc func(ctx context.Context, id domain.ID) (*domain.Ledger, error)
 
@@ -65,9 +65,9 @@ type MockLedgerQueries struct {
 }
 
 // Find calls FindFunc.
-func (mock *MockLedgerQueries) Find(ctx context.Context, id domain.ID) (*domain.Ledger, error) {
+func (mock *LedgerQueries) Find(ctx context.Context, id domain.ID) (*domain.Ledger, error) {
 	if mock.FindFunc == nil {
-		panic("MockLedgerQueries.FindFunc: method is nil but LedgerQueries.Find was just called")
+		panic("LedgerQueries.FindFunc: method is nil but LedgerQueries.Find was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
@@ -86,7 +86,7 @@ func (mock *MockLedgerQueries) Find(ctx context.Context, id domain.ID) (*domain.
 // Check the length with:
 //
 //	len(mockedLedgerQueries.FindCalls())
-func (mock *MockLedgerQueries) FindCalls() []struct {
+func (mock *LedgerQueries) FindCalls() []struct {
 	Ctx context.Context
 	ID  domain.ID
 } {
@@ -101,9 +101,9 @@ func (mock *MockLedgerQueries) FindCalls() []struct {
 }
 
 // GetByUser calls GetByUserFunc.
-func (mock *MockLedgerQueries) GetByUser(ctx context.Context, identity domain.ID) ([]domain.Ledger, error) {
+func (mock *LedgerQueries) GetByUser(ctx context.Context, identity domain.ID) ([]domain.Ledger, error) {
 	if mock.GetByUserFunc == nil {
-		panic("MockLedgerQueries.GetByUserFunc: method is nil but LedgerQueries.GetByUser was just called")
+		panic("LedgerQueries.GetByUserFunc: method is nil but LedgerQueries.GetByUser was just called")
 	}
 	callInfo := struct {
 		Ctx      context.Context
@@ -122,7 +122,7 @@ func (mock *MockLedgerQueries) GetByUser(ctx context.Context, identity domain.ID
 // Check the length with:
 //
 //	len(mockedLedgerQueries.GetByUserCalls())
-func (mock *MockLedgerQueries) GetByUserCalls() []struct {
+func (mock *LedgerQueries) GetByUserCalls() []struct {
 	Ctx      context.Context
 	Identity domain.ID
 } {
@@ -136,16 +136,16 @@ func (mock *MockLedgerQueries) GetByUserCalls() []struct {
 	return calls
 }
 
-// Ensure that MockLedgerCommands does implement application.LedgerCommands.
+// Ensure that LedgerCommands does implement application.LedgerCommands.
 // If this is not the case, regenerate this file with mockery.
-var _ application.LedgerCommands = &MockLedgerCommands{}
+var _ application.LedgerCommands = &LedgerCommands{}
 
-// MockLedgerCommands is a mock implementation of application.LedgerCommands.
+// LedgerCommands is a mock implementation of application.LedgerCommands.
 //
 //	func TestSomethingThatUsesLedgerCommands(t *testing.T) {
 //
 //		// make and configure a mocked application.LedgerCommands
-//		mockedLedgerCommands := &MockLedgerCommands{
+//		mockedLedgerCommands := &LedgerCommands{
 //			CreateFunc: func(ctx context.Context, ledger *domain.Ledger) error {
 //				panic("mock out the Create method")
 //			},
@@ -158,7 +158,7 @@ var _ application.LedgerCommands = &MockLedgerCommands{}
 //		// and then make assertions.
 //
 //	}
-type MockLedgerCommands struct {
+type LedgerCommands struct {
 	// CreateFunc mocks the Create method.
 	CreateFunc func(ctx context.Context, ledger *domain.Ledger) error
 
@@ -187,9 +187,9 @@ type MockLedgerCommands struct {
 }
 
 // Create calls CreateFunc.
-func (mock *MockLedgerCommands) Create(ctx context.Context, ledger *domain.Ledger) error {
+func (mock *LedgerCommands) Create(ctx context.Context, ledger *domain.Ledger) error {
 	if mock.CreateFunc == nil {
-		panic("MockLedgerCommands.CreateFunc: method is nil but LedgerCommands.Create was just called")
+		panic("LedgerCommands.CreateFunc: method is nil but LedgerCommands.Create was just called")
 	}
 	callInfo := struct {
 		Ctx    context.Context
@@ -208,7 +208,7 @@ func (mock *MockLedgerCommands) Create(ctx context.Context, ledger *domain.Ledge
 // Check the length with:
 //
 //	len(mockedLedgerCommands.CreateCalls())
-func (mock *MockLedgerCommands) CreateCalls() []struct {
+func (mock *LedgerCommands) CreateCalls() []struct {
 	Ctx    context.Context
 	Ledger *domain.Ledger
 } {
@@ -223,9 +223,9 @@ func (mock *MockLedgerCommands) CreateCalls() []struct {
 }
 
 // Update calls UpdateFunc.
-func (mock *MockLedgerCommands) Update(ctx context.Context, ledger *domain.Ledger) error {
+func (mock *LedgerCommands) Update(ctx context.Context, ledger *domain.Ledger) error {
 	if mock.UpdateFunc == nil {
-		panic("MockLedgerCommands.UpdateFunc: method is nil but LedgerCommands.Update was just called")
+		panic("LedgerCommands.UpdateFunc: method is nil but LedgerCommands.Update was just called")
 	}
 	callInfo := struct {
 		Ctx    context.Context
@@ -244,7 +244,7 @@ func (mock *MockLedgerCommands) Update(ctx context.Context, ledger *domain.Ledge
 // Check the length with:
 //
 //	len(mockedLedgerCommands.UpdateCalls())
-func (mock *MockLedgerCommands) UpdateCalls() []struct {
+func (mock *LedgerCommands) UpdateCalls() []struct {
 	Ctx    context.Context
 	Ledger *domain.Ledger
 } {
@@ -258,16 +258,16 @@ func (mock *MockLedgerCommands) UpdateCalls() []struct {
 	return calls
 }
 
-// Ensure that MockLedgerRepository does implement application.LedgerRepository.
+// Ensure that LedgerRepository does implement application.LedgerRepository.
 // If this is not the case, regenerate this file with mockery.
-var _ application.LedgerRepository = &MockLedgerRepository{}
+var _ application.LedgerRepository = &LedgerRepository{}
 
-// MockLedgerRepository is a mock implementation of application.LedgerRepository.
+// LedgerRepository is a mock implementation of application.LedgerRepository.
 //
 //	func TestSomethingThatUsesLedgerRepository(t *testing.T) {
 //
 //		// make and configure a mocked application.LedgerRepository
-//		mockedLedgerRepository := &MockLedgerRepository{
+//		mockedLedgerRepository := &LedgerRepository{
 //			CreateFunc: func(ctx context.Context, ledger *domain.Ledger) error {
 //				panic("mock out the Create method")
 //			},
@@ -286,7 +286,7 @@ var _ application.LedgerRepository = &MockLedgerRepository{}
 //		// and then make assertions.
 //
 //	}
-type MockLedgerRepository struct {
+type LedgerRepository struct {
 	// CreateFunc mocks the Create method.
 	CreateFunc func(ctx context.Context, ledger *domain.Ledger) error
 
@@ -337,9 +337,9 @@ type MockLedgerRepository struct {
 }
 
 // Create calls CreateFunc.
-func (mock *MockLedgerRepository) Create(ctx context.Context, ledger *domain.Ledger) error {
+func (mock *LedgerRepository) Create(ctx context.Context, ledger *domain.Ledger) error {
 	if mock.CreateFunc == nil {
-		panic("MockLedgerRepository.CreateFunc: method is nil but LedgerRepository.Create was just called")
+		panic("LedgerRepository.CreateFunc: method is nil but LedgerRepository.Create was just called")
 	}
 	callInfo := struct {
 		Ctx    context.Context
@@ -358,7 +358,7 @@ func (mock *MockLedgerRepository) Create(ctx context.Context, ledger *domain.Led
 // Check the length with:
 //
 //	len(mockedLedgerRepository.CreateCalls())
-func (mock *MockLedgerRepository) CreateCalls() []struct {
+func (mock *LedgerRepository) CreateCalls() []struct {
 	Ctx    context.Context
 	Ledger *domain.Ledger
 } {
@@ -373,9 +373,9 @@ func (mock *MockLedgerRepository) CreateCalls() []struct {
 }
 
 // Find calls FindFunc.
-func (mock *MockLedgerRepository) Find(ctx context.Context, id domain.ID) (*domain.Ledger, error) {
+func (mock *LedgerRepository) Find(ctx context.Context, id domain.ID) (*domain.Ledger, error) {
 	if mock.FindFunc == nil {
-		panic("MockLedgerRepository.FindFunc: method is nil but LedgerRepository.Find was just called")
+		panic("LedgerRepository.FindFunc: method is nil but LedgerRepository.Find was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
@@ -394,7 +394,7 @@ func (mock *MockLedgerRepository) Find(ctx context.Context, id domain.ID) (*doma
 // Check the length with:
 //
 //	len(mockedLedgerRepository.FindCalls())
-func (mock *MockLedgerRepository) FindCalls() []struct {
+func (mock *LedgerRepository) FindCalls() []struct {
 	Ctx context.Context
 	ID  domain.ID
 } {
@@ -409,9 +409,9 @@ func (mock *MockLedgerRepository) FindCalls() []struct {
 }
 
 // GetByUser calls GetByUserFunc.
-func (mock *MockLedgerRepository) GetByUser(ctx context.Context, identity domain.ID) ([]domain.Ledger, error) {
+func (mock *LedgerRepository) GetByUser(ctx context.Context, identity domain.ID) ([]domain.Ledger, error) {
 	if mock.GetByUserFunc == nil {
-		panic("MockLedgerRepository.GetByUserFunc: method is nil but LedgerRepository.GetByUser was just called")
+		panic("LedgerRepository.GetByUserFunc: method is nil but LedgerRepository.GetByUser was just called")
 	}
 	callInfo := struct {
 		Ctx      context.Context
@@ -430,7 +430,7 @@ func (mock *MockLedgerRepository) GetByUser(ctx context.Context, identity domain
 // Check the length with:
 //
 //	len(mockedLedgerRepository.GetByUserCalls())
-func (mock *MockLedgerRepository) GetByUserCalls() []struct {
+func (mock *LedgerRepository) GetByUserCalls() []struct {
 	Ctx      context.Context
 	Identity domain.ID
 } {
@@ -445,9 +445,9 @@ func (mock *MockLedgerRepository) GetByUserCalls() []struct {
 }
 
 // Update calls UpdateFunc.
-func (mock *MockLedgerRepository) Update(ctx context.Context, ledger *domain.Ledger) error {
+func (mock *LedgerRepository) Update(ctx context.Context, ledger *domain.Ledger) error {
 	if mock.UpdateFunc == nil {
-		panic("MockLedgerRepository.UpdateFunc: method is nil but LedgerRepository.Update was just called")
+		panic("LedgerRepository.UpdateFunc: method is nil but LedgerRepository.Update was just called")
 	}
 	callInfo := struct {
 		Ctx    context.Context
@@ -466,7 +466,7 @@ func (mock *MockLedgerRepository) Update(ctx context.Context, ledger *domain.Led
 // Check the length with:
 //
 //	len(mockedLedgerRepository.UpdateCalls())
-func (mock *MockLedgerRepository) UpdateCalls() []struct {
+func (mock *LedgerRepository) UpdateCalls() []struct {
 	Ctx    context.Context
 	Ledger *domain.Ledger
 } {
@@ -480,16 +480,16 @@ func (mock *MockLedgerRepository) UpdateCalls() []struct {
 	return calls
 }
 
-// Ensure that MockUserQueries does implement application.UserQueries.
+// Ensure that UserQueries does implement application.UserQueries.
 // If this is not the case, regenerate this file with mockery.
-var _ application.UserQueries = &MockUserQueries{}
+var _ application.UserQueries = &UserQueries{}
 
-// MockUserQueries is a mock implementation of application.UserQueries.
+// UserQueries is a mock implementation of application.UserQueries.
 //
 //	func TestSomethingThatUsesUserQueries(t *testing.T) {
 //
 //		// make and configure a mocked application.UserQueries
-//		mockedUserQueries := &MockUserQueries{
+//		mockedUserQueries := &UserQueries{
 //			FindFunc: func(ctx context.Context, id domain.ID) (*domain.User, error) {
 //				panic("mock out the Find method")
 //			},
@@ -505,7 +505,7 @@ var _ application.UserQueries = &MockUserQueries{}
 //		// and then make assertions.
 //
 //	}
-type MockUserQueries struct {
+type UserQueries struct {
 	// FindFunc mocks the Find method.
 	FindFunc func(ctx context.Context, id domain.ID) (*domain.User, error)
 
@@ -545,9 +545,9 @@ type MockUserQueries struct {
 }
 
 // Find calls FindFunc.
-func (mock *MockUserQueries) Find(ctx context.Context, id domain.ID) (*domain.User, error) {
+func (mock *UserQueries) Find(ctx context.Context, id domain.ID) (*domain.User, error) {
 	if mock.FindFunc == nil {
-		panic("MockUserQueries.FindFunc: method is nil but UserQueries.Find was just called")
+		panic("UserQueries.FindFunc: method is nil but UserQueries.Find was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
@@ -566,7 +566,7 @@ func (mock *MockUserQueries) Find(ctx context.Context, id domain.ID) (*domain.Us
 // Check the length with:
 //
 //	len(mockedUserQueries.FindCalls())
-func (mock *MockUserQueries) FindCalls() []struct {
+func (mock *UserQueries) FindCalls() []struct {
 	Ctx context.Context
 	ID  domain.ID
 } {
@@ -581,9 +581,9 @@ func (mock *MockUserQueries) FindCalls() []struct {
 }
 
 // FindByEmail calls FindByEmailFunc.
-func (mock *MockUserQueries) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
+func (mock *UserQueries) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
 	if mock.FindByEmailFunc == nil {
-		panic("MockUserQueries.FindByEmailFunc: method is nil but UserQueries.FindByEmail was just called")
+		panic("UserQueries.FindByEmailFunc: method is nil but UserQueries.FindByEmail was just called")
 	}
 	callInfo := struct {
 		Ctx   context.Context
@@ -602,7 +602,7 @@ func (mock *MockUserQueries) FindByEmail(ctx context.Context, email string) (*do
 // Check the length with:
 //
 //	len(mockedUserQueries.FindByEmailCalls())
-func (mock *MockUserQueries) FindByEmailCalls() []struct {
+func (mock *UserQueries) FindByEmailCalls() []struct {
 	Ctx   context.Context
 	Email string
 } {
@@ -617,9 +617,9 @@ func (mock *MockUserQueries) FindByEmailCalls() []struct {
 }
 
 // ListByEmail calls ListByEmailFunc.
-func (mock *MockUserQueries) ListByEmail(ctx context.Context, emails []string) ([]domain.User, error) {
+func (mock *UserQueries) ListByEmail(ctx context.Context, emails []string) ([]domain.User, error) {
 	if mock.ListByEmailFunc == nil {
-		panic("MockUserQueries.ListByEmailFunc: method is nil but UserQueries.ListByEmail was just called")
+		panic("UserQueries.ListByEmailFunc: method is nil but UserQueries.ListByEmail was just called")
 	}
 	callInfo := struct {
 		Ctx    context.Context
@@ -638,7 +638,7 @@ func (mock *MockUserQueries) ListByEmail(ctx context.Context, emails []string) (
 // Check the length with:
 //
 //	len(mockedUserQueries.ListByEmailCalls())
-func (mock *MockUserQueries) ListByEmailCalls() []struct {
+func (mock *UserQueries) ListByEmailCalls() []struct {
 	Ctx    context.Context
 	Emails []string
 } {
@@ -652,16 +652,16 @@ func (mock *MockUserQueries) ListByEmailCalls() []struct {
 	return calls
 }
 
-// Ensure that MockUserCommands does implement application.UserCommands.
+// Ensure that UserCommands does implement application.UserCommands.
 // If this is not the case, regenerate this file with mockery.
-var _ application.UserCommands = &MockUserCommands{}
+var _ application.UserCommands = &UserCommands{}
 
-// MockUserCommands is a mock implementation of application.UserCommands.
+// UserCommands is a mock implementation of application.UserCommands.
 //
 //	func TestSomethingThatUsesUserCommands(t *testing.T) {
 //
 //		// make and configure a mocked application.UserCommands
-//		mockedUserCommands := &MockUserCommands{
+//		mockedUserCommands := &UserCommands{
 //			SaveFunc: func(ctx context.Context, user *domain.User) error {
 //				panic("mock out the Save method")
 //			},
@@ -671,7 +671,7 @@ var _ application.UserCommands = &MockUserCommands{}
 //		// and then make assertions.
 //
 //	}
-type MockUserCommands struct {
+type UserCommands struct {
 	// SaveFunc mocks the Save method.
 	SaveFunc func(ctx context.Context, user *domain.User) error
 
@@ -689,9 +689,9 @@ type MockUserCommands struct {
 }
 
 // Save calls SaveFunc.
-func (mock *MockUserCommands) Save(ctx context.Context, user *domain.User) error {
+func (mock *UserCommands) Save(ctx context.Context, user *domain.User) error {
 	if mock.SaveFunc == nil {
-		panic("MockUserCommands.SaveFunc: method is nil but UserCommands.Save was just called")
+		panic("UserCommands.SaveFunc: method is nil but UserCommands.Save was just called")
 	}
 	callInfo := struct {
 		Ctx  context.Context
@@ -710,7 +710,7 @@ func (mock *MockUserCommands) Save(ctx context.Context, user *domain.User) error
 // Check the length with:
 //
 //	len(mockedUserCommands.SaveCalls())
-func (mock *MockUserCommands) SaveCalls() []struct {
+func (mock *UserCommands) SaveCalls() []struct {
 	Ctx  context.Context
 	User *domain.User
 } {
@@ -724,16 +724,16 @@ func (mock *MockUserCommands) SaveCalls() []struct {
 	return calls
 }
 
-// Ensure that MockUserRepository does implement application.UserRepository.
+// Ensure that UserRepository does implement application.UserRepository.
 // If this is not the case, regenerate this file with mockery.
-var _ application.UserRepository = &MockUserRepository{}
+var _ application.UserRepository = &UserRepository{}
 
-// MockUserRepository is a mock implementation of application.UserRepository.
+// UserRepository is a mock implementation of application.UserRepository.
 //
 //	func TestSomethingThatUsesUserRepository(t *testing.T) {
 //
 //		// make and configure a mocked application.UserRepository
-//		mockedUserRepository := &MockUserRepository{
+//		mockedUserRepository := &UserRepository{
 //			FindFunc: func(ctx context.Context, id domain.ID) (*domain.User, error) {
 //				panic("mock out the Find method")
 //			},
@@ -752,7 +752,7 @@ var _ application.UserRepository = &MockUserRepository{}
 //		// and then make assertions.
 //
 //	}
-type MockUserRepository struct {
+type UserRepository struct {
 	// FindFunc mocks the Find method.
 	FindFunc func(ctx context.Context, id domain.ID) (*domain.User, error)
 
@@ -803,9 +803,9 @@ type MockUserRepository struct {
 }
 
 // Find calls FindFunc.
-func (mock *MockUserRepository) Find(ctx context.Context, id domain.ID) (*domain.User, error) {
+func (mock *UserRepository) Find(ctx context.Context, id domain.ID) (*domain.User, error) {
 	if mock.FindFunc == nil {
-		panic("MockUserRepository.FindFunc: method is nil but UserRepository.Find was just called")
+		panic("UserRepository.FindFunc: method is nil but UserRepository.Find was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
@@ -824,7 +824,7 @@ func (mock *MockUserRepository) Find(ctx context.Context, id domain.ID) (*domain
 // Check the length with:
 //
 //	len(mockedUserRepository.FindCalls())
-func (mock *MockUserRepository) FindCalls() []struct {
+func (mock *UserRepository) FindCalls() []struct {
 	Ctx context.Context
 	ID  domain.ID
 } {
@@ -839,9 +839,9 @@ func (mock *MockUserRepository) FindCalls() []struct {
 }
 
 // FindByEmail calls FindByEmailFunc.
-func (mock *MockUserRepository) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
+func (mock *UserRepository) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
 	if mock.FindByEmailFunc == nil {
-		panic("MockUserRepository.FindByEmailFunc: method is nil but UserRepository.FindByEmail was just called")
+		panic("UserRepository.FindByEmailFunc: method is nil but UserRepository.FindByEmail was just called")
 	}
 	callInfo := struct {
 		Ctx   context.Context
@@ -860,7 +860,7 @@ func (mock *MockUserRepository) FindByEmail(ctx context.Context, email string) (
 // Check the length with:
 //
 //	len(mockedUserRepository.FindByEmailCalls())
-func (mock *MockUserRepository) FindByEmailCalls() []struct {
+func (mock *UserRepository) FindByEmailCalls() []struct {
 	Ctx   context.Context
 	Email string
 } {
@@ -875,9 +875,9 @@ func (mock *MockUserRepository) FindByEmailCalls() []struct {
 }
 
 // ListByEmail calls ListByEmailFunc.
-func (mock *MockUserRepository) ListByEmail(ctx context.Context, emails []string) ([]domain.User, error) {
+func (mock *UserRepository) ListByEmail(ctx context.Context, emails []string) ([]domain.User, error) {
 	if mock.ListByEmailFunc == nil {
-		panic("MockUserRepository.ListByEmailFunc: method is nil but UserRepository.ListByEmail was just called")
+		panic("UserRepository.ListByEmailFunc: method is nil but UserRepository.ListByEmail was just called")
 	}
 	callInfo := struct {
 		Ctx    context.Context
@@ -896,7 +896,7 @@ func (mock *MockUserRepository) ListByEmail(ctx context.Context, emails []string
 // Check the length with:
 //
 //	len(mockedUserRepository.ListByEmailCalls())
-func (mock *MockUserRepository) ListByEmailCalls() []struct {
+func (mock *UserRepository) ListByEmailCalls() []struct {
 	Ctx    context.Context
 	Emails []string
 } {
@@ -911,9 +911,9 @@ func (mock *MockUserRepository) ListByEmailCalls() []struct {
 }
 
 // Save calls SaveFunc.
-func (mock *MockUserRepository) Save(ctx context.Context, user *domain.User) error {
+func (mock *UserRepository) Save(ctx context.Context, user *domain.User) error {
 	if mock.SaveFunc == nil {
-		panic("MockUserRepository.SaveFunc: method is nil but UserRepository.Save was just called")
+		panic("UserRepository.SaveFunc: method is nil but UserRepository.Save was just called")
 	}
 	callInfo := struct {
 		Ctx  context.Context
@@ -932,7 +932,7 @@ func (mock *MockUserRepository) Save(ctx context.Context, user *domain.User) err
 // Check the length with:
 //
 //	len(mockedUserRepository.SaveCalls())
-func (mock *MockUserRepository) SaveCalls() []struct {
+func (mock *UserRepository) SaveCalls() []struct {
 	Ctx  context.Context
 	User *domain.User
 } {
@@ -946,16 +946,16 @@ func (mock *MockUserRepository) SaveCalls() []struct {
 	return calls
 }
 
-// Ensure that MockExpenseQueries does implement application.ExpenseQueries.
+// Ensure that ExpenseQueries does implement application.ExpenseQueries.
 // If this is not the case, regenerate this file with mockery.
-var _ application.ExpenseQueries = &MockExpenseQueries{}
+var _ application.ExpenseQueries = &ExpenseQueries{}
 
-// MockExpenseQueries is a mock implementation of application.ExpenseQueries.
+// ExpenseQueries is a mock implementation of application.ExpenseQueries.
 //
 //	func TestSomethingThatUsesExpenseQueries(t *testing.T) {
 //
 //		// make and configure a mocked application.ExpenseQueries
-//		mockedExpenseQueries := &MockExpenseQueries{
+//		mockedExpenseQueries := &ExpenseQueries{
 //			FindFunc: func(ctx context.Context, id domain.ID) (*domain.Expense, error) {
 //				panic("mock out the Find method")
 //			},
@@ -968,7 +968,7 @@ var _ application.ExpenseQueries = &MockExpenseQueries{}
 //		// and then make assertions.
 //
 //	}
-type MockExpenseQueries struct {
+type ExpenseQueries struct {
 	// FindFunc mocks the Find method.
 	FindFunc func(ctx context.Context, id domain.ID) (*domain.Expense, error)
 
@@ -1001,9 +1001,9 @@ type MockExpenseQueries struct {
 }
 
 // Find calls FindFunc.
-func (mock *MockExpenseQueries) Find(ctx context.Context, id domain.ID) (*domain.Expense, error) {
+func (mock *ExpenseQueries) Find(ctx context.Context, id domain.ID) (*domain.Expense, error) {
 	if mock.FindFunc == nil {
-		panic("MockExpenseQueries.FindFunc: method is nil but ExpenseQueries.Find was just called")
+		panic("ExpenseQueries.FindFunc: method is nil but ExpenseQueries.Find was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
@@ -1022,7 +1022,7 @@ func (mock *MockExpenseQueries) Find(ctx context.Context, id domain.ID) (*domain
 // Check the length with:
 //
 //	len(mockedExpenseQueries.FindCalls())
-func (mock *MockExpenseQueries) FindCalls() []struct {
+func (mock *ExpenseQueries) FindCalls() []struct {
 	Ctx context.Context
 	ID  domain.ID
 } {
@@ -1037,9 +1037,9 @@ func (mock *MockExpenseQueries) FindCalls() []struct {
 }
 
 // GetByLedger calls GetByLedgerFunc.
-func (mock *MockExpenseQueries) GetByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
+func (mock *ExpenseQueries) GetByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
 	if mock.GetByLedgerFunc == nil {
-		panic("MockExpenseQueries.GetByLedgerFunc: method is nil but ExpenseQueries.GetByLedger was just called")
+		panic("ExpenseQueries.GetByLedgerFunc: method is nil but ExpenseQueries.GetByLedger was just called")
 	}
 	callInfo := struct {
 		Ctx      context.Context
@@ -1062,7 +1062,7 @@ func (mock *MockExpenseQueries) GetByLedger(ctx context.Context, ledgerID domain
 // Check the length with:
 //
 //	len(mockedExpenseQueries.GetByLedgerCalls())
-func (mock *MockExpenseQueries) GetByLedgerCalls() []struct {
+func (mock *ExpenseQueries) GetByLedgerCalls() []struct {
 	Ctx      context.Context
 	LedgerID domain.ID
 	Cursor   time.Time
@@ -1080,16 +1080,16 @@ func (mock *MockExpenseQueries) GetByLedgerCalls() []struct {
 	return calls
 }
 
-// Ensure that MockExpenseCommands does implement application.ExpenseCommands.
+// Ensure that ExpenseCommands does implement application.ExpenseCommands.
 // If this is not the case, regenerate this file with mockery.
-var _ application.ExpenseCommands = &MockExpenseCommands{}
+var _ application.ExpenseCommands = &ExpenseCommands{}
 
-// MockExpenseCommands is a mock implementation of application.ExpenseCommands.
+// ExpenseCommands is a mock implementation of application.ExpenseCommands.
 //
 //	func TestSomethingThatUsesExpenseCommands(t *testing.T) {
 //
 //		// make and configure a mocked application.ExpenseCommands
-//		mockedExpenseCommands := &MockExpenseCommands{
+//		mockedExpenseCommands := &ExpenseCommands{
 //			CreateFunc: func(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error {
 //				panic("mock out the Create method")
 //			},
@@ -1102,7 +1102,7 @@ var _ application.ExpenseCommands = &MockExpenseCommands{}
 //		// and then make assertions.
 //
 //	}
-type MockExpenseCommands struct {
+type ExpenseCommands struct {
 	// CreateFunc mocks the Create method.
 	CreateFunc func(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error
 
@@ -1133,9 +1133,9 @@ type MockExpenseCommands struct {
 }
 
 // Create calls CreateFunc.
-func (mock *MockExpenseCommands) Create(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error {
+func (mock *ExpenseCommands) Create(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error {
 	if mock.CreateFunc == nil {
-		panic("MockExpenseCommands.CreateFunc: method is nil but ExpenseCommands.Create was just called")
+		panic("ExpenseCommands.CreateFunc: method is nil but ExpenseCommands.Create was just called")
 	}
 	callInfo := struct {
 		Ctx      context.Context
@@ -1156,7 +1156,7 @@ func (mock *MockExpenseCommands) Create(ctx context.Context, ledgerID domain.ID,
 // Check the length with:
 //
 //	len(mockedExpenseCommands.CreateCalls())
-func (mock *MockExpenseCommands) CreateCalls() []struct {
+func (mock *ExpenseCommands) CreateCalls() []struct {
 	Ctx      context.Context
 	LedgerID domain.ID
 	Expense  *domain.Expense
@@ -1173,9 +1173,9 @@ func (mock *MockExpenseCommands) CreateCalls() []struct {
 }
 
 // Update calls UpdateFunc.
-func (mock *MockExpenseCommands) Update(ctx context.Context, expense *domain.Expense) error {
+func (mock *ExpenseCommands) Update(ctx context.Context, expense *domain.Expense) error {
 	if mock.UpdateFunc == nil {
-		panic("MockExpenseCommands.UpdateFunc: method is nil but ExpenseCommands.Update was just called")
+		panic("ExpenseCommands.UpdateFunc: method is nil but ExpenseCommands.Update was just called")
 	}
 	callInfo := struct {
 		Ctx     context.Context
@@ -1194,7 +1194,7 @@ func (mock *MockExpenseCommands) Update(ctx context.Context, expense *domain.Exp
 // Check the length with:
 //
 //	len(mockedExpenseCommands.UpdateCalls())
-func (mock *MockExpenseCommands) UpdateCalls() []struct {
+func (mock *ExpenseCommands) UpdateCalls() []struct {
 	Ctx     context.Context
 	Expense *domain.Expense
 } {
@@ -1208,16 +1208,16 @@ func (mock *MockExpenseCommands) UpdateCalls() []struct {
 	return calls
 }
 
-// Ensure that MockExpenseRepository does implement application.ExpenseRepository.
+// Ensure that ExpenseRepository does implement application.ExpenseRepository.
 // If this is not the case, regenerate this file with mockery.
-var _ application.ExpenseRepository = &MockExpenseRepository{}
+var _ application.ExpenseRepository = &ExpenseRepository{}
 
-// MockExpenseRepository is a mock implementation of application.ExpenseRepository.
+// ExpenseRepository is a mock implementation of application.ExpenseRepository.
 //
 //	func TestSomethingThatUsesExpenseRepository(t *testing.T) {
 //
 //		// make and configure a mocked application.ExpenseRepository
-//		mockedExpenseRepository := &MockExpenseRepository{
+//		mockedExpenseRepository := &ExpenseRepository{
 //			CreateFunc: func(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error {
 //				panic("mock out the Create method")
 //			},
@@ -1236,7 +1236,7 @@ var _ application.ExpenseRepository = &MockExpenseRepository{}
 //		// and then make assertions.
 //
 //	}
-type MockExpenseRepository struct {
+type ExpenseRepository struct {
 	// CreateFunc mocks the Create method.
 	CreateFunc func(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error
 
@@ -1293,9 +1293,9 @@ type MockExpenseRepository struct {
 }
 
 // Create calls CreateFunc.
-func (mock *MockExpenseRepository) Create(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error {
+func (mock *ExpenseRepository) Create(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error {
 	if mock.CreateFunc == nil {
-		panic("MockExpenseRepository.CreateFunc: method is nil but ExpenseRepository.Create was just called")
+		panic("ExpenseRepository.CreateFunc: method is nil but ExpenseRepository.Create was just called")
 	}
 	callInfo := struct {
 		Ctx      context.Context
@@ -1316,7 +1316,7 @@ func (mock *MockExpenseRepository) Create(ctx context.Context, ledgerID domain.I
 // Check the length with:
 //
 //	len(mockedExpenseRepository.CreateCalls())
-func (mock *MockExpenseRepository) CreateCalls() []struct {
+func (mock *ExpenseRepository) CreateCalls() []struct {
 	Ctx      context.Context
 	LedgerID domain.ID
 	Expense  *domain.Expense
@@ -1333,9 +1333,9 @@ func (mock *MockExpenseRepository) CreateCalls() []struct {
 }
 
 // Find calls FindFunc.
-func (mock *MockExpenseRepository) Find(ctx context.Context, id domain.ID) (*domain.Expense, error) {
+func (mock *ExpenseRepository) Find(ctx context.Context, id domain.ID) (*domain.Expense, error) {
 	if mock.FindFunc == nil {
-		panic("MockExpenseRepository.FindFunc: method is nil but ExpenseRepository.Find was just called")
+		panic("ExpenseRepository.FindFunc: method is nil but ExpenseRepository.Find was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
@@ -1354,7 +1354,7 @@ func (mock *MockExpenseRepository) Find(ctx context.Context, id domain.ID) (*dom
 // Check the length with:
 //
 //	len(mockedExpenseRepository.FindCalls())
-func (mock *MockExpenseRepository) FindCalls() []struct {
+func (mock *ExpenseRepository) FindCalls() []struct {
 	Ctx context.Context
 	ID  domain.ID
 } {
@@ -1369,9 +1369,9 @@ func (mock *MockExpenseRepository) FindCalls() []struct {
 }
 
 // GetByLedger calls GetByLedgerFunc.
-func (mock *MockExpenseRepository) GetByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
+func (mock *ExpenseRepository) GetByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
 	if mock.GetByLedgerFunc == nil {
-		panic("MockExpenseRepository.GetByLedgerFunc: method is nil but ExpenseRepository.GetByLedger was just called")
+		panic("ExpenseRepository.GetByLedgerFunc: method is nil but ExpenseRepository.GetByLedger was just called")
 	}
 	callInfo := struct {
 		Ctx      context.Context
@@ -1394,7 +1394,7 @@ func (mock *MockExpenseRepository) GetByLedger(ctx context.Context, ledgerID dom
 // Check the length with:
 //
 //	len(mockedExpenseRepository.GetByLedgerCalls())
-func (mock *MockExpenseRepository) GetByLedgerCalls() []struct {
+func (mock *ExpenseRepository) GetByLedgerCalls() []struct {
 	Ctx      context.Context
 	LedgerID domain.ID
 	Cursor   time.Time
@@ -1413,9 +1413,9 @@ func (mock *MockExpenseRepository) GetByLedgerCalls() []struct {
 }
 
 // Update calls UpdateFunc.
-func (mock *MockExpenseRepository) Update(ctx context.Context, expense *domain.Expense) error {
+func (mock *ExpenseRepository) Update(ctx context.Context, expense *domain.Expense) error {
 	if mock.UpdateFunc == nil {
-		panic("MockExpenseRepository.UpdateFunc: method is nil but ExpenseRepository.Update was just called")
+		panic("ExpenseRepository.UpdateFunc: method is nil but ExpenseRepository.Update was just called")
 	}
 	callInfo := struct {
 		Ctx     context.Context
@@ -1434,7 +1434,7 @@ func (mock *MockExpenseRepository) Update(ctx context.Context, expense *domain.E
 // Check the length with:
 //
 //	len(mockedExpenseRepository.UpdateCalls())
-func (mock *MockExpenseRepository) UpdateCalls() []struct {
+func (mock *ExpenseRepository) UpdateCalls() []struct {
 	Ctx     context.Context
 	Expense *domain.Expense
 } {
@@ -1448,16 +1448,16 @@ func (mock *MockExpenseRepository) UpdateCalls() []struct {
 	return calls
 }
 
-// Ensure that MockDatabase does implement application.Database.
+// Ensure that Database does implement application.Database.
 // If this is not the case, regenerate this file with mockery.
-var _ application.Database = &MockDatabase{}
+var _ application.Database = &Database{}
 
-// MockDatabase is a mock implementation of application.Database.
+// Database is a mock implementation of application.Database.
 //
 //	func TestSomethingThatUsesDatabase(t *testing.T) {
 //
 //		// make and configure a mocked application.Database
-//		mockedDatabase := &MockDatabase{
+//		mockedDatabase := &Database{
 //			ExpenseFunc: func() application.ExpenseQueries {
 //				panic("mock out the Expense method")
 //			},
@@ -1476,7 +1476,7 @@ var _ application.Database = &MockDatabase{}
 //		// and then make assertions.
 //
 //	}
-type MockDatabase struct {
+type Database struct {
 	// ExpenseFunc mocks the Expense method.
 	ExpenseFunc func() application.ExpenseQueries
 
@@ -1515,9 +1515,9 @@ type MockDatabase struct {
 }
 
 // Expense calls ExpenseFunc.
-func (mock *MockDatabase) Expense() application.ExpenseQueries {
+func (mock *Database) Expense() application.ExpenseQueries {
 	if mock.ExpenseFunc == nil {
-		panic("MockDatabase.ExpenseFunc: method is nil but Database.Expense was just called")
+		panic("Database.ExpenseFunc: method is nil but Database.Expense was just called")
 	}
 	callInfo := struct {
 	}{}
@@ -1531,7 +1531,7 @@ func (mock *MockDatabase) Expense() application.ExpenseQueries {
 // Check the length with:
 //
 //	len(mockedDatabase.ExpenseCalls())
-func (mock *MockDatabase) ExpenseCalls() []struct {
+func (mock *Database) ExpenseCalls() []struct {
 } {
 	var calls []struct {
 	}
@@ -1542,9 +1542,9 @@ func (mock *MockDatabase) ExpenseCalls() []struct {
 }
 
 // Ledger calls LedgerFunc.
-func (mock *MockDatabase) Ledger() application.LedgerQueries {
+func (mock *Database) Ledger() application.LedgerQueries {
 	if mock.LedgerFunc == nil {
-		panic("MockDatabase.LedgerFunc: method is nil but Database.Ledger was just called")
+		panic("Database.LedgerFunc: method is nil but Database.Ledger was just called")
 	}
 	callInfo := struct {
 	}{}
@@ -1558,7 +1558,7 @@ func (mock *MockDatabase) Ledger() application.LedgerQueries {
 // Check the length with:
 //
 //	len(mockedDatabase.LedgerCalls())
-func (mock *MockDatabase) LedgerCalls() []struct {
+func (mock *Database) LedgerCalls() []struct {
 } {
 	var calls []struct {
 	}
@@ -1569,9 +1569,9 @@ func (mock *MockDatabase) LedgerCalls() []struct {
 }
 
 // Transaction calls TransactionFunc.
-func (mock *MockDatabase) Transaction(ctx context.Context, f func(tx application.Repositories) error) error {
+func (mock *Database) Transaction(ctx context.Context, f func(tx application.Repositories) error) error {
 	if mock.TransactionFunc == nil {
-		panic("MockDatabase.TransactionFunc: method is nil but Database.Transaction was just called")
+		panic("Database.TransactionFunc: method is nil but Database.Transaction was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
@@ -1590,7 +1590,7 @@ func (mock *MockDatabase) Transaction(ctx context.Context, f func(tx application
 // Check the length with:
 //
 //	len(mockedDatabase.TransactionCalls())
-func (mock *MockDatabase) TransactionCalls() []struct {
+func (mock *Database) TransactionCalls() []struct {
 	Ctx context.Context
 	F   func(tx application.Repositories) error
 } {
@@ -1605,9 +1605,9 @@ func (mock *MockDatabase) TransactionCalls() []struct {
 }
 
 // User calls UserFunc.
-func (mock *MockDatabase) User() application.UserQueries {
+func (mock *Database) User() application.UserQueries {
 	if mock.UserFunc == nil {
-		panic("MockDatabase.UserFunc: method is nil but Database.User was just called")
+		panic("Database.UserFunc: method is nil but Database.User was just called")
 	}
 	callInfo := struct {
 	}{}
@@ -1621,7 +1621,7 @@ func (mock *MockDatabase) User() application.UserQueries {
 // Check the length with:
 //
 //	len(mockedDatabase.UserCalls())
-func (mock *MockDatabase) UserCalls() []struct {
+func (mock *Database) UserCalls() []struct {
 } {
 	var calls []struct {
 	}
@@ -1631,16 +1631,16 @@ func (mock *MockDatabase) UserCalls() []struct {
 	return calls
 }
 
-// Ensure that MockQueries does implement application.Queries.
+// Ensure that Queries does implement application.Queries.
 // If this is not the case, regenerate this file with mockery.
-var _ application.Queries = &MockQueries{}
+var _ application.Queries = &Queries{}
 
-// MockQueries is a mock implementation of application.Queries.
+// Queries is a mock implementation of application.Queries.
 //
 //	func TestSomethingThatUsesQueries(t *testing.T) {
 //
 //		// make and configure a mocked application.Queries
-//		mockedQueries := &MockQueries{
+//		mockedQueries := &Queries{
 //			ExpenseFunc: func() application.ExpenseQueries {
 //				panic("mock out the Expense method")
 //			},
@@ -1656,7 +1656,7 @@ var _ application.Queries = &MockQueries{}
 //		// and then make assertions.
 //
 //	}
-type MockQueries struct {
+type Queries struct {
 	// ExpenseFunc mocks the Expense method.
 	ExpenseFunc func() application.ExpenseQueries
 
@@ -1684,9 +1684,9 @@ type MockQueries struct {
 }
 
 // Expense calls ExpenseFunc.
-func (mock *MockQueries) Expense() application.ExpenseQueries {
+func (mock *Queries) Expense() application.ExpenseQueries {
 	if mock.ExpenseFunc == nil {
-		panic("MockQueries.ExpenseFunc: method is nil but Queries.Expense was just called")
+		panic("Queries.ExpenseFunc: method is nil but Queries.Expense was just called")
 	}
 	callInfo := struct {
 	}{}
@@ -1700,7 +1700,7 @@ func (mock *MockQueries) Expense() application.ExpenseQueries {
 // Check the length with:
 //
 //	len(mockedQueries.ExpenseCalls())
-func (mock *MockQueries) ExpenseCalls() []struct {
+func (mock *Queries) ExpenseCalls() []struct {
 } {
 	var calls []struct {
 	}
@@ -1711,9 +1711,9 @@ func (mock *MockQueries) ExpenseCalls() []struct {
 }
 
 // Ledger calls LedgerFunc.
-func (mock *MockQueries) Ledger() application.LedgerQueries {
+func (mock *Queries) Ledger() application.LedgerQueries {
 	if mock.LedgerFunc == nil {
-		panic("MockQueries.LedgerFunc: method is nil but Queries.Ledger was just called")
+		panic("Queries.LedgerFunc: method is nil but Queries.Ledger was just called")
 	}
 	callInfo := struct {
 	}{}
@@ -1727,7 +1727,7 @@ func (mock *MockQueries) Ledger() application.LedgerQueries {
 // Check the length with:
 //
 //	len(mockedQueries.LedgerCalls())
-func (mock *MockQueries) LedgerCalls() []struct {
+func (mock *Queries) LedgerCalls() []struct {
 } {
 	var calls []struct {
 	}
@@ -1738,9 +1738,9 @@ func (mock *MockQueries) LedgerCalls() []struct {
 }
 
 // User calls UserFunc.
-func (mock *MockQueries) User() application.UserQueries {
+func (mock *Queries) User() application.UserQueries {
 	if mock.UserFunc == nil {
-		panic("MockQueries.UserFunc: method is nil but Queries.User was just called")
+		panic("Queries.UserFunc: method is nil but Queries.User was just called")
 	}
 	callInfo := struct {
 	}{}
@@ -1754,7 +1754,7 @@ func (mock *MockQueries) User() application.UserQueries {
 // Check the length with:
 //
 //	len(mockedQueries.UserCalls())
-func (mock *MockQueries) UserCalls() []struct {
+func (mock *Queries) UserCalls() []struct {
 } {
 	var calls []struct {
 	}
@@ -1764,16 +1764,16 @@ func (mock *MockQueries) UserCalls() []struct {
 	return calls
 }
 
-// Ensure that MockRepositories does implement application.Repositories.
+// Ensure that Repositories does implement application.Repositories.
 // If this is not the case, regenerate this file with mockery.
-var _ application.Repositories = &MockRepositories{}
+var _ application.Repositories = &Repositories{}
 
-// MockRepositories is a mock implementation of application.Repositories.
+// Repositories is a mock implementation of application.Repositories.
 //
 //	func TestSomethingThatUsesRepositories(t *testing.T) {
 //
 //		// make and configure a mocked application.Repositories
-//		mockedRepositories := &MockRepositories{
+//		mockedRepositories := &Repositories{
 //			ExpenseFunc: func() application.ExpenseRepository {
 //				panic("mock out the Expense method")
 //			},
@@ -1789,7 +1789,7 @@ var _ application.Repositories = &MockRepositories{}
 //		// and then make assertions.
 //
 //	}
-type MockRepositories struct {
+type Repositories struct {
 	// ExpenseFunc mocks the Expense method.
 	ExpenseFunc func() application.ExpenseRepository
 
@@ -1817,9 +1817,9 @@ type MockRepositories struct {
 }
 
 // Expense calls ExpenseFunc.
-func (mock *MockRepositories) Expense() application.ExpenseRepository {
+func (mock *Repositories) Expense() application.ExpenseRepository {
 	if mock.ExpenseFunc == nil {
-		panic("MockRepositories.ExpenseFunc: method is nil but Repositories.Expense was just called")
+		panic("Repositories.ExpenseFunc: method is nil but Repositories.Expense was just called")
 	}
 	callInfo := struct {
 	}{}
@@ -1833,7 +1833,7 @@ func (mock *MockRepositories) Expense() application.ExpenseRepository {
 // Check the length with:
 //
 //	len(mockedRepositories.ExpenseCalls())
-func (mock *MockRepositories) ExpenseCalls() []struct {
+func (mock *Repositories) ExpenseCalls() []struct {
 } {
 	var calls []struct {
 	}
@@ -1844,9 +1844,9 @@ func (mock *MockRepositories) ExpenseCalls() []struct {
 }
 
 // Ledger calls LedgerFunc.
-func (mock *MockRepositories) Ledger() application.LedgerRepository {
+func (mock *Repositories) Ledger() application.LedgerRepository {
 	if mock.LedgerFunc == nil {
-		panic("MockRepositories.LedgerFunc: method is nil but Repositories.Ledger was just called")
+		panic("Repositories.LedgerFunc: method is nil but Repositories.Ledger was just called")
 	}
 	callInfo := struct {
 	}{}
@@ -1860,7 +1860,7 @@ func (mock *MockRepositories) Ledger() application.LedgerRepository {
 // Check the length with:
 //
 //	len(mockedRepositories.LedgerCalls())
-func (mock *MockRepositories) LedgerCalls() []struct {
+func (mock *Repositories) LedgerCalls() []struct {
 } {
 	var calls []struct {
 	}
@@ -1871,9 +1871,9 @@ func (mock *MockRepositories) LedgerCalls() []struct {
 }
 
 // User calls UserFunc.
-func (mock *MockRepositories) User() application.UserRepository {
+func (mock *Repositories) User() application.UserRepository {
 	if mock.UserFunc == nil {
-		panic("MockRepositories.UserFunc: method is nil but Repositories.User was just called")
+		panic("Repositories.UserFunc: method is nil but Repositories.User was just called")
 	}
 	callInfo := struct {
 	}{}
@@ -1887,7 +1887,7 @@ func (mock *MockRepositories) User() application.UserRepository {
 // Check the length with:
 //
 //	len(mockedRepositories.UserCalls())
-func (mock *MockRepositories) UserCalls() []struct {
+func (mock *Repositories) UserCalls() []struct {
 } {
 	var calls []struct {
 	}

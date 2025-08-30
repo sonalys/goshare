@@ -2,7 +2,7 @@
 // github.com/vektra/mockery
 // template: matryer
 
-package identitycontroller
+package identitycontrollermock
 
 import (
 	"sync"
@@ -11,16 +11,16 @@ import (
 	"github.com/sonalys/goshare/internal/application/pkg/v1"
 )
 
-// Ensure that MockIdentityEncoder does implement identitycontroller.IdentityEncoder.
+// Ensure that IdentityEncoder does implement identitycontroller.IdentityEncoder.
 // If this is not the case, regenerate this file with mockery.
-var _ identitycontroller.IdentityEncoder = &MockIdentityEncoder{}
+var _ identitycontroller.IdentityEncoder = &IdentityEncoder{}
 
-// MockIdentityEncoder is a mock implementation of identitycontroller.IdentityEncoder.
+// IdentityEncoder is a mock implementation of identitycontroller.IdentityEncoder.
 //
 //	func TestSomethingThatUsesIdentityEncoder(t *testing.T) {
 //
 //		// make and configure a mocked identitycontroller.IdentityEncoder
-//		mockedIdentityEncoder := &MockIdentityEncoder{
+//		mockedIdentityEncoder := &IdentityEncoder{
 //			EncodeFunc: func(identity *v1.Identity) (string, error) {
 //				panic("mock out the Encode method")
 //			},
@@ -30,7 +30,7 @@ var _ identitycontroller.IdentityEncoder = &MockIdentityEncoder{}
 //		// and then make assertions.
 //
 //	}
-type MockIdentityEncoder struct {
+type IdentityEncoder struct {
 	// EncodeFunc mocks the Encode method.
 	EncodeFunc func(identity *v1.Identity) (string, error)
 
@@ -46,9 +46,9 @@ type MockIdentityEncoder struct {
 }
 
 // Encode calls EncodeFunc.
-func (mock *MockIdentityEncoder) Encode(identity *v1.Identity) (string, error) {
+func (mock *IdentityEncoder) Encode(identity *v1.Identity) (string, error) {
 	if mock.EncodeFunc == nil {
-		panic("MockIdentityEncoder.EncodeFunc: method is nil but IdentityEncoder.Encode was just called")
+		panic("IdentityEncoder.EncodeFunc: method is nil but IdentityEncoder.Encode was just called")
 	}
 	callInfo := struct {
 		Identity *v1.Identity
@@ -65,7 +65,7 @@ func (mock *MockIdentityEncoder) Encode(identity *v1.Identity) (string, error) {
 // Check the length with:
 //
 //	len(mockedIdentityEncoder.EncodeCalls())
-func (mock *MockIdentityEncoder) EncodeCalls() []struct {
+func (mock *IdentityEncoder) EncodeCalls() []struct {
 	Identity *v1.Identity
 } {
 	var calls []struct {

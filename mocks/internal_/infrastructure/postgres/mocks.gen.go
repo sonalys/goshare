@@ -2,7 +2,7 @@
 // github.com/vektra/mockery
 // template: matryer
 
-package postgres
+package postgresmock
 
 import (
 	"context"
@@ -14,16 +14,16 @@ import (
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 )
 
-// Ensure that mockconnection does implement postgres.connection.
+// Ensure that connection does implement postgres.connection.
 // If this is not the case, regenerate this file with mockery.
-var _ postgres.connection = &mockconnection{}
+var _ postgres.connection = &connection{}
 
-// mockconnection is a mock implementation of postgres.connection.
+// connection is a mock implementation of postgres.connection.
 //
 //	func TestSomethingThatUsesconnection(t *testing.T) {
 //
 //		// make and configure a mocked postgres.connection
-//		mockedconnection := &mockconnection{
+//		mockedconnection := &connection{
 //			queriesFunc: func() *sqlc.Queries {
 //				panic("mock out the queries method")
 //			},
@@ -36,7 +36,7 @@ var _ postgres.connection = &mockconnection{}
 //		// and then make assertions.
 //
 //	}
-type mockconnection struct {
+type connection struct {
 	// queriesFunc mocks the queries method.
 	queriesFunc func() *sqlc.Queries
 
@@ -61,9 +61,9 @@ type mockconnection struct {
 }
 
 // queries calls queriesFunc.
-func (mock *mockconnection) queries() *sqlc.Queries {
+func (mock *connection) queries() *sqlc.Queries {
 	if mock.queriesFunc == nil {
-		panic("mockconnection.queriesFunc: method is nil but connection.queries was just called")
+		panic("connection.queriesFunc: method is nil but connection.queries was just called")
 	}
 	callInfo := struct {
 	}{}
@@ -77,7 +77,7 @@ func (mock *mockconnection) queries() *sqlc.Queries {
 // Check the length with:
 //
 //	len(mockedconnection.queriesCalls())
-func (mock *mockconnection) queriesCalls() []struct {
+func (mock *connection) queriesCalls() []struct {
 } {
 	var calls []struct {
 	}
@@ -88,9 +88,9 @@ func (mock *mockconnection) queriesCalls() []struct {
 }
 
 // transaction calls transactionFunc.
-func (mock *mockconnection) transaction(ctx context.Context, f func(q *sqlc.Queries) error) error {
+func (mock *connection) transaction(ctx context.Context, f func(q *sqlc.Queries) error) error {
 	if mock.transactionFunc == nil {
-		panic("mockconnection.transactionFunc: method is nil but connection.transaction was just called")
+		panic("connection.transactionFunc: method is nil but connection.transaction was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
@@ -109,7 +109,7 @@ func (mock *mockconnection) transaction(ctx context.Context, f func(q *sqlc.Quer
 // Check the length with:
 //
 //	len(mockedconnection.transactionCalls())
-func (mock *mockconnection) transactionCalls() []struct {
+func (mock *connection) transactionCalls() []struct {
 	Ctx context.Context
 	F   func(q *sqlc.Queries) error
 } {
@@ -123,16 +123,16 @@ func (mock *mockconnection) transactionCalls() []struct {
 	return calls
 }
 
-// Ensure that mockpgxConn does implement postgres.pgxConn.
+// Ensure that pgxConn does implement postgres.pgxConn.
 // If this is not the case, regenerate this file with mockery.
-var _ postgres.pgxConn = &mockpgxConn{}
+var _ postgres.pgxConn = &pgxConn{}
 
-// mockpgxConn is a mock implementation of postgres.pgxConn.
+// pgxConn is a mock implementation of postgres.pgxConn.
 //
 //	func TestSomethingThatUsespgxConn(t *testing.T) {
 //
 //		// make and configure a mocked postgres.pgxConn
-//		mockedpgxConn := &mockpgxConn{
+//		mockedpgxConn := &pgxConn{
 //			BeginFunc: func(ctx context.Context) (pgx.Tx, error) {
 //				panic("mock out the Begin method")
 //			},
@@ -151,7 +151,7 @@ var _ postgres.pgxConn = &mockpgxConn{}
 //		// and then make assertions.
 //
 //	}
-type mockpgxConn struct {
+type pgxConn struct {
 	// BeginFunc mocks the Begin method.
 	BeginFunc func(ctx context.Context) (pgx.Tx, error)
 
@@ -206,9 +206,9 @@ type mockpgxConn struct {
 }
 
 // Begin calls BeginFunc.
-func (mock *mockpgxConn) Begin(ctx context.Context) (pgx.Tx, error) {
+func (mock *pgxConn) Begin(ctx context.Context) (pgx.Tx, error) {
 	if mock.BeginFunc == nil {
-		panic("mockpgxConn.BeginFunc: method is nil but pgxConn.Begin was just called")
+		panic("pgxConn.BeginFunc: method is nil but pgxConn.Begin was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
@@ -225,7 +225,7 @@ func (mock *mockpgxConn) Begin(ctx context.Context) (pgx.Tx, error) {
 // Check the length with:
 //
 //	len(mockedpgxConn.BeginCalls())
-func (mock *mockpgxConn) BeginCalls() []struct {
+func (mock *pgxConn) BeginCalls() []struct {
 	Ctx context.Context
 } {
 	var calls []struct {
@@ -238,9 +238,9 @@ func (mock *mockpgxConn) BeginCalls() []struct {
 }
 
 // Exec calls ExecFunc.
-func (mock *mockpgxConn) Exec(context1 context.Context, s string, ifaceVals ...interface{}) (pgconn.CommandTag, error) {
+func (mock *pgxConn) Exec(context1 context.Context, s string, ifaceVals ...interface{}) (pgconn.CommandTag, error) {
 	if mock.ExecFunc == nil {
-		panic("mockpgxConn.ExecFunc: method is nil but pgxConn.Exec was just called")
+		panic("pgxConn.ExecFunc: method is nil but pgxConn.Exec was just called")
 	}
 	callInfo := struct {
 		Context1  context.Context
@@ -261,7 +261,7 @@ func (mock *mockpgxConn) Exec(context1 context.Context, s string, ifaceVals ...i
 // Check the length with:
 //
 //	len(mockedpgxConn.ExecCalls())
-func (mock *mockpgxConn) ExecCalls() []struct {
+func (mock *pgxConn) ExecCalls() []struct {
 	Context1  context.Context
 	S         string
 	IfaceVals []interface{}
@@ -278,9 +278,9 @@ func (mock *mockpgxConn) ExecCalls() []struct {
 }
 
 // Query calls QueryFunc.
-func (mock *mockpgxConn) Query(context1 context.Context, s string, ifaceVals ...interface{}) (pgx.Rows, error) {
+func (mock *pgxConn) Query(context1 context.Context, s string, ifaceVals ...interface{}) (pgx.Rows, error) {
 	if mock.QueryFunc == nil {
-		panic("mockpgxConn.QueryFunc: method is nil but pgxConn.Query was just called")
+		panic("pgxConn.QueryFunc: method is nil but pgxConn.Query was just called")
 	}
 	callInfo := struct {
 		Context1  context.Context
@@ -301,7 +301,7 @@ func (mock *mockpgxConn) Query(context1 context.Context, s string, ifaceVals ...
 // Check the length with:
 //
 //	len(mockedpgxConn.QueryCalls())
-func (mock *mockpgxConn) QueryCalls() []struct {
+func (mock *pgxConn) QueryCalls() []struct {
 	Context1  context.Context
 	S         string
 	IfaceVals []interface{}
@@ -318,9 +318,9 @@ func (mock *mockpgxConn) QueryCalls() []struct {
 }
 
 // QueryRow calls QueryRowFunc.
-func (mock *mockpgxConn) QueryRow(context1 context.Context, s string, ifaceVals ...interface{}) pgx.Row {
+func (mock *pgxConn) QueryRow(context1 context.Context, s string, ifaceVals ...interface{}) pgx.Row {
 	if mock.QueryRowFunc == nil {
-		panic("mockpgxConn.QueryRowFunc: method is nil but pgxConn.QueryRow was just called")
+		panic("pgxConn.QueryRowFunc: method is nil but pgxConn.QueryRow was just called")
 	}
 	callInfo := struct {
 		Context1  context.Context
@@ -341,7 +341,7 @@ func (mock *mockpgxConn) QueryRow(context1 context.Context, s string, ifaceVals 
 // Check the length with:
 //
 //	len(mockedpgxConn.QueryRowCalls())
-func (mock *mockpgxConn) QueryRowCalls() []struct {
+func (mock *pgxConn) QueryRowCalls() []struct {
 	Context1  context.Context
 	S         string
 	IfaceVals []interface{}

@@ -2,7 +2,7 @@
 // github.com/vektra/mockery
 // template: matryer
 
-package sqlc
+package sqlcmock
 
 import (
 	"context"
@@ -13,16 +13,16 @@ import (
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
 )
 
-// Ensure that MockDBTX does implement sqlc.DBTX.
+// Ensure that DBTX does implement sqlc.DBTX.
 // If this is not the case, regenerate this file with mockery.
-var _ sqlc.DBTX = &MockDBTX{}
+var _ sqlc.DBTX = &DBTX{}
 
-// MockDBTX is a mock implementation of sqlc.DBTX.
+// DBTX is a mock implementation of sqlc.DBTX.
 //
 //	func TestSomethingThatUsesDBTX(t *testing.T) {
 //
 //		// make and configure a mocked sqlc.DBTX
-//		mockedDBTX := &MockDBTX{
+//		mockedDBTX := &DBTX{
 //			ExecFunc: func(context1 context.Context, s string, ifaceVals ...interface{}) (pgconn.CommandTag, error) {
 //				panic("mock out the Exec method")
 //			},
@@ -38,7 +38,7 @@ var _ sqlc.DBTX = &MockDBTX{}
 //		// and then make assertions.
 //
 //	}
-type MockDBTX struct {
+type DBTX struct {
 	// ExecFunc mocks the Exec method.
 	ExecFunc func(context1 context.Context, s string, ifaceVals ...interface{}) (pgconn.CommandTag, error)
 
@@ -84,9 +84,9 @@ type MockDBTX struct {
 }
 
 // Exec calls ExecFunc.
-func (mock *MockDBTX) Exec(context1 context.Context, s string, ifaceVals ...interface{}) (pgconn.CommandTag, error) {
+func (mock *DBTX) Exec(context1 context.Context, s string, ifaceVals ...interface{}) (pgconn.CommandTag, error) {
 	if mock.ExecFunc == nil {
-		panic("MockDBTX.ExecFunc: method is nil but DBTX.Exec was just called")
+		panic("DBTX.ExecFunc: method is nil but DBTX.Exec was just called")
 	}
 	callInfo := struct {
 		Context1  context.Context
@@ -107,7 +107,7 @@ func (mock *MockDBTX) Exec(context1 context.Context, s string, ifaceVals ...inte
 // Check the length with:
 //
 //	len(mockedDBTX.ExecCalls())
-func (mock *MockDBTX) ExecCalls() []struct {
+func (mock *DBTX) ExecCalls() []struct {
 	Context1  context.Context
 	S         string
 	IfaceVals []interface{}
@@ -124,9 +124,9 @@ func (mock *MockDBTX) ExecCalls() []struct {
 }
 
 // Query calls QueryFunc.
-func (mock *MockDBTX) Query(context1 context.Context, s string, ifaceVals ...interface{}) (pgx.Rows, error) {
+func (mock *DBTX) Query(context1 context.Context, s string, ifaceVals ...interface{}) (pgx.Rows, error) {
 	if mock.QueryFunc == nil {
-		panic("MockDBTX.QueryFunc: method is nil but DBTX.Query was just called")
+		panic("DBTX.QueryFunc: method is nil but DBTX.Query was just called")
 	}
 	callInfo := struct {
 		Context1  context.Context
@@ -147,7 +147,7 @@ func (mock *MockDBTX) Query(context1 context.Context, s string, ifaceVals ...int
 // Check the length with:
 //
 //	len(mockedDBTX.QueryCalls())
-func (mock *MockDBTX) QueryCalls() []struct {
+func (mock *DBTX) QueryCalls() []struct {
 	Context1  context.Context
 	S         string
 	IfaceVals []interface{}
@@ -164,9 +164,9 @@ func (mock *MockDBTX) QueryCalls() []struct {
 }
 
 // QueryRow calls QueryRowFunc.
-func (mock *MockDBTX) QueryRow(context1 context.Context, s string, ifaceVals ...interface{}) pgx.Row {
+func (mock *DBTX) QueryRow(context1 context.Context, s string, ifaceVals ...interface{}) pgx.Row {
 	if mock.QueryRowFunc == nil {
-		panic("MockDBTX.QueryRowFunc: method is nil but DBTX.QueryRow was just called")
+		panic("DBTX.QueryRowFunc: method is nil but DBTX.QueryRow was just called")
 	}
 	callInfo := struct {
 		Context1  context.Context
@@ -187,7 +187,7 @@ func (mock *MockDBTX) QueryRow(context1 context.Context, s string, ifaceVals ...
 // Check the length with:
 //
 //	len(mockedDBTX.QueryRowCalls())
-func (mock *MockDBTX) QueryRowCalls() []struct {
+func (mock *DBTX) QueryRowCalls() []struct {
 	Context1  context.Context
 	S         string
 	IfaceVals []interface{}

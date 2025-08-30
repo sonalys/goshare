@@ -2,6 +2,7 @@ package usercontroller
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/pkg/slog"
@@ -34,26 +35,30 @@ func (c *ledgerController) Create(ctx context.Context, req CreateLedgerRequest) 
 	err = c.db.Transaction(ctx, func(db application.Repositories) error {
 		user, err := db.User().Find(ctx, req.Actor)
 		if err != nil {
-			return err
+			return fmt.Errorf("finding user% w", err)
 		}
 
 		ledger, err := user.CreateLedger(req.Name)
 		if err != nil {
-			return err
+			return fmt.Errorf("creating ledger: %w", err)
 		}
 
 		if err := db.Ledger().Create(ctx, ledger); err != nil {
-			return err
+			return fmt.Errorf("saving ledger %w", err)
 		}
 
 		resp = &CreateLedgerResponse{
 			ID: ledger.ID,
 		}
 
-		return db.User().Save(ctx, user)
+		if err := db.User().Save(ctx, user); err != nil {
+			return fmt.Errorf("saving user: %w", err)
+		}
+
+		return nil
 	})
 	if err != nil {
-		return nil, slog.ErrorReturn(ctx, "creating ledger", err)
+		return nil, slog.ErrorReturn(ctx, "commiting transaction", err)
 	}
 
 	slog.Info(ctx, "ledger created", slog.WithStringer("ledger_id", resp.ID))
