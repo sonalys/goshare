@@ -11,6 +11,12 @@ import (
 )
 
 type (
+	connection interface {
+		transaction(ctx context.Context, f func(q connection) error) error
+		queries() *sqlcgen.Queries
+		readWrite() *readWriteRepository
+	}
+
 	pgxConn interface {
 		sqlcgen.DBTX
 		Begin(ctx context.Context) (pgx.Tx, error)
@@ -38,24 +44,6 @@ func (c *readWriteRepository) User() application.UserRepository {
 func (c *readWriteRepository) Expense() application.ExpenseRepository {
 	return &ExpenseRepository{
 		client: c.connection,
-	}
-}
-
-func (c *conn[T]) Ledger() application.LedgerQueries {
-	return &LedgerRepository{
-		client: c,
-	}
-}
-
-func (c *conn[T]) User() application.UserQueries {
-	return &UsersRepository{
-		client: c,
-	}
-}
-
-func (c *conn[T]) Expense() application.ExpenseQueries {
-	return &ExpenseRepository{
-		client: c,
 	}
 }
 

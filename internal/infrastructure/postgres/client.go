@@ -8,16 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/pkg/slog"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
 )
-
-type connection interface {
-	transaction(ctx context.Context, f func(q connection) error) error
-	queries() *sqlcgen.Queries
-	readWrite() *readWriteRepository
-
-	application.Queries
-}
 
 type Postgres struct {
 	connection
@@ -53,6 +44,24 @@ func (c *Postgres) Transaction(ctx context.Context, f func(application.Repositor
 	return c.transaction(ctx, func(q connection) error {
 		return f(c.readWrite())
 	})
+}
+
+func (c *Postgres) Ledger() application.LedgerQueries {
+	return &LedgerRepository{
+		client: c,
+	}
+}
+
+func (c *Postgres) User() application.UserQueries {
+	return &UsersRepository{
+		client: c,
+	}
+}
+
+func (c *Postgres) Expense() application.ExpenseQueries {
+	return &ExpenseRepository{
+		client: c,
+	}
 }
 
 func wait(ctx context.Context, conn *pgxpool.Pool) error {
