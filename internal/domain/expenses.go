@@ -52,12 +52,12 @@ func (e *Expense) TotalSettled() int32 {
 	return e.sumRecords(RecordTypeSettlement)
 }
 
-func (e *Expense) validateCreateRecords(actor ID, ledger *Ledger, records ...PendingRecord) error {
-	if !ledger.HasMember(actor) {
+func (e *Expense) validateCreateRecords(creator ID, ledger *Ledger, records ...PendingRecord) error {
+	if !ledger.HasMember(creator) {
 		return FieldError{
-			Field: "actor",
+			Field: "creator",
 			Cause: ErrLedgerUserNotMember{
-				UserID:   actor,
+				UserID:   creator,
 				LedgerID: ledger.ID,
 			},
 		}
@@ -161,8 +161,8 @@ func (e *Expense) validateCreateRecords(actor ID, ledger *Ledger, records ...Pen
 	return errs.Close()
 }
 
-func (e *Expense) CreateRecords(actor ID, ledger *Ledger, records ...PendingRecord) error {
-	if err := e.validateCreateRecords(actor, ledger, records...); err != nil {
+func (e *Expense) CreateRecords(creator ID, ledger *Ledger, records ...PendingRecord) error {
+	if err := e.validateCreateRecords(creator, ledger, records...); err != nil {
 		return err
 	}
 
@@ -176,9 +176,9 @@ func (e *Expense) CreateRecords(actor ID, ledger *Ledger, records ...PendingReco
 			From:      record.From,
 			To:        record.To,
 			CreatedAt: now,
-			CreatedBy: actor,
+			CreatedBy: creator,
 			UpdatedAt: now,
-			UpdatedBy: actor,
+			UpdatedBy: creator,
 		}
 
 		switch record.Type {
@@ -196,17 +196,7 @@ func (e *Expense) CreateRecords(actor ID, ledger *Ledger, records ...PendingReco
 	return nil
 }
 
-func (e *Expense) validateDeleteRecord(actor ID, ledger *Ledger, recordID ID) error {
-	if !ledger.HasMember(actor) {
-		return FieldError{
-			Field: "actor",
-			Cause: ErrLedgerUserNotMember{
-				UserID:   actor,
-				LedgerID: ledger.ID,
-			},
-		}
-	}
-
+func (e *Expense) validateDeleteRecord(ledger *Ledger, recordID ID) error {
 	if ledger.ID != e.LedgerID {
 		return FieldError{
 			Field: "ledger",
@@ -224,8 +214,8 @@ func (e *Expense) validateDeleteRecord(actor ID, ledger *Ledger, recordID ID) er
 	return nil
 }
 
-func (e *Expense) DeleteRecord(actor ID, ledger *Ledger, recordID ID) error {
-	if err := e.validateDeleteRecord(actor, ledger, recordID); err != nil {
+func (e *Expense) DeleteRecord(ledger *Ledger, recordID ID) error {
+	if err := e.validateDeleteRecord(ledger, recordID); err != nil {
 		return err
 	}
 

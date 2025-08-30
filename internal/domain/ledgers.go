@@ -27,7 +27,7 @@ type (
 	}
 
 	CreateExpenseRequest struct {
-		Actor          ID
+		Creator        ID
 		Name           string
 		ExpenseDate    time.Time
 		PendingRecords []PendingRecord
@@ -53,9 +53,9 @@ func (req *CreateExpenseRequest) validate() error {
 }
 
 func (ledger *Ledger) CreateExpense(req CreateExpenseRequest) (*Expense, error) {
-	if !ledger.HasMember(req.Actor) {
+	if !ledger.HasMember(req.Creator) {
 		return nil, ErrLedgerUserNotMember{
-			UserID:   req.Actor,
+			UserID:   req.Creator,
 			LedgerID: ledger.ID,
 		}
 	}
@@ -74,12 +74,12 @@ func (ledger *Ledger) CreateExpense(req CreateExpenseRequest) (*Expense, error) 
 		Records:     make(map[ID]*Record, len(req.PendingRecords)),
 		Amount:      0,
 		CreatedAt:   now,
-		CreatedBy:   req.Actor,
+		CreatedBy:   req.Creator,
 		UpdatedAt:   now,
-		UpdatedBy:   req.Actor,
+		UpdatedBy:   req.Creator,
 	}
 
-	if err := expense.CreateRecords(req.Actor, ledger, req.PendingRecords...); err != nil {
+	if err := expense.CreateRecords(req.Creator, ledger, req.PendingRecords...); err != nil {
 		return nil, fmt.Errorf("creating expense records: %w", err)
 	}
 
@@ -91,10 +91,10 @@ func (ledger *Ledger) HasMember(identity ID) bool {
 	return ok
 }
 
-func (ledger *Ledger) AddMember(actor ID, newMembers ...ID) error {
-	if !ledger.HasMember(actor) {
+func (ledger *Ledger) AddMember(inviter ID, newMembers ...ID) error {
+	if !ledger.HasMember(inviter) {
 		return ErrLedgerUserNotMember{
-			UserID:   actor,
+			UserID:   inviter,
 			LedgerID: ledger.ID,
 		}
 	}
@@ -131,7 +131,7 @@ func (ledger *Ledger) AddMember(actor ID, newMembers ...ID) error {
 		ledger.Members[id] = &LedgerMember{
 			Balance:   0,
 			CreatedAt: time.Now(),
-			CreatedBy: actor,
+			CreatedBy: inviter,
 		}
 	}
 

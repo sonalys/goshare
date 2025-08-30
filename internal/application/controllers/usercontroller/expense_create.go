@@ -44,7 +44,7 @@ func (c *expenseController) Create(ctx context.Context, req CreateExpenseRequest
 		}
 
 		expense, err := ledger.CreateExpense(domain.CreateExpenseRequest{
-			Actor:          req.Actor,
+			Creator:        req.Actor,
 			Name:           req.Name,
 			ExpenseDate:    req.ExpenseDate,
 			PendingRecords: req.PendingRecords,

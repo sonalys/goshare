@@ -30,7 +30,7 @@ func TestLedger_CreateExpense(t *testing.T) {
 				},
 			},
 			req: domain.CreateExpenseRequest{
-				Actor:       actorID,
+				Creator:     actorID,
 				Name:        "expense",
 				ExpenseDate: time.Now(),
 				PendingRecords: []domain.PendingRecord{
@@ -68,7 +68,7 @@ func TestLedger_CreateExpense(t *testing.T) {
 	t.Run("fail/actor is not a member", func(t *testing.T) {
 		t.Parallel()
 		data := factory(func(td *testData) {
-			td.req.Actor = domain.NewID()
+			td.req.Creator = domain.NewID()
 		})
 
 		expense, err := data.ledger.CreateExpense(data.req)
@@ -77,7 +77,7 @@ func TestLedger_CreateExpense(t *testing.T) {
 
 		var targetErr domain.ErrLedgerUserNotMember
 		require.ErrorAs(t, err, &targetErr)
-		assert.Equal(t, data.req.Actor, targetErr.UserID)
+		assert.Equal(t, data.req.Creator, targetErr.UserID)
 		assert.Equal(t, data.ledger.ID, targetErr.LedgerID)
 	})
 

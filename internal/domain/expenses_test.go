@@ -510,7 +510,7 @@ func TestExpense_DeleteRecord(t *testing.T) {
 			},
 		}
 
-		err := expense.DeleteRecord(actorID, ledger, recordID)
+		err := expense.DeleteRecord(ledger, recordID)
 		require.NoError(t, err)
 
 		assert.Empty(t, expense.Records)
@@ -542,7 +542,7 @@ func TestExpense_DeleteRecord(t *testing.T) {
 			},
 		}
 
-		err := expense.DeleteRecord(actorID, ledger, recordID)
+		err := expense.DeleteRecord(ledger, recordID)
 		require.NoError(t, err)
 
 		assert.Empty(t, expense.Records)
@@ -571,7 +571,7 @@ func TestExpense_DeleteRecord(t *testing.T) {
 			},
 		}
 
-		err := expense.DeleteRecord(actorID, ledger, recordID)
+		err := expense.DeleteRecord(ledger, recordID)
 		require.ErrorIs(t, err, domain.FieldError{
 			Field: "actor",
 			Cause: domain.ErrLedgerUserNotMember{
@@ -602,7 +602,7 @@ func TestExpense_DeleteRecord(t *testing.T) {
 			},
 		}
 
-		err := expense.DeleteRecord(actorID, ledger, recordID)
+		err := expense.DeleteRecord(ledger, recordID)
 		require.ErrorIs(t, err, domain.FieldError{
 			Field: "ledger",
 			Cause: domain.ErrLedgerMismatch,
@@ -630,7 +630,7 @@ func TestExpense_DeleteRecord(t *testing.T) {
 			},
 		}
 
-		err := expense.DeleteRecord(actorID, ledger, domain.NewID())
+		err := expense.DeleteRecord(ledger, domain.NewID())
 		require.ErrorIs(t, err, domain.FieldError{
 			Field: "recordID",
 			Cause: domain.CauseNotFound,
