@@ -2,10 +2,10 @@ package mappers
 
 import (
 	domain "github.com/sonalys/goshare/internal/domain"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
 )
 
-func NewLedger(ledger *sqlc.Ledger, members []sqlc.LedgerMember) *domain.Ledger {
+func NewLedger(ledger *sqlcgen.Ledger, members []sqlcgen.LedgerMember) *domain.Ledger {
 	ledgerMembers := make(map[domain.ID]*domain.LedgerMember, len(members))
 
 	for _, member := range members {

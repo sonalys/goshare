@@ -8,12 +8,12 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/pkg/slog"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
 )
 
 type connection interface {
 	transaction(ctx context.Context, f func(q connection) error) error
-	queries() *sqlc.Queries
+	queries() *sqlcgen.Queries
 	readWrite() *readWriteRepository
 
 	application.Queries

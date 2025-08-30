@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/sonalys/goshare/internal/application"
-	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
+	"github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/domain"
 )
 

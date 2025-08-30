@@ -8,7 +8,7 @@ import (
 	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/mappers"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
 )
 
 type UsersRepository struct {
@@ -22,7 +22,7 @@ func NewUsersRepository(client connection) *UsersRepository {
 }
 
 func (r *UsersRepository) Save(ctx context.Context, user *domain.User) error {
-	return mapError(r.client.queries().SaveUser(ctx, sqlc.SaveUserParams{
+	return mapError(r.client.queries().SaveUser(ctx, sqlcgen.SaveUserParams{
 		ID:           user.ID,
 		FirstName:    user.FirstName,
 		LastName:     user.LastName,
@@ -60,7 +60,7 @@ func (r *UsersRepository) ListByEmail(ctx context.Context, emails []string) ([]d
 
 	var errs domain.Form
 	for idx, email := range emails {
-		if !slices.ContainsFunc(users, func(user sqlc.User) bool {
+		if !slices.ContainsFunc(users, func(user sqlcgen.User) bool {
 			return user.Email == email
 		}) {
 			errs = append(errs, domain.FieldError{

@@ -8,15 +8,44 @@ env:
   GO_VERSION: 1.24
   VERSION: 0.1.0
   CGO_ENABLED: 0
+
+  # Secrets for local development
   POSTGRES_CONN: postgresql://user:password@postgres:5432/goshare?sslmode=disable
   JAEGER_CONN: jaeger:4317
 
+  # Tools
+  SQLC: go tool -modfile=.tools/sqlc/go.mod sqlc -f .config/.sqlc.yaml
+  GOLANGCI: go tool -modfile=.tools/golangci-lint/go.mod golangci-lint -c .config/.golangci.yaml
+  GOTESTSUM: go tool -modfile=.tools/gotestsum/go.mod gotestsum
+  OGEN: go tool -modfile=.tools/ogen/go.mod ogen
+  MOCKERY: go tool -modfile=.tools/mockery/go.mod mockery --config .config/.mockery.yaml
+
 tasks:
+  diff-mockery:
+    cmd: |
+        if ! git diff --quiet; then
+          echo "❌ commit all changes before comparing the diff"
+          exit 1
+        fi
+
+        task generate-mocks
+
+        if ! git diff --quiet; then
+          echo "❌ mockery generated changes. Run 'task generate-mocks' and commit the results."
+          exit 1
+        fi
+
+  diff-sqlc:
+    cmd: $SQLC diff
+
+  vet-sql:
+    cmd: $SQLC vet
+
   lint:
-    cmd: go tool -modfile=.tools/golangci-lint/go.mod golangci-lint run
+    cmd: $GOLANGCI run
 
   test-coverage:
-    cmd: go tool -modfile=.tools/gotestsum/go.mod gotestsum --hide-summary=skipped -- -cover -v ./...
+    cmd: $GOTESTSUM --hide-summary=skipped -- -cover -v ./...
 
   build-server:
     cmd: go build -ldflags "-extldflags '-static' -X main.version=$VERSION" -o ./bin/server ./cmd/server
@@ -29,7 +58,6 @@ tasks:
       - bin/migration
 
   add-tool:
-    desc: "Add a new tool (usage: task add-tool tool=github.com/vektra/mockery/v3)"
     vars:
       tool: { sh: 'echo "${tool}"' }
     cmds:
@@ -87,17 +115,17 @@ tasks:
     cmd: go run ./cmd/migration/...
 
   generate-sql:
-    cmd: go tool -modfile=.tools/sqlc/go.mod sqlc -f .config/.sqlc.yaml generate
+    cmd: $SQLC -f .config/.sqlc.yaml generate
 
   generate-openapi:
-    cmd: go tool -modfile=.tools/ogen/go.mod ogen -package handlers --target cmd/server/handlers --clean cmd/server/spec/root.yaml
+    cmd: $OGEN -package handlers --target cmd/server/handlers --clean cmd/server/spec/root.yaml
     sources:
       - cmd/server/spec/root.yaml
 
   generate-mocks:
     cmd: >
       rm -rf mocks;
-      go tool -modfile=.tools/mockery/go.mod mockery --config .config/.mockery.yaml
+      $MOCKERY
 
   compose-server:
     cmd: docker compose -f {{ .COMPOSE_FILE }} up -d --build goshare && docker compose -f {{ .COMPOSE_FILE }} logs -f goshare_migrate goshare

@@ -7,12 +7,12 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/pkg/slog"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
 )
 
 type (
 	pgxConn interface {
-		sqlc.DBTX
+		sqlcgen.DBTX
 		Begin(ctx context.Context) (pgx.Tx, error)
 	}
 
@@ -59,8 +59,8 @@ func (c *conn[T]) Expense() application.ExpenseQueries {
 	}
 }
 
-func (c *conn[T]) queries() *sqlc.Queries {
-	return sqlc.New(c.conn)
+func (c *conn[T]) queries() *sqlcgen.Queries {
+	return sqlcgen.New(c.conn)
 }
 
 func (c *conn[T]) transaction(ctx context.Context, f func(connection) error) error {

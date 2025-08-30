@@ -5,8 +5,8 @@ sql:
     schema: "../internal/infrastructure/postgres/migrations"
     gen:
       go:
-        package: "sqlc"
-        out: "../internal/infrastructure/postgres/sqlc"
+        package: "sqlcgen"
+        out: "../internal/infrastructure/postgres/sqlcgen"
         sql_package: "pgx/v5"
         overrides:
           - db_type: "uuid"

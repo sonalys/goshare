@@ -5,10 +5,10 @@ import (
 
 	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	domain "github.com/sonalys/goshare/internal/domain"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
 )
 
-func NewLedgerExpenseSummary(expense *sqlc.Expense) *v1.LedgerExpenseSummary {
+func NewLedgerExpenseSummary(expense *sqlcgen.Expense) *v1.LedgerExpenseSummary {
 	return &v1.LedgerExpenseSummary{
 		ID:          expense.ID,
 		Amount:      expense.Amount,
@@ -21,7 +21,7 @@ func NewLedgerExpenseSummary(expense *sqlc.Expense) *v1.LedgerExpenseSummary {
 	}
 }
 
-func NewExpense(expense *sqlc.Expense, records []sqlc.ExpenseRecord) (*domain.Expense, error) {
+func NewExpense(expense *sqlcgen.Expense, records []sqlcgen.ExpenseRecord) (*domain.Expense, error) {
 	result := &domain.Expense{
 		ID:          expense.ID,
 		LedgerID:    expense.LedgerID,
@@ -46,7 +46,7 @@ func NewExpense(expense *sqlc.Expense, records []sqlc.ExpenseRecord) (*domain.Ex
 	return result, nil
 }
 
-func NewRecord(record *sqlc.ExpenseRecord) (*domain.Record, error) {
+func NewRecord(record *sqlcgen.ExpenseRecord) (*domain.Record, error) {
 	recordType, err := domain.NewRecordType(record.RecordType)
 	if err != nil {
 		return nil, fmt.Errorf("invalid record type: %w", err)

@@ -9,7 +9,7 @@ import (
 	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/mappers"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlc"
+	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
 )
 
 type LedgerRepository struct {
@@ -30,7 +30,7 @@ func (r *LedgerRepository) Create(ctx context.Context, ledger *domain.Ledger) er
 	return r.transaction(ctx, func(conn connection) error {
 		query := conn.queries()
 
-		createLedgerReq := sqlc.CreateLedgerParams{
+		createLedgerReq := sqlcgen.CreateLedgerParams{
 			ID:        ledger.ID,
 			Name:      ledger.Name,
 			CreatedAt: convertTime(ledger.CreatedAt),
@@ -42,7 +42,7 @@ func (r *LedgerRepository) Create(ctx context.Context, ledger *domain.Ledger) er
 		}
 
 		for id, member := range ledger.Members {
-			addReq := sqlc.SaveLedgerMemberParams{
+			addReq := sqlcgen.SaveLedgerMemberParams{
 				UserID:    id,
 				LedgerID:  createLedgerReq.ID,
 				CreatedAt: convertTime(member.CreatedAt),
@@ -94,7 +94,7 @@ func (r *LedgerRepository) Update(ctx context.Context, ledger *domain.Ledger) er
 	return r.transaction(ctx, func(conn connection) error {
 		query := conn.queries()
 
-		updateLedgerParams := sqlc.UpdateLedgerParams{
+		updateLedgerParams := sqlcgen.UpdateLedgerParams{
 			ID:   ledger.ID,
 			Name: ledger.Name,
 		}
@@ -109,7 +109,7 @@ func (r *LedgerRepository) Update(ctx context.Context, ledger *domain.Ledger) er
 		}
 
 		for id, member := range ledger.Members {
-			err := query.SaveLedgerMember(ctx, sqlc.SaveLedgerMemberParams{
+			err := query.SaveLedgerMember(ctx, sqlcgen.SaveLedgerMemberParams{
 				LedgerID:  ledger.ID,
 				UserID:    id,
 				CreatedAt: convertTime(member.CreatedAt),
