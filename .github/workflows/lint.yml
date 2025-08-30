@@ -30,7 +30,7 @@ jobs:
       - name: sqlc check
         run: |
           task diff-sqlc
-          task sqlc-vet
+          task vet-sql
 
       - name: mockery check
         run: task diff-mockery
