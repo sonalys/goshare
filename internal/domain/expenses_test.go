@@ -231,7 +231,7 @@ func TestExpense_CreateRecords(t *testing.T) {
 		err := expense.CreateRecords(actorID, ledger, debt)
 		require.ErrorIs(t, err, domain.FieldError{
 			Field: "type",
-			Cause: domain.CauseInvalid,
+			Cause: domain.ErrInvalid,
 		})
 	})
 
@@ -405,7 +405,7 @@ func TestExpense_CreateRecords(t *testing.T) {
 		err := expense.CreateRecords(actorID, ledger, debt)
 		require.ErrorIs(t, err, domain.FieldError{
 			Field: "amount",
-			Cause: domain.CauseOverflow,
+			Cause: domain.ErrOverflow,
 		})
 	})
 
@@ -440,7 +440,7 @@ func TestExpense_CreateRecords(t *testing.T) {
 		err := expense.CreateRecords(actorID, ledger, debt)
 		require.ErrorIs(t, err, domain.FieldError{
 			Field: "amount",
-			Cause: domain.CauseOverflow,
+			Cause: domain.ErrOverflow,
 		})
 	})
 }
@@ -564,7 +564,7 @@ func TestExpense_DeleteRecord(t *testing.T) {
 		err := expense.DeleteRecord(ledger, domain.NewID())
 		require.ErrorIs(t, err, domain.FieldError{
 			Field: "recordID",
-			Cause: domain.CauseNotFound,
+			Cause: domain.ErrRecordNotFound,
 		})
 	})
 }

@@ -29,6 +29,8 @@ const (
 	RecordTypeDebt
 	RecordTypeSettlement
 	recordTypeMaxBoundary
+
+	ErrRecordNotFound = ErrorString("record not found")
 )
 
 func NewRecordType(s string) (RecordType, error) {
@@ -38,7 +40,7 @@ func NewRecordType(s string) (RecordType, error) {
 	case "settlement":
 		return RecordTypeSettlement, nil
 	default:
-		return RecordTypeUnknown, CauseInvalid
+		return RecordTypeUnknown, ErrInvalid
 	}
 }
 

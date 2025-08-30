@@ -1,14 +1,10 @@
 package postgres
 
 import (
-	"context"
-	"fmt"
-	"slices"
+	"errors"
 
-	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
+	"github.com/jackc/pgx/v5"
 	"github.com/sonalys/goshare/internal/domain"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/mappers"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
 )
 
 type UsersRepository struct {
@@ -25,65 +21,11 @@ func mapUserErrors(err error) error {
 	switch {
 	case err == nil:
 		return nil
+	case errors.Is(err, pgx.ErrNoRows):
+		return domain.ErrUserNotFound
 	case isViolatingConstraint(err, constraintUserUniqueEmail):
 		return domain.ErrUserAlreadyRegistered
 	default:
 		return mapError(err)
 	}
-}
-
-func (r *UsersRepository) Create(ctx context.Context, user *domain.User) error {
-	return mapUserErrors(r.client.queries().CreateUser(ctx, sqlcgen.CreateUserParams{
-		ID:           user.ID,
-		FirstName:    user.FirstName,
-		LastName:     user.LastName,
-		Email:        user.Email,
-		PasswordHash: user.PasswordHash,
-		LedgerCount:  user.LedgersCount,
-		CreatedAt:    convertTime(user.CreatedAt),
-	}))
-}
-
-func (r *UsersRepository) Get(ctx context.Context, id domain.ID) (*domain.User, error) {
-	user, err := r.client.queries().GetUser(ctx, id)
-	if err != nil {
-		return nil, mapError(err)
-	}
-
-	return mappers.NewUser(user), nil
-}
-
-func (r *UsersRepository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
-	user, err := r.client.queries().GetUserByEmail(ctx, email)
-	if err != nil {
-		return nil, mapError(err)
-	}
-
-	return mappers.NewUser(user), nil
-}
-
-func (r *UsersRepository) ListByEmail(ctx context.Context, emails []string) ([]domain.User, error) {
-	emails = slices.Compact(emails)
-	users, err := r.client.queries().ListByEmail(ctx, emails)
-	if err != nil {
-		return nil, mapError(err)
-	}
-
-	var errs domain.Form
-	for idx, email := range emails {
-		if !slices.ContainsFunc(users, func(user sqlcgen.User) bool {
-			return user.Email == email
-		}) {
-			errs = append(errs, domain.FieldError{
-				Field: fmt.Sprintf("emails.%d", idx),
-				Cause: v1.ErrNotFound,
-			})
-		}
-	}
-
-	if err := errs.Close(); err != nil {
-		return nil, fmt.Errorf("failed to get users by email: %w", err)
-	}
-
-	return mappers.NewUsers(users), nil
 }

@@ -9,10 +9,10 @@ import (
 
 func TestCause_Is(t *testing.T) {
 	t.Run("pass/is", func(t *testing.T) {
-		require.ErrorIs(t, domain.CauseOverflow, domain.CauseOverflow)
+		require.ErrorIs(t, domain.ErrOverflow, domain.ErrOverflow)
 	})
 
 	t.Run("fail/isnt", func(t *testing.T) {
-		require.NotErrorIs(t, domain.CauseInvalid, domain.CauseNotFound)
+		require.NotErrorIs(t, domain.ErrInvalid, domain.ErrOverflow)
 	})
 }

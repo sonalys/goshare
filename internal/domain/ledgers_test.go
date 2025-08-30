@@ -131,7 +131,7 @@ func TestLedger_CreateExpense(t *testing.T) {
 		})
 
 		expense, err := data.ledger.CreateExpense(data.req)
-		require.ErrorIs(t, err, domain.CauseInvalid)
+		require.ErrorIs(t, err, domain.ErrInvalid)
 		assert.Nil(t, expense)
 	})
 
@@ -178,7 +178,7 @@ func TestLedger_CreateExpense(t *testing.T) {
 		})
 
 		expense, err := data.ledger.CreateExpense(data.req)
-		require.ErrorIs(t, err, domain.CauseOverflow)
+		require.ErrorIs(t, err, domain.ErrOverflow)
 		assert.Nil(t, expense)
 	})
 
@@ -196,7 +196,7 @@ func TestLedger_CreateExpense(t *testing.T) {
 		})
 
 		expense, err := data.ledger.CreateExpense(data.req)
-		require.ErrorIs(t, err, domain.CauseOverflow)
+		require.ErrorIs(t, err, domain.ErrOverflow)
 		assert.Nil(t, expense)
 	})
 
@@ -209,7 +209,7 @@ func TestLedger_CreateExpense(t *testing.T) {
 		expense, err := data.ledger.CreateExpense(data.req)
 		assert.Nil(t, expense)
 		require.Error(t, err)
-		assert.ErrorIs(t, err, domain.CauseRequired)
+		assert.ErrorIs(t, err, domain.ErrRequired)
 	})
 
 	t.Run("fail/expenseDate required", func(t *testing.T) {
@@ -221,7 +221,7 @@ func TestLedger_CreateExpense(t *testing.T) {
 		expense, err := data.ledger.CreateExpense(data.req)
 		assert.Nil(t, expense)
 		require.Error(t, err)
-		assert.ErrorIs(t, err, domain.CauseRequired)
+		assert.ErrorIs(t, err, domain.ErrRequired)
 	})
 
 	t.Run("fail/no records", func(t *testing.T) {

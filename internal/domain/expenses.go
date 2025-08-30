@@ -26,10 +26,10 @@ type (
 const (
 	ExpenseMaxRecords = 100
 
-	ErrExpenseMaxRecords  = Cause("expense reached maximum number of records")
-	ErrSettlementMismatch = Cause("settlement cannot be greater than debt")
-	ErrLedgerFromToMatch  = Cause("from and to cannot be the equal")
-	ErrLedgerMismatch     = Cause("ledger mismatch")
+	ErrExpenseMaxRecords  = ErrorString("expense reached maximum number of records")
+	ErrSettlementMismatch = ErrorString("settlement cannot be greater than debt")
+	ErrLedgerFromToMatch  = ErrorString("from and to cannot be the equal")
+	ErrLedgerMismatch     = ErrorString("ledger mismatch")
 )
 
 func (e *Expense) sumRecords(t RecordType) int32 {
@@ -70,10 +70,10 @@ func (e *Expense) validateCreateRecords(creator ID, ledger *Ledger, records ...P
 		}
 	}
 
-	var errs Form
+	var form Form
 
 	if recordsLen := len(records); len(e.Records)+recordsLen > ExpenseMaxRecords {
-		errs.Append(
+		form.Append(
 			FieldError{
 				Cause: fmt.Errorf("%w: %w", ErrExpenseMaxRecords, RangeError{
 					Min: 0,
@@ -132,7 +132,7 @@ func (e *Expense) validateCreateRecords(creator ID, ledger *Ledger, records ...P
 				newAmount := totalDebt + record.Amount
 				if newAmount < totalDebt {
 					recordsForm.Append(FieldError{
-						Cause: CauseOverflow,
+						Cause: ErrOverflow,
 						Field: "amount",
 					})
 				}
@@ -141,7 +141,7 @@ func (e *Expense) validateCreateRecords(creator ID, ledger *Ledger, records ...P
 				newAmount := totalSettled + record.Amount
 				if newAmount < totalSettled {
 					recordsForm.Append(FieldError{
-						Cause: CauseOverflow,
+						Cause: ErrOverflow,
 						Field: "amount",
 					})
 				}
@@ -150,7 +150,7 @@ func (e *Expense) validateCreateRecords(creator ID, ledger *Ledger, records ...P
 		}
 
 		if err := recordsForm.Close(); err != nil {
-			errs.Append(FieldError{
+			form.Append(FieldError{
 				Field: fmt.Sprintf("records[%d]", i),
 				Cause: err,
 			})
@@ -158,7 +158,7 @@ func (e *Expense) validateCreateRecords(creator ID, ledger *Ledger, records ...P
 		}
 	}
 
-	return errs.Close()
+	return form.Close()
 }
 
 func (e *Expense) CreateRecords(creator ID, ledger *Ledger, records ...PendingRecord) error {
@@ -207,7 +207,7 @@ func (e *Expense) validateDeleteRecord(ledger *Ledger, recordID ID) error {
 	if _, ok := e.Records[recordID]; !ok {
 		return FieldError{
 			Field: "recordID",
-			Cause: CauseNotFound,
+			Cause: ErrRecordNotFound,
 		}
 	}
 

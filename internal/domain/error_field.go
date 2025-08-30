@@ -22,14 +22,14 @@ type (
 func newRequiredFieldError(field string) FieldError {
 	return FieldError{
 		Field: field,
-		Cause: CauseRequired,
+		Cause: ErrRequired,
 	}
 }
 
 func newInvalidFieldError(field string) FieldError {
 	return FieldError{
 		Field: field,
-		Cause: CauseInvalid,
+		Cause: ErrInvalid,
 	}
 }
 

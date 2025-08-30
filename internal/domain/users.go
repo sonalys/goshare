@@ -31,29 +31,30 @@ type (
 const (
 	UserMaxLedgers = 5
 
-	ErrUserAlreadyRegistered = Cause("email already in use")
+	ErrUserAlreadyRegistered = ErrorString("email already in use")
+	ErrUserNotFound          = ErrorString("user not found")
 )
 
 func (req *NewUserRequest) validate() error {
-	var errs Form
+	var form Form
 
 	if req.FirstName == "" {
-		errs.Append(newRequiredFieldError("firstName"))
+		form.Append(newRequiredFieldError("firstName"))
 	}
 
 	if req.LastName == "" {
-		errs.Append(newRequiredFieldError("lastName"))
+		form.Append(newRequiredFieldError("lastName"))
 	}
 
 	if pwdLen := len(req.Password); pwdLen < 8 || pwdLen > 72 {
-		errs.Append(newFieldLengthError("password", 8, 72))
+		form.Append(newFieldLengthError("password", 8, 72))
 	}
 
 	if _, err := mail.ParseAddress(req.Email); err != nil {
-		errs.Append(newInvalidFieldError("email"))
+		form.Append(newInvalidFieldError("email"))
 	}
 
-	return errs.Close()
+	return form.Close()
 }
 
 func NewUser(req NewUserRequest) (*User, error) {
@@ -79,7 +80,7 @@ func NewUser(req NewUserRequest) (*User, error) {
 }
 
 func (user *User) CreateLedger(name string) (*Ledger, error) {
-	var errs Form
+	var form Form
 
 	if user.LedgersCount+1 > UserMaxLedgers {
 		return nil, ErrUserMaxLedgers{
@@ -89,10 +90,10 @@ func (user *User) CreateLedger(name string) (*Ledger, error) {
 	}
 
 	if nameLength := len(name); nameLength < 3 || nameLength > 255 {
-		errs.Append(newFieldLengthError("name", 3, 255))
+		form.Append(newFieldLengthError("name", 3, 255))
 	}
 
-	if err := errs.Close(); err != nil {
+	if err := form.Close(); err != nil {
 		return nil, err
 	}
 

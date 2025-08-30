@@ -1,20 +1,19 @@
 package domain
 
-type Cause string
+type ErrorString string
 
 const (
-	CauseUnknown  = Cause("")
-	CauseInvalid  = Cause("invalid")
-	CauseRequired = Cause("required")
-	CauseNotFound = Cause("not found")
-	CauseOverflow = Cause("overflow")
+	ErrUnknown  = ErrorString("")
+	ErrInvalid  = ErrorString("invalid")
+	ErrRequired = ErrorString("required")
+	ErrOverflow = ErrorString("overflow")
 )
 
-func (e Cause) Error() string {
+func (e ErrorString) Error() string {
 	return string(e)
 }
 
-func (e Cause) Is(target error) bool {
-	cast, ok := target.(Cause)
+func (e ErrorString) Is(target error) bool {
+	cast, ok := target.(ErrorString)
 	return ok && e == cast
 }

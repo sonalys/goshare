@@ -2,9 +2,8 @@ package domain
 
 import (
 	"fmt"
+	"slices"
 	"time"
-
-	"github.com/sonalys/kset"
 )
 
 const (
@@ -35,21 +34,21 @@ type (
 )
 
 func (req *CreateExpenseRequest) validate() error {
-	var errs Form
+	var form Form
 
 	if req.Name == "" {
-		errs.Append(newRequiredFieldError("name"))
+		form.Append(newRequiredFieldError("name"))
 	}
 
 	if req.ExpenseDate.IsZero() {
-		errs.Append(newRequiredFieldError("expenseDate"))
+		form.Append(newRequiredFieldError("expenseDate"))
 	}
 
 	if recordsLen := len(req.PendingRecords); recordsLen < 1 || recordsLen > ExpenseMaxRecords {
-		errs.Append(newFieldLengthError("records", 1, ExpenseMaxRecords))
+		form.Append(newFieldLengthError("records", 1, ExpenseMaxRecords))
 	}
 
-	return errs.Close()
+	return form.Close()
 }
 
 func (ledger *Ledger) CreateExpense(req CreateExpenseRequest) (*Expense, error) {
@@ -99,15 +98,14 @@ func (ledger *Ledger) AddMember(inviter ID, newMembers ...ID) error {
 		}
 	}
 
-	// Deduplicate values using hashmap.
-	newMembers = kset.HashMapKey(newMembers...).ToSlice()
+	newMembers = slices.Compact(newMembers)
 
-	var errs Form
+	var form Form
 	for _, id := range newMembers {
 		if !ledger.HasMember(id) {
 			continue
 		}
-		errs.Append(FieldError{
+		form.Append(FieldError{
 			Field: "members",
 			Cause: ErrLedgerUserAlreadyMember{
 				UserID:   id,
@@ -116,7 +114,7 @@ func (ledger *Ledger) AddMember(inviter ID, newMembers ...ID) error {
 		})
 	}
 
-	if err := errs.Close(); err != nil {
+	if err := form.Close(); err != nil {
 		return err
 	}
 
