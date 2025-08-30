@@ -6,14 +6,6 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-const (
-	constraintUserUniqueEmail    = "users_unique_email"
-	constraintMemberUniqueEmail  = "member_unique_email"
-	constraintLedgerUniqueMember = "ledger_member_unique"
-	constraintLedgerMembersFK    = "ledger_members_ledger_id_fkey"
-	constraintLedgerRecordsUser  = "ledger_records_user_id_fkey"
-)
-
 func isConstraintError(err error) bool {
 	if pgErr := new(pgconn.PgError); errors.As(err, &pgErr) {
 		return pgErr.Code == "23505"
@@ -22,9 +14,10 @@ func isConstraintError(err error) bool {
 	return false
 }
 
-func isViolatingConstraint(err error, constraintName string) bool {
-	if pgErr := new(pgconn.PgError); errors.As(err, &pgErr) {
-		return pgErr.ConstraintName == constraintName
+func constraintErrorMap(err error, mapper map[string]error) error {
+	pgErr := new(pgconn.PgError)
+	if !errors.As(err, &pgErr) || pgErr.Code != "23505" {
+		return nil
 	}
-	return false
+	return mapper[pgErr.ConstraintName]
 }

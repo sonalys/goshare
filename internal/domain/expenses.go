@@ -30,6 +30,7 @@ const (
 	ErrSettlementMismatch = ErrorString("settlement cannot be greater than debt")
 	ErrLedgerFromToMatch  = ErrorString("from and to cannot be the equal")
 	ErrLedgerMismatch     = ErrorString("ledger mismatch")
+	ErrExpenseNotFound    = ErrorString("expense not found")
 )
 
 func (e *Expense) sumRecords(t RecordType) int32 {

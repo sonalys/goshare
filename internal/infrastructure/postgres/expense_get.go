@@ -11,7 +11,7 @@ import (
 func (r *ExpenseRepository) Get(ctx context.Context, id domain.ID) (*domain.Expense, error) {
 	expense, err := r.client.queries().GetExpenseById(ctx, id)
 	if err != nil {
-		return nil, mapLedgerError(err)
+		return nil, ledgerError(err)
 	}
 
 	records, err := r.client.queries().GetExpenseRecords(ctx, expense.ID)

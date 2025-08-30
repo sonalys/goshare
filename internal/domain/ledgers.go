@@ -8,6 +8,8 @@ import (
 
 const (
 	LedgerMaxMembers = 100
+
+	ErrLedgerNotFound = ErrorString("ledger not found")
 )
 
 type (

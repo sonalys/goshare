@@ -1,11 +1,12 @@
 package postgres
 
 import (
-	"errors"
-
-	"github.com/jackc/pgx/v5"
 	"github.com/sonalys/goshare/internal/domain"
 )
+
+var userConstraintMapping = map[string]error{
+	"unique_user_email": domain.ErrUserAlreadyRegistered,
+}
 
 type UsersRepository struct {
 	client connection
@@ -18,14 +19,9 @@ func NewUsersRepository(client connection) *UsersRepository {
 }
 
 func mapUserErrors(err error) error {
-	switch {
-	case err == nil:
-		return nil
-	case errors.Is(err, pgx.ErrNoRows):
-		return domain.ErrUserNotFound
-	case isViolatingConstraint(err, constraintUserUniqueEmail):
-		return domain.ErrUserAlreadyRegistered
-	default:
-		return mapError(err)
+	if err := constraintErrorMap(err, userConstraintMapping); err != nil {
+		return err
 	}
+
+	return defaultErrorMapping(err)
 }

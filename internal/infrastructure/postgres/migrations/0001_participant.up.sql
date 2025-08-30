@@ -7,7 +7,7 @@ CREATE TABLE users (
     created_at TIMESTAMP,
     ledger_count INTEGER NOT NULL,
 
-    CONSTRAINT users_unique_email UNIQUE (email)
+    CONSTRAINT unique_user_email UNIQUE (email)
 );
 
 CREATE TABLE ledgers (
@@ -16,7 +16,7 @@ CREATE TABLE ledgers (
     created_at TIMESTAMP NOT NULL,
     created_by UUID NOT NULL,
 
-    FOREIGN KEY (created_by) REFERENCES users (id)
+    CONSTRAINT fk_ledger_created_by FOREIGN KEY (created_by) REFERENCES users (id)
 );
 
 
@@ -27,11 +27,11 @@ CREATE TABLE ledger_members (
     created_by UUID NOT NULL,
     balance INTEGER NOT NULL,
 
-    FOREIGN KEY (ledger_id) REFERENCES ledgers (id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users (id),
-    FOREIGN KEY (created_by) REFERENCES users (id),
+    CONSTRAINT fk_ledger_member_ledger FOREIGN KEY (ledger_id) REFERENCES ledgers (id) ON DELETE CASCADE,
+    CONSTRAINT fk_ledger_member_user FOREIGN KEY (user_id) REFERENCES users (id),
+    CONSTRAINT fk_ledger_member_created_by FOREIGN KEY (created_by) REFERENCES users (id),
 
-    CONSTRAINT ledger_member_unique UNIQUE (ledger_id, user_id)
+    CONSTRAINT unique_ledger_member UNIQUE (ledger_id, user_id)
 );
 
 CREATE TABLE expenses (
@@ -46,9 +46,9 @@ CREATE TABLE expenses (
     updated_at TIMESTAMP NOT NULL,
     updated_by UUID NOT NULL,
 
-    FOREIGN KEY (ledger_id) REFERENCES ledgers (id) ON DELETE CASCADE,
-    FOREIGN KEY (created_by) REFERENCES users (id),
-    FOREIGN KEY (updated_by) REFERENCES users (id)
+    CONSTRAINT fk_expense_ledger FOREIGN KEY (ledger_id) REFERENCES ledgers (id) ON DELETE CASCADE,
+    CONSTRAINT fk_expense_created_by FOREIGN KEY (created_by) REFERENCES users (id),
+    CONSTRAINT fk_expense_updated_by FOREIGN KEY (updated_by) REFERENCES users (id)
 );
 
 CREATE INDEX expense_ledger_id_expense_date_desc ON expenses(ledger_id, expense_date DESC);
@@ -67,11 +67,11 @@ CREATE TABLE expense_records (
     updated_at TIMESTAMP NOT NULL,
     updated_by UUID NOT NULL,
 
-    FOREIGN KEY (expense_id) REFERENCES expenses (id) ON DELETE CASCADE,
-    FOREIGN KEY (from_user_id) REFERENCES users (id),
-    FOREIGN KEY (to_user_id) REFERENCES users (id),
-    FOREIGN KEY (created_by) REFERENCES users (id),
+    CONSTRAINT fk_expense_record_expense FOREIGN KEY (expense_id) REFERENCES expenses (id) ON DELETE CASCADE,
+    CONSTRAINT fk_expense_record_from_user FOREIGN KEY (from_user_id) REFERENCES users (id),
+    CONSTRAINT fk_expense_record_to_user FOREIGN KEY (to_user_id) REFERENCES users (id),
+    CONSTRAINT fk_expense_record_created_by FOREIGN KEY (created_by) REFERENCES users (id),
 
-    CONSTRAINT expense_record_unique UNIQUE (id, expense_id)
+    CONSTRAINT unique_expense_record UNIQUE (id, expense_id)
 );
 

@@ -9,7 +9,7 @@ import (
 )
 
 func (r *ExpenseRepository) Create(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error {
-	return r.client.transaction(ctx, func(conn connection) error {
+	return r.transaction(ctx, func(conn connection) error {
 		query := conn.queries()
 
 		createExpenseReq := sqlcgen.CreateExpenseParams{

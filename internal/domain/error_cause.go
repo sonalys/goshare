@@ -7,6 +7,7 @@ const (
 	ErrInvalid  = ErrorString("invalid")
 	ErrRequired = ErrorString("required")
 	ErrOverflow = ErrorString("overflow")
+	ErrConflict = ErrorString("conflict")
 )
 
 func (e ErrorString) Error() string {
