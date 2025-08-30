@@ -7,6 +7,7 @@ import (
 
 	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/pkg/slog"
+	v1 "github.com/sonalys/goshare/internal/application/pkg/v1"
 	"github.com/sonalys/goshare/internal/domain"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -14,7 +15,7 @@ import (
 
 type (
 	CreateExpenseRequest struct {
-		Actor          domain.ID
+		ActorID        domain.ID
 		LedgerID       domain.ID
 		Name           string
 		ExpenseDate    time.Time
@@ -29,7 +30,7 @@ type (
 func (c *expenseController) Create(ctx context.Context, req CreateExpenseRequest) (resp *CreateExpenseResponse, err error) {
 	ctx, span := c.tracer.Start(ctx, "create",
 		trace.WithAttributes(
-			attribute.Stringer("actor_id", req.Actor),
+			attribute.Stringer("actor_id", req.ActorID),
 			attribute.Stringer("ledger_id", req.LedgerID),
 		),
 	)
@@ -43,8 +44,12 @@ func (c *expenseController) Create(ctx context.Context, req CreateExpenseRequest
 			return fmt.Errorf("finding ledger: %w", err)
 		}
 
+		if !ledger.CanManageExpenses(req.ActorID) {
+			return fmt.Errorf("authorizing user ledger expense management: %w", v1.ErrForbidden)
+		}
+
 		expense, err := ledger.CreateExpense(domain.CreateExpenseRequest{
-			Creator:        req.Actor,
+			Creator:        req.ActorID,
 			Name:           req.Name,
 			ExpenseDate:    req.ExpenseDate,
 			PendingRecords: req.PendingRecords,
@@ -68,8 +73,10 @@ func (c *expenseController) Create(ctx context.Context, req CreateExpenseRequest
 		return nil
 	})
 	if err != nil {
-		return nil, slog.ErrorReturn(ctx, "creating expense", err)
+		return nil, slog.ErrorReturn(ctx, "commiting transaction", err)
 	}
+
 	slog.Info(ctx, "expense created")
+
 	return
 }

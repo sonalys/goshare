@@ -1,4 +1,5 @@
 version: '3'
+silent: true
 
 env:
   CWD: "{{ .USER_WORKING_DIR }}"
@@ -11,6 +12,9 @@ env:
   JAEGER_CONN: jaeger:4317
 
 tasks:
+  test-coverage:
+    cmd: go test -cover -v ./...
+
   build-server:
     cmd: go build -ldflags "-extldflags '-static' -X main.version=$VERSION" -o ./bin/server ./cmd/server
     generates:
@@ -22,17 +26,20 @@ tasks:
       - bin/migration
 
   tidy:
-    cmd: >
+    cmd: |
       go mod tidy
-      $(cd .tools/ogen; go mod tidy)
-      $(cd .tools/sqlc; go mod tidy)
-      $(cd .tools/mockery; go mod tidy)
-
+      for tool in .tools/*; do
+        (cd $tool; go mod tidy)
+      done
   upgrade_tools:
-    cmd: >
-      $(cd .tools/ogen; go get -tool github.com/ogen-go/ogen/cmd/ogen@latest)
-      $(cd .tools/sqlc; go get -tool github.com/sqlc-dev/sqlc/cmd/sqlc@latest)
-      $(cd .tools/mockery; go get -tool github.com/vektra/mockery/v3@latest)
+    cmd: |
+      for d in .tools/*; do
+          if [ -d "$d" ] && [ -f "$d/go.mod" ]; then
+            TOOL=$(grep "^tool " "$d/go.mod" | awk '{print $2}')
+            echo "Updating tool: $TOOL"
+            (cd "$d" && go get -tool "${TOOL}@latest" && go mod tidy)
+          fi
+      done
 
   build:
     deps: [build-server,build-migration]

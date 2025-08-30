@@ -20,7 +20,7 @@ func (a *API) LedgerExpenseCreate(ctx context.Context, req *handlers.Expense, pa
 	}
 
 	apiReq := usercontroller.CreateExpenseRequest{
-		Actor:          identity.UserID,
+		ActorID:        identity.UserID,
 		LedgerID:       domain.ConvertID(params.LedgerID),
 		Name:           req.Name,
 		ExpenseDate:    req.ExpenseDate,

@@ -15,7 +15,7 @@ func (a *API) LedgerExpenseGet(ctx context.Context, params handlers.LedgerExpens
 	}
 
 	expense, err := a.UserController.Expenses().Get(ctx, usercontroller.GetExpenseRequest{
-		Actor:     identity.UserID,
+		ActorID:   identity.UserID,
 		LedgerID:  domain.ConvertID(params.LedgerID),
 		ExpenseID: domain.ConvertID(params.ExpenseID),
 	})

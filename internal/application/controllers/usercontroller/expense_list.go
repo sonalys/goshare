@@ -2,6 +2,7 @@ package usercontroller
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/sonalys/goshare/internal/application/pkg/slog"
@@ -13,7 +14,7 @@ import (
 
 type (
 	ListExpensesRequest struct {
-		Actor    domain.ID
+		ActorID  domain.ID
 		LedgerID domain.ID
 		Cursor   time.Time
 		Limit    int32
@@ -28,11 +29,20 @@ type (
 func (c *expenseController) List(ctx context.Context, req ListExpensesRequest) (*ListExpensesResponse, error) {
 	ctx, span := c.tracer.Start(ctx, "list",
 		trace.WithAttributes(
-			attribute.Stringer("actor_id", req.Actor),
+			attribute.Stringer("actor_id", req.ActorID),
 			attribute.Stringer("ledger_id", req.LedgerID),
 		),
 	)
 	defer span.End()
+
+	ledger, err := c.db.Ledger().Get(ctx, req.LedgerID)
+	if err != nil {
+		return nil, fmt.Errorf("finding ledger: %w", err)
+	}
+
+	if !ledger.CanView(req.ActorID) {
+		return nil, fmt.Errorf("authorizing user ledger view: %w", v1.ErrForbidden)
+	}
 
 	req.Limit = max(1, req.Limit)
 

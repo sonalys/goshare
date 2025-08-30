@@ -132,46 +132,6 @@ func TestExpense_CreateRecords(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	t.Run("fail/actor not a member", func(t *testing.T) {
-		t.Parallel()
-
-		actorID := domain.NewID()
-		fromID := domain.NewID()
-		toID := domain.NewID()
-
-		ledger := &domain.Ledger{
-			ID: domain.NewID(),
-			Members: map[domain.ID]*domain.LedgerMember{
-				fromID: {},
-				toID:   {},
-			},
-		}
-
-		expense := domain.Expense{
-			LedgerID: ledger.ID,
-			Records:  make(map[domain.ID]*domain.Record),
-		}
-
-		debt := domain.PendingRecord{
-			Type:   domain.RecordTypeDebt,
-			From:   fromID,
-			To:     toID,
-			Amount: 32,
-		}
-
-		err := expense.CreateRecords(actorID, ledger, debt)
-		require.Error(t, err)
-
-		var targetErr domain.FieldError
-		require.ErrorAs(t, err, &targetErr)
-
-		assert.Equal(t, "actor", targetErr.Field)
-		assert.Equal(t, domain.ErrLedgerUserNotMember{
-			UserID:   actorID,
-			LedgerID: ledger.ID,
-		}, targetErr.Cause)
-	})
-
 	t.Run("fail/ledger mismatch", func(t *testing.T) {
 		t.Parallel()
 
@@ -550,35 +510,6 @@ func TestExpense_DeleteRecord(t *testing.T) {
 		for _, member := range ledger.Members {
 			assert.Zero(t, member.Balance)
 		}
-	})
-
-	t.Run("fail/actor is not a member", func(t *testing.T) {
-		t.Parallel()
-
-		recordID := domain.NewID()
-		memberID := domain.NewID()
-		actorID := domain.NewID()
-
-		ledger := &domain.Ledger{
-			ID:      domain.NewID(),
-			Members: map[domain.ID]*domain.LedgerMember{},
-		}
-
-		expense := domain.Expense{
-			LedgerID: ledger.ID,
-			Records: map[domain.ID]*domain.Record{
-				recordID: {Type: domain.RecordTypeDebt, Amount: 1, From: actorID, To: memberID},
-			},
-		}
-
-		err := expense.DeleteRecord(ledger, recordID)
-		require.ErrorIs(t, err, domain.FieldError{
-			Field: "actor",
-			Cause: domain.ErrLedgerUserNotMember{
-				UserID:   actorID,
-				LedgerID: ledger.ID,
-			},
-		})
 	})
 
 	t.Run("fail/ledger mismatch", func(t *testing.T) {

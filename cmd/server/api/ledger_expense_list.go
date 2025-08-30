@@ -17,7 +17,7 @@ func (a *API) LedgerExpenseList(ctx context.Context, params handlers.LedgerExpen
 	}
 
 	result, err := a.UserController.Expenses().List(ctx, usercontroller.ListExpensesRequest{
-		Actor:    identity.UserID,
+		ActorID:  identity.UserID,
 		LedgerID: domain.ConvertID(params.LedgerID),
 		Limit:    params.Limit.Or(10),
 		Cursor:   params.Cursor.Or(time.Now()),
