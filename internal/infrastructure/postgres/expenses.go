@@ -13,10 +13,5 @@ func (r *ExpenseRepository) transaction(ctx context.Context, f func(q connection
 }
 
 func mapExpensesError(err error) error {
-	switch {
-	case err == nil:
-		return nil
-	default:
-		return mapError(err)
-	}
+	return mapError(err)
 }
