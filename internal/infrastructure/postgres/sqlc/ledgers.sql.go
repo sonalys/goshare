@@ -64,12 +64,12 @@ func (q *Queries) DeleteMembersNotIn(ctx context.Context, ids []domain.ID) error
 	return err
 }
 
-const findLedgerById = `-- name: GetLedgerById :one
+const getLedgerById = `-- name: GetLedgerById :one
 SELECT id, name, created_at, created_by FROM ledgers WHERE id = $1 FOR UPDATE
 `
 
 func (q *Queries) GetLedgerById(ctx context.Context, id domain.ID) (Ledger, error) {
-	row := q.db.QueryRow(ctx, findLedgerById, id)
+	row := q.db.QueryRow(ctx, getLedgerById, id)
 	var i Ledger
 	err := row.Scan(
 		&i.ID,
@@ -111,11 +111,18 @@ func (q *Queries) GetLedgerMembers(ctx context.Context, ledgerID domain.ID) ([]L
 }
 
 const getUserLedgers = `-- name: GetUserLedgers :many
-SELECT ledgers.id, ledgers.name, ledgers.created_at, ledgers.created_by FROM ledgers JOIN ledger_members ON ledgers.id = ledger_members.ledger_id WHERE ledger_members.user_id = $1 ORDER BY ledgers.created_at DESC
+SELECT ledgers.id, ledgers.name, ledgers.created_at, ledgers.created_by FROM ledgers 
+JOIN ledger_members ON 
+    ledgers.id = ledger_members.ledger_id 
+WHERE 
+    ledgers.created_by = $1 OR
+    ledger_members.user_id = $1 
+ORDER BY 
+    ledgers.created_at DESC
 `
 
-func (q *Queries) GetUserLedgers(ctx context.Context, userID domain.ID) ([]Ledger, error) {
-	rows, err := q.db.Query(ctx, getUserLedgers, userID)
+func (q *Queries) GetUserLedgers(ctx context.Context, createdBy domain.ID) ([]Ledger, error) {
+	rows, err := q.db.Query(ctx, getUserLedgers, createdBy)
 	if err != nil {
 		return nil, err
 	}

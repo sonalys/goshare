@@ -94,12 +94,12 @@ func (q *Queries) DeleteExpenseRecordsNotIn(ctx context.Context, ids []domain.ID
 	return err
 }
 
-const findExpenseById = `-- name: GetExpenseById :one
+const getExpenseById = `-- name: GetExpenseById :one
 SELECT id, ledger_id, amount, name, expense_date, created_at, created_by, updated_at, updated_by FROM expenses WHERE id = $1
 `
 
 func (q *Queries) GetExpenseById(ctx context.Context, id domain.ID) (Expense, error) {
-	row := q.db.QueryRow(ctx, findExpenseById, id)
+	row := q.db.QueryRow(ctx, getExpenseById, id)
 	var i Expense
 	err := row.Scan(
 		&i.ID,

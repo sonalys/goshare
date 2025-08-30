@@ -19,7 +19,14 @@ DELETE FROM ledger_members WHERE user_id = $1;
 SELECT * FROM ledger_members WHERE ledger_id = $1;
 
 -- name: GetUserLedgers :many
-SELECT ledgers.* FROM ledgers JOIN ledger_members ON ledgers.id = ledger_members.ledger_id WHERE ledger_members.user_id = $1 ORDER BY ledgers.created_at DESC;
+SELECT ledgers.* FROM ledgers 
+JOIN ledger_members ON 
+    ledgers.id = ledger_members.ledger_id 
+WHERE 
+    ledgers.created_by = $1 OR
+    ledger_members.user_id = $1 
+ORDER BY 
+    ledgers.created_at DESC;
 
 -- name: LockLedgerForUpdate :exec
 SELECT * FROM ledgers WHERE id = $1 FOR UPDATE;

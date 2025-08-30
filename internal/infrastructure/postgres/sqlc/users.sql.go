@@ -12,12 +12,12 @@ import (
 	"github.com/sonalys/goshare/internal/domain"
 )
 
-const findUser = `-- name: GetUser :one
+const getUser = `-- name: GetUser :one
 SELECT id, first_name, last_name, email, password_hash, created_at, ledger_count FROM users WHERE id = $1 FOR UPDATE
 `
 
 func (q *Queries) GetUser(ctx context.Context, id domain.ID) (User, error) {
-	row := q.db.QueryRow(ctx, findUser, id)
+	row := q.db.QueryRow(ctx, getUser, id)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -31,12 +31,12 @@ func (q *Queries) GetUser(ctx context.Context, id domain.ID) (User, error) {
 	return i, err
 }
 
-const findUserByEmail = `-- name: GetUserByEmail :one
+const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT id, first_name, last_name, email, password_hash, created_at, ledger_count FROM users WHERE email = $1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
-	row := q.db.QueryRow(ctx, findUserByEmail, email)
+	row := q.db.QueryRow(ctx, getUserByEmail, email)
 	var i User
 	err := row.Scan(
 		&i.ID,
