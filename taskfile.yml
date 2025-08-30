@@ -13,7 +13,7 @@ env:
 
 tasks:
   test-coverage:
-    cmd: go test -cover -v ./...
+    cmd: go tool -modfile=.tools/gotestsum/go.mod gotestsum --hide-summary=skipped -- -cover -v ./...
 
   build-server:
     cmd: go build -ldflags "-extldflags '-static' -X main.version=$VERSION" -o ./bin/server ./cmd/server
@@ -25,12 +25,39 @@ tasks:
     generates:
       - bin/migration
 
+  add-tool:
+    desc: "Add a new tool (usage: task add-tool tool=github.com/vektra/mockery/v3)"
+    vars:
+      tool: { sh: 'echo "${tool}"' }
+    cmds:
+      - |
+        if [ -z "{{.tool}}" ]; then
+          echo "❌ tool variable is required, e.g.: task add-tool tool=github.com/vektra/mockery/v3"
+          exit 1
+        fi
+
+        TOOLNAME=$(basename "{{.tool}}" | sed -E 's/\/v[0-9]+$//; s/^v[0-9]+$//')
+        DIR=".tools/$TOOLNAME"
+
+        echo "📦 Adding tool: {{.tool}} into $DIR"
+
+        mkdir -p "$DIR"
+        cd "$DIR"
+
+        if [ ! -f go.mod ]; then
+          go mod init github.com/sonalys/goshare/tools/$TOOLNAME
+        fi
+
+        go get -tool {{.tool}}@latest
+        go mod tidy
+
   tidy:
     cmd: |
       go mod tidy
       for tool in .tools/*; do
         (cd $tool; go mod tidy)
       done
+
   upgrade_tools:
     cmd: |
       for d in .tools/*; do
