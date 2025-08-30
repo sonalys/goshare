@@ -35,7 +35,7 @@ type (
 	}
 
 	UserCommands interface {
-		Save(ctx context.Context, user *domain.User) error
+		Create(ctx context.Context, user *domain.User) error
 	}
 
 	UserRepository interface {

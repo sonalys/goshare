@@ -173,7 +173,7 @@ func (q *Queries) RemoveUserFromLedger(ctx context.Context, userID domain.ID) er
 	return err
 }
 
-const saveLedgerMember = `-- name: SaveLedgerMember :exec
+const saveLedgerMember = `-- name: CreateLedgerMember :exec
 INSERT INTO ledger_members (ledger_id,user_id,created_at,created_by,balance) 
 VALUES ($1,$2,$3,$4,$5) 
 ON CONFLICT(user_id) 
@@ -181,7 +181,7 @@ DO UPDATE
 SET balance = EXCLUDED.balance
 `
 
-type SaveLedgerMemberParams struct {
+type CreateLedgerMemberParams struct {
 	LedgerID  domain.ID
 	UserID    domain.ID
 	CreatedAt pgtype.Timestamp
@@ -189,7 +189,7 @@ type SaveLedgerMemberParams struct {
 	Balance   int32
 }
 
-func (q *Queries) SaveLedgerMember(ctx context.Context, arg SaveLedgerMemberParams) error {
+func (q *Queries) CreateLedgerMember(ctx context.Context, arg CreateLedgerMemberParams) error {
 	_, err := q.db.Exec(ctx, saveLedgerMember,
 		arg.LedgerID,
 		arg.UserID,

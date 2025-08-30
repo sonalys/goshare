@@ -30,6 +30,8 @@ type (
 
 const (
 	UserMaxLedgers = 5
+
+	ErrUserAlreadyRegistered = Cause("email already in use")
 )
 
 func (req *NewUserRequest) validate() error {

@@ -4,7 +4,7 @@ INSERT INTO ledgers (id,name,created_at,created_by) VALUES ($1,$2,$3,$4);
 -- name: GetLedgerById :one
 SELECT * FROM ledgers WHERE id = $1 FOR UPDATE;
 
--- name: SaveLedgerMember :exec
+-- name: CreateLedgerMember :exec
 INSERT INTO ledger_members (ledger_id,user_id,created_at,created_by,balance) 
 VALUES ($1,$2,$3,$4,$5) 
 ON CONFLICT(user_id) 

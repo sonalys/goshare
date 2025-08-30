@@ -42,7 +42,7 @@ func (r *LedgerRepository) Create(ctx context.Context, ledger *domain.Ledger) er
 		}
 
 		for id, member := range ledger.Members {
-			addReq := sqlcgen.SaveLedgerMemberParams{
+			addReq := sqlcgen.CreateLedgerMemberParams{
 				UserID:    id,
 				LedgerID:  createLedgerReq.ID,
 				CreatedAt: convertTime(member.CreatedAt),
@@ -50,7 +50,7 @@ func (r *LedgerRepository) Create(ctx context.Context, ledger *domain.Ledger) er
 				Balance:   member.Balance,
 			}
 
-			if err := query.SaveLedgerMember(ctx, addReq); err != nil {
+			if err := query.CreateLedgerMember(ctx, addReq); err != nil {
 				return fmt.Errorf("failed to add user to ledger: %w", err)
 			}
 		}
@@ -109,7 +109,7 @@ func (r *LedgerRepository) Update(ctx context.Context, ledger *domain.Ledger) er
 		}
 
 		for id, member := range ledger.Members {
-			err := query.SaveLedgerMember(ctx, sqlcgen.SaveLedgerMemberParams{
+			err := query.CreateLedgerMember(ctx, sqlcgen.CreateLedgerMemberParams{
 				LedgerID:  ledger.ID,
 				UserID:    id,
 				CreatedAt: convertTime(member.CreatedAt),

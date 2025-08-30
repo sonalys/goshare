@@ -82,7 +82,7 @@ func (q *Queries) ListByEmail(ctx context.Context, emails []string) ([]User, err
 	return items, nil
 }
 
-const saveUser = `-- name: SaveUser :exec
+const saveUser = `-- name: CreateUser :exec
 INSERT INTO users (id,first_name,last_name,email,password_hash,ledger_count,created_at) 
 VALUES ($1,$2,$3,$4,$5,$6,$7)
 ON CONFLICT (id)
@@ -95,7 +95,7 @@ password_hash = EXCLUDED.password_hash,
 ledger_count = EXCLUDED.ledger_count
 `
 
-type SaveUserParams struct {
+type CreateUserParams struct {
 	ID           domain.ID
 	FirstName    string
 	LastName     string
@@ -105,7 +105,7 @@ type SaveUserParams struct {
 	CreatedAt    pgtype.Timestamp
 }
 
-func (q *Queries) SaveUser(ctx context.Context, arg SaveUserParams) error {
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 	_, err := q.db.Exec(ctx, saveUser,
 		arg.ID,
 		arg.FirstName,

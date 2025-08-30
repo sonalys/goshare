@@ -7,6 +7,7 @@ import (
 )
 
 const (
+	constraintUserUniqueEmail    = "users_unique_email"
 	constraintMemberUniqueEmail  = "member_unique_email"
 	constraintLedgerUniqueMember = "ledger_member_unique"
 	constraintLedgerMembersFK    = "ledger_members_ledger_id_fkey"

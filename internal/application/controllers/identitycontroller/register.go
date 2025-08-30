@@ -37,7 +37,7 @@ func (c *Controller) Register(ctx context.Context, req RegisterRequest) (resp *R
 			return fmt.Errorf("creating user: %w", err)
 		}
 
-		if err = tx.User().Save(ctx, user); err != nil {
+		if err = tx.User().Create(ctx, user); err != nil {
 			return fmt.Errorf("saving user: %w", err)
 		}
 

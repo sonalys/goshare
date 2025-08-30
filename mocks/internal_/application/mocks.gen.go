@@ -662,8 +662,8 @@ var _ application.UserCommands = &UserCommands{}
 //
 //		// make and configure a mocked application.UserCommands
 //		mockedUserCommands := &UserCommands{
-//			SaveFunc: func(ctx context.Context, user *domain.User) error {
-//				panic("mock out the Save method")
+//			CreateFunc: func(ctx context.Context, user *domain.User) error {
+//				panic("mock out the Create method")
 //			},
 //		}
 //
@@ -672,26 +672,26 @@ var _ application.UserCommands = &UserCommands{}
 //
 //	}
 type UserCommands struct {
-	// SaveFunc mocks the Save method.
-	SaveFunc func(ctx context.Context, user *domain.User) error
+	// CreateFunc mocks the Create method.
+	CreateFunc func(ctx context.Context, user *domain.User) error
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// Save holds details about calls to the Save method.
-		Save []struct {
+		// Create holds details about calls to the Create method.
+		Create []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// User is the user argument value.
 			User *domain.User
 		}
 	}
-	lockSave sync.RWMutex
+	lockCreate sync.RWMutex
 }
 
-// Save calls SaveFunc.
-func (mock *UserCommands) Save(ctx context.Context, user *domain.User) error {
-	if mock.SaveFunc == nil {
-		panic("UserCommands.SaveFunc: method is nil but UserCommands.Save was just called")
+// Create calls CreateFunc.
+func (mock *UserCommands) Create(ctx context.Context, user *domain.User) error {
+	if mock.CreateFunc == nil {
+		panic("UserCommands.CreateFunc: method is nil but UserCommands.Create was just called")
 	}
 	callInfo := struct {
 		Ctx  context.Context
@@ -700,17 +700,17 @@ func (mock *UserCommands) Save(ctx context.Context, user *domain.User) error {
 		Ctx:  ctx,
 		User: user,
 	}
-	mock.lockSave.Lock()
-	mock.calls.Save = append(mock.calls.Save, callInfo)
-	mock.lockSave.Unlock()
-	return mock.SaveFunc(ctx, user)
+	mock.lockCreate.Lock()
+	mock.calls.Create = append(mock.calls.Create, callInfo)
+	mock.lockCreate.Unlock()
+	return mock.CreateFunc(ctx, user)
 }
 
-// SaveCalls gets all the calls that were made to Save.
+// CreateCalls gets all the calls that were made to Create.
 // Check the length with:
 //
-//	len(mockedUserCommands.SaveCalls())
-func (mock *UserCommands) SaveCalls() []struct {
+//	len(mockedUserCommands.CreateCalls())
+func (mock *UserCommands) CreateCalls() []struct {
 	Ctx  context.Context
 	User *domain.User
 } {
@@ -718,9 +718,9 @@ func (mock *UserCommands) SaveCalls() []struct {
 		Ctx  context.Context
 		User *domain.User
 	}
-	mock.lockSave.RLock()
-	calls = mock.calls.Save
-	mock.lockSave.RUnlock()
+	mock.lockCreate.RLock()
+	calls = mock.calls.Create
+	mock.lockCreate.RUnlock()
 	return calls
 }
 
@@ -734,6 +734,9 @@ var _ application.UserRepository = &UserRepository{}
 //
 //		// make and configure a mocked application.UserRepository
 //		mockedUserRepository := &UserRepository{
+//			CreateFunc: func(ctx context.Context, user *domain.User) error {
+//				panic("mock out the Create method")
+//			},
 //			GetFunc: func(ctx context.Context, id domain.ID) (*domain.User, error) {
 //				panic("mock out the Get method")
 //			},
@@ -743,9 +746,6 @@ var _ application.UserRepository = &UserRepository{}
 //			ListByEmailFunc: func(ctx context.Context, emails []string) ([]domain.User, error) {
 //				panic("mock out the ListByEmail method")
 //			},
-//			SaveFunc: func(ctx context.Context, user *domain.User) error {
-//				panic("mock out the Save method")
-//			},
 //		}
 //
 //		// use mockedUserRepository in code that requires application.UserRepository
@@ -753,6 +753,9 @@ var _ application.UserRepository = &UserRepository{}
 //
 //	}
 type UserRepository struct {
+	// CreateFunc mocks the Create method.
+	CreateFunc func(ctx context.Context, user *domain.User) error
+
 	// GetFunc mocks the Get method.
 	GetFunc func(ctx context.Context, id domain.ID) (*domain.User, error)
 
@@ -762,11 +765,15 @@ type UserRepository struct {
 	// ListByEmailFunc mocks the ListByEmail method.
 	ListByEmailFunc func(ctx context.Context, emails []string) ([]domain.User, error)
 
-	// SaveFunc mocks the Save method.
-	SaveFunc func(ctx context.Context, user *domain.User) error
-
 	// calls tracks calls to the methods.
 	calls struct {
+		// Create holds details about calls to the Create method.
+		Create []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// User is the user argument value.
+			User *domain.User
+		}
 		// Get holds details about calls to the Get method.
 		Get []struct {
 			// Ctx is the ctx argument value.
@@ -788,18 +795,47 @@ type UserRepository struct {
 			// Emails is the emails argument value.
 			Emails []string
 		}
-		// Save holds details about calls to the Save method.
-		Save []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// User is the user argument value.
-			User *domain.User
-		}
 	}
+	lockCreate      sync.RWMutex
 	lockGet         sync.RWMutex
 	lockGetByEmail  sync.RWMutex
 	lockListByEmail sync.RWMutex
-	lockSave        sync.RWMutex
+}
+
+// Create calls CreateFunc.
+func (mock *UserRepository) Create(ctx context.Context, user *domain.User) error {
+	if mock.CreateFunc == nil {
+		panic("UserRepository.CreateFunc: method is nil but UserRepository.Create was just called")
+	}
+	callInfo := struct {
+		Ctx  context.Context
+		User *domain.User
+	}{
+		Ctx:  ctx,
+		User: user,
+	}
+	mock.lockCreate.Lock()
+	mock.calls.Create = append(mock.calls.Create, callInfo)
+	mock.lockCreate.Unlock()
+	return mock.CreateFunc(ctx, user)
+}
+
+// CreateCalls gets all the calls that were made to Create.
+// Check the length with:
+//
+//	len(mockedUserRepository.CreateCalls())
+func (mock *UserRepository) CreateCalls() []struct {
+	Ctx  context.Context
+	User *domain.User
+} {
+	var calls []struct {
+		Ctx  context.Context
+		User *domain.User
+	}
+	mock.lockCreate.RLock()
+	calls = mock.calls.Create
+	mock.lockCreate.RUnlock()
+	return calls
 }
 
 // Get calls GetFunc.
@@ -907,42 +943,6 @@ func (mock *UserRepository) ListByEmailCalls() []struct {
 	mock.lockListByEmail.RLock()
 	calls = mock.calls.ListByEmail
 	mock.lockListByEmail.RUnlock()
-	return calls
-}
-
-// Save calls SaveFunc.
-func (mock *UserRepository) Save(ctx context.Context, user *domain.User) error {
-	if mock.SaveFunc == nil {
-		panic("UserRepository.SaveFunc: method is nil but UserRepository.Save was just called")
-	}
-	callInfo := struct {
-		Ctx  context.Context
-		User *domain.User
-	}{
-		Ctx:  ctx,
-		User: user,
-	}
-	mock.lockSave.Lock()
-	mock.calls.Save = append(mock.calls.Save, callInfo)
-	mock.lockSave.Unlock()
-	return mock.SaveFunc(ctx, user)
-}
-
-// SaveCalls gets all the calls that were made to Save.
-// Check the length with:
-//
-//	len(mockedUserRepository.SaveCalls())
-func (mock *UserRepository) SaveCalls() []struct {
-	Ctx  context.Context
-	User *domain.User
-} {
-	var calls []struct {
-		Ctx  context.Context
-		User *domain.User
-	}
-	mock.lockSave.RLock()
-	calls = mock.calls.Save
-	mock.lockSave.RUnlock()
 	return calls
 }
 

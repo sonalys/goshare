@@ -43,7 +43,7 @@ func Test_Ledger_Create(t *testing.T) {
 
 		previousLedgerCount := user.LedgersCount
 
-		mocks.db.tx.user.SaveFunc = func(ctx context.Context, user *domain.User) error {
+		mocks.db.tx.user.CreateFunc = func(ctx context.Context, user *domain.User) error {
 			assert.EqualValues(t, previousLedgerCount+1, user.LedgersCount)
 			return nil
 		}

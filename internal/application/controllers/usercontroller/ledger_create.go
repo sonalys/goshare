@@ -51,7 +51,7 @@ func (c *ledgerController) Create(ctx context.Context, req CreateLedgerRequest) 
 			ID: ledger.ID,
 		}
 
-		if err := db.User().Save(ctx, user); err != nil {
+		if err := db.User().Create(ctx, user); err != nil {
 			return fmt.Errorf("saving user: %w", err)
 		}
 

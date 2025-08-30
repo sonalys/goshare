@@ -21,8 +21,19 @@ func NewUsersRepository(client connection) *UsersRepository {
 	}
 }
 
-func (r *UsersRepository) Save(ctx context.Context, user *domain.User) error {
-	return mapError(r.client.queries().SaveUser(ctx, sqlcgen.SaveUserParams{
+func mapUserErrors(err error) error {
+	switch {
+	case err == nil:
+		return nil
+	case isViolatingConstraint(err, constraintUserUniqueEmail):
+		return domain.ErrUserAlreadyRegistered
+	default:
+		return mapError(err)
+	}
+}
+
+func (r *UsersRepository) Create(ctx context.Context, user *domain.User) error {
+	return mapUserErrors(r.client.queries().CreateUser(ctx, sqlcgen.CreateUserParams{
 		ID:           user.ID,
 		FirstName:    user.FirstName,
 		LastName:     user.LastName,
