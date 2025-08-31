@@ -30,7 +30,7 @@ func (c *recordsController) Delete(ctx context.Context, req DeleteExpenseRecordR
 	)
 	defer span.End()
 
-	err := c.db.Transaction(ctx, func(db ports.Repositories) error {
+	err := c.db.Transaction(ctx, func(db ports.LocalRepositories) error {
 		ledger, err := db.Ledger().Get(ctx, req.LedgerID)
 		if err != nil {
 			return fmt.Errorf("getting ledger: %w", err)

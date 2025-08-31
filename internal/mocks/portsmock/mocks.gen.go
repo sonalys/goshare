@@ -11,7 +11,7 @@ import (
 
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/ports"
-	"github.com/sonalys/goshare/pkg/v1"
+	v1 "github.com/sonalys/goshare/pkg/v1"
 )
 
 // Ensure that ExpenseQueries does implement ports.ExpenseQueries.
@@ -984,7 +984,7 @@ func (mock *LedgerRepository) UpdateCalls() []struct {
 
 // Ensure that Repositories does implement ports.Repositories.
 // If this is not the case, regenerate this file with mockery.
-var _ ports.Repositories = &Repositories{}
+var _ ports.LocalRepositories = &Repositories{}
 
 // Repositories is a mock implementation of ports.Repositories.
 //
@@ -1151,7 +1151,7 @@ type LocalDatabase struct {
 	LedgerFunc func() ports.LedgerQueries
 
 	// TransactionFunc mocks the Transaction method.
-	TransactionFunc func(ctx context.Context, f func(tx ports.Repositories) error) error
+	TransactionFunc func(ctx context.Context, f func(tx ports.LocalRepositories) error) error
 
 	// UserFunc mocks the User method.
 	UserFunc func() ports.UserQueries
@@ -1169,7 +1169,7 @@ type LocalDatabase struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// F is the f argument value.
-			F func(tx ports.Repositories) error
+			F func(tx ports.LocalRepositories) error
 		}
 		// User holds details about calls to the User method.
 		User []struct {
@@ -1236,13 +1236,13 @@ func (mock *LocalDatabase) LedgerCalls() []struct {
 }
 
 // Transaction calls TransactionFunc.
-func (mock *LocalDatabase) Transaction(ctx context.Context, f func(tx ports.Repositories) error) error {
+func (mock *LocalDatabase) Transaction(ctx context.Context, f func(tx ports.LocalRepositories) error) error {
 	if mock.TransactionFunc == nil {
 		panic("LocalDatabase.TransactionFunc: method is nil but LocalDatabase.Transaction was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
-		F   func(tx ports.Repositories) error
+		F   func(tx ports.LocalRepositories) error
 	}{
 		Ctx: ctx,
 		F:   f,
@@ -1259,11 +1259,11 @@ func (mock *LocalDatabase) Transaction(ctx context.Context, f func(tx ports.Repo
 //	len(mockedLocalDatabase.TransactionCalls())
 func (mock *LocalDatabase) TransactionCalls() []struct {
 	Ctx context.Context
-	F   func(tx ports.Repositories) error
+	F   func(tx ports.LocalRepositories) error
 } {
 	var calls []struct {
 		Ctx context.Context
-		F   func(tx ports.Repositories) error
+		F   func(tx ports.LocalRepositories) error
 	}
 	mock.lockTransaction.RLock()
 	calls = mock.calls.Transaction

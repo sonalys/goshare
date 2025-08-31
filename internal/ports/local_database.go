@@ -5,7 +5,7 @@ import (
 )
 
 type (
-	Repositories interface {
+	LocalRepositories interface {
 		Expense() ExpenseRepository
 		Ledger() LedgerRepository
 		User() UserRepository
@@ -15,6 +15,6 @@ type (
 		Expense() ExpenseQueries
 		Ledger() LedgerQueries
 		User() UserQueries
-		Transaction(ctx context.Context, f func(tx Repositories) error) error
+		Transaction(ctx context.Context, f func(tx LocalRepositories) error) error
 	}
 )

@@ -33,7 +33,7 @@ func (c *ledgerController) MembersAdd(ctx context.Context, req AddMembersRequest
 
 	slog.Debug(ctx, "adding ledger member", slog.With("req", req))
 
-	transaction := func(db ports.Repositories) error {
+	transaction := func(db ports.LocalRepositories) error {
 		ledger, err := db.Ledger().Get(ctx, req.LedgerID)
 		if err != nil {
 			return fmt.Errorf("getting ledger: %w", err)

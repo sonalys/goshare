@@ -17,7 +17,7 @@ func Test_Users_Create(t *testing.T) {
 	t.Run("pass", func(t *testing.T) {
 		ctx := t.Context()
 
-		err := client.Transaction(ctx, func(r ports.Repositories) error {
+		err := client.Transaction(ctx, func(r ports.LocalRepositories) error {
 			user := testfixtures.User(t)
 
 			return r.User().Create(ctx, user)
@@ -28,7 +28,7 @@ func Test_Users_Create(t *testing.T) {
 	t.Run("fail/email conflict", func(t *testing.T) {
 		ctx := t.Context()
 
-		err := client.Transaction(ctx, func(r ports.Repositories) error {
+		err := client.Transaction(ctx, func(r ports.LocalRepositories) error {
 			user := testfixtures.User(t)
 
 			err := r.User().Create(ctx, user)

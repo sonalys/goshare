@@ -31,7 +31,7 @@ func (c *recordsController) Create(ctx context.Context, req CreateExpenseRecordR
 
 	slog.Debug(ctx, "creating expense record", slog.With("req", req))
 
-	err = c.db.Transaction(ctx, func(db ports.Repositories) error {
+	err = c.db.Transaction(ctx, func(db ports.LocalRepositories) error {
 		ledger, err := db.Ledger().Get(ctx, req.LedgerID)
 		if err != nil {
 			return fmt.Errorf("fetching ledger: %w", err)

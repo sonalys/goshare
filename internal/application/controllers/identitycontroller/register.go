@@ -26,7 +26,7 @@ func (c *Controller) Register(ctx context.Context, req RegisterRequest) (resp *R
 	ctx, span := c.tracer.Start(ctx, "register")
 	defer span.End()
 
-	err = c.db.Transaction(ctx, func(tx ports.Repositories) error {
+	err = c.db.Transaction(ctx, func(tx ports.LocalRepositories) error {
 		user, err := domain.NewUser(domain.NewUserRequest{
 			FirstName: req.FirstName,
 			LastName:  req.LastName,
