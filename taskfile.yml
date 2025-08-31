@@ -45,7 +45,7 @@ tasks:
     cmd: $GOLANGCI run
 
   test-coverage:
-    cmd: $GOTESTSUM --hide-summary=skipped -- -cover -v ./...
+    cmd: $GOTESTSUM --hide-summary=skipped -- -coverprofile=coverage.out -v ./...
 
   build-server:
     cmd: go build -ldflags "-extldflags '-static' -X main.version=$VERSION" -o ./bin/server ./cmd/server
@@ -127,8 +127,8 @@ tasks:
     env:
       OPENAPI_SPEC: internal/infrastructure/http/openapi.yaml
     cmd: $OGEN -package server --target internal/infrastructure/http/server --clean $OPENAPI_SPEC
-    # sources:
-    #   - $OPENAPI_SPEC
+    sources:
+      - $OPENAPI_SPEC
 
   generate-mocks:
     cmd: >
