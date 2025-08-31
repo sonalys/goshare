@@ -14,9 +14,10 @@ type Server struct {
 
 func setupServer(cfg Config, handler http.Handler) *Server {
 	httpServer := http.Server{
-		Addr:        cfg.AddrPort,
-		ReadTimeout: cfg.ReadTimeout,
-		Handler:     handler,
+		Addr:         cfg.AddrPort,
+		WriteTimeout: cfg.WriteTimeout,
+		ReadTimeout:  cfg.ReadTimeout,
+		Handler:      handler,
 	}
 
 	return &Server{

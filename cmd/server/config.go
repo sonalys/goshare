@@ -13,6 +13,7 @@ type Config struct {
 	ServiceName       string
 	AddrPort          string
 	ReadTimeout       time.Duration
+	WriteTimeout      time.Duration
 	EnableTelemetry   bool
 	TelemetryEndpoint string
 }
@@ -22,6 +23,7 @@ func loadConfigFromEnv(ctx context.Context) Config {
 		ServiceName:       "server",
 		AddrPort:          ":8080",
 		ReadTimeout:       10 * time.Second,
+		WriteTimeout:      30 * time.Second,
 		EnableTelemetry:   true,
 		TelemetryEndpoint: os.Getenv("JAEGER_CONN"),
 	}
