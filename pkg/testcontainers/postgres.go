@@ -2,7 +2,7 @@ package testcontainers
 
 import (
 	"context"
-	"sync/atomic"
+	"sync"
 	"testing"
 
 	"github.com/sonalys/goshare/internal/infrastructure/postgres"
@@ -18,9 +18,39 @@ func init() {
 	slog.Init(slog.LevelDebug)
 }
 
-var references atomic.Int32
+var (
+	conn      postgres.Connection
+	container *module.PostgresContainer
+
+	lock       sync.Mutex
+	references int
+)
 
 func Postgres(t *testing.T) postgres.Connection {
+	lock.Lock()
+	defer lock.Unlock()
+
+	references++
+	t.Cleanup(func() {
+		lock.Lock()
+		defer lock.Unlock()
+
+		references--
+
+		if references > 0 || container == nil {
+			return
+		}
+
+		err := container.Terminate(context.Background())
+		require.NoError(t, err)
+
+		container = nil
+	})
+
+	if conn != nil {
+		return conn
+	}
+
 	ctx := t.Context()
 
 	dbName := "users"
@@ -29,7 +59,8 @@ func Postgres(t *testing.T) postgres.Connection {
 
 	t.Setenv("TESTCONTAINERS_RYUK_DISABLED", "true")
 
-	container, err := module.Run(ctx,
+	var err error
+	container, err = module.Run(ctx,
 		"postgres:17-alpine",
 		module.WithDatabase(dbName),
 		module.WithUsername(dbUser),
@@ -38,16 +69,6 @@ func Postgres(t *testing.T) postgres.Connection {
 		testcontainers.WithReuseByName("goshare-test-postgres"),
 	)
 	require.NoError(t, err)
-
-	references.Add(1)
-
-	t.Cleanup(func() {
-		if references.Add(-1) != 0 {
-			return
-		}
-		err := container.Terminate(context.Background())
-		require.NoError(t, err)
-	})
 
 	connStr, err := container.ConnectionString(ctx, "sslmode=disable")
 	require.NoError(t, err)
