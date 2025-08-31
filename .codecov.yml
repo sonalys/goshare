@@ -1,6 +1,6 @@
 ignore:
-  - "internal/application/pkg/**"
-  - "**/*.gen.go"
+  - "pkg/**"
+  - "**/*gen.go"
   - "cmd/**"
 coverage:
   status:
