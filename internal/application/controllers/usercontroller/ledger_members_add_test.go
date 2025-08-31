@@ -30,7 +30,7 @@ func Test_Ledger_MembersAdd(t *testing.T) {
 		}
 	}
 
-	setup := func(t *testing.T, td usercontroller.AddMembersRequest) (*usercontroller.Controller, testSetup) {
+	setup := func(t *testing.T, td usercontroller.AddMembersRequest) (usercontroller.Controller, testSetup) {
 		mocks := testSetup{
 			db: setupDatabaseMock(t),
 		}

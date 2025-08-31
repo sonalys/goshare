@@ -4,17 +4,16 @@ import (
 	"context"
 
 	"github.com/sonalys/goshare/internal/domain"
-	"github.com/sonalys/goshare/internal/infrastructure/http/middlewares"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
 )
 
 func (a *Router) LedgerList(ctx context.Context) (*server.LedgerListOK, error) {
-	identity, err := middlewares.GetIdentity(ctx)
+	identity, err := a.GetIdentity(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	ledgers, err := a.UserController.ListByUser(ctx, identity.UserID)
+	ledgers, err := a.Ledgers().ListByUser(ctx, identity.UserID)
 	if err != nil {
 		return nil, err
 	}

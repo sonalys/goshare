@@ -1298,6 +1298,72 @@ func (mock *LocalDatabase) UserCalls() []struct {
 	return calls
 }
 
+// Ensure that SecurityHandler does implement ports.SecurityHandler.
+// If this is not the case, regenerate this file with mockery.
+var _ ports.SecurityHandler = &SecurityHandler{}
+
+// SecurityHandler is a mock implementation of ports.SecurityHandler.
+//
+//	func TestSomethingThatUsesSecurityHandler(t *testing.T) {
+//
+//		// make and configure a mocked ports.SecurityHandler
+//		mockedSecurityHandler := &SecurityHandler{
+//			GetIdentityFunc: func(ctx context.Context) (*v1.Identity, error) {
+//				panic("mock out the GetIdentity method")
+//			},
+//		}
+//
+//		// use mockedSecurityHandler in code that requires ports.SecurityHandler
+//		// and then make assertions.
+//
+//	}
+type SecurityHandler struct {
+	// GetIdentityFunc mocks the GetIdentity method.
+	GetIdentityFunc func(ctx context.Context) (*v1.Identity, error)
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// GetIdentity holds details about calls to the GetIdentity method.
+		GetIdentity []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+		}
+	}
+	lockGetIdentity sync.RWMutex
+}
+
+// GetIdentity calls GetIdentityFunc.
+func (mock *SecurityHandler) GetIdentity(ctx context.Context) (*v1.Identity, error) {
+	if mock.GetIdentityFunc == nil {
+		panic("SecurityHandler.GetIdentityFunc: method is nil but SecurityHandler.GetIdentity was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+	}{
+		Ctx: ctx,
+	}
+	mock.lockGetIdentity.Lock()
+	mock.calls.GetIdentity = append(mock.calls.GetIdentity, callInfo)
+	mock.lockGetIdentity.Unlock()
+	return mock.GetIdentityFunc(ctx)
+}
+
+// GetIdentityCalls gets all the calls that were made to GetIdentity.
+// Check the length with:
+//
+//	len(mockedSecurityHandler.GetIdentityCalls())
+func (mock *SecurityHandler) GetIdentityCalls() []struct {
+	Ctx context.Context
+} {
+	var calls []struct {
+		Ctx context.Context
+	}
+	mock.lockGetIdentity.RLock()
+	calls = mock.calls.GetIdentity
+	mock.lockGetIdentity.RUnlock()
+	return calls
+}
+
 // Ensure that UserQueries does implement ports.UserQueries.
 // If this is not the case, regenerate this file with mockery.
 var _ ports.UserQueries = &UserQueries{}

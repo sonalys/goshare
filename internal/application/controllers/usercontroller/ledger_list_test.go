@@ -19,7 +19,7 @@ func Test_Ledger_ListByUser(t *testing.T) {
 
 	createTestData := domain.NewID
 
-	setup := func(t *testing.T, td domain.ID) (*usercontroller.Controller, testSetup) {
+	setup := func(t *testing.T, td domain.ID) (usercontroller.Controller, testSetup) {
 		mocks := testSetup{
 			db: setupDatabaseMock(t),
 		}

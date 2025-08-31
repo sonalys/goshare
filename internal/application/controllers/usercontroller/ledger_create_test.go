@@ -24,7 +24,7 @@ func Test_Ledger_Create(t *testing.T) {
 		}
 	}
 
-	setup := func(t *testing.T, td usercontroller.CreateLedgerRequest) (*usercontroller.Controller, testSetup) {
+	setup := func(t *testing.T, td usercontroller.CreateLedgerRequest) (usercontroller.Controller, testSetup) {
 		mocks := testSetup{
 			db: setupDatabaseMock(t),
 		}

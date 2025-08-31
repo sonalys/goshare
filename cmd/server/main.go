@@ -11,6 +11,7 @@ import (
 
 	"github.com/sonalys/goshare/internal/application/controllers/identitycontroller"
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
+	"github.com/sonalys/goshare/internal/infrastructure/http/middlewares"
 	"github.com/sonalys/goshare/internal/infrastructure/http/router"
 	"github.com/sonalys/goshare/pkg/otel"
 	"github.com/sonalys/goshare/pkg/secrets"
@@ -50,11 +51,14 @@ func main() {
 		IdentityEncoder: repositories.JWTRepository,
 	})
 
+	securityHandler := middlewares.NewSecurityHandler(repositories.JWTRepository)
+
 	router := router.New(
+		securityHandler,
 		identityController,
 		userController,
 	)
-	handler := setupHandler(ctx, router, repositories)
+	handler := setupHandler(ctx, securityHandler, router)
 	server := setupServer(cfg, handler)
 
 	go server.ServeHTTP(ctx)

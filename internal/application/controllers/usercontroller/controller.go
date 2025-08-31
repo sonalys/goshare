@@ -5,17 +5,23 @@ import (
 )
 
 type (
-	Controller struct {
+	Controller interface {
+		Expenses() ExpenseController
+		Ledgers() LedgerController
+		Records() RecordsController
+	}
+
+	controller struct {
 		*ledgerController
 		*recordsController
 		*expenseController
 	}
 )
 
-func New(dep Dependencies) *Controller {
+func New(dep Dependencies) Controller {
 	traceProvider := otel.Provider.TracerProvider()
 
-	return &Controller{
+	return &controller{
 		ledgerController: &ledgerController{
 			db:     dep.LocalDatabase,
 			tracer: traceProvider.Tracer("userController.ledger"),
@@ -31,14 +37,14 @@ func New(dep Dependencies) *Controller {
 	}
 }
 
-func (c *Controller) Ledgers() *ledgerController {
+func (c *controller) Ledgers() LedgerController {
 	return c.ledgerController
 }
 
-func (c *Controller) Records() *recordsController {
+func (c *controller) Records() RecordsController {
 	return c.recordsController
 }
 
-func (c *Controller) Expenses() *expenseController {
+func (c *controller) Expenses() ExpenseController {
 	return c.expenseController
 }

@@ -5,12 +5,11 @@ import (
 
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
 	"github.com/sonalys/goshare/internal/domain"
-	"github.com/sonalys/goshare/internal/infrastructure/http/middlewares"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
 )
 
 func (a *Router) LedgerExpenseCreate(ctx context.Context, req *server.Expense, params server.LedgerExpenseCreateParams) (r *server.LedgerExpenseCreateOK, _ error) {
-	identity, err := middlewares.GetIdentity(ctx)
+	identity, err := a.GetIdentity(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +27,7 @@ func (a *Router) LedgerExpenseCreate(ctx context.Context, req *server.Expense, p
 		PendingRecords: pendingRecords,
 	}
 
-	switch resp, err := a.UserController.Expenses().Create(ctx, apiReq); err {
+	switch resp, err := a.Expenses().Create(ctx, apiReq); err {
 	case nil:
 		return &server.LedgerExpenseCreateOK{
 			ID: resp.ID.UUID(),

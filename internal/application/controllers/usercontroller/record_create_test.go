@@ -35,7 +35,7 @@ func Test_Record_Create(t *testing.T) {
 		}
 	}
 
-	setup := func(t *testing.T, td usercontroller.CreateExpenseRecordRequest) (*usercontroller.Controller, testSetup) {
+	setup := func(t *testing.T, td usercontroller.CreateExpenseRecordRequest) (usercontroller.Controller, testSetup) {
 		mocks := testSetup{
 			db: setupDatabaseMock(t),
 		}

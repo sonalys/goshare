@@ -28,7 +28,7 @@ func Test_Record_Delete(t *testing.T) {
 		}
 	}
 
-	setup := func(t *testing.T, td usercontroller.DeleteExpenseRecordRequest) (*usercontroller.Controller, testSetup) {
+	setup := func(t *testing.T, td usercontroller.DeleteExpenseRecordRequest) (usercontroller.Controller, testSetup) {
 		mocks := testSetup{
 			db: setupDatabaseMock(t),
 		}

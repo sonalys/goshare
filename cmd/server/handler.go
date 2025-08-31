@@ -11,10 +11,8 @@ import (
 	"github.com/sonalys/goshare/pkg/slog"
 )
 
-func setupHandler(ctx context.Context, client server.Handler, repositories *repos) http.Handler {
-	securityMiddleware := middlewares.NewSecurityHandler(repositories.JWTRepository)
-
-	handler, err := server.NewServer(client, securityMiddleware,
+func setupHandler(ctx context.Context, securityHandler server.SecurityHandler, client server.Handler) http.Handler {
+	handler, err := server.NewServer(client, securityHandler,
 		server.WithPathPrefix("/api/v1"),
 		server.WithTracerProvider(otel.Provider.TracerProvider()),
 		server.WithMiddleware(

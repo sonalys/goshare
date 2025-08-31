@@ -27,7 +27,7 @@ func Test_Expense_Get(t *testing.T) {
 		}
 	}
 
-	setup := func(t *testing.T, td usercontroller.GetExpenseRequest) (*usercontroller.Controller, testSetup) {
+	setup := func(t *testing.T, td usercontroller.GetExpenseRequest) (usercontroller.Controller, testSetup) {
 		mocks := testSetup{
 			db: setupDatabaseMock(t),
 		}

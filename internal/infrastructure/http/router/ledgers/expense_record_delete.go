@@ -5,12 +5,11 @@ import (
 
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
 	"github.com/sonalys/goshare/internal/domain"
-	"github.com/sonalys/goshare/internal/infrastructure/http/middlewares"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
 )
 
 func (a *Router) LedgerExpenseRecordDelete(ctx context.Context, params server.LedgerExpenseRecordDeleteParams) error {
-	identity, err := middlewares.GetIdentity(ctx)
+	identity, err := a.GetIdentity(ctx)
 	if err != nil {
 		return err
 	}
@@ -22,5 +21,5 @@ func (a *Router) LedgerExpenseRecordDelete(ctx context.Context, params server.Le
 		RecordID:  domain.ConvertID(params.RecordID),
 	}
 
-	return a.UserController.Records().Delete(ctx, apiReq)
+	return a.Records().Delete(ctx, apiReq)
 }

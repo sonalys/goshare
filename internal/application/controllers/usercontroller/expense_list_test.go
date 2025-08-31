@@ -29,7 +29,7 @@ func Test_Expense_List(t *testing.T) {
 		}
 	}
 
-	setup := func(t *testing.T, td usercontroller.ListExpensesRequest) (*usercontroller.Controller, testSetup) {
+	setup := func(t *testing.T, td usercontroller.ListExpensesRequest) (usercontroller.Controller, testSetup) {
 		mocks := testSetup{
 			db: setupDatabaseMock(t),
 		}

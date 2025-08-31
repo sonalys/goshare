@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/sonalys/goshare/internal/domain"
+	v1 "github.com/sonalys/goshare/pkg/v1"
 	"github.com/sonalys/kset"
 	"github.com/stretchr/testify/require"
 )
@@ -52,4 +53,12 @@ func Expense(t *testing.T, ledger *domain.Ledger, from, to domain.ID) *domain.Ex
 	require.NoError(t, err)
 
 	return expense
+}
+
+func Identity(t *testing.T) *v1.Identity {
+	return &v1.Identity{
+		UserID: domain.NewID(),
+		Email:  domain.NewID().String() + "@example.com",
+		Exp:    domain.Now().Unix(),
+	}
 }

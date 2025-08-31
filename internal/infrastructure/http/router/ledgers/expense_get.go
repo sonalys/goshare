@@ -5,17 +5,16 @@ import (
 
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
 	"github.com/sonalys/goshare/internal/domain"
-	"github.com/sonalys/goshare/internal/infrastructure/http/middlewares"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
 )
 
 func (a *Router) LedgerExpenseGet(ctx context.Context, params server.LedgerExpenseGetParams) (*server.Expense, error) {
-	identity, err := middlewares.GetIdentity(ctx)
+	identity, err := a.GetIdentity(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	expense, err := a.UserController.Expenses().Get(ctx, usercontroller.GetExpenseRequest{
+	expense, err := a.Expenses().Get(ctx, usercontroller.GetExpenseRequest{
 		ActorID:   identity.UserID,
 		LedgerID:  domain.ConvertID(params.LedgerID),
 		ExpenseID: domain.ConvertID(params.ExpenseID),

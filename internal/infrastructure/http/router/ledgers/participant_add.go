@@ -5,12 +5,11 @@ import (
 
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
 	"github.com/sonalys/goshare/internal/domain"
-	"github.com/sonalys/goshare/internal/infrastructure/http/middlewares"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
 )
 
 func (a *Router) LedgerMemberAdd(ctx context.Context, req *server.LedgerMemberAddReq, params server.LedgerMemberAddParams) error {
-	identity, err := middlewares.GetIdentity(ctx)
+	identity, err := a.GetIdentity(ctx)
 	if err != nil {
 		return err
 	}
@@ -21,5 +20,5 @@ func (a *Router) LedgerMemberAdd(ctx context.Context, req *server.LedgerMemberAd
 		Emails:   req.Emails,
 	}
 
-	return a.UserController.MembersAdd(ctx, apiParams)
+	return a.Ledgers().MembersAdd(ctx, apiParams)
 }

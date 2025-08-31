@@ -14,6 +14,7 @@ import (
 	"github.com/sonalys/goshare/internal/infrastructure/http/router/ledgers"
 	"github.com/sonalys/goshare/internal/infrastructure/http/router/users"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
+	"github.com/sonalys/goshare/internal/ports"
 	v1 "github.com/sonalys/goshare/pkg/v1"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -26,12 +27,13 @@ type (
 )
 
 func New(
+	securityHandler ports.SecurityHandler,
 	identityController *identitycontroller.Controller,
-	userController *usercontroller.Controller,
+	userController usercontroller.Controller,
 ) server.Handler {
 	return &Router{
-		LedgersHandler: ledgers.New(userController),
-		UsersHandler:   users.New(identityController, userController),
+		LedgersHandler: ledgers.New(securityHandler, userController),
+		UsersHandler:   users.New(securityHandler, identityController, userController),
 	}
 }
 

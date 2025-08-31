@@ -3,12 +3,11 @@ package users
 import (
 	"context"
 
-	"github.com/sonalys/goshare/internal/infrastructure/http/middlewares"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
 )
 
 func (a *Router) AuthenticationWhoAmI(ctx context.Context) (*server.AuthenticationWhoAmIOK, error) {
-	identity, err := middlewares.GetIdentity(ctx)
+	identity, err := a.SecurityHandler.GetIdentity(ctx)
 	if err != nil {
 		return nil, err
 	}

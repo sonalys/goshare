@@ -4,12 +4,11 @@ import (
 	"context"
 
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
-	"github.com/sonalys/goshare/internal/infrastructure/http/middlewares"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
 )
 
 func (a *Router) LedgerCreate(ctx context.Context, req *server.LedgerCreateReq) (r *server.LedgerCreateOK, _ error) {
-	identity, err := middlewares.GetIdentity(ctx)
+	identity, err := a.GetIdentity(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -19,7 +18,7 @@ func (a *Router) LedgerCreate(ctx context.Context, req *server.LedgerCreateReq) 
 		Name:    req.Name,
 	}
 
-	switch resp, err := a.UserController.Ledgers().Create(ctx, apiParams); err {
+	switch resp, err := a.Ledgers().Create(ctx, apiParams); err {
 	case nil:
 		return &server.LedgerCreateOK{
 			ID: resp.ID.UUID(),
