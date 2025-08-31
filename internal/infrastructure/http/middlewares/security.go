@@ -11,12 +11,12 @@ import (
 type (
 	contextKey string
 
-	identityController interface {
+	IdentityDecoder interface {
 		Decode(jwt string) (*v1.Identity, error)
 	}
 
 	SecurityHandler struct {
-		controller identityController
+		controller IdentityDecoder
 	}
 )
 
@@ -31,7 +31,7 @@ func GetIdentity(ctx context.Context) (*v1.Identity, error) {
 	return identity, nil
 }
 
-func NewSecurityHandler(c identityController) *SecurityHandler {
+func NewSecurityHandler(c IdentityDecoder) *SecurityHandler {
 	return &SecurityHandler{
 		controller: c,
 	}

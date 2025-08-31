@@ -15,7 +15,7 @@ env:
 
   # Tools
   SQLC: go tool -modfile=.tools/sqlc/go.mod sqlc -f .config/.sqlc.yaml
-  GOLANGCI: go tool -modfile=.tools/golangci-lint/go.mod golangci-lint -c .config/.golangci.yaml
+  GOLANGCI: go tool -modfile=.tools/golangci-lint/go.mod golangci-lint run -c .config/.golangci.yaml
   GOTESTSUM: go tool -modfile=.tools/gotestsum/go.mod gotestsum
   OGEN: go tool -modfile=.tools/ogen/go.mod ogen -config .config/.ogen.yaml
   MOCKERY: go tool -modfile=.tools/mockery/go.mod mockery --config .config/.mockery.yaml
@@ -42,7 +42,7 @@ tasks:
     cmd: $SQLC vet
 
   lint:
-    cmd: $GOLANGCI run
+    cmd: $GOLANGCI
 
   test-coverage:
     cmd: $GOTESTSUM --hide-summary=skipped -- -coverprofile=coverage.out -v ./...
