@@ -8,7 +8,6 @@ import (
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/mappers"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
-	v1 "github.com/sonalys/goshare/pkg/v1"
 )
 
 func (r *Repository) ListByEmail(ctx context.Context, emails []string) ([]domain.User, error) {
@@ -25,7 +24,7 @@ func (r *Repository) ListByEmail(ctx context.Context, emails []string) ([]domain
 		}) {
 			errs = append(errs, domain.FieldError{
 				Field: fmt.Sprintf("emails.%d", idx),
-				Cause: v1.ErrNotFound,
+				Cause: domain.ErrUserNotFound,
 			})
 		}
 	}
