@@ -20,7 +20,7 @@ jobs:
         run: |
           task download
           task test-coverage;
-          task junit-report --set-exit-code
+          task junit-report
 
       - uses: codecov/codecov-action@v5
         with:

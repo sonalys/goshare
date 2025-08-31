@@ -1,9 +1,11 @@
 package testcontainers
 
 import (
-	"context"
+	"fmt"
 	"io"
 	"log"
+	"os"
+	"os/exec"
 	"sync"
 	"testing"
 
@@ -21,33 +23,31 @@ func init() {
 }
 
 var (
-	conn      postgres.Connection
-	container *module.PostgresContainer
-
-	lock       sync.Mutex
-	references int
+	conn postgres.Connection
+	lock sync.Mutex
 )
+
+// watcher will kill the container once the pid is stopped.
+func watcher(cid string) {
+	pid := os.Getpid()
+	//nolint:gosec,noctx // safe.
+	watcher := exec.Command("sh", "-c",
+		fmt.Sprintf(`(while kill -0 %d 2>/dev/null; do sleep 2; done; docker rm -f %s) & disown`, pid, cid),
+	)
+
+	// Detach stdio so watcher doesn't block
+	watcher.Stdout = nil
+	watcher.Stderr = nil
+	watcher.Stdin = nil
+
+	if err := watcher.Start(); err != nil {
+		log.Fatalf("failed to start watcher: %v", err)
+	}
+}
 
 func Postgres(t *testing.T) postgres.Connection {
 	lock.Lock()
 	defer lock.Unlock()
-
-	references++
-	t.Cleanup(func() {
-		lock.Lock()
-		defer lock.Unlock()
-
-		references--
-
-		if references > 0 || container == nil {
-			return
-		}
-
-		err := container.Terminate(context.Background())
-		require.NoError(t, err)
-
-		container = nil
-	})
 
 	if conn != nil {
 		return conn
@@ -62,7 +62,7 @@ func Postgres(t *testing.T) postgres.Connection {
 	t.Setenv("TESTCONTAINERS_RYUK_DISABLED", "true")
 
 	var err error
-	container, err = module.Run(ctx,
+	container, err := module.Run(ctx,
 		"postgres:17-alpine",
 		module.WithDatabase(dbName),
 		module.WithUsername(dbUser),
@@ -78,11 +78,13 @@ func Postgres(t *testing.T) postgres.Connection {
 
 	slog.Debug(ctx, "postgres started", slog.WithString("connStr", connStr))
 
-	conn, err := postgres.New(ctx, connStr)
+	conn, err = postgres.New(ctx, connStr)
 	require.NoError(t, err)
 
 	err = migrations.MigrateUp(ctx, connStr)
 	require.NoError(t, err)
+
+	watcher(container.GetContainerID())
 
 	return conn
 }
