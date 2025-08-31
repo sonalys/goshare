@@ -38,7 +38,7 @@ func Test_Expense_Get(t *testing.T) {
 		ledger := testfixtures.Ledger(t, user)
 		ledger.ID = td.LedgerID
 
-		expense := testfixtures.Expense(t, ledger)
+		expense := testfixtures.Expense(t, ledger, domain.NewID(), domain.NewID())
 
 		mocks.db.repositories.ledger.GetFunc = func(ctx context.Context, id domain.ID) (*domain.Ledger, error) {
 			assert.Equal(t, td.LedgerID, id)

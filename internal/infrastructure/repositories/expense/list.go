@@ -7,7 +7,6 @@ import (
 
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/mappers"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
 	v1 "github.com/sonalys/goshare/pkg/v1"
 )
@@ -24,7 +23,7 @@ func (r *Repository) ListByLedger(ctx context.Context, ledgerID domain.ID, curso
 
 	result := make([]v1.LedgerExpenseSummary, 0, len(expenses))
 	for _, expense := range expenses {
-		result = append(result, *mappers.NewLedgerExpenseSummary(&expense))
+		result = append(result, *toLedgerExpenseSummary(&expense))
 	}
 
 	return result, nil

@@ -39,7 +39,7 @@ func Test_Record_Delete(t *testing.T) {
 		ledger := testfixtures.Ledger(t, user)
 		ledger.ID = td.LedgerID
 
-		expense := testfixtures.Expense(t, ledger)
+		expense := testfixtures.Expense(t, ledger, domain.NewID(), domain.NewID())
 		expense.Records[td.RecordID] = &domain.Record{}
 
 		mocks.db.tx.ledger.GetFunc = func(ctx context.Context, id domain.ID) (*domain.Ledger, error) {

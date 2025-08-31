@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/sonalys/goshare/internal/domain"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/mappers"
 )
 
 func (r *Repository) Get(ctx context.Context, id domain.ID) (*domain.Ledger, error) {
@@ -18,5 +17,5 @@ func (r *Repository) Get(ctx context.Context, id domain.ID) (*domain.Ledger, err
 		return nil, ledgerError(err)
 	}
 
-	return mappers.NewLedger(&ledger, members), nil
+	return toLedger(&ledger, members), nil
 }

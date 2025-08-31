@@ -6,7 +6,6 @@ import (
 	"slices"
 
 	"github.com/sonalys/goshare/internal/domain"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/mappers"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
 )
 
@@ -33,5 +32,5 @@ func (r *Repository) ListByEmail(ctx context.Context, emails []string) ([]domain
 		return nil, fmt.Errorf("failed to get users by email: %w", err)
 	}
 
-	return mappers.NewUsers(users), nil
+	return toUsers(users), nil
 }

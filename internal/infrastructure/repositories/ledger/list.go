@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/sonalys/goshare/internal/domain"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/mappers"
 )
 
 func (r *Repository) ListByUser(ctx context.Context, userID domain.ID) ([]domain.Ledger, error) {
@@ -19,7 +18,7 @@ func (r *Repository) ListByUser(ctx context.Context, userID domain.ID) ([]domain
 		if err != nil {
 			return nil, ledgerError(err)
 		}
-		result = append(result, *mappers.NewLedger(&ledger, members))
+		result = append(result, *toLedger(&ledger, members))
 	}
 
 	return result, nil

@@ -11,15 +11,18 @@ import (
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
 )
 
+func updateLedgerParams(ledger *domain.Ledger) sqlcgen.UpdateLedgerParams {
+	return sqlcgen.UpdateLedgerParams{
+		ID:   ledger.ID,
+		Name: ledger.Name,
+	}
+}
+
 func (r *Repository) Update(ctx context.Context, ledger *domain.Ledger) error {
 	return r.transaction(ctx, func(conn postgres.Connection) error {
 		query := conn.Queries()
 
-		updateLedgerParams := sqlcgen.UpdateLedgerParams{
-			ID:   ledger.ID,
-			Name: ledger.Name,
-		}
-		if err := query.UpdateLedger(ctx, updateLedgerParams); err != nil {
+		if err := query.UpdateLedger(ctx, updateLedgerParams(ledger)); err != nil {
 			return fmt.Errorf("updating ledger: %w", err)
 		}
 
@@ -30,13 +33,7 @@ func (r *Repository) Update(ctx context.Context, ledger *domain.Ledger) error {
 		}
 
 		for id, member := range ledger.Members {
-			err := query.CreateLedgerMember(ctx, sqlcgen.CreateLedgerMemberParams{
-				LedgerID:  ledger.ID,
-				UserID:    id,
-				CreatedAt: postgres.ConvertTime(member.CreatedAt),
-				CreatedBy: member.CreatedBy,
-				Balance:   member.Balance,
-			})
+			err := query.CreateLedgerMember(ctx, createLedgerMemberParams(ledger.ID, id, member))
 			if err != nil {
 				return fmt.Errorf("saving ledger member: %w", err)
 			}

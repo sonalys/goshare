@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/sonalys/goshare/internal/domain"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/mappers"
 )
 
 func (r *Repository) Get(ctx context.Context, id domain.ID) (*domain.User, error) {
@@ -13,7 +12,7 @@ func (r *Repository) Get(ctx context.Context, id domain.ID) (*domain.User, error
 		return nil, userError(err)
 	}
 
-	return mappers.NewUser(user), nil
+	return toUser(user), nil
 }
 
 func (r *Repository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
@@ -22,5 +21,5 @@ func (r *Repository) GetByEmail(ctx context.Context, email string) (*domain.User
 		return nil, userError(err)
 	}
 
-	return mappers.NewUser(user), nil
+	return toUser(user), nil
 }

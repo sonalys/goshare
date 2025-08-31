@@ -9,31 +9,35 @@ import (
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
 )
 
+func createLedgerParams(ledger *domain.Ledger) sqlcgen.CreateLedgerParams {
+	return sqlcgen.CreateLedgerParams{
+		ID:        ledger.ID,
+		Name:      ledger.Name,
+		CreatedAt: postgres.ConvertTime(ledger.CreatedAt),
+		CreatedBy: ledger.CreatedBy,
+	}
+}
+
+func createLedgerMemberParams(ledgerID, memberID domain.ID, member *domain.LedgerMember) sqlcgen.CreateLedgerMemberParams {
+	return sqlcgen.CreateLedgerMemberParams{
+		UserID:    memberID,
+		LedgerID:  ledgerID,
+		CreatedAt: postgres.ConvertTime(member.CreatedAt),
+		CreatedBy: member.CreatedBy,
+		Balance:   member.Balance,
+	}
+}
+
 func (r *Repository) Create(ctx context.Context, ledger *domain.Ledger) error {
 	return r.transaction(ctx, func(conn postgres.Connection) error {
 		query := conn.Queries()
 
-		createLedgerReq := sqlcgen.CreateLedgerParams{
-			ID:        ledger.ID,
-			Name:      ledger.Name,
-			CreatedAt: postgres.ConvertTime(ledger.CreatedAt),
-			CreatedBy: ledger.CreatedBy,
-		}
-
-		if err := query.CreateLedger(ctx, createLedgerReq); err != nil {
+		if err := query.CreateLedger(ctx, createLedgerParams(ledger)); err != nil {
 			return fmt.Errorf("failed to create ledger: %w", err)
 		}
 
 		for id, member := range ledger.Members {
-			addReq := sqlcgen.CreateLedgerMemberParams{
-				UserID:    id,
-				LedgerID:  createLedgerReq.ID,
-				CreatedAt: postgres.ConvertTime(member.CreatedAt),
-				CreatedBy: member.CreatedBy,
-				Balance:   member.Balance,
-			}
-
-			if err := query.CreateLedgerMember(ctx, addReq); err != nil {
+			if err := query.CreateLedgerMember(ctx, createLedgerMemberParams(ledger.ID, id, member)); err != nil {
 				return fmt.Errorf("failed to add user to ledger: %w", err)
 			}
 		}

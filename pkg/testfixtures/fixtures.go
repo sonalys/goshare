@@ -1,10 +1,13 @@
 package testfixtures
 
 import (
+	"maps"
+	"slices"
 	"testing"
 	"time"
 
 	"github.com/sonalys/goshare/internal/domain"
+	"github.com/sonalys/kset"
 	"github.com/stretchr/testify/require"
 )
 
@@ -31,12 +34,12 @@ func Ledger(t *testing.T, creator *domain.User) *domain.Ledger {
 	return ledger
 }
 
-func Expense(t *testing.T, ledger *domain.Ledger) *domain.Expense {
-	from := domain.NewID()
-	to := domain.NewID()
+func Expense(t *testing.T, ledger *domain.Ledger, from, to domain.ID) *domain.Expense {
+	currentMembers := kset.HashMapKey(slices.Collect(maps.Keys(ledger.Members))...)
+	newMembers := kset.HashMapKey(from, to)
 
-	ledger.Members[from] = &domain.LedgerMember{}
-	ledger.Members[to] = &domain.LedgerMember{}
+	err := ledger.AddMember(ledger.CreatedBy, newMembers.Difference(currentMembers).ToSlice()...)
+	require.NoError(t, err)
 
 	expense, err := ledger.CreateExpense(domain.CreateExpenseRequest{
 		Creator:     ledger.CreatedBy,

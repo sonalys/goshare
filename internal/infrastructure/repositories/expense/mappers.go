@@ -1,4 +1,4 @@
-package mappers
+package expense
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	v1 "github.com/sonalys/goshare/pkg/v1"
 )
 
-func NewLedgerExpenseSummary(expense *sqlcgen.Expense) *v1.LedgerExpenseSummary {
+func toLedgerExpenseSummary(expense *sqlcgen.Expense) *v1.LedgerExpenseSummary {
 	return &v1.LedgerExpenseSummary{
 		ID:          expense.ID,
 		Amount:      expense.Amount,
@@ -21,7 +21,7 @@ func NewLedgerExpenseSummary(expense *sqlcgen.Expense) *v1.LedgerExpenseSummary 
 	}
 }
 
-func NewExpense(expense *sqlcgen.Expense, records []sqlcgen.ExpenseRecord) (*domain.Expense, error) {
+func toExpense(expense *sqlcgen.Expense, records []sqlcgen.ExpenseRecord) (*domain.Expense, error) {
 	result := &domain.Expense{
 		ID:          expense.ID,
 		LedgerID:    expense.LedgerID,
@@ -36,7 +36,7 @@ func NewExpense(expense *sqlcgen.Expense, records []sqlcgen.ExpenseRecord) (*dom
 	}
 
 	for _, recordModel := range records {
-		record, err := NewRecord(&recordModel)
+		record, err := toRecord(&recordModel)
 		if err != nil {
 			return nil, fmt.Errorf("creating record: %w", err)
 		}
@@ -46,7 +46,7 @@ func NewExpense(expense *sqlcgen.Expense, records []sqlcgen.ExpenseRecord) (*dom
 	return result, nil
 }
 
-func NewRecord(record *sqlcgen.ExpenseRecord) (*domain.Record, error) {
+func toRecord(record *sqlcgen.ExpenseRecord) (*domain.Record, error) {
 	recordType, err := domain.NewRecordType(record.RecordType)
 	if err != nil {
 		return nil, fmt.Errorf("invalid record type: %w", err)

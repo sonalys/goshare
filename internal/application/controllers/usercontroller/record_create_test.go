@@ -51,7 +51,7 @@ func Test_Record_Create(t *testing.T) {
 			ledger.Members[record.To] = &domain.LedgerMember{}
 		}
 
-		expense := testfixtures.Expense(t, ledger)
+		expense := testfixtures.Expense(t, ledger, domain.NewID(), domain.NewID())
 
 		mocks.db.tx.ledger.GetFunc = func(ctx context.Context, id domain.ID) (*domain.Ledger, error) {
 			assert.Equal(t, td.LedgerID, id)

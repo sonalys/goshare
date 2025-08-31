@@ -6,7 +6,6 @@ import (
 
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres/mappers"
 )
 
 func (r *Repository) Get(ctx context.Context, id domain.ID) (*domain.Expense, error) {
@@ -20,5 +19,5 @@ func (r *Repository) Get(ctx context.Context, id domain.ID) (*domain.Expense, er
 		return nil, fmt.Errorf("getting expense records: %w", postgres.DefaultErrorMapping(err))
 	}
 
-	return mappers.NewExpense(&expense, records)
+	return toExpense(&expense, records)
 }
