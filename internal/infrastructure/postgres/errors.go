@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/sonalys/goshare/internal/domain"
 	v1 "github.com/sonalys/goshare/pkg/v1"
 )
 
@@ -14,7 +15,7 @@ func DefaultErrorMapping(err error) error {
 	case errors.Is(err, pgx.ErrNoRows):
 		return v1.ErrNotFound
 	case isConstraintError(err):
-		return v1.ErrConflict
+		return domain.ErrConflict
 	default:
 		return err
 	}

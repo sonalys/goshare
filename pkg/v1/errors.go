@@ -13,11 +13,8 @@ type (
 )
 
 const (
-	ErrConflict      = StringError("conflict")
-	ErrForbidden     = StringError("forbidden")
-	ErrInvalidValue  = StringError("invalid value")
-	ErrNotFound      = StringError("not found")
-	ErrRequiredValue = StringError("cannot be empty")
+	ErrForbidden = StringError("forbidden")
+	ErrNotFound  = StringError("not found")
 )
 
 func (e *UserEmailConflictError) Error() string {

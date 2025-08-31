@@ -19,14 +19,13 @@ DELETE FROM ledger_members WHERE user_id = $1;
 SELECT * FROM ledger_members WHERE ledger_id = $1;
 
 -- name: GetUserLedgers :many
-SELECT ledgers.* FROM ledgers 
-JOIN ledger_members ON 
-    ledgers.id = ledger_members.ledger_id 
-WHERE 
-    ledgers.created_by = $1 OR
-    ledger_members.user_id = $1 
-ORDER BY 
-    ledgers.created_at DESC;
+SELECT DISTINCT ledgers.*
+FROM ledgers
+LEFT JOIN ledger_members 
+  ON ledgers.id = ledger_members.ledger_id
+WHERE ledgers.created_by = $1
+   OR ledger_members.user_id = $1
+ORDER BY ledgers.created_at DESC;
 
 -- name: LockLedgerForUpdate :exec
 SELECT * FROM ledgers WHERE id = $1 FOR UPDATE;
@@ -44,4 +43,4 @@ SELECT COUNT(*) FROM ledgers WHERE created_by = $1;
 UPDATE ledgers SET name = $1 WHERE id = $2 RETURNING id;
 
 -- name: DeleteMembersNotIn :exec
-DELETE FROM ledger_members WHERE user_id != ALL(sqlc.arg('ids')::uuid[]);
+DELETE FROM ledger_members WHERE user_id NOT IN (SELECT UNNEST($1::uuid[]));

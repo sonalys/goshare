@@ -2,8 +2,10 @@ package ledger
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres"
 )
@@ -31,9 +33,18 @@ func (r *Repository) transaction(ctx context.Context, f func(q postgres.Connecti
 }
 
 func ledgerError(err error) error {
+	if err == nil {
+		return nil
+	}
+
 	if err := postgres.MapConstraintError(err, constraintMapping); err != nil {
 		return err
 	}
 
-	return postgres.DefaultErrorMapping(err)
+	switch {
+	case errors.Is(err, pgx.ErrNoRows):
+		return domain.ErrLedgerNotFound
+	default:
+		return postgres.DefaultErrorMapping(err)
+	}
 }

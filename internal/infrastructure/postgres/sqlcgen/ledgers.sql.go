@@ -83,11 +83,11 @@ func (q *Queries) CreateLedgerMember(ctx context.Context, arg CreateLedgerMember
 }
 
 const deleteMembersNotIn = `-- name: DeleteMembersNotIn :exec
-DELETE FROM ledger_members WHERE user_id != ALL($1::uuid[])
+DELETE FROM ledger_members WHERE user_id NOT IN (SELECT UNNEST($1::uuid[]))
 `
 
-func (q *Queries) DeleteMembersNotIn(ctx context.Context, ids []domain.ID) error {
-	_, err := q.db.Exec(ctx, deleteMembersNotIn, ids)
+func (q *Queries) DeleteMembersNotIn(ctx context.Context, dollar_1 []domain.ID) error {
+	_, err := q.db.Exec(ctx, deleteMembersNotIn, dollar_1)
 	return err
 }
 
@@ -138,14 +138,13 @@ func (q *Queries) GetLedgerMembers(ctx context.Context, ledgerID domain.ID) ([]L
 }
 
 const getUserLedgers = `-- name: GetUserLedgers :many
-SELECT ledgers.id, ledgers.name, ledgers.created_at, ledgers.created_by FROM ledgers 
-JOIN ledger_members ON 
-    ledgers.id = ledger_members.ledger_id 
-WHERE 
-    ledgers.created_by = $1 OR
-    ledger_members.user_id = $1 
-ORDER BY 
-    ledgers.created_at DESC
+SELECT DISTINCT ledgers.id, ledgers.name, ledgers.created_at, ledgers.created_by
+FROM ledgers
+LEFT JOIN ledger_members 
+  ON ledgers.id = ledger_members.ledger_id
+WHERE ledgers.created_by = $1
+   OR ledger_members.user_id = $1
+ORDER BY ledgers.created_at DESC
 `
 
 func (q *Queries) GetUserLedgers(ctx context.Context, createdBy domain.ID) ([]Ledger, error) {
