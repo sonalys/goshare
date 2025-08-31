@@ -19,6 +19,8 @@ func User(t *testing.T) *domain.User {
 	})
 	require.NoError(t, err)
 
+	user.CreatedAt = Now
+
 	return user
 }
 

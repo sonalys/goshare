@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_Users_Create(t *testing.T) {
+func Test_User_Create(t *testing.T) {
 	client := repositories.New(testcontainers.Postgres(t))
 
 	t.Run("pass", func(t *testing.T) {

@@ -50,7 +50,7 @@ func (r localTransaction) Ledger() ports.LedgerRepository {
 	return ledger.New(r.conn)
 }
 
-func (r LocalRepository) Transaction(ctx context.Context, handler func(ports.LocalRepositories) error) error {
+func (r LocalRepository) Transaction(ctx context.Context, handler func(r ports.LocalRepositories) error) error {
 	return r.conn.Transaction(ctx, func(conn postgres.Connection) error {
 		return handler(localTransaction{conn: conn})
 	})
