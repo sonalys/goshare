@@ -2,6 +2,7 @@ package user_test
 
 import (
 	"testing"
+	"testing/synctest"
 
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/repositories"
@@ -16,17 +17,19 @@ func Test_User_ListByEmail(t *testing.T) {
 	client := repositories.New(testcontainers.Postgres(t))
 
 	t.Run("pass/results", func(t *testing.T) {
-		ctx := t.Context()
-		user := testfixtures.User(t)
+		synctest.Test(t, func(t *testing.T) {
+			ctx := t.Context()
+			user := testfixtures.User(t)
 
-		err := client.Transaction(ctx, func(r ports.LocalRepositories) error {
-			return r.User().Create(ctx, user)
+			err := client.Transaction(ctx, func(r ports.LocalRepositories) error {
+				return r.User().Create(ctx, user)
+			})
+			require.NoError(t, err)
+
+			got, err := client.User().ListByEmail(ctx, []string{user.Email})
+			require.NoError(t, err)
+			assert.Len(t, got, 1)
 		})
-		require.NoError(t, err)
-
-		got, err := client.User().ListByEmail(ctx, []string{user.Email})
-		require.NoError(t, err)
-		assert.Len(t, got, 1)
 	})
 
 	t.Run("fail/one email doesn't exist", func(t *testing.T) {

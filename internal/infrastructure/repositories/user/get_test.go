@@ -2,6 +2,7 @@ package user_test
 
 import (
 	"testing"
+	"testing/synctest"
 
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/repositories"
@@ -16,17 +17,19 @@ func Test_User_Get(t *testing.T) {
 	client := repositories.New(testcontainers.Postgres(t))
 
 	t.Run("pass/found", func(t *testing.T) {
-		ctx := t.Context()
-		user := testfixtures.User(t)
+		synctest.Test(t, func(t *testing.T) {
+			ctx := t.Context()
+			user := testfixtures.User(t)
 
-		err := client.Transaction(ctx, func(r ports.LocalRepositories) error {
-			return r.User().Create(ctx, user)
+			err := client.Transaction(ctx, func(r ports.LocalRepositories) error {
+				return r.User().Create(ctx, user)
+			})
+			require.NoError(t, err)
+
+			got, err := client.User().Get(ctx, user.ID)
+			require.NoError(t, err)
+			assert.Equal(t, user, got)
 		})
-		require.NoError(t, err)
-
-		got, err := client.User().Get(ctx, user.ID)
-		require.NoError(t, err)
-		assert.Equal(t, user, got)
 	})
 
 	t.Run("fail/not found", func(t *testing.T) {
@@ -41,17 +44,19 @@ func Test_User_GetByEmail(t *testing.T) {
 	client := repositories.New(testcontainers.Postgres(t))
 
 	t.Run("pass/found", func(t *testing.T) {
-		ctx := t.Context()
-		user := testfixtures.User(t)
+		synctest.Test(t, func(t *testing.T) {
+			ctx := t.Context()
+			user := testfixtures.User(t)
 
-		err := client.Transaction(ctx, func(r ports.LocalRepositories) error {
-			return r.User().Create(ctx, user)
+			err := client.Transaction(ctx, func(r ports.LocalRepositories) error {
+				return r.User().Create(ctx, user)
+			})
+			require.NoError(t, err)
+
+			got, err := client.User().GetByEmail(ctx, user.Email)
+			require.NoError(t, err)
+			assert.Equal(t, user, got)
 		})
-		require.NoError(t, err)
-
-		got, err := client.User().GetByEmail(ctx, user.Email)
-		require.NoError(t, err)
-		assert.Equal(t, user, got)
 	})
 
 	t.Run("fail/not found", func(t *testing.T) {
