@@ -19,8 +19,11 @@ env:
   GOTESTSUM: go tool -modfile=.tools/gotestsum/go.mod gotestsum
   OGEN: go tool -modfile=.tools/ogen/go.mod ogen -config .config/.ogen.yaml
   MOCKERY: go tool -modfile=.tools/mockery/go.mod mockery --config .config/.mockery.yaml
+  JUNIT_REPORT: go tool -modfile=.tools/go-junit-report/go.mod go-junit-report
 
 tasks:
+  junit-report:
+    cmd: $JUNIT_REPORT -set-exit-code > report.xml
   diff-mockery:
     cmd: |
         if ! git diff --quiet; then
@@ -67,10 +70,10 @@ tasks:
           exit 1
         fi
 
-        TOOLNAME=$(basename "{{.tool}}" | sed -E 's/\/v[0-9]+$//; s/^v[0-9]+$//')
+        TOOLNAME=$(basename $(echo "{{.tool}}" | sed -E 's/\/v[0-9]+$//; s/^v[0-9]+$//'))
         DIR=".tools/$TOOLNAME"
 
-        echo "📦 Adding tool: {{.tool}} into $DIR"
+        echo "📦 Adding tool: $TOOLNAME into $DIR"
 
         mkdir -p "$DIR"
         cd "$DIR"

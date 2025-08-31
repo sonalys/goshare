@@ -9,28 +9,18 @@ on:
       - main
 
 jobs:
-  golangci:
+  lint:
     name: lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          cache-dependency-path: |
-            go.sum
-            .tools/**/go.sum
+          cache-dependency-path: "**/go.sum"
       - uses: golangci/golangci-lint-action@v8
         with:
           args: -c .config/.golangci.yaml
       - uses: arduino/setup-task@v2
-
-      - name: Cache Go tools
-        uses: actions/cache@v4
-        with:
-          path: ~/go/bin
-          key: ${{ runner.os }}-go-tools-${{ hashFiles('.tools/**') }}
-          restore-keys: |
-            ${{ runner.os }}-go-tools-
 
       - name: sqlc check
         run: |
