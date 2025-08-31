@@ -1,4 +1,4 @@
-package repositories
+package ledger
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/mappers"
 )
 
-func (r *LedgerRepository) ListByUser(ctx context.Context, userID domain.ID) ([]domain.Ledger, error) {
+func (r *Repository) ListByUser(ctx context.Context, userID domain.ID) ([]domain.Ledger, error) {
 	ledgers, err := r.client.Queries().GetUserLedgers(ctx, userID)
 	if err != nil {
 		return nil, ledgerError(err)

@@ -1,4 +1,4 @@
-package repositories
+package ledger
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
 )
 
-func (r *LedgerRepository) Update(ctx context.Context, ledger *domain.Ledger) error {
+func (r *Repository) Update(ctx context.Context, ledger *domain.Ledger) error {
 	return r.transaction(ctx, func(conn postgres.Connection) error {
 		query := conn.Queries()
 

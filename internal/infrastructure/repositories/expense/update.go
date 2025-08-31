@@ -1,4 +1,4 @@
-package repositories
+package expense
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
 )
 
-func (r *ExpenseRepository) Update(ctx context.Context, expense *domain.Expense) error {
+func (r *Repository) Update(ctx context.Context, expense *domain.Expense) error {
 	return r.transaction(ctx, func(conn postgres.Connection) error {
 		query := conn.Queries()
 

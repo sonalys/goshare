@@ -1,4 +1,4 @@
-package repositories
+package user
 
 import (
 	"github.com/sonalys/goshare/internal/domain"
@@ -6,22 +6,22 @@ import (
 	"github.com/sonalys/goshare/internal/ports"
 )
 
-var userConstraintMapping = map[string]error{
+var constraintMapping = map[string]error{
 	"unique_user_email": domain.ErrUserAlreadyRegistered,
 }
 
-type UserRepository struct {
+type Repository struct {
 	conn postgres.Connection
 }
 
-func newUserRepository(client postgres.Connection) ports.UserRepository {
-	return &UserRepository{
+func New(client postgres.Connection) ports.UserRepository {
+	return &Repository{
 		conn: client,
 	}
 }
 
-func mapUserErrors(err error) error {
-	if err := postgres.MapConstraintError(err, userConstraintMapping); err != nil {
+func userError(err error) error {
+	if err := postgres.MapConstraintError(err, constraintMapping); err != nil {
 		return err
 	}
 

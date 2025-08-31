@@ -1,4 +1,4 @@
-package repositories
+package ledger
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"github.com/sonalys/goshare/internal/infrastructure/postgres"
 )
 
-var ledgerConstraintMapping = map[string]error{
+var constraintMapping = map[string]error{
 	"fk_ledger_created_by":        domain.ErrUserNotFound,
 	"fk_ledger_member_ledger":     domain.ErrLedgerNotFound,
 	"fk_ledger_member_user":       domain.ErrUserNotFound,
@@ -16,22 +16,22 @@ var ledgerConstraintMapping = map[string]error{
 	"unique_ledger_member":        fmt.Errorf("member already in ledger: %w", domain.ErrConflict),
 }
 
-type LedgerRepository struct {
+type Repository struct {
 	client postgres.Connection
 }
 
-func newLedgerRepository(client postgres.Connection) *LedgerRepository {
-	return &LedgerRepository{
+func New(client postgres.Connection) *Repository {
+	return &Repository{
 		client: client,
 	}
 }
 
-func (r *LedgerRepository) transaction(ctx context.Context, f func(q postgres.Connection) error) error {
+func (r *Repository) transaction(ctx context.Context, f func(q postgres.Connection) error) error {
 	return ledgerError(r.client.Transaction(ctx, f))
 }
 
 func ledgerError(err error) error {
-	if err := postgres.MapConstraintError(err, ledgerConstraintMapping); err != nil {
+	if err := postgres.MapConstraintError(err, constraintMapping); err != nil {
 		return err
 	}
 

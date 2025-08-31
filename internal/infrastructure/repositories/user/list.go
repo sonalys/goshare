@@ -1,4 +1,4 @@
-package repositories
+package user
 
 import (
 	"context"
@@ -11,11 +11,11 @@ import (
 	v1 "github.com/sonalys/goshare/pkg/v1"
 )
 
-func (r *UserRepository) ListByEmail(ctx context.Context, emails []string) ([]domain.User, error) {
+func (r *Repository) ListByEmail(ctx context.Context, emails []string) ([]domain.User, error) {
 	emails = slices.Compact(emails)
 	users, err := r.conn.Queries().ListByEmail(ctx, emails)
 	if err != nil {
-		return nil, mapUserErrors(err)
+		return nil, userError(err)
 	}
 
 	var errs domain.Form

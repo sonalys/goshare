@@ -1,4 +1,4 @@
-package repositories
+package expense
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"github.com/sonalys/goshare/internal/infrastructure/postgres"
 )
 
-var expenseConstraintMapping = map[string]error{
+var constraintMapping = map[string]error{
 	"fk_expense_ledger":            domain.ErrLedgerNotFound,
 	"fk_expense_created_by":        domain.ErrUserNotFound,
 	"fk_expense_updated_by":        domain.ErrUserNotFound,
@@ -19,22 +19,22 @@ var expenseConstraintMapping = map[string]error{
 	"unique_expense_record":        fmt.Errorf("expense already exists: %w", domain.ErrConflict),
 }
 
-type ExpenseRepository struct {
+type Repository struct {
 	conn postgres.Connection
 }
 
-func newExpenseRepository(conn postgres.Connection) *ExpenseRepository {
-	return &ExpenseRepository{
+func New(conn postgres.Connection) *Repository {
+	return &Repository{
 		conn: conn,
 	}
 }
 
-func (r *ExpenseRepository) transaction(ctx context.Context, f func(q postgres.Connection) error) error {
+func (r *Repository) transaction(ctx context.Context, f func(q postgres.Connection) error) error {
 	return expenseError(r.conn.Transaction(ctx, f))
 }
 
 func expenseError(err error) error {
-	if err := postgres.MapConstraintError(err, expenseConstraintMapping); err != nil {
+	if err := postgres.MapConstraintError(err, constraintMapping); err != nil {
 		return err
 	}
 

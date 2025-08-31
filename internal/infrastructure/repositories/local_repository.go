@@ -4,6 +4,9 @@ import (
 	"context"
 
 	"github.com/sonalys/goshare/internal/infrastructure/postgres"
+	"github.com/sonalys/goshare/internal/infrastructure/repositories/expense"
+	"github.com/sonalys/goshare/internal/infrastructure/repositories/ledger"
+	"github.com/sonalys/goshare/internal/infrastructure/repositories/user"
 	"github.com/sonalys/goshare/internal/ports"
 )
 
@@ -24,27 +27,27 @@ func New(conn postgres.Connection) LocalRepository {
 }
 
 func (r LocalRepository) User() ports.UserQueries {
-	return newUserRepository(r.conn)
+	return user.New(r.conn)
 }
 
 func (r localTransaction) User() ports.UserRepository {
-	return newUserRepository(r.conn)
+	return user.New(r.conn)
 }
 
 func (r LocalRepository) Expense() ports.ExpenseQueries {
-	return newExpenseRepository(r.conn)
+	return expense.New(r.conn)
 }
 
 func (r localTransaction) Expense() ports.ExpenseRepository {
-	return newExpenseRepository(r.conn)
+	return expense.New(r.conn)
 }
 
 func (r LocalRepository) Ledger() ports.LedgerQueries {
-	return newLedgerRepository(r.conn)
+	return ledger.New(r.conn)
 }
 
 func (r localTransaction) Ledger() ports.LedgerRepository {
-	return newLedgerRepository(r.conn)
+	return ledger.New(r.conn)
 }
 
 func (r LocalRepository) Transaction(ctx context.Context, handler func(ports.Repositories) error) error {

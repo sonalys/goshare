@@ -1,4 +1,4 @@
-package repositories
+package expense
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 	v1 "github.com/sonalys/goshare/pkg/v1"
 )
 
-func (r *ExpenseRepository) ListByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
+func (r *Repository) ListByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
 	expenses, err := r.conn.Queries().GetLedgerExpenses(ctx, sqlcgen.GetLedgerExpensesParams{
 		LedgerID:  ledgerID,
 		Limit:     limit,

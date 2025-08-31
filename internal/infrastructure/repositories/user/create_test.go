@@ -1,16 +1,18 @@
-package repositories_test
+package user_test
 
 import (
 	"testing"
 
 	"github.com/sonalys/goshare/internal/domain"
+	"github.com/sonalys/goshare/internal/infrastructure/repositories"
 	"github.com/sonalys/goshare/internal/ports"
+	"github.com/sonalys/goshare/pkg/testcontainers"
 	"github.com/sonalys/goshare/pkg/testfixtures"
 	"github.com/stretchr/testify/require"
 )
 
 func Test_Users_Create(t *testing.T) {
-	client := initializePostgres(t)
+	client := repositories.New(testcontainers.Postgres(t))
 
 	t.Run("pass", func(t *testing.T) {
 		ctx := t.Context()

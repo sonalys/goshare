@@ -1,4 +1,4 @@
-package repositories_test
+package testcontainers
 
 import (
 	"context"
@@ -6,13 +6,12 @@ import (
 
 	"github.com/sonalys/goshare/internal/infrastructure/postgres"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/migrations"
-	"github.com/sonalys/goshare/internal/infrastructure/repositories"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	module "github.com/testcontainers/testcontainers-go/modules/postgres"
 )
 
-func initializePostgres(t *testing.T) repositories.LocalRepository {
+func Postgres(t *testing.T) postgres.Connection {
 	ctx := t.Context()
 
 	dbName := "users"
@@ -45,5 +44,5 @@ func initializePostgres(t *testing.T) repositories.LocalRepository {
 	err = migrations.MigrateUp(ctx, connStr)
 	require.NoError(t, err)
 
-	return repositories.New(conn)
+	return conn
 }

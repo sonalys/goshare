@@ -1,4 +1,4 @@
-package repositories
+package user
 
 import (
 	"context"
@@ -8,8 +8,8 @@ import (
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
 )
 
-func (r *UserRepository) Create(ctx context.Context, user *domain.User) error {
-	return mapUserErrors(r.conn.Queries().CreateUser(ctx, sqlcgen.CreateUserParams{
+func (r *Repository) Create(ctx context.Context, user *domain.User) error {
+	return userError(r.conn.Queries().CreateUser(ctx, sqlcgen.CreateUserParams{
 		ID:           user.ID,
 		FirstName:    user.FirstName,
 		LastName:     user.LastName,
