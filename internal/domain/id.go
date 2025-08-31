@@ -1,9 +1,10 @@
 package domain
 
 import (
-	"fmt"
+	"context"
 
 	"github.com/google/uuid"
+	"github.com/sonalys/goshare/pkg/slog"
 )
 
 type (
@@ -14,7 +15,7 @@ type (
 func NewID() ID {
 	id, err := uuid.NewV7()
 	if err != nil {
-		panic(fmt.Errorf("could not generate uuid v7: %w", err))
+		slog.Panic(context.Background(), "could not generate uuid v7", err)
 	}
 
 	return ID{id: id}

@@ -63,7 +63,8 @@ func Error(ctx context.Context, msg string, err error, args ...any) {
 
 func Panic(ctx context.Context, msg string, args ...any) {
 	slog.Default().Log(ctx, LevelPanic, msg, args...)
-	panic(msg)
+	//nolint:nilpanic // log already gives panic information.
+	panic(nil)
 }
 
 func ErrorReturn(ctx context.Context, msg string, err error, args ...any) error {
