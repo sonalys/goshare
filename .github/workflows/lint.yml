@@ -20,6 +20,17 @@ jobs:
           args: -c .config/.golangci.yaml
       - uses: arduino/setup-task@v2
 
+      - name: Cache Go tools
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+            ~/go/bin
+          key: ${{ runner.os }}-go-tools-${{ hashFiles('.tools/**') }}
+          restore-keys: |
+            ${{ runner.os }}-go-tools-
+
       - name: sqlc check
         run: |
           task diff-sqlc
