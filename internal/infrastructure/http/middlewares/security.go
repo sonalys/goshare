@@ -31,7 +31,7 @@ func GetIdentity(ctx context.Context) (*v1.Identity, error) {
 	return identity, nil
 }
 
-func NewSecurityHandler(c IdentityDecoder) *SecurityHandler {
+func NewSecurityHandler(c IdentityDecoder) server.SecurityHandler {
 	return &SecurityHandler{
 		controller: c,
 	}
