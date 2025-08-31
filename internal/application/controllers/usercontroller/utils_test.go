@@ -32,7 +32,7 @@ func setupDatabaseMock(_ *testing.T) *databaseMock {
 			LedgerFunc:  func() ports.LedgerQueries { return &repositories.ledger },
 			UserFunc:    func() ports.UserQueries { return &repositories.user },
 			TransactionFunc: func(ctx context.Context, f func(tx ports.LocalRepositories) error) error {
-				return f(&portsmock.Repositories{
+				return f(&portsmock.LocalRepositories{
 					ExpenseFunc: func() ports.ExpenseRepository { return &tx.expense },
 					LedgerFunc:  func() ports.LedgerRepository { return &tx.ledger },
 					UserFunc:    func() ports.UserRepository { return &tx.user },

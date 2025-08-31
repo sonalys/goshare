@@ -11,7 +11,7 @@ import (
 
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/ports"
-	v1 "github.com/sonalys/goshare/pkg/v1"
+	"github.com/sonalys/goshare/pkg/v1"
 )
 
 // Ensure that ExpenseQueries does implement ports.ExpenseQueries.
@@ -982,16 +982,16 @@ func (mock *LedgerRepository) UpdateCalls() []struct {
 	return calls
 }
 
-// Ensure that Repositories does implement ports.Repositories.
+// Ensure that LocalRepositories does implement ports.LocalRepositories.
 // If this is not the case, regenerate this file with mockery.
-var _ ports.LocalRepositories = &Repositories{}
+var _ ports.LocalRepositories = &LocalRepositories{}
 
-// Repositories is a mock implementation of ports.Repositories.
+// LocalRepositories is a mock implementation of ports.LocalRepositories.
 //
-//	func TestSomethingThatUsesRepositories(t *testing.T) {
+//	func TestSomethingThatUsesLocalRepositories(t *testing.T) {
 //
-//		// make and configure a mocked ports.Repositories
-//		mockedRepositories := &Repositories{
+//		// make and configure a mocked ports.LocalRepositories
+//		mockedLocalRepositories := &LocalRepositories{
 //			ExpenseFunc: func() ports.ExpenseRepository {
 //				panic("mock out the Expense method")
 //			},
@@ -1003,11 +1003,11 @@ var _ ports.LocalRepositories = &Repositories{}
 //			},
 //		}
 //
-//		// use mockedRepositories in code that requires ports.Repositories
+//		// use mockedLocalRepositories in code that requires ports.LocalRepositories
 //		// and then make assertions.
 //
 //	}
-type Repositories struct {
+type LocalRepositories struct {
 	// ExpenseFunc mocks the Expense method.
 	ExpenseFunc func() ports.ExpenseRepository
 
@@ -1035,9 +1035,9 @@ type Repositories struct {
 }
 
 // Expense calls ExpenseFunc.
-func (mock *Repositories) Expense() ports.ExpenseRepository {
+func (mock *LocalRepositories) Expense() ports.ExpenseRepository {
 	if mock.ExpenseFunc == nil {
-		panic("Repositories.ExpenseFunc: method is nil but Repositories.Expense was just called")
+		panic("LocalRepositories.ExpenseFunc: method is nil but LocalRepositories.Expense was just called")
 	}
 	callInfo := struct {
 	}{}
@@ -1050,8 +1050,8 @@ func (mock *Repositories) Expense() ports.ExpenseRepository {
 // ExpenseCalls gets all the calls that were made to Expense.
 // Check the length with:
 //
-//	len(mockedRepositories.ExpenseCalls())
-func (mock *Repositories) ExpenseCalls() []struct {
+//	len(mockedLocalRepositories.ExpenseCalls())
+func (mock *LocalRepositories) ExpenseCalls() []struct {
 } {
 	var calls []struct {
 	}
@@ -1062,9 +1062,9 @@ func (mock *Repositories) ExpenseCalls() []struct {
 }
 
 // Ledger calls LedgerFunc.
-func (mock *Repositories) Ledger() ports.LedgerRepository {
+func (mock *LocalRepositories) Ledger() ports.LedgerRepository {
 	if mock.LedgerFunc == nil {
-		panic("Repositories.LedgerFunc: method is nil but Repositories.Ledger was just called")
+		panic("LocalRepositories.LedgerFunc: method is nil but LocalRepositories.Ledger was just called")
 	}
 	callInfo := struct {
 	}{}
@@ -1077,8 +1077,8 @@ func (mock *Repositories) Ledger() ports.LedgerRepository {
 // LedgerCalls gets all the calls that were made to Ledger.
 // Check the length with:
 //
-//	len(mockedRepositories.LedgerCalls())
-func (mock *Repositories) LedgerCalls() []struct {
+//	len(mockedLocalRepositories.LedgerCalls())
+func (mock *LocalRepositories) LedgerCalls() []struct {
 } {
 	var calls []struct {
 	}
@@ -1089,9 +1089,9 @@ func (mock *Repositories) LedgerCalls() []struct {
 }
 
 // User calls UserFunc.
-func (mock *Repositories) User() ports.UserRepository {
+func (mock *LocalRepositories) User() ports.UserRepository {
 	if mock.UserFunc == nil {
-		panic("Repositories.UserFunc: method is nil but Repositories.User was just called")
+		panic("LocalRepositories.UserFunc: method is nil but LocalRepositories.User was just called")
 	}
 	callInfo := struct {
 	}{}
@@ -1104,8 +1104,8 @@ func (mock *Repositories) User() ports.UserRepository {
 // UserCalls gets all the calls that were made to User.
 // Check the length with:
 //
-//	len(mockedRepositories.UserCalls())
-func (mock *Repositories) UserCalls() []struct {
+//	len(mockedLocalRepositories.UserCalls())
+func (mock *LocalRepositories) UserCalls() []struct {
 } {
 	var calls []struct {
 	}
@@ -1131,7 +1131,7 @@ var _ ports.LocalDatabase = &LocalDatabase{}
 //			LedgerFunc: func() ports.LedgerQueries {
 //				panic("mock out the Ledger method")
 //			},
-//			TransactionFunc: func(ctx context.Context, f func(tx ports.Repositories) error) error {
+//			TransactionFunc: func(ctx context.Context, f func(tx ports.LocalRepositories) error) error {
 //				panic("mock out the Transaction method")
 //			},
 //			UserFunc: func() ports.UserQueries {

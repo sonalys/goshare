@@ -130,6 +130,12 @@ tasks:
       JAEGER_CONN: localhost:4317
     cmd: go run ./cmd/migration/...
 
+  generate:
+    deps:
+      - generate-sql
+      - generate-openapi
+      - generate-mocks
+
   generate-sql:
     cmd: $SQLC -f .config/.sqlc.yaml generate
 
