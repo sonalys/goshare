@@ -2,6 +2,8 @@ package testcontainers
 
 import (
 	"context"
+	"io"
+	"log"
 	"sync"
 	"testing"
 
@@ -67,6 +69,7 @@ func Postgres(t *testing.T) postgres.Connection {
 		module.WithPassword(dbPassword),
 		module.BasicWaitStrategies(),
 		testcontainers.WithReuseByName("goshare-test-postgres"),
+		testcontainers.WithLogger(log.New(io.Discard, "", 0)),
 	)
 	require.NoError(t, err)
 
