@@ -55,6 +55,33 @@ func (q *Queries) CreateLedger(ctx context.Context, arg CreateLedgerParams) erro
 	return err
 }
 
+const createLedgerMember = `-- name: CreateLedgerMember :exec
+INSERT INTO ledger_members (ledger_id,user_id,created_at,created_by,balance) 
+VALUES ($1,$2,$3,$4,$5) 
+ON CONFLICT(user_id) 
+DO UPDATE
+SET balance = EXCLUDED.balance
+`
+
+type CreateLedgerMemberParams struct {
+	LedgerID  domain.ID
+	UserID    domain.ID
+	CreatedAt pgtype.Timestamp
+	CreatedBy domain.ID
+	Balance   int32
+}
+
+func (q *Queries) CreateLedgerMember(ctx context.Context, arg CreateLedgerMemberParams) error {
+	_, err := q.db.Exec(ctx, createLedgerMember,
+		arg.LedgerID,
+		arg.UserID,
+		arg.CreatedAt,
+		arg.CreatedBy,
+		arg.Balance,
+	)
+	return err
+}
+
 const deleteMembersNotIn = `-- name: DeleteMembersNotIn :exec
 DELETE FROM ledger_members WHERE user_id != ALL($1::uuid[])
 `
@@ -170,33 +197,6 @@ DELETE FROM ledger_members WHERE user_id = $1
 
 func (q *Queries) RemoveUserFromLedger(ctx context.Context, userID domain.ID) error {
 	_, err := q.db.Exec(ctx, removeUserFromLedger, userID)
-	return err
-}
-
-const saveLedgerMember = `-- name: CreateLedgerMember :exec
-INSERT INTO ledger_members (ledger_id,user_id,created_at,created_by,balance) 
-VALUES ($1,$2,$3,$4,$5) 
-ON CONFLICT(user_id) 
-DO UPDATE
-SET balance = EXCLUDED.balance
-`
-
-type CreateLedgerMemberParams struct {
-	LedgerID  domain.ID
-	UserID    domain.ID
-	CreatedAt pgtype.Timestamp
-	CreatedBy domain.ID
-	Balance   int32
-}
-
-func (q *Queries) CreateLedgerMember(ctx context.Context, arg CreateLedgerMemberParams) error {
-	_, err := q.db.Exec(ctx, saveLedgerMember,
-		arg.LedgerID,
-		arg.UserID,
-		arg.CreatedAt,
-		arg.CreatedBy,
-		arg.Balance,
-	)
 	return err
 }
 

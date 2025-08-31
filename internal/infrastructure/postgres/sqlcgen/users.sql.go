@@ -12,6 +12,42 @@ import (
 	"github.com/sonalys/goshare/internal/domain"
 )
 
+const createUser = `-- name: CreateUser :exec
+INSERT INTO users (id,first_name,last_name,email,password_hash,ledger_count,created_at) 
+VALUES ($1,$2,$3,$4,$5,$6,$7)
+ON CONFLICT (id)
+DO UPDATE
+SET
+first_name = EXCLUDED.first_name,
+last_name = EXCLUDED.last_name,
+email = EXCLUDED.email,
+password_hash = EXCLUDED.password_hash,
+ledger_count = EXCLUDED.ledger_count
+`
+
+type CreateUserParams struct {
+	ID           domain.ID
+	FirstName    string
+	LastName     string
+	Email        string
+	PasswordHash string
+	LedgerCount  int32
+	CreatedAt    pgtype.Timestamp
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
+	_, err := q.db.Exec(ctx, createUser,
+		arg.ID,
+		arg.FirstName,
+		arg.LastName,
+		arg.Email,
+		arg.PasswordHash,
+		arg.LedgerCount,
+		arg.CreatedAt,
+	)
+	return err
+}
+
 const getUser = `-- name: GetUser :one
 SELECT id, first_name, last_name, email, password_hash, created_at, ledger_count FROM users WHERE id = $1 FOR UPDATE
 `
@@ -80,40 +116,4 @@ func (q *Queries) ListByEmail(ctx context.Context, emails []string) ([]User, err
 		return nil, err
 	}
 	return items, nil
-}
-
-const saveUser = `-- name: CreateUser :exec
-INSERT INTO users (id,first_name,last_name,email,password_hash,ledger_count,created_at) 
-VALUES ($1,$2,$3,$4,$5,$6,$7)
-ON CONFLICT (id)
-DO UPDATE
-SET
-first_name = EXCLUDED.first_name,
-last_name = EXCLUDED.last_name,
-email = EXCLUDED.email,
-password_hash = EXCLUDED.password_hash,
-ledger_count = EXCLUDED.ledger_count
-`
-
-type CreateUserParams struct {
-	ID           domain.ID
-	FirstName    string
-	LastName     string
-	Email        string
-	PasswordHash string
-	LedgerCount  int32
-	CreatedAt    pgtype.Timestamp
-}
-
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
-	_, err := q.db.Exec(ctx, saveUser,
-		arg.ID,
-		arg.FirstName,
-		arg.LastName,
-		arg.Email,
-		arg.PasswordHash,
-		arg.LedgerCount,
-		arg.CreatedAt,
-	)
-	return err
 }
