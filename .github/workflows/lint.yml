@@ -23,10 +23,7 @@ jobs:
       - name: Cache Go tools
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-            ~/go/bin
+          path: ~/go/bin
           key: ${{ runner.os }}-go-tools-${{ hashFiles('.tools/**') }}
           restore-keys: |
             ${{ runner.os }}-go-tools-
