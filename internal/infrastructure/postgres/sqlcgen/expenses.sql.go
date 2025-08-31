@@ -230,8 +230,8 @@ func (q *Queries) GetLedgerExpenses(ctx context.Context, arg GetLedgerExpensesPa
 	return items, nil
 }
 
-const updateExpense = `-- name: UpdateExpense :exec
-UPDATE expenses SET amount = $1, name = $2, expense_date = $3, updated_at = $4, updated_by = $5 WHERE id = $6
+const updateExpense = `-- name: UpdateExpense :many
+UPDATE expenses SET amount = $1, name = $2, expense_date = $3, updated_at = $4, updated_by = $5 WHERE id = $6 RETURNING id
 `
 
 type UpdateExpenseParams struct {
@@ -243,8 +243,8 @@ type UpdateExpenseParams struct {
 	ID          domain.ID
 }
 
-func (q *Queries) UpdateExpense(ctx context.Context, arg UpdateExpenseParams) error {
-	_, err := q.db.Exec(ctx, updateExpense,
+func (q *Queries) UpdateExpense(ctx context.Context, arg UpdateExpenseParams) ([]domain.ID, error) {
+	rows, err := q.db.Query(ctx, updateExpense,
 		arg.Amount,
 		arg.Name,
 		arg.ExpenseDate,
@@ -252,5 +252,20 @@ func (q *Queries) UpdateExpense(ctx context.Context, arg UpdateExpenseParams) er
 		arg.UpdatedBy,
 		arg.ID,
 	)
-	return err
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []domain.ID
+	for rows.Next() {
+		var id domain.ID
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

@@ -30,8 +30,10 @@ func (r *Repository) Update(ctx context.Context, expense *domain.Expense) error 
 			return fmt.Errorf("deleting records: %w", err)
 		}
 
-		if err := query.UpdateExpense(ctx, updateExpenseParams(expense)); err != nil {
+		if ids, err := query.UpdateExpense(ctx, updateExpenseParams(expense)); err != nil {
 			return fmt.Errorf("updating expense: %w", err)
+		} else if len(ids) == 0 {
+			return domain.ErrExpenseNotFound
 		}
 
 		for id, record := range expense.Records {

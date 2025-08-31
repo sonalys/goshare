@@ -22,8 +22,10 @@ func (r *Repository) Update(ctx context.Context, ledger *domain.Ledger) error {
 	return r.transaction(ctx, func(conn postgres.Connection) error {
 		query := conn.Queries()
 
-		if err := query.UpdateLedger(ctx, updateLedgerParams(ledger)); err != nil {
+		if ids, err := query.UpdateLedger(ctx, updateLedgerParams(ledger)); err != nil {
 			return fmt.Errorf("updating ledger: %w", err)
+		} else if len(ids) == 0 {
+			return domain.ErrLedgerNotFound
 		}
 
 		memberIDs := slices.Collect(maps.Keys(ledger.Members))

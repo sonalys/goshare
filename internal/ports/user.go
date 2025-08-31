@@ -14,10 +14,14 @@ type (
 		// GetByEmail returns the user by the given email.
 		// Returns domain.ErrUserNotFound if it doesn't exist.
 		GetByEmail(ctx context.Context, email string) (*domain.User, error)
+		// ListByEmail returns all the users with the given emails.
+		// Returns domain.ErrUserNotFound if any email is not found.
 		ListByEmail(ctx context.Context, emails []string) ([]domain.User, error)
 	}
 
 	UserCommands interface {
+		// Create saves a newly created user.
+		// Returns domain.ErrUserAlreadyRegistered if the email is already registered for another user.
 		Create(ctx context.Context, user *domain.User) error
 	}
 

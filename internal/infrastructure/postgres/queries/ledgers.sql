@@ -40,8 +40,8 @@ SELECT * FROM users WHERE id = $1 FOR UPDATE;
 -- name: CountUserLedgers :one
 SELECT COUNT(*) FROM ledgers WHERE created_by = $1;
 
--- name: UpdateLedger :exec
-UPDATE ledgers SET name = $1 WHERE id = $2;
+-- name: UpdateLedger :many
+UPDATE ledgers SET name = $1 WHERE id = $2 RETURNING id;
 
 -- name: DeleteMembersNotIn :exec
 DELETE FROM ledger_members WHERE user_id != ALL(sqlc.arg('ids')::uuid[]);

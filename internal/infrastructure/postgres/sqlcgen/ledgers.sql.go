@@ -200,8 +200,8 @@ func (q *Queries) RemoveUserFromLedger(ctx context.Context, userID domain.ID) er
 	return err
 }
 
-const updateLedger = `-- name: UpdateLedger :exec
-UPDATE ledgers SET name = $1 WHERE id = $2
+const updateLedger = `-- name: UpdateLedger :many
+UPDATE ledgers SET name = $1 WHERE id = $2 RETURNING id
 `
 
 type UpdateLedgerParams struct {
@@ -209,7 +209,22 @@ type UpdateLedgerParams struct {
 	ID   domain.ID
 }
 
-func (q *Queries) UpdateLedger(ctx context.Context, arg UpdateLedgerParams) error {
-	_, err := q.db.Exec(ctx, updateLedger, arg.Name, arg.ID)
-	return err
+func (q *Queries) UpdateLedger(ctx context.Context, arg UpdateLedgerParams) ([]domain.ID, error) {
+	rows, err := q.db.Query(ctx, updateLedger, arg.Name, arg.ID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []domain.ID
+	for rows.Next() {
+		var id domain.ID
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

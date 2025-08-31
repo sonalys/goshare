@@ -7,8 +7,8 @@ SELECT * FROM expenses WHERE ledger_id = $1 AND created_at < $2 ORDER BY created
 -- name: GetExpenseById :one
 SELECT * FROM expenses WHERE id = $1;
 
--- name: UpdateExpense :exec
-UPDATE expenses SET amount = $1, name = $2, expense_date = $3, updated_at = $4, updated_by = $5 WHERE id = $6;
+-- name: UpdateExpense :many
+UPDATE expenses SET amount = $1, name = $2, expense_date = $3, updated_at = $4, updated_by = $5 WHERE id = $6 RETURNING id;
 
 -- name: DeleteExpense :exec
 DELETE FROM expenses WHERE id = $1;
