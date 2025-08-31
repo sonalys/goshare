@@ -46,7 +46,7 @@ func (e *Expense) CreateRecords(creator ID, ledger *Ledger, records ...PendingRe
 		return err
 	}
 
-	now := time.Now()
+	now := Now()
 
 	for i := range records {
 		record := &records[i]

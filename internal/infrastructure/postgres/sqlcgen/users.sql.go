@@ -32,7 +32,7 @@ type CreateUserParams struct {
 	Email        string
 	PasswordHash string
 	LedgerCount  int32
-	CreatedAt    pgtype.Timestamp
+	CreatedAt    pgtype.Timestamptz
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {

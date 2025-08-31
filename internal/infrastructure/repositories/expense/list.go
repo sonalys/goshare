@@ -18,7 +18,7 @@ func (r *Repository) ListByLedger(ctx context.Context, ledgerID domain.ID, curso
 		CreatedAt: postgres.ConvertTime(cursor),
 	})
 	if err != nil {
-		return nil, fmt.Errorf("getting ledger expenses: %w", err)
+		return nil, fmt.Errorf("getting ledger expenses: %w", expenseError(err))
 	}
 
 	result := make([]v1.LedgerExpenseSummary, 0, len(expenses))

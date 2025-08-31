@@ -1,8 +1,6 @@
 module github.com/sonalys/goshare/tools/mockery
 
-go 1.24.0
-
-toolchain go1.24.6
+go 1.25
 
 tool github.com/vektra/mockery/v3
 

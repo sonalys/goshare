@@ -4,7 +4,7 @@ CREATE TABLE users (
     last_name TEXT NOT NULL,
     email TEXT NOT NULL,
     password_hash TEXT NOT NULL,
-    created_at TIMESTAMP,
+    created_at TIMESTAMPTZ,
     ledger_count INTEGER NOT NULL,
 
     CONSTRAINT unique_user_email UNIQUE (email)
@@ -13,7 +13,7 @@ CREATE TABLE users (
 CREATE TABLE ledgers (
     id UUID PRIMARY KEY,
     name TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL,
     created_by UUID NOT NULL,
 
     CONSTRAINT fk_ledger_created_by FOREIGN KEY (created_by) REFERENCES users (id)
@@ -23,7 +23,7 @@ CREATE TABLE ledgers (
 CREATE TABLE ledger_members (
     user_id UUID PRIMARY KEY,
     ledger_id UUID NOT NULL,
-    created_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL,
     created_by UUID NOT NULL,
     balance INTEGER NOT NULL,
 
@@ -39,11 +39,11 @@ CREATE TABLE expenses (
     ledger_id UUID NOT NULL,
     amount INTEGER NOT NULL,
     name TEXT NOT NULL,
-    expense_date TIMESTAMP NOT NULL,
+    expense_date TIMESTAMPTZ NOT NULL,
 
-    created_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL,
     created_by UUID NOT NULL,
-    updated_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL,
     updated_by UUID NOT NULL,
 
     CONSTRAINT fk_expense_ledger FOREIGN KEY (ledger_id) REFERENCES ledgers (id) ON DELETE CASCADE,
@@ -62,9 +62,9 @@ CREATE TABLE expense_records (
     from_user_id UUID NOT NULL,
     to_user_id UUID NOT NULL,
 
-    created_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL,
     created_by UUID NOT NULL,
-    updated_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL,
     updated_by UUID NOT NULL,
 
     CONSTRAINT fk_expense_record_expense FOREIGN KEY (expense_id) REFERENCES expenses (id) ON DELETE CASCADE,

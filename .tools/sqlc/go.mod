@@ -1,8 +1,6 @@
 module github.com/sonalys/goshare/tools/sqlc
 
-go 1.24.0
-
-toolchain go1.24.6
+go 1.25
 
 tool github.com/sqlc-dev/sqlc/cmd/sqlc
 

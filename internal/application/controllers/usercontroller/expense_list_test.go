@@ -24,7 +24,7 @@ func Test_Expense_List(t *testing.T) {
 		return usercontroller.ListExpensesRequest{
 			ActorID:  domain.NewID(),
 			LedgerID: domain.NewID(),
-			Cursor:   testfixtures.Now,
+			Cursor:   domain.Now(),
 			Limit:    1,
 		}
 	}

@@ -4,14 +4,11 @@ import (
 	"maps"
 	"slices"
 	"testing"
-	"time"
 
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/kset"
 	"github.com/stretchr/testify/require"
 )
-
-var Now = time.Now().UTC().Truncate(time.Microsecond)
 
 func User(t *testing.T) *domain.User {
 	user, err := domain.NewUser(domain.NewUserRequest{
@@ -21,8 +18,6 @@ func User(t *testing.T) *domain.User {
 		Password:  domain.NewID().String(),
 	})
 	require.NoError(t, err)
-
-	user.CreatedAt = Now
 
 	return user
 }
@@ -44,7 +39,7 @@ func Expense(t *testing.T, ledger *domain.Ledger, from, to domain.ID) *domain.Ex
 	expense, err := ledger.CreateExpense(domain.CreateExpenseRequest{
 		Creator:     ledger.CreatedBy,
 		Name:        domain.NewID().String(),
-		ExpenseDate: Now,
+		ExpenseDate: domain.Now(),
 		PendingRecords: []domain.PendingRecord{
 			{
 				From:   from,

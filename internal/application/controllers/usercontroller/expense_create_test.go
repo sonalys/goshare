@@ -24,7 +24,7 @@ func Test_Expense_Create(t *testing.T) {
 			ActorID:     domain.NewID(),
 			LedgerID:    domain.NewID(),
 			Name:        domain.NewID().String(),
-			ExpenseDate: testfixtures.Now,
+			ExpenseDate: domain.Now(),
 			PendingRecords: []domain.PendingRecord{
 				{
 					From:   domain.NewID(),

@@ -21,10 +21,10 @@ type CreateExpenseParams struct {
 	LedgerID    domain.ID
 	Amount      int32
 	Name        string
-	ExpenseDate pgtype.Timestamp
-	CreatedAt   pgtype.Timestamp
+	ExpenseDate pgtype.Timestamptz
+	CreatedAt   pgtype.Timestamptz
 	CreatedBy   domain.ID
-	UpdatedAt   pgtype.Timestamp
+	UpdatedAt   pgtype.Timestamptz
 	UpdatedBy   domain.ID
 }
 
@@ -54,9 +54,9 @@ type CreateExpenseRecordParams struct {
 	Amount     int32
 	FromUserID domain.ID
 	ToUserID   domain.ID
-	CreatedAt  pgtype.Timestamp
+	CreatedAt  pgtype.Timestamptz
 	CreatedBy  domain.ID
-	UpdatedAt  pgtype.Timestamp
+	UpdatedAt  pgtype.Timestamptz
 	UpdatedBy  domain.ID
 }
 
@@ -156,7 +156,7 @@ SELECT id, ledger_id, amount, name, expense_date, created_at, created_by, update
 
 type GetExpensesByLedgerParams struct {
 	LedgerID  domain.ID
-	CreatedAt pgtype.Timestamp
+	CreatedAt pgtype.Timestamptz
 	Limit     int32
 }
 
@@ -196,7 +196,7 @@ SELECT id, ledger_id, amount, name, expense_date, created_at, created_by, update
 
 type GetLedgerExpensesParams struct {
 	LedgerID  domain.ID
-	CreatedAt pgtype.Timestamp
+	CreatedAt pgtype.Timestamptz
 	Limit     int32
 }
 
@@ -237,8 +237,8 @@ UPDATE expenses SET amount = $1, name = $2, expense_date = $3, updated_at = $4, 
 type UpdateExpenseParams struct {
 	Amount      int32
 	Name        string
-	ExpenseDate pgtype.Timestamp
-	UpdatedAt   pgtype.Timestamp
+	ExpenseDate pgtype.Timestamptz
+	UpdatedAt   pgtype.Timestamptz
 	UpdatedBy   domain.ID
 	ID          domain.ID
 }

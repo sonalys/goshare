@@ -41,7 +41,7 @@ INSERT INTO ledgers (id,name,created_at,created_by) VALUES ($1,$2,$3,$4)
 type CreateLedgerParams struct {
 	ID        domain.ID
 	Name      string
-	CreatedAt pgtype.Timestamp
+	CreatedAt pgtype.Timestamptz
 	CreatedBy domain.ID
 }
 
@@ -66,7 +66,7 @@ SET balance = EXCLUDED.balance
 type CreateLedgerMemberParams struct {
 	LedgerID  domain.ID
 	UserID    domain.ID
-	CreatedAt pgtype.Timestamp
+	CreatedAt pgtype.Timestamptz
 	CreatedBy domain.ID
 	Balance   int32
 }

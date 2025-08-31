@@ -46,8 +46,8 @@ func (r *Repository) Create(ctx context.Context, ledgerID domain.ID, expense *do
 			return fmt.Errorf("creating expense: %w", err)
 		}
 
-		for id, record := range expense.Records {
-			if err := query.CreateExpenseRecord(ctx, createExpenseRecordParams(expense.ID, id, record)); err != nil {
+		for recordID, record := range expense.Records {
+			if err := query.CreateExpenseRecord(ctx, createExpenseRecordParams(expense.ID, recordID, record)); err != nil {
 				return fmt.Errorf("creating expense record: %w", err)
 			}
 		}

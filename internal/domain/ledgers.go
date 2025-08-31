@@ -65,7 +65,7 @@ func (ledger *Ledger) CreateExpense(req CreateExpenseRequest) (*Expense, error) 
 		return nil, err
 	}
 
-	now := time.Now()
+	now := Now()
 
 	expense := &Expense{
 		ID:          NewID(),
@@ -131,7 +131,7 @@ func (ledger *Ledger) AddMember(inviter ID, newMembers ...ID) error {
 	for _, id := range newMembers {
 		ledger.Members[id] = &LedgerMember{
 			Balance:   0,
-			CreatedAt: time.Now(),
+			CreatedAt: Now(),
 			CreatedBy: inviter,
 		}
 	}

@@ -14,10 +14,10 @@ type Expense struct {
 	LedgerID    domain.ID
 	Amount      int32
 	Name        string
-	ExpenseDate pgtype.Timestamp
-	CreatedAt   pgtype.Timestamp
+	ExpenseDate pgtype.Timestamptz
+	CreatedAt   pgtype.Timestamptz
 	CreatedBy   domain.ID
-	UpdatedAt   pgtype.Timestamp
+	UpdatedAt   pgtype.Timestamptz
 	UpdatedBy   domain.ID
 }
 
@@ -28,23 +28,23 @@ type ExpenseRecord struct {
 	Amount     int32
 	FromUserID domain.ID
 	ToUserID   domain.ID
-	CreatedAt  pgtype.Timestamp
+	CreatedAt  pgtype.Timestamptz
 	CreatedBy  domain.ID
-	UpdatedAt  pgtype.Timestamp
+	UpdatedAt  pgtype.Timestamptz
 	UpdatedBy  domain.ID
 }
 
 type Ledger struct {
 	ID        domain.ID
 	Name      string
-	CreatedAt pgtype.Timestamp
+	CreatedAt pgtype.Timestamptz
 	CreatedBy domain.ID
 }
 
 type LedgerMember struct {
 	UserID    domain.ID
 	LedgerID  domain.ID
-	CreatedAt pgtype.Timestamp
+	CreatedAt pgtype.Timestamptz
 	CreatedBy domain.ID
 	Balance   int32
 }
@@ -55,6 +55,6 @@ type User struct {
 	LastName     string
 	Email        string
 	PasswordHash string
-	CreatedAt    pgtype.Timestamp
+	CreatedAt    pgtype.Timestamptz
 	LedgerCount  int32
 }

@@ -75,7 +75,7 @@ func NewUser(req NewUserRequest) (*User, error) {
 		PasswordHash:    string(hashedPassword),
 		IsEmailVerified: false,
 		LedgersCount:    0,
-		CreatedAt:       time.Now(),
+		CreatedAt:       Now(),
 	}, nil
 }
 
@@ -105,11 +105,11 @@ func (user *User) CreateLedger(name string) (*Ledger, error) {
 		Members: map[ID]*LedgerMember{
 			user.ID: {
 				Balance:   0,
-				CreatedAt: time.Now(),
+				CreatedAt: Now(),
 				CreatedBy: user.ID,
 			},
 		},
-		CreatedAt: time.Now(),
+		CreatedAt: Now(),
 		CreatedBy: user.ID,
 	}, nil
 }

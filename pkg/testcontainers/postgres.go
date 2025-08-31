@@ -6,10 +6,16 @@ import (
 
 	"github.com/sonalys/goshare/internal/infrastructure/postgres"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/migrations"
+	"github.com/sonalys/goshare/pkg/slog"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	module "github.com/testcontainers/testcontainers-go/modules/postgres"
 )
+
+//nolint:gochecknoinits // test utility
+func init() {
+	slog.Init(slog.LevelDebug)
+}
 
 func Postgres(t *testing.T) postgres.Connection {
 	ctx := t.Context()
@@ -37,6 +43,8 @@ func Postgres(t *testing.T) postgres.Connection {
 
 	connStr, err := container.ConnectionString(ctx, "sslmode=disable")
 	require.NoError(t, err)
+
+	slog.Debug(ctx, "postgres started", slog.WithString("connStr", connStr))
 
 	conn, err := postgres.New(ctx, connStr)
 	require.NoError(t, err)

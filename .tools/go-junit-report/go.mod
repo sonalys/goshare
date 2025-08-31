@@ -1,6 +1,6 @@
 module github.com/sonalys/goshare/tools/go-junit-report
 
-go 1.24.6
+go 1.25
 
 tool github.com/jstemmer/go-junit-report/v2
 

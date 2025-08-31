@@ -32,7 +32,7 @@ func TestLedger_CreateExpense(t *testing.T) {
 			req: domain.CreateExpenseRequest{
 				Creator:     actorID,
 				Name:        "expense",
-				ExpenseDate: time.Now(),
+				ExpenseDate: domain.Now(),
 				PendingRecords: []domain.PendingRecord{
 					{
 						From:   actorID,

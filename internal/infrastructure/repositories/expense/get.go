@@ -5,18 +5,17 @@ import (
 	"fmt"
 
 	"github.com/sonalys/goshare/internal/domain"
-	"github.com/sonalys/goshare/internal/infrastructure/postgres"
 )
 
 func (r *Repository) Get(ctx context.Context, id domain.ID) (*domain.Expense, error) {
 	expense, err := r.conn.Queries().GetExpenseById(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("getting expense: %w", postgres.DefaultErrorMapping(err))
+		return nil, fmt.Errorf("getting expense: %w", expenseError(err))
 	}
 
 	records, err := r.conn.Queries().GetExpenseRecords(ctx, expense.ID)
 	if err != nil {
-		return nil, fmt.Errorf("getting expense records: %w", postgres.DefaultErrorMapping(err))
+		return nil, fmt.Errorf("getting expense records: %w", expenseError(err))
 	}
 
 	return toExpense(&expense, records)
