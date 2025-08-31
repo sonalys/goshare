@@ -39,3 +39,4 @@ linters:
     - cyclop
     - maintidx
     - funlen
+    - contextcheck
