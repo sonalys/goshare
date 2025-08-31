@@ -10,13 +10,13 @@ on:
 
 jobs:
   lint:
-    name: lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          cache-dependency-path: "**/go.sum"
+          cache-dependency-path: "**/*.sum"
+
       - uses: golangci/golangci-lint-action@v8
         with:
           args: -c .config/.golangci.yaml
