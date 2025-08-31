@@ -49,6 +49,7 @@ func TestNewRecordType(t *testing.T) {
 			assert.Equal(t, tt.want, got)
 			if tt.wantErr {
 				assert.Error(t, err)
+
 				return
 			}
 			assert.NoError(t, err)

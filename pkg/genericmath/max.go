@@ -1,15 +1,15 @@
 package genericmath
 
-import "golang.org/x/exp/constraints"
+import "cmp"
 
-func Max[T constraints.Integer | constraints.Float](values ...T) T {
-	max := values[0]
+func Max[T cmp.Ordered](values ...T) T {
+	maxValue := values[0]
 
 	for i := 1; i < len(values); i++ {
-		if values[i] > max {
-			max = values[i]
+		if values[i] > maxValue {
+			maxValue = values[i]
 		}
 	}
 
-	return max
+	return maxValue
 }

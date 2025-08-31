@@ -19,5 +19,6 @@ func MapConstraintError(err error, mapper map[string]error) error {
 	if !errors.As(err, &pgErr) || pgErr.Code != "23505" {
 		return nil
 	}
+
 	return mapper[pgErr.ConstraintName]
 }

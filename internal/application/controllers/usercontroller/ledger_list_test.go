@@ -11,13 +11,13 @@ import (
 )
 
 func Test_Ledger_ListByUser(t *testing.T) {
+	t.Parallel()
+
 	type testSetup struct {
 		db *databaseMock
 	}
 
-	createTestData := func() domain.ID {
-		return domain.NewID()
-	}
+	createTestData := domain.NewID
 
 	setup := func(t *testing.T, td domain.ID) (*usercontroller.Controller, testSetup) {
 		mocks := testSetup{
@@ -26,6 +26,7 @@ func Test_Ledger_ListByUser(t *testing.T) {
 
 		mocks.db.repositories.ledger.ListByUserFunc = func(ctx context.Context, identity domain.ID) ([]domain.Ledger, error) {
 			assert.Equal(t, td, identity)
+
 			return []domain.Ledger{}, nil
 		}
 
@@ -37,6 +38,7 @@ func Test_Ledger_ListByUser(t *testing.T) {
 	}
 
 	t.Run("pass", func(t *testing.T) {
+		t.Parallel()
 		ctx := t.Context()
 		td := createTestData()
 
@@ -48,6 +50,7 @@ func Test_Ledger_ListByUser(t *testing.T) {
 	})
 
 	t.Run("fail/ledger repository error", func(t *testing.T) {
+		t.Parallel()
 		ctx := t.Context()
 		td := createTestData()
 

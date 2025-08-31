@@ -62,7 +62,7 @@ func (c *ledgerController) MembersAdd(ctx context.Context, req AddMembersRequest
 	}
 
 	if err := c.db.Transaction(ctx, transaction); err != nil {
-		return slog.ErrorReturn(ctx, "commiting transaction", err)
+		return slog.ErrorReturn(ctx, "committing transaction", err)
 	}
 
 	slog.Info(ctx, "added new members to ledger")

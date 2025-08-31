@@ -81,7 +81,7 @@ func (a *Router) NewError(ctx context.Context, err error) *server.ErrorResponseS
 		return newErrorResponse(ctx, http.StatusBadRequest, errs...)
 	}
 
-	if target := new(domain.FieldErrorList); errors.As(err, target) {
+	if target := new(domain.FieldErrors); errors.As(err, target) {
 		errs := make([]server.Error, 0, len(*target))
 
 		for _, fieldErr := range *target {

@@ -137,7 +137,10 @@ func TestNewUser(t *testing.T) {
 
 func TestUser_CreateLedger(t *testing.T) {
 	t.Parallel()
+
 	t.Run("pass", func(t *testing.T) {
+		t.Parallel()
+
 		user := domain.User{
 			ID: domain.NewID(),
 		}
@@ -146,7 +149,7 @@ func TestUser_CreateLedger(t *testing.T) {
 
 		require.NoError(t, err)
 
-		assert.Equal(t, ledger.Name, "name")
+		assert.Equal(t, "name", ledger.Name)
 		assert.NotZero(t, ledger.ID)
 		assert.NotZero(t, ledger.CreatedAt)
 		assert.Equal(t, user.ID, ledger.CreatedBy)
@@ -162,6 +165,7 @@ func TestUser_CreateLedger(t *testing.T) {
 
 	t.Run("fail/short name", func(t *testing.T) {
 		t.Parallel()
+
 		user := domain.User{
 			ID: domain.NewID(),
 		}
@@ -177,6 +181,7 @@ func TestUser_CreateLedger(t *testing.T) {
 
 	t.Run("fail/long name", func(t *testing.T) {
 		t.Parallel()
+
 		user := domain.User{
 			ID: domain.NewID(),
 		}
@@ -192,6 +197,7 @@ func TestUser_CreateLedger(t *testing.T) {
 
 	t.Run("fail/user max ledgers", func(t *testing.T) {
 		t.Parallel()
+
 		user := domain.User{
 			ID:           domain.NewID(),
 			LedgersCount: domain.UserMaxLedgers,
@@ -200,7 +206,7 @@ func TestUser_CreateLedger(t *testing.T) {
 		ledger, err := user.CreateLedger("name")
 
 		assert.Nil(t, ledger)
-		var targetErr domain.ErrUserMaxLedgers
+		var targetErr domain.UserMaxLedgersError
 		require.ErrorAs(t, err, &targetErr)
 		assert.Equal(t, user.ID, targetErr.UserID)
 		assert.Equal(t, domain.UserMaxLedgers, targetErr.MaxLedgers)

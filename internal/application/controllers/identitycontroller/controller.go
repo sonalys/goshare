@@ -14,6 +14,7 @@ type Controller struct {
 
 func New(dep Dependencies) *Controller {
 	traceProvider := otel.Provider.TracerProvider()
+
 	return &Controller{
 		identityEncoder: dep.IdentityEncoder,
 		db:              dep.LocalDatabase,

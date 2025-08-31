@@ -19,14 +19,11 @@ import (
 
 var version string = "dev"
 
-func init() {
-	slog.Init(slog.LevelDebug)
-}
-
 func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
+	slog.Init(slog.LevelDebug)
 	cfg := loadConfigFromEnv(ctx)
 
 	slog.Info(ctx, "starting server",
@@ -76,14 +73,14 @@ func shutdown(fns ...func(context.Context) error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	var wg sync.WaitGroup
+	var waitGroup sync.WaitGroup
 
 	wait := make(chan struct{})
 
 	for _, fn := range fns {
-		wg.Add(1)
+		waitGroup.Add(1)
 		go func() {
-			defer wg.Done()
+			defer waitGroup.Done()
 			if err := fn(ctx); err != nil && !errors.Is(err, context.Canceled) {
 				slog.Error(ctx, "shutting down service", err)
 			}
@@ -91,7 +88,7 @@ func shutdown(fns ...func(context.Context) error) {
 	}
 
 	go func() {
-		wg.Wait()
+		waitGroup.Wait()
 		close(wait)
 	}()
 

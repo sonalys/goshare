@@ -10,6 +10,7 @@ func WithError(err error) slog.Attr {
 	if err == nil {
 		return slog.Any("error", nil)
 	}
+
 	return slog.Any("error", err.Error())
 }
 

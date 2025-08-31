@@ -1,6 +1,8 @@
 package middlewares
 
 import (
+	"errors"
+
 	"github.com/google/uuid"
 	"github.com/ogen-go/ogen/middleware"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
@@ -18,19 +20,20 @@ func Logger(req middleware.Request, next middleware.Next) (resp middleware.Respo
 	slog.Info(ctx, "request received", fields...)
 
 	resp, err = next(req)
-	switch err := err.(type) {
-	case nil:
+	if err == nil {
 		if tresp, ok := resp.Type.(interface{ GetStatusCode() int }); ok {
 			fields = append(fields,
 				slog.WithInt("status_code", tresp.GetStatusCode()),
 			)
 		}
-	case *server.ErrorResponseStatusCode:
+	}
+
+	if target := new(server.ErrorResponseStatusCode); errors.As(err, &target) {
 		var traceID trace.TraceID
 		if span := trace.SpanFromContext(ctx); span != nil {
 			traceID = span.SpanContext().TraceID()
 		}
-		err.Response.TraceID = uuid.UUID(traceID)
+		target.Response.TraceID = uuid.UUID(traceID)
 	}
 
 	slog.Info(ctx, "request completed", fields...)

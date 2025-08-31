@@ -8,8 +8,11 @@ import (
 )
 
 func TestFieldErrorList_Error(t *testing.T) {
+	t.Parallel()
+
 	t.Run("pass/more than one error", func(t *testing.T) {
-		testData := domain.FieldErrorList{
+		t.Parallel()
+		testData := domain.FieldErrors{
 			domain.FieldError{},
 			domain.FieldError{},
 		}

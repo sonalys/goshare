@@ -16,7 +16,7 @@ type (
 		Metadata *FieldErrorMetadata
 	}
 
-	FieldErrorList []FieldError
+	FieldErrors []FieldError
 )
 
 func newRequiredFieldError(field string) FieldError {
@@ -33,10 +33,10 @@ func newInvalidFieldError(field string) FieldError {
 	}
 }
 
-func newFieldLengthError(field string, min, max int) FieldError {
+func newFieldLengthError(field string, minLength, maxLength int) FieldError {
 	return FieldError{
 		Field: field,
-		Cause: RangeError{Min: min, Max: max},
+		Cause: RangeError{Min: minLength, Max: maxLength},
 	}
 }
 
@@ -46,6 +46,7 @@ func (e FieldError) Error() string {
 
 func (e FieldError) Is(target error) bool {
 	cast, ok := target.(FieldError)
+
 	return ok && e.Field == cast.Field && errors.Is(e.Cause, cast.Cause)
 }
 
@@ -53,17 +54,19 @@ func (e FieldError) Unwrap() error {
 	return e.Cause
 }
 
-func (el FieldErrorList) Unwrap() []error {
+func (el FieldErrors) Unwrap() []error {
 	errs := make([]error, 0, len(el))
 	for _, f := range el {
 		errs = append(errs, f)
 	}
+
 	return errs
 }
 
-func (el FieldErrorList) Error() string {
+func (el FieldErrors) Error() string {
 	if len(el) == 1 {
 		return el[0].Error()
 	}
+
 	return fmt.Sprintf("%v", []FieldError(el))
 }

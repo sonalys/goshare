@@ -8,11 +8,16 @@ import (
 )
 
 func TestCause_Is(t *testing.T) {
+	t.Parallel()
+
 	t.Run("pass/is", func(t *testing.T) {
+		t.Parallel()
+		//nolint
 		require.ErrorIs(t, domain.ErrOverflow, domain.ErrOverflow)
 	})
 
 	t.Run("fail/isnt", func(t *testing.T) {
+		t.Parallel()
 		require.NotErrorIs(t, domain.ErrInvalid, domain.ErrOverflow)
 	})
 }

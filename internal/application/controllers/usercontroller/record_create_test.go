@@ -13,6 +13,8 @@ import (
 )
 
 func Test_Record_Create(t *testing.T) {
+	t.Parallel()
+
 	type testSetup struct {
 		db *databaseMock
 	}
@@ -53,11 +55,13 @@ func Test_Record_Create(t *testing.T) {
 
 		mocks.db.tx.ledger.GetFunc = func(ctx context.Context, id domain.ID) (*domain.Ledger, error) {
 			assert.Equal(t, td.LedgerID, id)
+
 			return ledger, nil
 		}
 
 		mocks.db.tx.expense.GetFunc = func(ctx context.Context, id domain.ID) (*domain.Expense, error) {
 			assert.Equal(t, td.ExpenseID, id)
+
 			return expense, nil
 		}
 
@@ -77,6 +81,7 @@ func Test_Record_Create(t *testing.T) {
 	}
 
 	t.Run("pass", func(t *testing.T) {
+		t.Parallel()
 		ctx := t.Context()
 
 		td := createTestData()
@@ -88,6 +93,7 @@ func Test_Record_Create(t *testing.T) {
 	})
 
 	t.Run("fail/user unauthorized to manage expenses", func(t *testing.T) {
+		t.Parallel()
 		ctx := t.Context()
 
 		td := createTestData()
@@ -100,6 +106,7 @@ func Test_Record_Create(t *testing.T) {
 	})
 
 	t.Run("fail/ledger repository get error", func(t *testing.T) {
+		t.Parallel()
 		ctx := t.Context()
 
 		td := createTestData()
@@ -115,6 +122,7 @@ func Test_Record_Create(t *testing.T) {
 	})
 
 	t.Run("fail/expense repository get error", func(t *testing.T) {
+		t.Parallel()
 		ctx := t.Context()
 
 		td := createTestData()
@@ -130,6 +138,7 @@ func Test_Record_Create(t *testing.T) {
 	})
 
 	t.Run("fail/ledger repository update error", func(t *testing.T) {
+		t.Parallel()
 		ctx := t.Context()
 
 		td := createTestData()
@@ -145,6 +154,7 @@ func Test_Record_Create(t *testing.T) {
 	})
 
 	t.Run("fail/expense repository update error", func(t *testing.T) {
+		t.Parallel()
 		ctx := t.Context()
 
 		td := createTestData()

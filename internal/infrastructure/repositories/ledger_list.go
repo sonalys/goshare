@@ -21,5 +21,6 @@ func (r *LedgerRepository) ListByUser(ctx context.Context, userID domain.ID) ([]
 		}
 		result = append(result, *mappers.NewLedger(&ledger, members))
 	}
+
 	return result, nil
 }

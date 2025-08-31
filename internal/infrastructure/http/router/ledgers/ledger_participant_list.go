@@ -29,7 +29,7 @@ func (a *Router) LedgerMemberList(ctx context.Context, params server.LedgerMembe
 }
 
 func mapLedgerMemberBalanceToResponseObject(members map[domain.ID]*domain.LedgerMember) []server.LedgerMember {
-	var balances []server.LedgerMember
+	balances := make([]server.LedgerMember, 0, len(members))
 	for id, member := range members {
 		balances = append(balances, server.LedgerMember{
 			UserID:    id.UUID(),

@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -38,7 +39,7 @@ func (c *Client) Decode(tokenString string) (*v1.Identity, error) {
 		jwt.WithValidMethods(supportedMethods),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("parsing token: %v", err)
+		return nil, fmt.Errorf("parsing token: %w", err)
 	}
 
 	if !token.Valid {
@@ -47,22 +48,22 @@ func (c *Client) Decode(tokenString string) (*v1.Identity, error) {
 
 	email, ok := claims["email"].(string)
 	if !ok {
-		return nil, fmt.Errorf("missing email claim")
+		return nil, errors.New("missing email claim")
 	}
 
 	userID, ok := claims["user_id"].(string)
 	if !ok {
-		return nil, fmt.Errorf("missing user_id claim")
+		return nil, errors.New("missing user_id claim")
 	}
 
 	userUUID, err := domain.ParseID(userID)
 	if err != nil {
-		return nil, fmt.Errorf("parsing user_id: %v", err)
+		return nil, fmt.Errorf("parsing user_id: %w", err)
 	}
 
 	exp, ok := claims["exp"].(float64)
 	if !ok {
-		return nil, fmt.Errorf("missing exp claim")
+		return nil, errors.New("missing exp claim")
 	}
 
 	identity := &v1.Identity{
@@ -84,7 +85,7 @@ func (c *Client) Encode(identity *v1.Identity) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString(c.jwtSignKey)
 	if err != nil {
-		return "", fmt.Errorf("signing token: %v", err)
+		return "", fmt.Errorf("signing token: %w", err)
 	}
 
 	return tokenString, nil

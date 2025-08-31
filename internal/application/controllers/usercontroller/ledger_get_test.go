@@ -13,6 +13,8 @@ import (
 )
 
 func Test_Ledger_Get(t *testing.T) {
+	t.Parallel()
+
 	type testSetup struct {
 		db *databaseMock
 	}
@@ -37,6 +39,7 @@ func Test_Ledger_Get(t *testing.T) {
 
 		mocks.db.repositories.ledger.GetFunc = func(ctx context.Context, id domain.ID) (*domain.Ledger, error) {
 			assert.Equal(t, td.LedgerID, id)
+
 			return ledger, nil
 		}
 
@@ -48,6 +51,7 @@ func Test_Ledger_Get(t *testing.T) {
 	}
 
 	t.Run("pass", func(t *testing.T) {
+		t.Parallel()
 		ctx := t.Context()
 		td := createTestData()
 
@@ -59,6 +63,7 @@ func Test_Ledger_Get(t *testing.T) {
 	})
 
 	t.Run("fail/user is not authorized to view ledger", func(t *testing.T) {
+		t.Parallel()
 		ctx := t.Context()
 
 		td := createTestData()
@@ -71,6 +76,7 @@ func Test_Ledger_Get(t *testing.T) {
 	})
 
 	t.Run("fail/ledger repository error", func(t *testing.T) {
+		t.Parallel()
 		ctx := t.Context()
 		td := createTestData()
 
@@ -78,6 +84,7 @@ func Test_Ledger_Get(t *testing.T) {
 
 		mocks.db.repositories.ledger.GetFunc = func(ctx context.Context, id domain.ID) (*domain.Ledger, error) {
 			assert.Equal(t, td.LedgerID, id)
+
 			return nil, assert.AnError
 		}
 

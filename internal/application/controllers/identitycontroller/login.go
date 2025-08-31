@@ -3,7 +3,6 @@ package identitycontroller
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/sonalys/goshare/pkg/slog"
@@ -29,10 +28,11 @@ func (c *Controller) Login(ctx context.Context, req LoginRequest) (*LoginRespons
 	user, err := c.db.User().GetByEmail(ctx, req.Email)
 	if err != nil {
 		if !errors.Is(err, v1.ErrNotFound) {
-			return nil, err
+			return nil, slog.ErrorReturn(ctx, "getting user by email", err)
 		}
-		slog.Error(ctx, "could not find user by email", err)
-		return nil, &v1.ErrUserCredentialsMismatch{
+		slog.Warn(ctx, "could not find user by email", err)
+
+		return nil, &v1.UserCredentialsMismatchError{
 			Email: req.Email,
 		}
 	}
@@ -41,7 +41,8 @@ func (c *Controller) Login(ctx context.Context, req LoginRequest) (*LoginRespons
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password))
 	if err != nil {
 		slog.Error(ctx, "password hash mismatch", err)
-		return nil, &v1.ErrUserCredentialsMismatch{
+
+		return nil, &v1.UserCredentialsMismatchError{
 			Email: req.Email,
 		}
 	}
@@ -54,8 +55,7 @@ func (c *Controller) Login(ctx context.Context, req LoginRequest) (*LoginRespons
 	}
 	token, err := c.identityEncoder.Encode(identity)
 	if err != nil {
-		slog.Error(ctx, "could not sign JWT token", err)
-		return nil, fmt.Errorf("failed to sign token: %v", err)
+		return nil, slog.ErrorReturn(ctx, "signing jwt token", err)
 	}
 
 	slog.Info(ctx, "user logged in", slog.WithStringer("user_id", user.ID))

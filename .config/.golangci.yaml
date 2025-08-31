@@ -1,2 +1,37 @@
+version: "2"
 linters:
   default: all
+  exclusions:
+    rules:
+      - path: '_test.go'
+        linters:
+          - bodyclose
+      - path: 'repositories'
+        linters:
+          - paralleltest
+  settings:
+    revive:
+      rules:
+        - name: package-comments
+          disabled: true
+  disable:
+    - wsl
+    - wsl_v5
+    - mnd
+    - noinlineerr
+    - depguard
+    - exhaustruct
+    - varnamelen
+    - nonamedreturns
+    - nakedret
+    - wrapcheck
+    - lll
+    - thelper
+    - godox
+    - exhaustive
+    - err113
+    - ireturn
+    - gochecknoglobals
+    - cyclop
+    - maintidx
+    - funlen

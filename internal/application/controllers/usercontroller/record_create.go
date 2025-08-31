@@ -59,10 +59,11 @@ func (c *recordsController) Create(ctx context.Context, req CreateExpenseRecordR
 		}
 
 		resp = expense
+
 		return nil
 	})
 	if err != nil {
-		return nil, slog.ErrorReturn(ctx, "commiting transaction", err)
+		return nil, slog.ErrorReturn(ctx, "committing transaction", err)
 	}
 
 	slog.Info(ctx, "expense records created")

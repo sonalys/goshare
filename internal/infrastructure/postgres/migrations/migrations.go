@@ -3,6 +3,7 @@ package migrations
 import (
 	"context"
 	"embed"
+	"errors"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
@@ -27,15 +28,16 @@ func MigrateUp(ctx context.Context, connStr string) error {
 	}
 
 	version, dirty, err := m.Version()
-	if err != nil && err != migrate.ErrNilVersion {
+	if err != nil && !errors.Is(err, migrate.ErrNilVersion) {
 		return err
 	}
 
 	slog.Info(ctx, "migrate driver loaded", slog.WithUint64("current_version", uint64(version)), slog.WithBool("is_dirty", dirty))
 
 	if err := m.Up(); err != nil {
-		if err == migrate.ErrNoChange {
+		if errors.Is(err, migrate.ErrNoChange) {
 			slog.Info(ctx, "no changes to migrate")
+
 			return nil
 		}
 		slog.Panic(ctx, "migrating up")

@@ -73,7 +73,7 @@ func (c *expenseController) Create(ctx context.Context, req CreateExpenseRequest
 		return nil
 	})
 	if err != nil {
-		return nil, slog.ErrorReturn(ctx, "commiting transaction", err)
+		return nil, slog.ErrorReturn(ctx, "committing transaction", err)
 	}
 
 	slog.Info(ctx, "expense created")

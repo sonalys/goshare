@@ -30,7 +30,7 @@ const (
 	RecordTypeSettlement
 	recordTypeMaxBoundary
 
-	ErrRecordNotFound = ErrorString("record not found")
+	ErrRecordNotFound = StringError("record not found")
 )
 
 func NewRecordType(s string) (RecordType, error) {

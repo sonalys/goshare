@@ -12,6 +12,7 @@ import (
 )
 
 func Test_Ledger_Create(t *testing.T) {
+	t.Parallel()
 	type testSetup struct {
 		db *databaseMock
 	}
@@ -33,18 +34,21 @@ func Test_Ledger_Create(t *testing.T) {
 
 		mocks.db.tx.user.GetFunc = func(ctx context.Context, id domain.ID) (*domain.User, error) {
 			assert.Equal(t, td.ActorID, id)
+
 			return user, nil
 		}
 
 		mocks.db.tx.ledger.CreateFunc = func(ctx context.Context, ledger *domain.Ledger) error {
 			assert.Equal(t, td.Name, ledger.Name)
+
 			return nil
 		}
 
 		previousLedgerCount := user.LedgersCount
 
 		mocks.db.tx.user.CreateFunc = func(ctx context.Context, user *domain.User) error {
-			assert.EqualValues(t, previousLedgerCount+1, user.LedgersCount)
+			assert.Equal(t, previousLedgerCount+1, user.LedgersCount)
+
 			return nil
 		}
 
@@ -56,6 +60,7 @@ func Test_Ledger_Create(t *testing.T) {
 	}
 
 	t.Run("pass", func(t *testing.T) {
+		t.Parallel()
 		ctx := t.Context()
 
 		td := createTestData()
@@ -67,6 +72,7 @@ func Test_Ledger_Create(t *testing.T) {
 	})
 
 	t.Run("fail/user repository find error", func(t *testing.T) {
+		t.Parallel()
 		ctx := t.Context()
 
 		td := createTestData()
@@ -74,6 +80,7 @@ func Test_Ledger_Create(t *testing.T) {
 
 		mocks.db.tx.user.GetFunc = func(ctx context.Context, id domain.ID) (*domain.User, error) {
 			assert.Equal(t, td.ActorID, id)
+
 			return nil, assert.AnError
 		}
 
@@ -83,6 +90,7 @@ func Test_Ledger_Create(t *testing.T) {
 	})
 
 	t.Run("fail/ledger repository create error", func(t *testing.T) {
+		t.Parallel()
 		ctx := t.Context()
 
 		td := createTestData()
@@ -90,6 +98,7 @@ func Test_Ledger_Create(t *testing.T) {
 
 		mocks.db.tx.ledger.CreateFunc = func(ctx context.Context, ledger *domain.Ledger) error {
 			assert.Equal(t, td.Name, ledger.Name)
+
 			return assert.AnError
 		}
 

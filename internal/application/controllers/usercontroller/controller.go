@@ -14,6 +14,7 @@ type (
 
 func New(dep Dependencies) *Controller {
 	traceProvider := otel.Provider.TracerProvider()
+
 	return &Controller{
 		ledgerController: &ledgerController{
 			db:     dep.LocalDatabase,

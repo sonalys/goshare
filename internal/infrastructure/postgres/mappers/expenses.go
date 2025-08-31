@@ -51,6 +51,7 @@ func NewRecord(record *sqlcgen.ExpenseRecord) (*domain.Record, error) {
 	if err != nil {
 		return nil, fmt.Errorf("invalid record type: %w", err)
 	}
+
 	return &domain.Record{
 		From:      record.FromUserID,
 		To:        record.ToUserID,

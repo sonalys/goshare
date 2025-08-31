@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/sonalys/goshare/pkg/slog"
 )
 
 type Server struct {
-	httpServer *http.Server
+	*http.Server
 }
 
 func setupServer(cfg Config, handler http.Handler) *Server {
@@ -19,17 +20,13 @@ func setupServer(cfg Config, handler http.Handler) *Server {
 	}
 
 	return &Server{
-		httpServer: &httpServer,
+		Server: &httpServer,
 	}
 }
 
 func (s *Server) ServeHTTP(ctx context.Context) {
-	slog.Info(ctx, "http server listening", slog.WithString("addr", s.httpServer.Addr))
-	if err := s.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+	slog.Info(ctx, "http server listening", slog.WithString("addr", s.Addr))
+	if err := s.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		slog.Panic(ctx, "listening")
 	}
-}
-
-func (s *Server) Shutdown(ctx context.Context) error {
-	return s.httpServer.Shutdown(ctx)
 }

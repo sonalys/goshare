@@ -46,6 +46,7 @@ func (r *ExpenseRepository) Update(ctx context.Context, expense *domain.Expense)
 				return fmt.Errorf("creating record: %w", err)
 			}
 		}
+
 		return nil
 	})
 }

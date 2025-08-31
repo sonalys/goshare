@@ -13,6 +13,8 @@ import (
 )
 
 func Test_Ledger_MembersAdd(t *testing.T) {
+	t.Parallel()
+
 	type testSetup struct {
 		db *databaseMock
 	}
@@ -41,6 +43,7 @@ func Test_Ledger_MembersAdd(t *testing.T) {
 
 		mocks.db.tx.ledger.GetFunc = func(ctx context.Context, id domain.ID) (*domain.Ledger, error) {
 			assert.Equal(t, td.LedgerID, id)
+
 			return ledger, nil
 		}
 
@@ -51,6 +54,7 @@ func Test_Ledger_MembersAdd(t *testing.T) {
 
 		mocks.db.tx.user.ListByEmailFunc = func(ctx context.Context, emails []string) ([]domain.User, error) {
 			assert.Equal(t, td.Emails, emails)
+
 			return members, nil
 		}
 
@@ -58,6 +62,7 @@ func Test_Ledger_MembersAdd(t *testing.T) {
 
 		mocks.db.tx.ledger.UpdateFunc = func(ctx context.Context, ledger *domain.Ledger) error {
 			assert.Len(t, ledger.Members, previousLen+2)
+
 			return nil
 		}
 
@@ -69,6 +74,7 @@ func Test_Ledger_MembersAdd(t *testing.T) {
 	}
 
 	t.Run("pass", func(t *testing.T) {
+		t.Parallel()
 		ctx := t.Context()
 
 		td := createTestData()
@@ -79,6 +85,7 @@ func Test_Ledger_MembersAdd(t *testing.T) {
 	})
 
 	t.Run("fail/user is not authorized to manage members", func(t *testing.T) {
+		t.Parallel()
 		ctx := t.Context()
 
 		td := createTestData()
@@ -90,6 +97,7 @@ func Test_Ledger_MembersAdd(t *testing.T) {
 	})
 
 	t.Run("fail/ledger repository get error", func(t *testing.T) {
+		t.Parallel()
 		ctx := t.Context()
 
 		td := createTestData()
@@ -104,6 +112,7 @@ func Test_Ledger_MembersAdd(t *testing.T) {
 	})
 
 	t.Run("fail/user repository list error", func(t *testing.T) {
+		t.Parallel()
 		ctx := t.Context()
 
 		td := createTestData()
@@ -118,6 +127,7 @@ func Test_Ledger_MembersAdd(t *testing.T) {
 	})
 
 	t.Run("fail/ledger repository update error", func(t *testing.T) {
+		t.Parallel()
 		ctx := t.Context()
 
 		td := createTestData()

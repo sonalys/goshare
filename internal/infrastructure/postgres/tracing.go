@@ -27,12 +27,21 @@ func endContextSpan(ctx context.Context, err error) {
 	span.End()
 }
 
+func (t tracer) TraceQueryStart(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryStartData) context.Context {
+	//nolint:spancheck // span is closed.
+	ctx, _ = otel.Tracer.Start(ctx, data.SQL)
+
+	return ctx
+}
+
 func (t tracer) TraceQueryEnd(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryEndData) {
 	endContextSpan(ctx, data.Err)
 }
 
-func (t tracer) TraceQueryStart(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryStartData) context.Context {
-	ctx, _ = otel.Tracer.Start(ctx, data.SQL)
+func (t tracer) TracePrepareStart(ctx context.Context, conn *pgx.Conn, data pgx.TracePrepareStartData) context.Context {
+	//nolint:spancheck // span is closed.
+	ctx, _ = otel.Tracer.Start(ctx, data.Name)
+
 	return ctx
 }
 
@@ -40,8 +49,10 @@ func (t tracer) TracePrepareEnd(ctx context.Context, conn *pgx.Conn, data pgx.Tr
 	endContextSpan(ctx, data.Err)
 }
 
-func (t tracer) TracePrepareStart(ctx context.Context, conn *pgx.Conn, data pgx.TracePrepareStartData) context.Context {
-	ctx, _ = otel.Tracer.Start(ctx, data.Name)
+func (t tracer) TraceCopyFromStart(ctx context.Context, conn *pgx.Conn, data pgx.TraceCopyFromStartData) context.Context {
+	//nolint:spancheck // span is closed.
+	ctx, _ = otel.Tracer.Start(ctx, data.TableName.Sanitize())
+
 	return ctx
 }
 
@@ -49,21 +60,14 @@ func (t tracer) TraceCopyFromEnd(ctx context.Context, conn *pgx.Conn, data pgx.T
 	endContextSpan(ctx, data.Err)
 }
 
-func (t tracer) TraceCopyFromStart(ctx context.Context, conn *pgx.Conn, data pgx.TraceCopyFromStartData) context.Context {
-	ctx, _ = otel.Tracer.Start(ctx, data.TableName.Sanitize())
+func (t tracer) TraceConnectStart(ctx context.Context, data pgx.TraceConnectStartData) context.Context {
+	//nolint:spancheck // span is closed.
+	ctx, _ = otel.Tracer.Start(ctx, "connect")
+
 	return ctx
 }
 
 func (t tracer) TraceConnectEnd(ctx context.Context, data pgx.TraceConnectEndData) {
-	endContextSpan(ctx, data.Err)
-}
-
-func (t tracer) TraceConnectStart(ctx context.Context, data pgx.TraceConnectStartData) context.Context {
-	ctx, _ = otel.Tracer.Start(ctx, "connect")
-	return ctx
-}
-
-func (t tracer) TraceBatchEnd(ctx context.Context, conn *pgx.Conn, data pgx.TraceBatchEndData) {
 	endContextSpan(ctx, data.Err)
 }
 
@@ -73,6 +77,12 @@ func (t tracer) TraceBatchQuery(ctx context.Context, conn *pgx.Conn, data pgx.Tr
 }
 
 func (t tracer) TraceBatchStart(ctx context.Context, conn *pgx.Conn, data pgx.TraceBatchStartData) context.Context {
+	//nolint:spancheck // span is closed.
 	ctx, _ = otel.Tracer.Start(ctx, "batch")
+
 	return ctx
+}
+
+func (t tracer) TraceBatchEnd(ctx context.Context, conn *pgx.Conn, data pgx.TraceBatchEndData) {
+	endContextSpan(ctx, data.Err)
 }

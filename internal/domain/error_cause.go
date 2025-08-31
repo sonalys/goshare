@@ -1,20 +1,21 @@
 package domain
 
-type ErrorString string
+type StringError string
 
 const (
-	ErrUnknown  = ErrorString("")
-	ErrInvalid  = ErrorString("invalid")
-	ErrRequired = ErrorString("required")
-	ErrOverflow = ErrorString("overflow")
-	ErrConflict = ErrorString("conflict")
+	ErrUnknown  = StringError("")
+	ErrInvalid  = StringError("invalid")
+	ErrRequired = StringError("required")
+	ErrOverflow = StringError("overflow")
+	ErrConflict = StringError("conflict")
 )
 
-func (e ErrorString) Error() string {
+func (e StringError) Error() string {
 	return string(e)
 }
 
-func (e ErrorString) Is(target error) bool {
-	cast, ok := target.(ErrorString)
+func (e StringError) Is(target error) bool {
+	cast, ok := target.(StringError)
+
 	return ok && e == cast
 }

@@ -9,7 +9,7 @@ import (
 const (
 	LedgerMaxMembers = 100
 
-	ErrLedgerNotFound = ErrorString("ledger not found")
+	ErrLedgerNotFound = StringError("ledger not found")
 )
 
 type (
@@ -55,7 +55,7 @@ func (req *CreateExpenseRequest) validate() error {
 
 func (ledger *Ledger) CreateExpense(req CreateExpenseRequest) (*Expense, error) {
 	if !ledger.HasMember(req.Creator) {
-		return nil, ErrLedgerUserNotMember{
+		return nil, LedgerUserNotMemberError{
 			UserID:   req.Creator,
 			LedgerID: ledger.ID,
 		}
@@ -89,12 +89,13 @@ func (ledger *Ledger) CreateExpense(req CreateExpenseRequest) (*Expense, error) 
 
 func (ledger *Ledger) HasMember(identity ID) bool {
 	_, ok := ledger.Members[identity]
+
 	return ok
 }
 
 func (ledger *Ledger) AddMember(inviter ID, newMembers ...ID) error {
 	if !ledger.HasMember(inviter) {
-		return ErrLedgerUserNotMember{
+		return LedgerUserNotMemberError{
 			UserID:   inviter,
 			LedgerID: ledger.ID,
 		}
@@ -109,7 +110,7 @@ func (ledger *Ledger) AddMember(inviter ID, newMembers ...ID) error {
 		}
 		form.Append(FieldError{
 			Field: "members",
-			Cause: ErrLedgerUserAlreadyMember{
+			Cause: LedgerUserAlreadyMemberError{
 				UserID:   id,
 				LedgerID: ledger.ID,
 			},
@@ -121,7 +122,7 @@ func (ledger *Ledger) AddMember(inviter ID, newMembers ...ID) error {
 	}
 
 	if len(ledger.Members)+len(newMembers) >= LedgerMaxMembers {
-		return ErrLedgerMaxMembers{
+		return LedgerMaxMembersError{
 			LedgerID:   ledger.ID,
 			MaxMembers: LedgerMaxMembers,
 		}

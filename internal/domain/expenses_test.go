@@ -96,9 +96,9 @@ func TestExpense_CreateRecords(t *testing.T) {
 		err := expense.CreateRecords(actorID, ledger, debt, settlement)
 		require.NoError(t, err)
 
-		assert.EqualValues(t, -debt.Amount+settlement.Amount, ledger.Members[actorID].Balance)
-		assert.EqualValues(t, debt.Amount-settlement.Amount, ledger.Members[memberID].Balance)
-		assert.EqualValues(t, debt.Amount, expense.Amount)
+		assert.Equal(t, -debt.Amount+settlement.Amount, ledger.Members[actorID].Balance)
+		assert.Equal(t, debt.Amount-settlement.Amount, ledger.Members[memberID].Balance)
+		assert.Equal(t, debt.Amount, expense.Amount)
 
 		assert.Len(t, expense.Records, 2)
 
@@ -331,7 +331,7 @@ func TestExpense_CreateRecords(t *testing.T) {
 		err := expense.CreateRecords(actorID, ledger, debt)
 		require.ErrorIs(t, err, domain.FieldError{
 			Field: "from",
-			Cause: domain.ErrLedgerUserNotMember{
+			Cause: domain.LedgerUserNotMemberError{
 				UserID:   debt.From,
 				LedgerID: ledger.ID,
 			},
@@ -367,13 +367,14 @@ func TestExpense_CreateRecords(t *testing.T) {
 		err := expense.CreateRecords(actorID, ledger, debt)
 		require.ErrorIs(t, err, domain.FieldError{
 			Field: "to",
-			Cause: domain.ErrLedgerUserNotMember{
+			Cause: domain.LedgerUserNotMemberError{
 				UserID:   debt.To,
 				LedgerID: ledger.ID,
 			},
 		})
 	})
 
+	//nolint:dupl
 	t.Run("fail/debt overflow", func(t *testing.T) {
 		t.Parallel()
 
@@ -409,6 +410,7 @@ func TestExpense_CreateRecords(t *testing.T) {
 		})
 	})
 
+	//nolint:dupl
 	t.Run("fail/settlement overflow", func(t *testing.T) {
 		t.Parallel()
 

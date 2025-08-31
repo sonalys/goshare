@@ -11,13 +11,12 @@ type (
 	ID struct{ id }
 )
 
-var EmptyID = ID{uuid.Nil}
-
 func NewID() ID {
 	id, err := uuid.NewV7()
 	if err != nil {
 		panic(fmt.Errorf("could not generate uuid v7: %w", err))
 	}
+
 	return ID{id: id}
 }
 
@@ -26,6 +25,7 @@ func ParseID(from string) (ID, error) {
 	if err != nil {
 		return ID{uuid.Nil}, err
 	}
+
 	return ID{id}, nil
 }
 

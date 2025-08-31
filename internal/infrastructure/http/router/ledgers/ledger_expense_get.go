@@ -47,5 +47,6 @@ func convertRecords(records map[domain.ID]*domain.Record) []server.ExpenseRecord
 			Amount:     record.Amount,
 		})
 	}
+
 	return result
 }

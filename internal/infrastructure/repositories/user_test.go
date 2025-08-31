@@ -17,6 +17,7 @@ func Test_Users_Create(t *testing.T) {
 
 		err := client.Transaction(ctx, func(r ports.Repositories) error {
 			user := testfixtures.User(t)
+
 			return r.User().Create(ctx, user)
 		})
 		require.NoError(t, err)
@@ -38,6 +39,6 @@ func Test_Users_Create(t *testing.T) {
 
 			return nil
 		})
-		require.NoError(t, err)
+		require.Error(t, err)
 	})
 }

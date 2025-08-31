@@ -58,7 +58,7 @@ func (c *ledgerController) Create(ctx context.Context, req CreateLedgerRequest) 
 		return nil
 	})
 	if err != nil {
-		return nil, slog.ErrorReturn(ctx, "commiting transaction", err)
+		return nil, slog.ErrorReturn(ctx, "committing transaction", err)
 	}
 
 	slog.Info(ctx, "ledger created", slog.WithStringer("ledger_id", resp.ID))

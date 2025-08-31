@@ -26,12 +26,74 @@ type (
 const (
 	ExpenseMaxRecords = 100
 
-	ErrExpenseMaxRecords  = ErrorString("expense reached maximum number of records")
-	ErrSettlementMismatch = ErrorString("settlement cannot be greater than debt")
-	ErrLedgerFromToMatch  = ErrorString("from and to cannot be the equal")
-	ErrLedgerMismatch     = ErrorString("ledger mismatch")
-	ErrExpenseNotFound    = ErrorString("expense not found")
+	ErrExpenseMaxRecords  = StringError("expense reached maximum number of records")
+	ErrSettlementMismatch = StringError("settlement cannot be greater than debt")
+	ErrLedgerFromToMatch  = StringError("from and to cannot be the equal")
+	ErrLedgerMismatch     = StringError("ledger mismatch")
+	ErrExpenseNotFound    = StringError("expense not found")
 )
+
+func (e *Expense) TotalDebt() int32 {
+	return e.sumRecords(RecordTypeDebt)
+}
+
+func (e *Expense) TotalSettled() int32 {
+	return e.sumRecords(RecordTypeSettlement)
+}
+
+func (e *Expense) CreateRecords(creator ID, ledger *Ledger, records ...PendingRecord) error {
+	if err := e.validateCreateRecords(creator, ledger, records...); err != nil {
+		return err
+	}
+
+	now := time.Now()
+
+	for i := range records {
+		record := &records[i]
+		e.Records[NewID()] = &Record{
+			Type:      record.Type,
+			Amount:    record.Amount,
+			From:      record.From,
+			To:        record.To,
+			CreatedAt: now,
+			CreatedBy: creator,
+			UpdatedAt: now,
+			UpdatedBy: creator,
+		}
+
+		switch record.Type {
+		case RecordTypeDebt:
+			ledger.Members[record.From].Balance -= record.Amount
+			ledger.Members[record.To].Balance += record.Amount
+		case RecordTypeSettlement:
+			ledger.Members[record.From].Balance += record.Amount
+			ledger.Members[record.To].Balance -= record.Amount
+		}
+	}
+
+	e.Amount = e.TotalDebt()
+
+	return nil
+}
+
+func (e *Expense) DeleteRecord(ledger *Ledger, recordID ID) error {
+	if err := e.validateDeleteRecord(ledger, recordID); err != nil {
+		return err
+	}
+
+	switch record := e.Records[recordID]; record.Type {
+	case RecordTypeDebt:
+		ledger.Members[record.From].Balance += record.Amount
+		ledger.Members[record.To].Balance -= record.Amount
+	case RecordTypeSettlement:
+		ledger.Members[record.From].Balance -= record.Amount
+		ledger.Members[record.To].Balance += record.Amount
+	}
+
+	delete(e.Records, recordID)
+
+	return nil
+}
 
 func (e *Expense) sumRecords(t RecordType) int32 {
 	var sum int32
@@ -45,19 +107,29 @@ func (e *Expense) sumRecords(t RecordType) int32 {
 	return sum
 }
 
-func (e *Expense) TotalDebt() int32 {
-	return e.sumRecords(RecordTypeDebt)
-}
+func (e *Expense) validateDeleteRecord(ledger *Ledger, recordID ID) error {
+	if ledger.ID != e.LedgerID {
+		return FieldError{
+			Field: "ledger",
+			Cause: ErrLedgerMismatch,
+		}
+	}
 
-func (e *Expense) TotalSettled() int32 {
-	return e.sumRecords(RecordTypeSettlement)
+	if _, ok := e.Records[recordID]; !ok {
+		return FieldError{
+			Field: "recordID",
+			Cause: ErrRecordNotFound,
+		}
+	}
+
+	return nil
 }
 
 func (e *Expense) validateCreateRecords(creator ID, ledger *Ledger, records ...PendingRecord) error {
 	if !ledger.HasMember(creator) {
 		return FieldError{
 			Field: "creator",
-			Cause: ErrLedgerUserNotMember{
+			Cause: LedgerUserNotMemberError{
 				UserID:   creator,
 				LedgerID: ledger.ID,
 			},
@@ -110,7 +182,7 @@ func (e *Expense) validateCreateRecords(creator ID, ledger *Ledger, records ...P
 		if !ledger.HasMember(record.From) {
 			recordsForm.Append(FieldError{
 				Field: "from",
-				Cause: ErrLedgerUserNotMember{
+				Cause: LedgerUserNotMemberError{
 					UserID:   record.From,
 					LedgerID: ledger.ID,
 				},
@@ -120,7 +192,7 @@ func (e *Expense) validateCreateRecords(creator ID, ledger *Ledger, records ...P
 		if !ledger.HasMember(record.To) {
 			recordsForm.Append(FieldError{
 				Field: "to",
-				Cause: ErrLedgerUserNotMember{
+				Cause: LedgerUserNotMemberError{
 					UserID:   record.To,
 					LedgerID: ledger.ID,
 				},
@@ -155,81 +227,8 @@ func (e *Expense) validateCreateRecords(creator ID, ledger *Ledger, records ...P
 				Field: fmt.Sprintf("records[%d]", i),
 				Cause: err,
 			})
-			continue
 		}
 	}
 
 	return form.Close()
-}
-
-func (e *Expense) CreateRecords(creator ID, ledger *Ledger, records ...PendingRecord) error {
-	if err := e.validateCreateRecords(creator, ledger, records...); err != nil {
-		return err
-	}
-
-	now := time.Now()
-
-	for i := range records {
-		record := &records[i]
-		e.Records[NewID()] = &Record{
-			Type:      record.Type,
-			Amount:    record.Amount,
-			From:      record.From,
-			To:        record.To,
-			CreatedAt: now,
-			CreatedBy: creator,
-			UpdatedAt: now,
-			UpdatedBy: creator,
-		}
-
-		switch record.Type {
-		case RecordTypeDebt:
-			ledger.Members[record.From].Balance -= record.Amount
-			ledger.Members[record.To].Balance += record.Amount
-		case RecordTypeSettlement:
-			ledger.Members[record.From].Balance += record.Amount
-			ledger.Members[record.To].Balance -= record.Amount
-		}
-	}
-
-	e.Amount = e.TotalDebt()
-
-	return nil
-}
-
-func (e *Expense) validateDeleteRecord(ledger *Ledger, recordID ID) error {
-	if ledger.ID != e.LedgerID {
-		return FieldError{
-			Field: "ledger",
-			Cause: ErrLedgerMismatch,
-		}
-	}
-
-	if _, ok := e.Records[recordID]; !ok {
-		return FieldError{
-			Field: "recordID",
-			Cause: ErrRecordNotFound,
-		}
-	}
-
-	return nil
-}
-
-func (e *Expense) DeleteRecord(ledger *Ledger, recordID ID) error {
-	if err := e.validateDeleteRecord(ledger, recordID); err != nil {
-		return err
-	}
-
-	switch record := e.Records[recordID]; record.Type {
-	case RecordTypeDebt:
-		ledger.Members[record.From].Balance += record.Amount
-		ledger.Members[record.To].Balance -= record.Amount
-	case RecordTypeSettlement:
-		ledger.Members[record.From].Balance -= record.Amount
-		ledger.Members[record.To].Balance += record.Amount
-	}
-
-	delete(e.Records, recordID)
-
-	return nil
 }

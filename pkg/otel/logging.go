@@ -25,5 +25,6 @@ func newLoggerProvider(ctx context.Context, endpoint string, res *resource.Resou
 		log.WithResource(res),
 		log.WithProcessor(processor),
 	)
+
 	return provider, nil
 }

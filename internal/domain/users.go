@@ -31,8 +31,8 @@ type (
 const (
 	UserMaxLedgers = 5
 
-	ErrUserAlreadyRegistered = ErrorString("email already in use")
-	ErrUserNotFound          = ErrorString("user not found")
+	ErrUserAlreadyRegistered = StringError("email already in use")
+	ErrUserNotFound          = StringError("user not found")
 )
 
 func (req *NewUserRequest) validate() error {
@@ -83,7 +83,7 @@ func (user *User) CreateLedger(name string) (*Ledger, error) {
 	var form Form
 
 	if user.LedgersCount+1 > UserMaxLedgers {
-		return nil, ErrUserMaxLedgers{
+		return nil, UserMaxLedgersError{
 			UserID:     user.ID,
 			MaxLedgers: UserMaxLedgers,
 		}

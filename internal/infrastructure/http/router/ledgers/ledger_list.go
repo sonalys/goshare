@@ -34,5 +34,6 @@ func convertLedgers(ledgers []domain.Ledger) []server.Ledger {
 			CreatedBy: ledger.CreatedBy.UUID(),
 		})
 	}
+
 	return result
 }

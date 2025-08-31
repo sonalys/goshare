@@ -3,11 +3,11 @@ package v1
 type (
 	StringError string
 
-	ErrUserEmailConflict struct {
+	UserEmailConflictError struct {
 		Email string
 	}
 
-	ErrUserCredentialsMismatch struct {
+	UserCredentialsMismatchError struct {
 		Email string
 	}
 )
@@ -20,11 +20,11 @@ const (
 	ErrRequiredValue = StringError("cannot be empty")
 )
 
-func (e *ErrUserEmailConflict) Error() string {
+func (e *UserEmailConflictError) Error() string {
 	return "email already registered"
 }
 
-func (e *ErrUserCredentialsMismatch) Error() string {
+func (e *UserCredentialsMismatchError) Error() string {
 	return "email and/or password mismatch"
 }
 

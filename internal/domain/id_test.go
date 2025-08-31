@@ -8,7 +8,10 @@ import (
 )
 
 func TestParseID(t *testing.T) {
+	t.Parallel()
+
 	t.Run("pass/converts roundtrip", func(t *testing.T) {
+		t.Parallel()
 		id := domain.NewID()
 		got, err := domain.ParseID(id.String())
 		require.NoError(t, err)
@@ -16,6 +19,7 @@ func TestParseID(t *testing.T) {
 	})
 
 	t.Run("fail/invalid id", func(t *testing.T) {
+		t.Parallel()
 		got, err := domain.ParseID("a")
 		require.Error(t, err)
 		require.Empty(t, got)

@@ -13,7 +13,7 @@ import (
 
 func (a *Router) AuthenticationLogin(ctx context.Context, req *server.AuthenticationLoginReq) (*server.AuthenticationLoginOK, error) {
 	resp, err := a.IdentityController.Login(ctx, identitycontroller.LoginRequest{
-		Email:    string(req.Email),
+		Email:    req.Email,
 		Password: req.Password,
 	})
 	if err == nil {
@@ -22,7 +22,7 @@ func (a *Router) AuthenticationLogin(ctx context.Context, req *server.Authentica
 		}, nil
 	}
 
-	if target := new(v1.ErrUserCredentialsMismatch); errors.As(err, &target) {
+	if target := new(v1.UserCredentialsMismatchError); errors.As(err, &target) {
 		return nil, &server.ErrorResponseStatusCode{
 			StatusCode: http.StatusUnauthorized,
 			Response: server.ErrorResponse{

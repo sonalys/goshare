@@ -25,6 +25,7 @@ func User(t *testing.T) *domain.User {
 func Ledger(t *testing.T, creator *domain.User) *domain.Ledger {
 	ledger, err := creator.CreateLedger(domain.NewID().String())
 	require.NoError(t, err)
+
 	return ledger
 }
 
@@ -49,5 +50,6 @@ func Expense(t *testing.T, ledger *domain.Ledger) *domain.Expense {
 		},
 	})
 	require.NoError(t, err)
+
 	return expense
 }

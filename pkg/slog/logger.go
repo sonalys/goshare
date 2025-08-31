@@ -68,5 +68,6 @@ func Panic(ctx context.Context, msg string, args ...any) {
 
 func ErrorReturn(ctx context.Context, msg string, err error, args ...any) error {
 	slog.ErrorContext(ctx, msg, append(args, WithError(err))...)
+
 	return fmt.Errorf("%s: %w", msg, err)
 }

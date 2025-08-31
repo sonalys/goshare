@@ -51,6 +51,7 @@ func Initialize(ctx context.Context, endpoint, version string) (shutdown func(co
 			err = errors.Join(err, fn(ctx))
 		}
 		shutdownFuncs = nil
+
 		return err
 	}
 
@@ -61,12 +62,14 @@ func Initialize(ctx context.Context, endpoint, version string) (shutdown func(co
 	res, err := newResource(version)
 	if err != nil {
 		handleErr(err)
+
 		return
 	}
 
 	loggerProvider, err := newLoggerProvider(ctx, endpoint, res)
 	if err != nil {
 		handleErr(err)
+
 		return
 	}
 	global.SetLoggerProvider(loggerProvider)
@@ -79,6 +82,7 @@ func Initialize(ctx context.Context, endpoint, version string) (shutdown func(co
 	tracerProvider, err := newTraceProvider(ctx, endpoint, res)
 	if err != nil {
 		handleErr(err)
+
 		return
 	}
 	shutdownFuncs = append(shutdownFuncs, tracerProvider.Shutdown)
@@ -104,6 +108,7 @@ func newTraceProvider(ctx context.Context, endpoint string, res *resource.Resour
 		traceSDK.WithBatcher(traceExporter),
 		traceSDK.WithResource(res),
 	)
+
 	return traceProvider, nil
 }
 

@@ -21,20 +21,25 @@ func setupHandler(ctx context.Context, client server.Handler, repositories *repo
 			middlewares.Recoverer,
 			middlewares.Logger,
 		),
-		server.WithErrorHandler(func(ctx context.Context, w http.ResponseWriter, r *http.Request, err error) {
-			resp := client.NewError(ctx, err)
-
-			w.WriteHeader(resp.StatusCode)
-
-			w.Header().Set("Content-Type", "application/json")
-			if err := json.NewEncoder(w).Encode(resp); err != nil {
-				slog.Error(ctx, "failed to encode error response", err)
-			}
-		}),
+		server.WithErrorHandler(errorHandler(client)),
 	)
 	if err != nil {
 		slog.Panic(ctx, "creating http api handler", slog.WithError(err))
 	}
 
 	return handler
+}
+
+func errorHandler(client server.Handler) func(ctx context.Context, w http.ResponseWriter, r *http.Request, err error) {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request, err error) {
+		resp := client.NewError(ctx, err)
+
+		w.WriteHeader(resp.StatusCode)
+
+		w.Header().Set("Content-Type", "application/json")
+		//nolint:musttag // generated structure.
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			slog.Error(ctx, "failed to encode error response", err)
+		}
+	}
 }

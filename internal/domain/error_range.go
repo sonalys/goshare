@@ -13,5 +13,6 @@ func (e RangeError) Error() string {
 
 func (e RangeError) Is(target error) bool {
 	cast, ok := target.(RangeError)
+
 	return ok && cast == e
 }

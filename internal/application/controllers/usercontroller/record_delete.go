@@ -60,7 +60,7 @@ func (c *recordsController) Delete(ctx context.Context, req DeleteExpenseRecordR
 		return nil
 	})
 	if err != nil {
-		return slog.ErrorReturn(ctx, "commiting transaction", err)
+		return slog.ErrorReturn(ctx, "committing transaction", err)
 	}
 
 	slog.Info(ctx, "ledger expense record deleted")

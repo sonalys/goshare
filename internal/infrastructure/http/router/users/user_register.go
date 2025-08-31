@@ -14,7 +14,7 @@ func (a *Router) UserRegister(ctx context.Context, req *server.UserRegisterReq) 
 	apiParams := identitycontroller.RegisterRequest{
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
-		Email:     string(req.Email),
+		Email:     req.Email,
 		Password:  req.Password,
 	}
 
