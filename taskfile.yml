@@ -85,6 +85,13 @@ tasks:
         go get -tool {{.tool}}@latest
         go mod tidy
 
+  download:
+    cmd: |
+      go mod download
+      for tool in .tools/*; do
+        (cd $tool; go mod download)
+      done
+
   tidy:
     cmd: |
       go mod tidy

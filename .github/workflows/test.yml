@@ -18,6 +18,7 @@ jobs:
 
       - name: Test
         run: |
+          task download
           task test-coverage || true
           task junit-report
 

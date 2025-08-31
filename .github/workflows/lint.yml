@@ -24,6 +24,7 @@ jobs:
 
       - name: sqlc check
         run: |
+          task download
           task diff-sqlc
           task vet-sql
 
