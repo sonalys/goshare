@@ -2,6 +2,7 @@ package testcontainers
 
 import (
 	"context"
+	"sync/atomic"
 	"testing"
 
 	"github.com/sonalys/goshare/internal/infrastructure/postgres"
@@ -16,6 +17,8 @@ import (
 func init() {
 	slog.Init(slog.LevelDebug)
 }
+
+var references atomic.Int32
 
 func Postgres(t *testing.T) postgres.Connection {
 	ctx := t.Context()
@@ -36,7 +39,12 @@ func Postgres(t *testing.T) postgres.Connection {
 	)
 	require.NoError(t, err)
 
+	references.Add(1)
+
 	t.Cleanup(func() {
+		if references.Add(-1) != 0 {
+			return
+		}
 		err := container.Terminate(context.Background())
 		require.NoError(t, err)
 	})

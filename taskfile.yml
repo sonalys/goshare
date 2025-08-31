@@ -47,6 +47,9 @@ tasks:
   lint:
     cmd: $GOLANGCI
 
+  test:
+    cmd: $GOTESTSUM --hide-summary=skipped -- -v ./...
+
   test-coverage:
     cmd: $GOTESTSUM --hide-summary=skipped -- -coverprofile=coverage.out -v ./...
 
