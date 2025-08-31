@@ -16,6 +16,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
       - uses: golangci/golangci-lint-action@v8
+        with:
+          args: -c .config/.golangci.yaml
       - uses: arduino/setup-task@v2
 
       - name: sqlc check
