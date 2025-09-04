@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
+	v1 "github.com/sonalys/goshare/internal/application/v1"
 	"github.com/sonalys/goshare/internal/domain"
-	v1 "github.com/sonalys/goshare/pkg/v1"
 )
 
 type (
@@ -23,7 +23,7 @@ type (
 	ExpenseCommands interface {
 		// Create will save the newly created expense.
 		// Returns domain.ErrLedgerNotFound if the ledgerID doesn't exist.
-		Create(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error
+		Create(ctx context.Context, expense *domain.Expense) error
 		// Update will update the expense.
 		// Returns domain.ErrLedgerNotFound if the expense doesn't exist.
 		Update(ctx context.Context, expense *domain.Expense) error

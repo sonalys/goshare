@@ -9,9 +9,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/sonalys/goshare/internal/application/v1"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/ports"
-	"github.com/sonalys/goshare/pkg/v1"
 )
 
 // Ensure that ExpenseQueries does implement ports.ExpenseQueries.
@@ -158,7 +158,7 @@ var _ ports.ExpenseCommands = &ExpenseCommands{}
 //
 //		// make and configure a mocked ports.ExpenseCommands
 //		mockedExpenseCommands := &ExpenseCommands{
-//			CreateFunc: func(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error {
+//			CreateFunc: func(ctx context.Context, expense *domain.Expense) error {
 //				panic("mock out the Create method")
 //			},
 //			UpdateFunc: func(ctx context.Context, expense *domain.Expense) error {
@@ -172,7 +172,7 @@ var _ ports.ExpenseCommands = &ExpenseCommands{}
 //	}
 type ExpenseCommands struct {
 	// CreateFunc mocks the Create method.
-	CreateFunc func(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error
+	CreateFunc func(ctx context.Context, expense *domain.Expense) error
 
 	// UpdateFunc mocks the Update method.
 	UpdateFunc func(ctx context.Context, expense *domain.Expense) error
@@ -183,8 +183,6 @@ type ExpenseCommands struct {
 		Create []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
-			// LedgerID is the ledgerID argument value.
-			LedgerID domain.ID
 			// Expense is the expense argument value.
 			Expense *domain.Expense
 		}
@@ -201,23 +199,21 @@ type ExpenseCommands struct {
 }
 
 // Create calls CreateFunc.
-func (mock *ExpenseCommands) Create(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error {
+func (mock *ExpenseCommands) Create(ctx context.Context, expense *domain.Expense) error {
 	if mock.CreateFunc == nil {
 		panic("ExpenseCommands.CreateFunc: method is nil but ExpenseCommands.Create was just called")
 	}
 	callInfo := struct {
-		Ctx      context.Context
-		LedgerID domain.ID
-		Expense  *domain.Expense
+		Ctx     context.Context
+		Expense *domain.Expense
 	}{
-		Ctx:      ctx,
-		LedgerID: ledgerID,
-		Expense:  expense,
+		Ctx:     ctx,
+		Expense: expense,
 	}
 	mock.lockCreate.Lock()
 	mock.calls.Create = append(mock.calls.Create, callInfo)
 	mock.lockCreate.Unlock()
-	return mock.CreateFunc(ctx, ledgerID, expense)
+	return mock.CreateFunc(ctx, expense)
 }
 
 // CreateCalls gets all the calls that were made to Create.
@@ -225,14 +221,12 @@ func (mock *ExpenseCommands) Create(ctx context.Context, ledgerID domain.ID, exp
 //
 //	len(mockedExpenseCommands.CreateCalls())
 func (mock *ExpenseCommands) CreateCalls() []struct {
-	Ctx      context.Context
-	LedgerID domain.ID
-	Expense  *domain.Expense
+	Ctx     context.Context
+	Expense *domain.Expense
 } {
 	var calls []struct {
-		Ctx      context.Context
-		LedgerID domain.ID
-		Expense  *domain.Expense
+		Ctx     context.Context
+		Expense *domain.Expense
 	}
 	mock.lockCreate.RLock()
 	calls = mock.calls.Create
@@ -286,7 +280,7 @@ var _ ports.ExpenseRepository = &ExpenseRepository{}
 //
 //		// make and configure a mocked ports.ExpenseRepository
 //		mockedExpenseRepository := &ExpenseRepository{
-//			CreateFunc: func(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error {
+//			CreateFunc: func(ctx context.Context, expense *domain.Expense) error {
 //				panic("mock out the Create method")
 //			},
 //			GetFunc: func(ctx context.Context, id domain.ID) (*domain.Expense, error) {
@@ -306,7 +300,7 @@ var _ ports.ExpenseRepository = &ExpenseRepository{}
 //	}
 type ExpenseRepository struct {
 	// CreateFunc mocks the Create method.
-	CreateFunc func(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error
+	CreateFunc func(ctx context.Context, expense *domain.Expense) error
 
 	// GetFunc mocks the Get method.
 	GetFunc func(ctx context.Context, id domain.ID) (*domain.Expense, error)
@@ -323,8 +317,6 @@ type ExpenseRepository struct {
 		Create []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
-			// LedgerID is the ledgerID argument value.
-			LedgerID domain.ID
 			// Expense is the expense argument value.
 			Expense *domain.Expense
 		}
@@ -361,23 +353,21 @@ type ExpenseRepository struct {
 }
 
 // Create calls CreateFunc.
-func (mock *ExpenseRepository) Create(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error {
+func (mock *ExpenseRepository) Create(ctx context.Context, expense *domain.Expense) error {
 	if mock.CreateFunc == nil {
 		panic("ExpenseRepository.CreateFunc: method is nil but ExpenseRepository.Create was just called")
 	}
 	callInfo := struct {
-		Ctx      context.Context
-		LedgerID domain.ID
-		Expense  *domain.Expense
+		Ctx     context.Context
+		Expense *domain.Expense
 	}{
-		Ctx:      ctx,
-		LedgerID: ledgerID,
-		Expense:  expense,
+		Ctx:     ctx,
+		Expense: expense,
 	}
 	mock.lockCreate.Lock()
 	mock.calls.Create = append(mock.calls.Create, callInfo)
 	mock.lockCreate.Unlock()
-	return mock.CreateFunc(ctx, ledgerID, expense)
+	return mock.CreateFunc(ctx, expense)
 }
 
 // CreateCalls gets all the calls that were made to Create.
@@ -385,14 +375,12 @@ func (mock *ExpenseRepository) Create(ctx context.Context, ledgerID domain.ID, e
 //
 //	len(mockedExpenseRepository.CreateCalls())
 func (mock *ExpenseRepository) CreateCalls() []struct {
-	Ctx      context.Context
-	LedgerID domain.ID
-	Expense  *domain.Expense
+	Ctx     context.Context
+	Expense *domain.Expense
 } {
 	var calls []struct {
-		Ctx      context.Context
-		LedgerID domain.ID
-		Expense  *domain.Expense
+		Ctx     context.Context
+		Expense *domain.Expense
 	}
 	mock.lockCreate.RLock()
 	calls = mock.calls.Create

@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
+	v1 "github.com/sonalys/goshare/internal/application/v1"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/http/router/ledgers"
 	"github.com/sonalys/goshare/internal/mocks/application/controllers/usercontrollermock"
 	"github.com/sonalys/goshare/internal/mocks/portsmock"
-	v1 "github.com/sonalys/goshare/pkg/v1"
 	"github.com/stretchr/testify/assert"
 )
 

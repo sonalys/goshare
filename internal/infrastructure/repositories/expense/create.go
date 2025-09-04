@@ -38,7 +38,7 @@ func createExpenseRecordParams(expenseID, recordID domain.ID, record *domain.Rec
 	}
 }
 
-func (r *Repository) Create(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error {
+func (r *Repository) Create(ctx context.Context, expense *domain.Expense) error {
 	return r.transaction(ctx, func(conn postgres.Connection) error {
 		query := conn.Queries()
 

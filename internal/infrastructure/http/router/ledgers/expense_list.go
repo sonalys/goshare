@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
+	v1 "github.com/sonalys/goshare/internal/application/v1"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
-	v1 "github.com/sonalys/goshare/pkg/v1"
 )
 
 func (a *Router) LedgerExpenseList(ctx context.Context, params server.LedgerExpenseListParams) (*server.LedgerExpenseListOK, error) {

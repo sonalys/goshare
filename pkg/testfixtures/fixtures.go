@@ -5,8 +5,8 @@ import (
 	"slices"
 	"testing"
 
+	v1 "github.com/sonalys/goshare/internal/application/v1"
 	"github.com/sonalys/goshare/internal/domain"
-	v1 "github.com/sonalys/goshare/pkg/v1"
 	"github.com/sonalys/kset"
 	"github.com/stretchr/testify/require"
 )

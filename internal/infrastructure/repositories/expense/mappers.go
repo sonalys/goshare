@@ -3,9 +3,9 @@ package expense
 import (
 	"fmt"
 
+	v1 "github.com/sonalys/goshare/internal/application/v1"
 	domain "github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
-	v1 "github.com/sonalys/goshare/pkg/v1"
 )
 
 func toLedgerExpenseSummary(expense *sqlcgen.Expense) *v1.LedgerExpenseSummary {

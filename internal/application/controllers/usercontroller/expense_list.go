@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
+	v1 "github.com/sonalys/goshare/internal/application/v1"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/pkg/slog"
-	v1 "github.com/sonalys/goshare/pkg/v1"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 )

@@ -8,6 +8,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres"
+	"github.com/sonalys/goshare/internal/ports"
 )
 
 var constraintMapping = map[string]error{
@@ -22,7 +23,7 @@ type Repository struct {
 	client postgres.Connection
 }
 
-func New(client postgres.Connection) *Repository {
+func New(client postgres.Connection) ports.LedgerRepository {
 	return &Repository{
 		client: client,
 	}

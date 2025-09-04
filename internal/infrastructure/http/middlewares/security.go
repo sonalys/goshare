@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
+	v1 "github.com/sonalys/goshare/internal/application/v1"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
-	v1 "github.com/sonalys/goshare/pkg/v1"
 )
 
 type (

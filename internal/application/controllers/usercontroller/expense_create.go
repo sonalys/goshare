@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	v1 "github.com/sonalys/goshare/internal/application/v1"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/ports"
 	"github.com/sonalys/goshare/pkg/slog"
-	v1 "github.com/sonalys/goshare/pkg/v1"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -58,7 +58,7 @@ func (c *expenseController) Create(ctx context.Context, req CreateExpenseRequest
 			return fmt.Errorf("creating expense: %w", err)
 		}
 
-		if err = db.Expense().Create(ctx, req.LedgerID, expense); err != nil {
+		if err = db.Expense().Create(ctx, expense); err != nil {
 			return fmt.Errorf("saving expense: %w", err)
 		}
 

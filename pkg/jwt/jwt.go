@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/golang-jwt/jwt/v5"
+	v1 "github.com/sonalys/goshare/internal/application/v1"
 	"github.com/sonalys/goshare/internal/domain"
-	v1 "github.com/sonalys/goshare/pkg/v1"
 )
 
 type (

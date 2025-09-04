@@ -63,7 +63,7 @@ func Test_Expense_Create(t *testing.T) {
 		td := createTestData(t)
 
 		setup(t, td, func(r ports.LocalRepositories) {
-			err := r.Expense().Create(ctx, td.ledger.ID, td.expense)
+			err := r.Expense().Create(ctx, td.expense)
 			require.NoError(t, err)
 		})
 	})

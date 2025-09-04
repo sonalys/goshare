@@ -10,12 +10,12 @@ import (
 	"github.com/ogen-go/ogen/validate"
 	"github.com/sonalys/goshare/internal/application/controllers/identitycontroller"
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
+	v1 "github.com/sonalys/goshare/internal/application/v1"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/http/router/ledgers"
 	"github.com/sonalys/goshare/internal/infrastructure/http/router/users"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
 	"github.com/sonalys/goshare/internal/ports"
-	v1 "github.com/sonalys/goshare/pkg/v1"
 	"go.opentelemetry.io/otel/trace"
 )
 

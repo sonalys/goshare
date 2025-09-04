@@ -7,8 +7,8 @@ import (
 	"net/http"
 
 	"github.com/sonalys/goshare/internal/application/controllers/identitycontroller"
+	v1 "github.com/sonalys/goshare/internal/application/v1"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
-	v1 "github.com/sonalys/goshare/pkg/v1"
 )
 
 func (a *Router) AuthenticationLogin(ctx context.Context, req *server.AuthenticationLoginReq) (*server.AuthenticationLoginOK, error) {

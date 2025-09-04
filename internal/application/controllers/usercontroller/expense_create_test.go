@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
+	v1 "github.com/sonalys/goshare/internal/application/v1"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/pkg/testfixtures"
-	v1 "github.com/sonalys/goshare/pkg/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -58,8 +58,8 @@ func Test_Expense_Create(t *testing.T) {
 			return ledger, nil
 		}
 
-		mocks.db.tx.expense.CreateFunc = func(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error {
-			assert.Equal(t, td.LedgerID, ledgerID)
+		mocks.db.tx.expense.CreateFunc = func(ctx context.Context, expense *domain.Expense) error {
+			assert.Equal(t, td.LedgerID, expense.LedgerID)
 
 			return nil
 		}
@@ -125,7 +125,7 @@ func Test_Expense_Create(t *testing.T) {
 		td := createTestData()
 		controller, mocks := setup(t, td)
 
-		mocks.db.tx.expense.CreateFunc = func(ctx context.Context, ledgerID domain.ID, expense *domain.Expense) error {
+		mocks.db.tx.expense.CreateFunc = func(ctx context.Context, expense *domain.Expense) error {
 			return assert.AnError
 		}
 

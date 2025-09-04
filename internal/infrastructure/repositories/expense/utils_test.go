@@ -44,7 +44,7 @@ func setup(t *testing.T, client ports.LocalDatabase, td testData, handler func(r
 		err = r.Ledger().Create(ctx, td.ledger)
 		require.NoError(t, err)
 
-		err = r.Expense().Create(ctx, td.ledger.ID, td.expense)
+		err = r.Expense().Create(ctx, td.expense)
 		require.NoError(t, err)
 
 		handler(r)

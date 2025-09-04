@@ -3,7 +3,7 @@ package ports
 import (
 	"context"
 
-	v1 "github.com/sonalys/goshare/pkg/v1"
+	v1 "github.com/sonalys/goshare/internal/application/v1"
 )
 
 type (

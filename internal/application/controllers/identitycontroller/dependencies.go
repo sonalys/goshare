@@ -1,8 +1,8 @@
 package identitycontroller
 
 import (
+	v1 "github.com/sonalys/goshare/internal/application/v1"
 	"github.com/sonalys/goshare/internal/ports"
-	v1 "github.com/sonalys/goshare/pkg/v1"
 )
 
 type (
