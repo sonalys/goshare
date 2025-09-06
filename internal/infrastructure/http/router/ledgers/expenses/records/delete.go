@@ -9,7 +9,7 @@ import (
 )
 
 func (a *Router) LedgerExpenseRecordDelete(ctx context.Context, params server.LedgerExpenseRecordDeleteParams) error {
-	identity, err := a.GetIdentity(ctx)
+	identity, err := a.securityHandler.GetIdentity(ctx)
 	if err != nil {
 		return err
 	}
@@ -21,5 +21,5 @@ func (a *Router) LedgerExpenseRecordDelete(ctx context.Context, params server.Le
 		RecordID:  domain.ConvertID(params.RecordID),
 	}
 
-	return a.Records().Delete(ctx, apiReq)
+	return a.controller.Records().Delete(ctx, apiReq)
 }

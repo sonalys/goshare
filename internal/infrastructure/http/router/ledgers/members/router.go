@@ -1,4 +1,4 @@
-package records
+package members
 
 import (
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"

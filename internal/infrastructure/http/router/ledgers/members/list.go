@@ -1,4 +1,4 @@
-package ledgers
+package members
 
 import (
 	"context"

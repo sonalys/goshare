@@ -12,7 +12,7 @@ import (
 )
 
 func (a *Router) AuthenticationLogin(ctx context.Context, req *server.AuthenticationLoginReq) (*server.AuthenticationLoginOK, error) {
-	resp, err := a.IdentityController.Login(ctx, identitycontroller.LoginRequest{
+	resp, err := a.identityController.Login(ctx, identitycontroller.LoginRequest{
 		Email:    req.Email,
 		Password: req.Password,
 	})

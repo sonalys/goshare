@@ -7,7 +7,7 @@ import (
 )
 
 func (a *Router) AuthenticationWhoAmI(ctx context.Context) (*server.AuthenticationWhoAmIOK, error) {
-	identity, err := a.SecurityHandler.GetIdentity(ctx)
+	identity, err := a.securityHandler.GetIdentity(ctx)
 	if err != nil {
 		return nil, err
 	}

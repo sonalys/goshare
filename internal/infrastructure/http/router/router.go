@@ -3,9 +3,9 @@ package router
 import (
 	"github.com/sonalys/goshare/internal/application/controllers/identitycontroller"
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
-	"github.com/sonalys/goshare/internal/infrastructure/http/router/expenses"
 	"github.com/sonalys/goshare/internal/infrastructure/http/router/ledgers"
-	"github.com/sonalys/goshare/internal/infrastructure/http/router/records"
+	"github.com/sonalys/goshare/internal/infrastructure/http/router/ledgers/expenses"
+	"github.com/sonalys/goshare/internal/infrastructure/http/router/ledgers/expenses/records"
 	"github.com/sonalys/goshare/internal/infrastructure/http/router/users"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
 	"github.com/sonalys/goshare/internal/ports"

@@ -18,7 +18,7 @@ func (a *Router) UserRegister(ctx context.Context, req *server.UserRegisterReq) 
 		Password:  req.Password,
 	}
 
-	switch resp, err := a.IdentityController.Register(ctx, apiParams); {
+	switch resp, err := a.identityController.Register(ctx, apiParams); {
 	case err == nil:
 		return &server.UserRegisterOK{
 			ID: resp.ID.UUID(),

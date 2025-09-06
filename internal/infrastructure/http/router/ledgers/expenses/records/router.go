@@ -1,4 +1,4 @@
-package expenses
+package records
 
 import (
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
@@ -6,8 +6,8 @@ import (
 )
 
 type Router struct {
-	ports.SecurityHandler
-	usercontroller.Controller
+	securityHandler ports.SecurityHandler
+	controller      usercontroller.Controller
 }
 
 func New(
@@ -15,7 +15,7 @@ func New(
 	userController usercontroller.Controller,
 ) *Router {
 	return &Router{
-		SecurityHandler: securityHandler,
-		Controller:      userController,
+		securityHandler: securityHandler,
+		controller:      userController,
 	}
 }

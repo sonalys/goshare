@@ -10,7 +10,7 @@ import (
 )
 
 func (a *Router) LedgerExpenseCreate(ctx context.Context, req *server.Expense, params server.LedgerExpenseCreateParams) (r *server.LedgerExpenseCreateOK, _ error) {
-	identity, err := a.GetIdentity(ctx)
+	identity, err := a.securityHandler.GetIdentity(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +28,7 @@ func (a *Router) LedgerExpenseCreate(ctx context.Context, req *server.Expense, p
 		PendingRecords: pendingRecords,
 	}
 
-	switch resp, err := a.Expenses().Create(ctx, apiReq); err {
+	switch resp, err := a.controller.Expenses().Create(ctx, apiReq); err {
 	case nil:
 		return &server.LedgerExpenseCreateOK{
 			ID: resp.ID.UUID(),

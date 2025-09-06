@@ -1,14 +1,11 @@
-package ledgers
+package expenses
 
 import (
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
-	"github.com/sonalys/goshare/internal/infrastructure/http/router/ledgers/members"
 	"github.com/sonalys/goshare/internal/ports"
 )
 
 type Router struct {
-	members.Router
-
 	securityHandler ports.SecurityHandler
 	controller      usercontroller.Controller
 }
@@ -20,6 +17,5 @@ func New(
 	return &Router{
 		securityHandler: securityHandler,
 		controller:      userController,
-		Router:          *members.New(securityHandler, userController),
 	}
 }

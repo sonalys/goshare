@@ -10,12 +10,12 @@ import (
 )
 
 func (a *Router) LedgerExpenseGet(ctx context.Context, params server.LedgerExpenseGetParams) (*server.Expense, error) {
-	identity, err := a.GetIdentity(ctx)
+	identity, err := a.securityHandler.GetIdentity(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	expense, err := a.Expenses().Get(ctx, usercontroller.GetExpenseRequest{
+	expense, err := a.controller.Expenses().Get(ctx, usercontroller.GetExpenseRequest{
 		ActorID:   identity.UserID,
 		LedgerID:  domain.ConvertID(params.LedgerID),
 		ExpenseID: domain.ConvertID(params.ExpenseID),

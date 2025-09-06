@@ -11,12 +11,12 @@ import (
 )
 
 func (a *Router) LedgerExpenseList(ctx context.Context, params server.LedgerExpenseListParams) (*server.LedgerExpenseListOK, error) {
-	identity, err := a.GetIdentity(ctx)
+	identity, err := a.securityHandler.GetIdentity(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	result, err := a.Expenses().List(ctx, usercontroller.ListExpensesRequest{
+	result, err := a.controller.Expenses().List(ctx, usercontroller.ListExpensesRequest{
 		ActorID:  identity.UserID,
 		LedgerID: domain.ConvertID(params.LedgerID),
 		Limit:    params.Limit.Or(10),
