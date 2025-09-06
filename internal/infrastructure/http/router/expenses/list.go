@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
-	v1 "github.com/sonalys/goshare/internal/application/v1"
 	"github.com/sonalys/goshare/internal/domain"
+	"github.com/sonalys/goshare/internal/infrastructure/http/mappers"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
 )
 
@@ -33,26 +33,7 @@ func (a *Router) LedgerExpenseList(ctx context.Context, params server.LedgerExpe
 	}
 
 	return &server.LedgerExpenseListOK{
-		Expenses: mapLedgerExpenseToResponseObject(result.Expenses),
+		Expenses: mappers.LedgerExpenseSummaryToExpenseSummary(result.Expenses),
 		Cursor:   cursor,
 	}, nil
-}
-
-func mapLedgerExpenseToResponseObject(expenses []v1.LedgerExpenseSummary) []server.ExpenseSummary {
-	expensesResponse := make([]server.ExpenseSummary, 0, len(expenses))
-
-	for _, e := range expenses {
-		expensesResponse = append(expensesResponse, server.ExpenseSummary{
-			ID:          e.ID.UUID(),
-			Amount:      e.Amount,
-			Name:        e.Name,
-			ExpenseDate: e.ExpenseDate,
-			CreatedAt:   e.CreatedAt,
-			CreatedBy:   e.CreatedBy.UUID(),
-			UpdatedAt:   e.UpdatedAt,
-			UpdatedBy:   e.UpdatedBy.UUID(),
-		})
-	}
-
-	return expensesResponse
 }
