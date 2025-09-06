@@ -18,12 +18,12 @@ func (a *Router) LedgerCreate(ctx context.Context, req *server.LedgerCreateReq) 
 		Name:    req.Name,
 	}
 
-	switch resp, err := a.Ledgers().Create(ctx, apiParams); err {
-	case nil:
-		return &server.LedgerCreateOK{
-			ID: resp.ID.UUID(),
-		}, nil
-	default:
+	resp, err := a.Ledgers().Create(ctx, apiParams)
+	if err != nil {
 		return nil, err
 	}
+
+	return &server.LedgerCreateOK{
+		ID: resp.ID.UUID(),
+	}, nil
 }

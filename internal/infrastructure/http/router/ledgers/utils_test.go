@@ -3,11 +3,9 @@ package ledgers_test
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
 	v1 "github.com/sonalys/goshare/internal/application/v1"
-	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/http/router/ledgers"
 	"github.com/sonalys/goshare/internal/mocks/application/controllers/usercontrollermock"
 	"github.com/sonalys/goshare/internal/mocks/portsmock"
@@ -44,15 +42,7 @@ func setup(_ *testing.T, hooks ...func(*testSetup)) (*ledgers.Router, *testSetup
 	recordsController := &usercontrollermock.RecordsController{}
 
 	ts := &testSetup{
-		SecurityHandler: &portsmock.SecurityHandler{
-			GetIdentityFunc: func(ctx context.Context) (*v1.Identity, error) {
-				return &v1.Identity{
-					Email:  "email@example.com",
-					UserID: domain.NewID(),
-					Exp:    domain.Now().Add(time.Hour).Unix(),
-				}, nil
-			},
-		},
+		SecurityHandler: &portsmock.SecurityHandler{},
 		Controller: &usercontrollermock.Controller{
 			ExpensesFunc: func() usercontroller.ExpenseController { return expenseController },
 			LedgersFunc:  func() usercontroller.LedgerController { return ledgerController },
