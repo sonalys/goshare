@@ -14,7 +14,7 @@ jobs:
       postgres:
         image: postgres:17-alpine
         env:
-          POSTGRES_PASSWORD: password
+          POSTGRES_PASSWORD: postgres
         options: >-
           --health-cmd pg_isready
           --health-interval 1s
@@ -28,8 +28,9 @@ jobs:
           cache-dependency-path: "**/*.sum"
 
       - name: Test
+        env:
+          POSTGRES_CONN_STR: postgresql://postgres:postgres@localhost:5432/postgres
         run: |
-          export POSTGRES_CONN_STR "postgres://postgres:password@${POSTGRES_HOST}:${POSTGRES_PORT}/postgres?sslmode=disable"
           task download
           task test-coverage;
           task junit-report
