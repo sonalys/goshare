@@ -1,6 +1,7 @@
 package testcontainers
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -53,7 +54,7 @@ func Postgres(t *testing.T) postgres.Connection {
 		return conn
 	}
 
-	ctx := t.Context()
+	ctx := context.Background()
 
 	dbName := "users"
 	dbUser := "user"
