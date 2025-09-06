@@ -14,12 +14,18 @@ jobs:
       postgres:
         image: postgres:17-alpine
         env:
+          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 1s
           --health-timeout 1s
           --health-retries 10
+    env:
+      POSTGRES_CONN_STR: postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable
     steps:
       - uses: actions/checkout@v4
       - uses: arduino/setup-task@v2
@@ -28,8 +34,6 @@ jobs:
           cache-dependency-path: "**/*.sum"
 
       - name: Test
-        env:
-          POSTGRES_CONN_STR: postgresql://postgres:postgres@localhost:5432/postgres
         run: |
           task download
           task test-coverage;

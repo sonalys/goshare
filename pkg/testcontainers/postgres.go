@@ -89,8 +89,6 @@ func Postgres(t *testing.T) postgres.Connection {
 		connStr = initializeContainer(t)
 	}
 
-	slog.Info(ctx, "waiting for postgres test container")
-
 	var err error
 	conn, err = postgres.New(ctx, connStr)
 	require.NoError(t, err)
