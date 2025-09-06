@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_ExpenseCreate(t *testing.T) {
+func Test_LedgerExpenseCreate(t *testing.T) {
 	t.Parallel()
 
 	type testData struct {
@@ -81,20 +81,18 @@ func Test_ExpenseCreate(t *testing.T) {
 		expense := td.expense
 		params := td.params
 
-		ledgerID := domain.NewID()
-
 		mocks.ExpenseController.CreateFunc = func(ctx context.Context, got usercontroller.CreateExpenseRequest) (*usercontroller.CreateExpenseResponse, error) {
 			assertCreateFunc(t, identity, td, got)
 
 			return &usercontroller.CreateExpenseResponse{
-				ID: ledgerID,
+				ID: domain.ConvertID(td.params.LedgerID),
 			}, nil
 		}
 
 		resp, err := router.LedgerExpenseCreate(ctx, expense, params)
 		require.NoError(t, err)
 		require.NotNil(t, resp)
-		assert.Equal(t, ledgerID.UUID(), resp.ID)
+		assert.Equal(t, td.params.LedgerID, resp.ID)
 	})
 
 	t.Run("fail/controller error", func(t *testing.T) {
