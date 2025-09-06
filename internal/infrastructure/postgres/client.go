@@ -33,11 +33,12 @@ func New(ctx context.Context, connStr string) (Connection, error) {
 
 func wait(ctx context.Context, conn *pgxpool.Pool) error {
 	for {
-		if conn.Ping(ctx) == nil {
+		err := conn.Ping(ctx)
+		if err == nil {
 			return nil
 		}
 
-		slog.Info(ctx, "waiting for postgres connection")
+		slog.Info(ctx, "waiting for postgres connection", slog.WithError(err))
 
 		select {
 		case <-ctx.Done():
