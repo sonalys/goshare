@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	v1 "github.com/sonalys/goshare/internal/application/v1"
+	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/domain"
 )
 
@@ -17,7 +17,7 @@ type (
 		// All results will be created before cursor, it's used for the pagination.
 		// Limit restricts how many documents are returned.
 		// If no results are found, an empty list and no error is returned.
-		ListByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error)
+		ListByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]application.LedgerExpenseSummary, error)
 	}
 
 	ExpenseCommands interface {

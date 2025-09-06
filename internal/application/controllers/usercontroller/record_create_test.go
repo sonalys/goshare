@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
-	v1 "github.com/sonalys/goshare/internal/application/v1"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/pkg/testfixtures"
 	"github.com/stretchr/testify/assert"
@@ -101,7 +101,7 @@ func Test_Record_Create(t *testing.T) {
 		td.ActorID = domain.NewID()
 
 		expense, err := controller.Records().Create(ctx, td)
-		require.ErrorIs(t, err, v1.ErrForbidden)
+		require.ErrorIs(t, err, application.ErrForbidden)
 		require.Nil(t, expense)
 	})
 

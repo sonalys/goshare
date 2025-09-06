@@ -3,13 +3,13 @@ package expense
 import (
 	"fmt"
 
-	v1 "github.com/sonalys/goshare/internal/application/v1"
+	"github.com/sonalys/goshare/internal/application"
 	domain "github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
 )
 
-func toLedgerExpenseSummary(expense *sqlcgen.Expense) *v1.LedgerExpenseSummary {
-	return &v1.LedgerExpenseSummary{
+func toLedgerExpenseSummary(expense *sqlcgen.Expense) *application.LedgerExpenseSummary {
+	return &application.LedgerExpenseSummary{
 		ID:          expense.ID,
 		Amount:      expense.Amount,
 		Name:        expense.Name,

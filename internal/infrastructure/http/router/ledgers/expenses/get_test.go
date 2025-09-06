@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
-	v1 "github.com/sonalys/goshare/internal/application/v1"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
 	"github.com/sonalys/goshare/internal/infrastructure/http/testutils"
@@ -36,7 +36,7 @@ func Test_LedgerExpenseGet(t *testing.T) {
 		}
 	}
 
-	assertController := func(t *testing.T, identity *v1.Identity, td testData, req usercontroller.GetExpenseRequest) {
+	assertController := func(t *testing.T, identity *application.Identity, td testData, req usercontroller.GetExpenseRequest) {
 		assert.Equal(t, identity.UserID, req.ActorID)
 		assert.Equal(t, td.params.LedgerID, req.LedgerID.UUID())
 		assert.Equal(t, td.params.ExpenseID, req.ExpenseID.UUID())

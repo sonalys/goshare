@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"time"
 
-	v1 "github.com/sonalys/goshare/internal/application/v1"
+	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/sqlcgen"
 )
 
-func (r *Repository) ListByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
+func (r *Repository) ListByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]application.LedgerExpenseSummary, error) {
 	expenses, err := r.conn.Queries().GetLedgerExpenses(ctx, sqlcgen.GetLedgerExpensesParams{
 		LedgerID:  ledgerID,
 		Limit:     limit,
@@ -21,7 +21,7 @@ func (r *Repository) ListByLedger(ctx context.Context, ledgerID domain.ID, curso
 		return nil, fmt.Errorf("getting ledger expenses: %w", expenseError(err))
 	}
 
-	result := make([]v1.LedgerExpenseSummary, 0, len(expenses))
+	result := make([]application.LedgerExpenseSummary, 0, len(expenses))
 	for _, expense := range expenses {
 		result = append(result, *toLedgerExpenseSummary(&expense))
 	}

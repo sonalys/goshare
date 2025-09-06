@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/golang-jwt/jwt/v5"
-	v1 "github.com/sonalys/goshare/internal/application/v1"
+	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/domain"
 )
 
@@ -21,7 +21,7 @@ func NewClient(jwtSignKey []byte) *Client {
 	}
 }
 
-func (c *Client) Decode(tokenString string) (*v1.Identity, error) {
+func (c *Client) Decode(tokenString string) (*application.Identity, error) {
 	var claims jwt.MapClaims
 
 	keyFunc := func(token *jwt.Token) (any, error) {
@@ -43,7 +43,7 @@ func (c *Client) Decode(tokenString string) (*v1.Identity, error) {
 	}
 
 	if !token.Valid {
-		return nil, v1.ErrAuthenticationExpired
+		return nil, application.ErrAuthenticationExpired
 	}
 
 	email, ok := claims["email"].(string)
@@ -66,7 +66,7 @@ func (c *Client) Decode(tokenString string) (*v1.Identity, error) {
 		return nil, errors.New("missing exp claim")
 	}
 
-	identity := &v1.Identity{
+	identity := &application.Identity{
 		Email:  email,
 		UserID: userUUID,
 		Exp:    int64(exp),
@@ -75,7 +75,7 @@ func (c *Client) Decode(tokenString string) (*v1.Identity, error) {
 	return identity, nil
 }
 
-func (c *Client) Encode(identity *v1.Identity) (string, error) {
+func (c *Client) Encode(identity *application.Identity) (string, error) {
 	claims := jwt.MapClaims{
 		"email":   identity.Email,
 		"user_id": identity.UserID.String(),

@@ -1,11 +1,11 @@
 package mappers
 
 import (
-	v1 "github.com/sonalys/goshare/internal/application/v1"
+	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
 )
 
-func LedgerExpenseSummaryToExpenseSummary(expenses []v1.LedgerExpenseSummary) []server.ExpenseSummary {
+func LedgerExpenseSummaryToExpenseSummary(expenses []application.LedgerExpenseSummary) []server.ExpenseSummary {
 	expensesResponse := make([]server.ExpenseSummary, 0, len(expenses))
 
 	for _, e := range expenses {

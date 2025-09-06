@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sonalys/goshare/internal/application/v1"
+	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/ports"
 )
@@ -27,7 +27,7 @@ var _ ports.ExpenseQueries = &ExpenseQueries{}
 //			GetFunc: func(ctx context.Context, id domain.ID) (*domain.Expense, error) {
 //				panic("mock out the Get method")
 //			},
-//			ListByLedgerFunc: func(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
+//			ListByLedgerFunc: func(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]application.LedgerExpenseSummary, error) {
 //				panic("mock out the ListByLedger method")
 //			},
 //		}
@@ -41,7 +41,7 @@ type ExpenseQueries struct {
 	GetFunc func(ctx context.Context, id domain.ID) (*domain.Expense, error)
 
 	// ListByLedgerFunc mocks the ListByLedger method.
-	ListByLedgerFunc func(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error)
+	ListByLedgerFunc func(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]application.LedgerExpenseSummary, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -105,7 +105,7 @@ func (mock *ExpenseQueries) GetCalls() []struct {
 }
 
 // ListByLedger calls ListByLedgerFunc.
-func (mock *ExpenseQueries) ListByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
+func (mock *ExpenseQueries) ListByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]application.LedgerExpenseSummary, error) {
 	if mock.ListByLedgerFunc == nil {
 		panic("ExpenseQueries.ListByLedgerFunc: method is nil but ExpenseQueries.ListByLedger was just called")
 	}
@@ -286,7 +286,7 @@ var _ ports.ExpenseRepository = &ExpenseRepository{}
 //			GetFunc: func(ctx context.Context, id domain.ID) (*domain.Expense, error) {
 //				panic("mock out the Get method")
 //			},
-//			ListByLedgerFunc: func(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
+//			ListByLedgerFunc: func(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]application.LedgerExpenseSummary, error) {
 //				panic("mock out the ListByLedger method")
 //			},
 //			UpdateFunc: func(ctx context.Context, expense *domain.Expense) error {
@@ -306,7 +306,7 @@ type ExpenseRepository struct {
 	GetFunc func(ctx context.Context, id domain.ID) (*domain.Expense, error)
 
 	// ListByLedgerFunc mocks the ListByLedger method.
-	ListByLedgerFunc func(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error)
+	ListByLedgerFunc func(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]application.LedgerExpenseSummary, error)
 
 	// UpdateFunc mocks the Update method.
 	UpdateFunc func(ctx context.Context, expense *domain.Expense) error
@@ -425,7 +425,7 @@ func (mock *ExpenseRepository) GetCalls() []struct {
 }
 
 // ListByLedger calls ListByLedgerFunc.
-func (mock *ExpenseRepository) ListByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
+func (mock *ExpenseRepository) ListByLedger(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]application.LedgerExpenseSummary, error) {
 	if mock.ListByLedgerFunc == nil {
 		panic("ExpenseRepository.ListByLedgerFunc: method is nil but ExpenseRepository.ListByLedger was just called")
 	}
@@ -1296,7 +1296,7 @@ var _ ports.SecurityHandler = &SecurityHandler{}
 //
 //		// make and configure a mocked ports.SecurityHandler
 //		mockedSecurityHandler := &SecurityHandler{
-//			GetIdentityFunc: func(ctx context.Context) (*v1.Identity, error) {
+//			GetIdentityFunc: func(ctx context.Context) (*application.Identity, error) {
 //				panic("mock out the GetIdentity method")
 //			},
 //		}
@@ -1307,7 +1307,7 @@ var _ ports.SecurityHandler = &SecurityHandler{}
 //	}
 type SecurityHandler struct {
 	// GetIdentityFunc mocks the GetIdentity method.
-	GetIdentityFunc func(ctx context.Context) (*v1.Identity, error)
+	GetIdentityFunc func(ctx context.Context) (*application.Identity, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -1321,7 +1321,7 @@ type SecurityHandler struct {
 }
 
 // GetIdentity calls GetIdentityFunc.
-func (mock *SecurityHandler) GetIdentity(ctx context.Context) (*v1.Identity, error) {
+func (mock *SecurityHandler) GetIdentity(ctx context.Context) (*application.Identity, error) {
 	if mock.GetIdentityFunc == nil {
 		panic("SecurityHandler.GetIdentityFunc: method is nil but SecurityHandler.GetIdentity was just called")
 	}

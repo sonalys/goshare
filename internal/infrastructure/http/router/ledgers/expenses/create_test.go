@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
-	v1 "github.com/sonalys/goshare/internal/application/v1"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
 	"github.com/sonalys/goshare/internal/infrastructure/http/testutils"
@@ -47,7 +47,7 @@ func Test_LedgerExpenseCreate(t *testing.T) {
 		}
 	}
 
-	assertCreateFunc := func(t *testing.T, identity *v1.Identity, td testData, got usercontroller.CreateExpenseRequest) {
+	assertCreateFunc := func(t *testing.T, identity *application.Identity, td testData, got usercontroller.CreateExpenseRequest) {
 		expense := td.expense
 		params := td.params
 

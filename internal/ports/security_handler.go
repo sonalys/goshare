@@ -3,11 +3,11 @@ package ports
 import (
 	"context"
 
-	v1 "github.com/sonalys/goshare/internal/application/v1"
+	"github.com/sonalys/goshare/internal/application"
 )
 
 type (
 	SecurityHandler interface {
-		GetIdentity(ctx context.Context) (*v1.Identity, error)
+		GetIdentity(ctx context.Context) (*application.Identity, error)
 	}
 )

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/controllers/identitycontroller"
-	v1 "github.com/sonalys/goshare/internal/application/v1"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
 )
 
@@ -22,7 +22,7 @@ func (a *Router) AuthenticationLogin(ctx context.Context, req *server.Authentica
 		}, nil
 	}
 
-	if target := new(v1.UserCredentialsMismatchError); errors.As(err, &target) {
+	if target := new(application.UserCredentialsMismatchError); errors.As(err, &target) {
 		return nil, &server.ErrorResponseStatusCode{
 			StatusCode: http.StatusUnauthorized,
 			Response: server.ErrorResponse{

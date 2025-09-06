@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	v1 "github.com/sonalys/goshare/internal/application/v1"
+	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/ports"
 	"github.com/sonalys/goshare/pkg/slog"
@@ -40,7 +40,7 @@ func (c *ledgerController) MembersAdd(ctx context.Context, req AddMembersRequest
 		}
 
 		if !ledger.CanManageMembers(req.ActorID) {
-			return fmt.Errorf("authorizing member management: %w", v1.ErrForbidden)
+			return fmt.Errorf("authorizing member management: %w", application.ErrForbidden)
 		}
 
 		users, err := db.User().ListByEmail(ctx, req.Emails)

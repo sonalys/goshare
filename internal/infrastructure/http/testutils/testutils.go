@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
-	v1 "github.com/sonalys/goshare/internal/application/v1"
 	"github.com/sonalys/goshare/internal/infrastructure/http/router"
 	"github.com/sonalys/goshare/internal/infrastructure/http/router/ledgers"
 	"github.com/sonalys/goshare/internal/infrastructure/http/router/ledgers/expenses"
@@ -27,9 +27,9 @@ type testSetup struct {
 	RecordsController  *usercontrollermock.RecordsController
 }
 
-func WithIdentity(identity *v1.Identity) func(*testSetup) {
+func WithIdentity(identity *application.Identity) func(*testSetup) {
 	return func(ts *testSetup) {
-		ts.SecurityHandler.GetIdentityFunc = func(ctx context.Context) (*v1.Identity, error) {
+		ts.SecurityHandler.GetIdentityFunc = func(ctx context.Context) (*application.Identity, error) {
 			if identity == nil {
 				return nil, assert.AnError
 			}

@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
-	v1 "github.com/sonalys/goshare/internal/application/v1"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/pkg/testfixtures"
 	"github.com/stretchr/testify/assert"
@@ -46,8 +46,8 @@ func Test_Expense_List(t *testing.T) {
 			return ledger, nil
 		}
 
-		mocks.db.repositories.expense.ListByLedgerFunc = func(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
-			return []v1.LedgerExpenseSummary{}, nil
+		mocks.db.repositories.expense.ListByLedgerFunc = func(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]application.LedgerExpenseSummary, error) {
+			return []application.LedgerExpenseSummary{}, nil
 		}
 
 		controller := usercontroller.New(usercontroller.Dependencies{
@@ -76,8 +76,8 @@ func Test_Expense_List(t *testing.T) {
 		td := createTestData()
 		controller, mocks := setup(t, td)
 
-		mocks.db.repositories.expense.ListByLedgerFunc = func(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
-			return []v1.LedgerExpenseSummary{
+		mocks.db.repositories.expense.ListByLedgerFunc = func(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]application.LedgerExpenseSummary, error) {
+			return []application.LedgerExpenseSummary{
 				{},
 				{},
 			}, nil
@@ -98,7 +98,7 @@ func Test_Expense_List(t *testing.T) {
 		td.ActorID = domain.NewID()
 
 		resp, err := controller.Expenses().List(ctx, td)
-		require.ErrorIs(t, err, v1.ErrForbidden)
+		require.ErrorIs(t, err, application.ErrForbidden)
 		require.Empty(t, resp)
 	})
 
@@ -125,7 +125,7 @@ func Test_Expense_List(t *testing.T) {
 		td := createTestData()
 		controller, mocks := setup(t, td)
 
-		mocks.db.repositories.expense.ListByLedgerFunc = func(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]v1.LedgerExpenseSummary, error) {
+		mocks.db.repositories.expense.ListByLedgerFunc = func(ctx context.Context, ledgerID domain.ID, cursor time.Time, limit int32) ([]application.LedgerExpenseSummary, error) {
 			return nil, assert.AnError
 		}
 

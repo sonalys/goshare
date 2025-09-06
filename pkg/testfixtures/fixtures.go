@@ -5,7 +5,7 @@ import (
 	"slices"
 	"testing"
 
-	v1 "github.com/sonalys/goshare/internal/application/v1"
+	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/kset"
 	"github.com/stretchr/testify/require"
@@ -55,8 +55,8 @@ func Expense(t *testing.T, ledger *domain.Ledger, from, to domain.ID) *domain.Ex
 	return expense
 }
 
-func Identity(t *testing.T) *v1.Identity {
-	return &v1.Identity{
+func Identity(t *testing.T) *application.Identity {
+	return &application.Identity{
 		UserID: domain.NewID(),
 		Email:  domain.NewID().String() + "@example.com",
 		Exp:    domain.Now().Unix(),

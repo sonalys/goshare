@@ -7,7 +7,7 @@ import (
 
 	"github.com/ogen-go/ogen/ogenerrors"
 	"github.com/ogen-go/ogen/validate"
-	v1 "github.com/sonalys/goshare/internal/application/v1"
+	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
 )
@@ -20,7 +20,7 @@ func (a *Router) NewError(ctx context.Context, err error) *server.ErrorResponseS
 		})
 	}
 
-	if errors.Is(err, v1.ErrForbidden) {
+	if errors.Is(err, application.ErrForbidden) {
 		return newErrorResponse(http.StatusForbidden, server.Error{
 			Code:    server.ErrorCodeUnauthorized,
 			Message: "not authorized to access resource",
@@ -59,7 +59,7 @@ func (a *Router) NewError(ctx context.Context, err error) *server.ErrorResponseS
 		return newErrorResponse(http.StatusBadRequest, errs...)
 	}
 
-	if errors.Is(err, v1.ErrNotFound) {
+	if errors.Is(err, application.ErrNotFound) {
 		return newErrorResponse(http.StatusNotFound, server.Error{
 			Code:    server.ErrorCodeNotFound,
 			Message: err.Error(),

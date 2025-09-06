@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
-	v1 "github.com/sonalys/goshare/internal/application/v1"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
 	"github.com/sonalys/goshare/internal/infrastructure/http/testutils"
@@ -29,7 +29,7 @@ func Test_Create(t *testing.T) {
 		}
 	}
 
-	assertController := func(t *testing.T, identity *v1.Identity, td testData, got usercontroller.CreateLedgerRequest) {
+	assertController := func(t *testing.T, identity *application.Identity, td testData, got usercontroller.CreateLedgerRequest) {
 		assert.Equal(t, td.req.Name, got.Name)
 		assert.Equal(t, identity.UserID, got.ActorID)
 	}

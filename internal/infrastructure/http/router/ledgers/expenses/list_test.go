@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
-	v1 "github.com/sonalys/goshare/internal/application/v1"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
 	"github.com/sonalys/goshare/internal/infrastructure/http/testutils"
@@ -38,7 +38,7 @@ func Test_LedgerExpenseList(t *testing.T) {
 		}
 	}
 
-	assertController := func(t *testing.T, identity *v1.Identity, td testData, req usercontroller.ListExpensesRequest) {
+	assertController := func(t *testing.T, identity *application.Identity, td testData, req usercontroller.ListExpensesRequest) {
 		assert.Equal(t, identity.UserID, req.ActorID)
 		assert.Equal(t, td.params.LedgerID, req.LedgerID.UUID())
 		assert.Equal(t, td.params.Cursor.Value, req.Cursor)
@@ -58,7 +58,7 @@ func Test_LedgerExpenseList(t *testing.T) {
 			assertController(t, identity, td, req)
 
 			return &usercontroller.ListExpensesResponse{
-				Expenses: []v1.LedgerExpenseSummary{
+				Expenses: []application.LedgerExpenseSummary{
 					{},
 				},
 				Cursor: &time.Time{},

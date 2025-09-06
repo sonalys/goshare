@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	v1 "github.com/sonalys/goshare/internal/application/v1"
+	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/ports"
 	"github.com/sonalys/goshare/pkg/slog"
@@ -37,7 +37,7 @@ func (c *recordsController) Delete(ctx context.Context, req DeleteExpenseRecordR
 		}
 
 		if !ledger.CanManageExpenses(req.ActorID) {
-			return fmt.Errorf("authorizing expenses management: %w", v1.ErrForbidden)
+			return fmt.Errorf("authorizing expenses management: %w", application.ErrForbidden)
 		}
 
 		expense, err := db.Expense().Get(ctx, req.ExpenseID)

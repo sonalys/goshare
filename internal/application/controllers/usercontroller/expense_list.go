@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	v1 "github.com/sonalys/goshare/internal/application/v1"
+	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/pkg/slog"
 	"go.opentelemetry.io/otel/attribute"
@@ -21,7 +21,7 @@ type (
 	}
 
 	ListExpensesResponse struct {
-		Expenses []v1.LedgerExpenseSummary
+		Expenses []application.LedgerExpenseSummary
 		Cursor   *time.Time
 	}
 )
@@ -41,7 +41,7 @@ func (c *expenseController) List(ctx context.Context, req ListExpensesRequest) (
 	}
 
 	if !ledger.CanView(req.ActorID) {
-		return nil, fmt.Errorf("authorizing user ledger view: %w", v1.ErrForbidden)
+		return nil, fmt.Errorf("authorizing user ledger view: %w", application.ErrForbidden)
 	}
 
 	req.Limit = max(1, req.Limit)

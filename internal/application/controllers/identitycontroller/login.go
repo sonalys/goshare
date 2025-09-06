@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	v1 "github.com/sonalys/goshare/internal/application/v1"
+	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/pkg/slog"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -27,12 +27,12 @@ func (c *controller) Login(ctx context.Context, req LoginRequest) (*LoginRespons
 
 	user, err := c.db.User().GetByEmail(ctx, req.Email)
 	if err != nil {
-		if !errors.Is(err, v1.ErrNotFound) {
+		if !errors.Is(err, application.ErrNotFound) {
 			return nil, slog.ErrorReturn(ctx, "getting user by email", err)
 		}
 		slog.Warn(ctx, "could not find user by email", err)
 
-		return nil, &v1.UserCredentialsMismatchError{
+		return nil, &application.UserCredentialsMismatchError{
 			Email: req.Email,
 		}
 	}
@@ -42,13 +42,13 @@ func (c *controller) Login(ctx context.Context, req LoginRequest) (*LoginRespons
 	if err != nil {
 		slog.Error(ctx, "password hash mismatch", err)
 
-		return nil, &v1.UserCredentialsMismatchError{
+		return nil, &application.UserCredentialsMismatchError{
 			Email: req.Email,
 		}
 	}
 	span.AddEvent("hash compared")
 
-	identity := &v1.Identity{
+	identity := &application.Identity{
 		Email:  user.Email,
 		UserID: user.ID,
 		Exp:    time.Now().Add(72 * time.Hour).Unix(),

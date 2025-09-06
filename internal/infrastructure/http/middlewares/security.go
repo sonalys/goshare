@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	v1 "github.com/sonalys/goshare/internal/application/v1"
+	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
 )
 
@@ -12,7 +12,7 @@ type (
 	contextKey string
 
 	IdentityDecoder interface {
-		Decode(jwt string) (*v1.Identity, error)
+		Decode(jwt string) (*application.Identity, error)
 	}
 
 	SecurityHandler struct {
@@ -28,8 +28,8 @@ func NewSecurityHandler(c IdentityDecoder) *SecurityHandler {
 	}
 }
 
-func (h *SecurityHandler) GetIdentity(ctx context.Context) (*v1.Identity, error) {
-	identity, ok := ctx.Value(identityContextKey).(*v1.Identity)
+func (h *SecurityHandler) GetIdentity(ctx context.Context) (*application.Identity, error) {
+	identity, ok := ctx.Value(identityContextKey).(*application.Identity)
 	if !ok {
 		return nil, errors.New("unauthorized")
 	}

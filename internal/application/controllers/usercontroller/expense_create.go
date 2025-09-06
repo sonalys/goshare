@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	v1 "github.com/sonalys/goshare/internal/application/v1"
+	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/ports"
 	"github.com/sonalys/goshare/pkg/slog"
@@ -45,7 +45,7 @@ func (c *expenseController) Create(ctx context.Context, req CreateExpenseRequest
 		}
 
 		if !ledger.CanManageExpenses(req.ActorID) {
-			return fmt.Errorf("authorizing user ledger expense management: %w", v1.ErrForbidden)
+			return fmt.Errorf("authorizing user ledger expense management: %w", application.ErrForbidden)
 		}
 
 		expense, err := ledger.CreateExpense(domain.CreateExpenseRequest{

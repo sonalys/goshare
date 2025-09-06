@@ -8,8 +8,8 @@ import (
 	"context"
 	"sync"
 
+	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/controllers/identitycontroller"
-	"github.com/sonalys/goshare/internal/application/v1"
 )
 
 // Ensure that Controller does implement identitycontroller.Controller.
@@ -144,7 +144,7 @@ var _ identitycontroller.IdentityEncoder = &IdentityEncoder{}
 //
 //		// make and configure a mocked identitycontroller.IdentityEncoder
 //		mockedIdentityEncoder := &IdentityEncoder{
-//			EncodeFunc: func(identity *v1.Identity) (string, error) {
+//			EncodeFunc: func(identity *application.Identity) (string, error) {
 //				panic("mock out the Encode method")
 //			},
 //		}
@@ -155,26 +155,26 @@ var _ identitycontroller.IdentityEncoder = &IdentityEncoder{}
 //	}
 type IdentityEncoder struct {
 	// EncodeFunc mocks the Encode method.
-	EncodeFunc func(identity *v1.Identity) (string, error)
+	EncodeFunc func(identity *application.Identity) (string, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
 		// Encode holds details about calls to the Encode method.
 		Encode []struct {
 			// Identity is the identity argument value.
-			Identity *v1.Identity
+			Identity *application.Identity
 		}
 	}
 	lockEncode sync.RWMutex
 }
 
 // Encode calls EncodeFunc.
-func (mock *IdentityEncoder) Encode(identity *v1.Identity) (string, error) {
+func (mock *IdentityEncoder) Encode(identity *application.Identity) (string, error) {
 	if mock.EncodeFunc == nil {
 		panic("IdentityEncoder.EncodeFunc: method is nil but IdentityEncoder.Encode was just called")
 	}
 	callInfo := struct {
-		Identity *v1.Identity
+		Identity *application.Identity
 	}{
 		Identity: identity,
 	}
@@ -189,10 +189,10 @@ func (mock *IdentityEncoder) Encode(identity *v1.Identity) (string, error) {
 //
 //	len(mockedIdentityEncoder.EncodeCalls())
 func (mock *IdentityEncoder) EncodeCalls() []struct {
-	Identity *v1.Identity
+	Identity *application.Identity
 } {
 	var calls []struct {
-		Identity *v1.Identity
+		Identity *application.Identity
 	}
 	mock.lockEncode.RLock()
 	calls = mock.calls.Encode

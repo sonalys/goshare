@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/sonalys/goshare/internal/application"
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
-	v1 "github.com/sonalys/goshare/internal/application/v1"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/pkg/testfixtures"
 	"github.com/stretchr/testify/assert"
@@ -93,7 +93,7 @@ func Test_Ledger_MembersAdd(t *testing.T) {
 		td.ActorID = domain.NewID()
 
 		err := controller.Ledgers().MembersAdd(ctx, td)
-		require.ErrorIs(t, err, v1.ErrForbidden)
+		require.ErrorIs(t, err, application.ErrForbidden)
 	})
 
 	t.Run("fail/ledger repository get error", func(t *testing.T) {
