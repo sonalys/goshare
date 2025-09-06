@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
+	v1 "github.com/sonalys/goshare/internal/application/v1"
 	"github.com/sonalys/goshare/internal/domain"
 	"github.com/sonalys/goshare/internal/infrastructure/http/router/testutils"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
@@ -16,29 +17,42 @@ import (
 func Test_Create(t *testing.T) {
 	t.Parallel()
 
+	type testData struct {
+		req *server.LedgerCreateReq
+	}
+
+	getTestData := func() testData {
+		return testData{
+			req: &server.LedgerCreateReq{
+				Name: "my new ledger",
+			},
+		}
+	}
+
+	assertController := func(t *testing.T, identity *v1.Identity, td testData, got usercontroller.CreateLedgerRequest) {
+		assert.Equal(t, td.req.Name, got.Name)
+		assert.Equal(t, identity.UserID, got.ActorID)
+	}
+
 	t.Run("pass", func(t *testing.T) {
 		t.Parallel()
 		ctx := t.Context()
 
 		identity := testfixtures.Identity(t)
 		router, mocks := testutils.Setup(t, testutils.WithIdentity(identity))
-
-		req := &server.LedgerCreateReq{
-			Name: "my new ledger",
-		}
+		td := getTestData()
 
 		ledgerID := domain.NewID()
 
 		mocks.LedgerController.CreateFunc = func(ctx context.Context, got usercontroller.CreateLedgerRequest) (*usercontroller.CreateLedgerResponse, error) {
-			assert.Equal(t, req.Name, got.Name)
-			assert.Equal(t, identity.UserID, got.ActorID)
+			assertController(t, identity, td, got)
 
 			return &usercontroller.CreateLedgerResponse{
 				ID: ledgerID,
 			}, nil
 		}
 
-		resp, err := router.LedgerCreate(ctx, req)
+		resp, err := router.LedgerCreate(ctx, td.req)
 		require.NoError(t, err)
 		require.NotNil(t, resp)
 		assert.Equal(t, ledgerID.UUID(), resp.ID)
@@ -50,19 +64,15 @@ func Test_Create(t *testing.T) {
 
 		identity := testfixtures.Identity(t)
 		router, mocks := testutils.Setup(t, testutils.WithIdentity(identity))
-
-		req := &server.LedgerCreateReq{
-			Name: "my new ledger",
-		}
+		td := getTestData()
 
 		mocks.LedgerController.CreateFunc = func(ctx context.Context, got usercontroller.CreateLedgerRequest) (*usercontroller.CreateLedgerResponse, error) {
-			assert.Equal(t, req.Name, got.Name)
-			assert.Equal(t, identity.UserID, got.ActorID)
+			assertController(t, identity, td, got)
 
 			return nil, assert.AnError
 		}
 
-		_, err := router.LedgerCreate(ctx, req)
+		_, err := router.LedgerCreate(ctx, td.req)
 		require.ErrorIs(t, err, assert.AnError)
 	})
 
