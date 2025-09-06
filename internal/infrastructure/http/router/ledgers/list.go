@@ -19,6 +19,6 @@ func (a *Router) LedgerList(ctx context.Context) (*server.LedgerListOK, error) {
 	}
 
 	return &server.LedgerListOK{
-		Ledgers: mappers.FromLedgersToLedgers(ledgers),
+		Ledgers: mappers.LedgersToLedgers(ledgers),
 	}, nil
 }

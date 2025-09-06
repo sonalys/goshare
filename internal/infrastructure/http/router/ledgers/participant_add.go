@@ -14,11 +14,9 @@ func (a *Router) LedgerMemberAdd(ctx context.Context, req *server.LedgerMemberAd
 		return err
 	}
 
-	apiParams := usercontroller.AddMembersRequest{
+	return a.Ledgers().MembersAdd(ctx, usercontroller.AddMembersRequest{
 		ActorID:  identity.UserID,
 		LedgerID: domain.ConvertID(params.LedgerID),
 		Emails:   req.Emails,
-	}
-
-	return a.Ledgers().MembersAdd(ctx, apiParams)
+	})
 }

@@ -5,6 +5,7 @@ import (
 
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
 	"github.com/sonalys/goshare/internal/domain"
+	"github.com/sonalys/goshare/internal/infrastructure/http/mappers"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
 )
 
@@ -23,20 +24,6 @@ func (a *Router) LedgerMemberList(ctx context.Context, params server.LedgerMembe
 	}
 
 	return &server.LedgerMemberListOK{
-		Members: mapLedgerMemberBalanceToResponseObject(ledger.Members),
+		Members: mappers.LedgerMemberToLedgerMember(ledger.Members),
 	}, nil
-}
-
-func mapLedgerMemberBalanceToResponseObject(members map[domain.ID]*domain.LedgerMember) []server.LedgerMember {
-	balances := make([]server.LedgerMember, 0, len(members))
-	for id, member := range members {
-		balances = append(balances, server.LedgerMember{
-			UserID:    id.UUID(),
-			CreatedAt: member.CreatedAt,
-			CreatedBy: member.CreatedBy.UUID(),
-			Balance:   member.Balance,
-		})
-	}
-
-	return balances
 }
