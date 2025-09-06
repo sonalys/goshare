@@ -22,7 +22,7 @@ type (
 	}
 )
 
-func (c *Controller) Register(ctx context.Context, req RegisterRequest) (resp *RegisterResponse, err error) {
+func (c *controller) Register(ctx context.Context, req RegisterRequest) (resp *RegisterResponse, err error) {
 	ctx, span := c.tracer.Start(ctx, "register")
 	defer span.End()
 

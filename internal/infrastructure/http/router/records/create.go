@@ -1,10 +1,11 @@
-package ledgers
+package records
 
 import (
 	"context"
 
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
 	"github.com/sonalys/goshare/internal/domain"
+	"github.com/sonalys/goshare/internal/infrastructure/http/mappers"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
 )
 
@@ -14,7 +15,7 @@ func (a *Router) LedgerExpenseRecordCreate(ctx context.Context, req *server.Ledg
 		return nil, err
 	}
 
-	pendingRecords, err := convertUserBalances(req.Records)
+	pendingRecords, err := mappers.ExpenseRecordToPendingRecord(req.Records)
 	if err != nil {
 		return nil, err
 	}
@@ -35,6 +36,6 @@ func (a *Router) LedgerExpenseRecordCreate(ctx context.Context, req *server.Ledg
 		ID:          server.NewOptUUID(resp.ID.UUID()),
 		Name:        resp.Name,
 		ExpenseDate: resp.ExpenseDate,
-		Records:     convertRecords(resp.Records),
+		Records:     mappers.RecordToExpenseRecord(resp.Records),
 	}, nil
 }

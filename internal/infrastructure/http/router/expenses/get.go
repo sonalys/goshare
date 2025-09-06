@@ -1,10 +1,11 @@
-package ledgers
+package expenses
 
 import (
 	"context"
 
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
 	"github.com/sonalys/goshare/internal/domain"
+	"github.com/sonalys/goshare/internal/infrastructure/http/mappers"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
 )
 
@@ -31,21 +32,6 @@ func convertExpense(expense *domain.Expense) *server.Expense {
 		ID:          server.NewOptUUID(expense.ID.UUID()),
 		Name:        expense.Name,
 		ExpenseDate: expense.ExpenseDate,
-		Records:     convertRecords(expense.Records),
+		Records:     mappers.RecordToExpenseRecord(expense.Records),
 	}
-}
-
-func convertRecords(records map[domain.ID]*domain.Record) []server.ExpenseRecord {
-	result := make([]server.ExpenseRecord, 0, len(records))
-	for id, record := range records {
-		result = append(result, server.ExpenseRecord{
-			ID:         server.NewOptUUID(id.UUID()),
-			Type:       server.ExpenseRecordType(record.Type.String()),
-			FromUserID: record.From.UUID(),
-			ToUserID:   record.To.UUID(),
-			Amount:     record.Amount,
-		})
-	}
-
-	return result
 }

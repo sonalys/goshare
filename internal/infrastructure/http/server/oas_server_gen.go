@@ -8,13 +8,39 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
+	ExpensesHandler
 	HealthcheckHandler
 	LedgersHandler
+	RecordsHandler
 	UsersHandler
 	// NewError creates *ErrorResponseStatusCode from error returned by handler.
 	//
 	// Used for common default response.
 	NewError(ctx context.Context, err error) *ErrorResponseStatusCode
+}
+
+// ExpensesHandler handles operations described by OpenAPI v3 specification.
+//
+// x-ogen-operation-group: Expenses
+type ExpensesHandler interface {
+	// LedgerExpenseCreate implements LedgerExpenseCreate operation.
+	//
+	// Creates a new expense record.
+	//
+	// POST /ledgers/{ledgerID}/expenses
+	LedgerExpenseCreate(ctx context.Context, req *Expense, params LedgerExpenseCreateParams) (*LedgerExpenseCreateOK, error)
+	// LedgerExpenseGet implements LedgerExpenseGet operation.
+	//
+	// Retrieves an expense.
+	//
+	// GET /ledgers/{ledgerID}/expenses/{expenseID}
+	LedgerExpenseGet(ctx context.Context, params LedgerExpenseGetParams) (*Expense, error)
+	// LedgerExpenseList implements LedgerExpenseList operation.
+	//
+	// Lists all expenses in the ledger.
+	//
+	// GET /ledgers/{ledgerID}/expenses
+	LedgerExpenseList(ctx context.Context, params LedgerExpenseListParams) (*LedgerExpenseListOK, error)
 }
 
 // HealthcheckHandler handles operations described by OpenAPI v3 specification.
@@ -39,36 +65,6 @@ type LedgersHandler interface {
 	//
 	// POST /ledgers
 	LedgerCreate(ctx context.Context, req *LedgerCreateReq) (*LedgerCreateOK, error)
-	// LedgerExpenseCreate implements LedgerExpenseCreate operation.
-	//
-	// Creates a new expense record.
-	//
-	// POST /ledgers/{ledgerID}/expenses
-	LedgerExpenseCreate(ctx context.Context, req *Expense, params LedgerExpenseCreateParams) (*LedgerExpenseCreateOK, error)
-	// LedgerExpenseGet implements LedgerExpenseGet operation.
-	//
-	// Retrieves an expense.
-	//
-	// GET /ledgers/{ledgerID}/expenses/{expenseID}
-	LedgerExpenseGet(ctx context.Context, params LedgerExpenseGetParams) (*Expense, error)
-	// LedgerExpenseList implements LedgerExpenseList operation.
-	//
-	// Lists all expenses in the ledger.
-	//
-	// GET /ledgers/{ledgerID}/expenses
-	LedgerExpenseList(ctx context.Context, params LedgerExpenseListParams) (*LedgerExpenseListOK, error)
-	// LedgerExpenseRecordCreate implements LedgerExpenseRecordCreate operation.
-	//
-	// Creates a new expense record.
-	//
-	// POST /ledgers/{ledgerID}/expenses/{expenseID}/records
-	LedgerExpenseRecordCreate(ctx context.Context, req *LedgerExpenseRecordCreateReq, params LedgerExpenseRecordCreateParams) (*Expense, error)
-	// LedgerExpenseRecordDelete implements LedgerExpenseRecordDelete operation.
-	//
-	// Delete an expense record.
-	//
-	// DELETE /ledgers/{ledgerID}/expenses/{expenseID}/records/{recordID}
-	LedgerExpenseRecordDelete(ctx context.Context, params LedgerExpenseRecordDeleteParams) error
 	// LedgerList implements LedgerList operation.
 	//
 	// Lists all ledgers.
@@ -87,6 +83,24 @@ type LedgersHandler interface {
 	//
 	// GET /ledgers/{ledgerID}/members
 	LedgerMemberList(ctx context.Context, params LedgerMemberListParams) (*LedgerMemberListOK, error)
+}
+
+// RecordsHandler handles operations described by OpenAPI v3 specification.
+//
+// x-ogen-operation-group: Records
+type RecordsHandler interface {
+	// LedgerExpenseRecordCreate implements LedgerExpenseRecordCreate operation.
+	//
+	// Creates a new expense record.
+	//
+	// POST /ledgers/{ledgerID}/expenses/{expenseID}/records
+	LedgerExpenseRecordCreate(ctx context.Context, req *LedgerExpenseRecordCreateReq, params LedgerExpenseRecordCreateParams) (*Expense, error)
+	// LedgerExpenseRecordDelete implements LedgerExpenseRecordDelete operation.
+	//
+	// Delete an expense record.
+	//
+	// DELETE /ledgers/{ledgerID}/expenses/{expenseID}/records/{recordID}
+	LedgerExpenseRecordDelete(ctx context.Context, params LedgerExpenseRecordDeleteParams) error
 }
 
 // UsersHandler handles operations described by OpenAPI v3 specification.

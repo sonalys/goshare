@@ -1,4 +1,4 @@
-package ledgers
+package records
 
 import (
 	"context"

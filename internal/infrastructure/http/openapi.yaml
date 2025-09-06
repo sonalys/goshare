@@ -1,4 +1,4 @@
-openapi: "3.0.0"
+openapi: "3.1.0"
 info:
   version: 1.0.0
   title: Rest API for GoShare
@@ -264,7 +264,7 @@ paths:
           description: All users were added to the ledger
 
   /ledgers/{ledgerID}/expenses:
-    x-ogen-operation-group: Ledgers
+    x-ogen-operation-group: Expenses
     post:
       operationId: LedgerExpenseCreate
       description: Creates a new expense record
@@ -353,7 +353,7 @@ paths:
                       $ref: "#/components/schemas/ExpenseSummary"
 
   /ledgers/{ledgerID}/expenses/{expenseID}:
-    x-ogen-operation-group: Ledgers
+    x-ogen-operation-group: Expenses
     get:
       operationId: LedgerExpenseGet
       description: Retrieves an expense
@@ -385,7 +385,7 @@ paths:
                 $ref: "#/components/schemas/Expense"
 
   /ledgers/{ledgerID}/expenses/{expenseID}/records:
-    x-ogen-operation-group: Ledgers
+    x-ogen-operation-group: Records
     post:
       operationId: LedgerExpenseRecordCreate
       description: Creates a new expense record
@@ -428,7 +428,7 @@ paths:
                 $ref: "#/components/schemas/Expense"
 
   /ledgers/{ledgerID}/expenses/{expenseID}/records/{recordID}:
-    x-ogen-operation-group: Ledgers
+    x-ogen-operation-group: Records
     delete:
       operationId: LedgerExpenseRecordDelete
       description: Delete an expense record

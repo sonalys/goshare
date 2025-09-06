@@ -6,6 +6,7 @@ import (
 
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
 	"github.com/sonalys/goshare/internal/domain"
+	"github.com/sonalys/goshare/internal/infrastructure/http/router/testutils"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
 	"github.com/sonalys/goshare/pkg/testfixtures"
 	"github.com/stretchr/testify/assert"
@@ -20,7 +21,7 @@ func Test_Create(t *testing.T) {
 		ctx := t.Context()
 
 		identity := testfixtures.Identity(t)
-		router, mocks := setup(t, withIdentity(identity))
+		router, mocks := testutils.Setup(t, testutils.WithIdentity(identity))
 
 		req := &server.LedgerCreateReq{
 			Name: "my new ledger",
@@ -48,7 +49,7 @@ func Test_Create(t *testing.T) {
 		ctx := t.Context()
 
 		identity := testfixtures.Identity(t)
-		router, mocks := setup(t, withIdentity(identity))
+		router, mocks := testutils.Setup(t, testutils.WithIdentity(identity))
 
 		req := &server.LedgerCreateReq{
 			Name: "my new ledger",
@@ -69,7 +70,7 @@ func Test_Create(t *testing.T) {
 		t.Parallel()
 		ctx := t.Context()
 
-		router, _ := setup(t, unauthenticated())
+		router, _ := testutils.Setup(t, testutils.WithIdentity(nil))
 		_, err := router.LedgerCreate(ctx, &server.LedgerCreateReq{})
 		require.ErrorIs(t, err, assert.AnError)
 	})

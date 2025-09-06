@@ -29,9 +29,35 @@ func trimTrailingSlashes(u *url.URL) {
 
 // Invoker invokes operations described by OpenAPI v3 specification.
 type Invoker interface {
+	ExpensesInvoker
 	HealthcheckInvoker
 	LedgersInvoker
+	RecordsInvoker
 	UsersInvoker
+}
+
+// ExpensesInvoker invokes operations described by OpenAPI v3 specification.
+//
+// x-gen-operation-group: Expenses
+type ExpensesInvoker interface {
+	// LedgerExpenseCreate invokes LedgerExpenseCreate operation.
+	//
+	// Creates a new expense record.
+	//
+	// POST /ledgers/{ledgerID}/expenses
+	LedgerExpenseCreate(ctx context.Context, request *Expense, params LedgerExpenseCreateParams) (*LedgerExpenseCreateOK, error)
+	// LedgerExpenseGet invokes LedgerExpenseGet operation.
+	//
+	// Retrieves an expense.
+	//
+	// GET /ledgers/{ledgerID}/expenses/{expenseID}
+	LedgerExpenseGet(ctx context.Context, params LedgerExpenseGetParams) (*Expense, error)
+	// LedgerExpenseList invokes LedgerExpenseList operation.
+	//
+	// Lists all expenses in the ledger.
+	//
+	// GET /ledgers/{ledgerID}/expenses
+	LedgerExpenseList(ctx context.Context, params LedgerExpenseListParams) (*LedgerExpenseListOK, error)
 }
 
 // HealthcheckInvoker invokes operations described by OpenAPI v3 specification.
@@ -56,36 +82,6 @@ type LedgersInvoker interface {
 	//
 	// POST /ledgers
 	LedgerCreate(ctx context.Context, request *LedgerCreateReq) (*LedgerCreateOK, error)
-	// LedgerExpenseCreate invokes LedgerExpenseCreate operation.
-	//
-	// Creates a new expense record.
-	//
-	// POST /ledgers/{ledgerID}/expenses
-	LedgerExpenseCreate(ctx context.Context, request *Expense, params LedgerExpenseCreateParams) (*LedgerExpenseCreateOK, error)
-	// LedgerExpenseGet invokes LedgerExpenseGet operation.
-	//
-	// Retrieves an expense.
-	//
-	// GET /ledgers/{ledgerID}/expenses/{expenseID}
-	LedgerExpenseGet(ctx context.Context, params LedgerExpenseGetParams) (*Expense, error)
-	// LedgerExpenseList invokes LedgerExpenseList operation.
-	//
-	// Lists all expenses in the ledger.
-	//
-	// GET /ledgers/{ledgerID}/expenses
-	LedgerExpenseList(ctx context.Context, params LedgerExpenseListParams) (*LedgerExpenseListOK, error)
-	// LedgerExpenseRecordCreate invokes LedgerExpenseRecordCreate operation.
-	//
-	// Creates a new expense record.
-	//
-	// POST /ledgers/{ledgerID}/expenses/{expenseID}/records
-	LedgerExpenseRecordCreate(ctx context.Context, request *LedgerExpenseRecordCreateReq, params LedgerExpenseRecordCreateParams) (*Expense, error)
-	// LedgerExpenseRecordDelete invokes LedgerExpenseRecordDelete operation.
-	//
-	// Delete an expense record.
-	//
-	// DELETE /ledgers/{ledgerID}/expenses/{expenseID}/records/{recordID}
-	LedgerExpenseRecordDelete(ctx context.Context, params LedgerExpenseRecordDeleteParams) error
 	// LedgerList invokes LedgerList operation.
 	//
 	// Lists all ledgers.
@@ -104,6 +100,24 @@ type LedgersInvoker interface {
 	//
 	// GET /ledgers/{ledgerID}/members
 	LedgerMemberList(ctx context.Context, params LedgerMemberListParams) (*LedgerMemberListOK, error)
+}
+
+// RecordsInvoker invokes operations described by OpenAPI v3 specification.
+//
+// x-gen-operation-group: Records
+type RecordsInvoker interface {
+	// LedgerExpenseRecordCreate invokes LedgerExpenseRecordCreate operation.
+	//
+	// Creates a new expense record.
+	//
+	// POST /ledgers/{ledgerID}/expenses/{expenseID}/records
+	LedgerExpenseRecordCreate(ctx context.Context, request *LedgerExpenseRecordCreateReq, params LedgerExpenseRecordCreateParams) (*Expense, error)
+	// LedgerExpenseRecordDelete invokes LedgerExpenseRecordDelete operation.
+	//
+	// Delete an expense record.
+	//
+	// DELETE /ledgers/{ledgerID}/expenses/{expenseID}/records/{recordID}
+	LedgerExpenseRecordDelete(ctx context.Context, params LedgerExpenseRecordDeleteParams) error
 }
 
 // UsersInvoker invokes operations described by OpenAPI v3 specification.

@@ -7,14 +7,14 @@ import (
 )
 
 type Router struct {
-	IdentityController *identitycontroller.Controller
+	IdentityController identitycontroller.Controller
 	UserController     usercontroller.Controller
 	SecurityHandler    ports.SecurityHandler
 }
 
 func New(
 	securityHandler ports.SecurityHandler,
-	identityController *identitycontroller.Controller,
+	identityController identitycontroller.Controller,
 	userController usercontroller.Controller,
 ) *Router {
 	return &Router{

@@ -5,11 +5,134 @@
 package identitycontrollermock
 
 import (
+	"context"
 	"sync"
 
 	"github.com/sonalys/goshare/internal/application/controllers/identitycontroller"
 	"github.com/sonalys/goshare/internal/application/v1"
 )
+
+// Ensure that Controller does implement identitycontroller.Controller.
+// If this is not the case, regenerate this file with mockery.
+var _ identitycontroller.Controller = &Controller{}
+
+// Controller is a mock implementation of identitycontroller.Controller.
+//
+//	func TestSomethingThatUsesController(t *testing.T) {
+//
+//		// make and configure a mocked identitycontroller.Controller
+//		mockedController := &Controller{
+//			LoginFunc: func(ctx context.Context, req identitycontroller.LoginRequest) (*identitycontroller.LoginResponse, error) {
+//				panic("mock out the Login method")
+//			},
+//			RegisterFunc: func(ctx context.Context, req identitycontroller.RegisterRequest) (*identitycontroller.RegisterResponse, error) {
+//				panic("mock out the Register method")
+//			},
+//		}
+//
+//		// use mockedController in code that requires identitycontroller.Controller
+//		// and then make assertions.
+//
+//	}
+type Controller struct {
+	// LoginFunc mocks the Login method.
+	LoginFunc func(ctx context.Context, req identitycontroller.LoginRequest) (*identitycontroller.LoginResponse, error)
+
+	// RegisterFunc mocks the Register method.
+	RegisterFunc func(ctx context.Context, req identitycontroller.RegisterRequest) (*identitycontroller.RegisterResponse, error)
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// Login holds details about calls to the Login method.
+		Login []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Req is the req argument value.
+			Req identitycontroller.LoginRequest
+		}
+		// Register holds details about calls to the Register method.
+		Register []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Req is the req argument value.
+			Req identitycontroller.RegisterRequest
+		}
+	}
+	lockLogin    sync.RWMutex
+	lockRegister sync.RWMutex
+}
+
+// Login calls LoginFunc.
+func (mock *Controller) Login(ctx context.Context, req identitycontroller.LoginRequest) (*identitycontroller.LoginResponse, error) {
+	if mock.LoginFunc == nil {
+		panic("Controller.LoginFunc: method is nil but Controller.Login was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+		Req identitycontroller.LoginRequest
+	}{
+		Ctx: ctx,
+		Req: req,
+	}
+	mock.lockLogin.Lock()
+	mock.calls.Login = append(mock.calls.Login, callInfo)
+	mock.lockLogin.Unlock()
+	return mock.LoginFunc(ctx, req)
+}
+
+// LoginCalls gets all the calls that were made to Login.
+// Check the length with:
+//
+//	len(mockedController.LoginCalls())
+func (mock *Controller) LoginCalls() []struct {
+	Ctx context.Context
+	Req identitycontroller.LoginRequest
+} {
+	var calls []struct {
+		Ctx context.Context
+		Req identitycontroller.LoginRequest
+	}
+	mock.lockLogin.RLock()
+	calls = mock.calls.Login
+	mock.lockLogin.RUnlock()
+	return calls
+}
+
+// Register calls RegisterFunc.
+func (mock *Controller) Register(ctx context.Context, req identitycontroller.RegisterRequest) (*identitycontroller.RegisterResponse, error) {
+	if mock.RegisterFunc == nil {
+		panic("Controller.RegisterFunc: method is nil but Controller.Register was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+		Req identitycontroller.RegisterRequest
+	}{
+		Ctx: ctx,
+		Req: req,
+	}
+	mock.lockRegister.Lock()
+	mock.calls.Register = append(mock.calls.Register, callInfo)
+	mock.lockRegister.Unlock()
+	return mock.RegisterFunc(ctx, req)
+}
+
+// RegisterCalls gets all the calls that were made to Register.
+// Check the length with:
+//
+//	len(mockedController.RegisterCalls())
+func (mock *Controller) RegisterCalls() []struct {
+	Ctx context.Context
+	Req identitycontroller.RegisterRequest
+} {
+	var calls []struct {
+		Ctx context.Context
+		Req identitycontroller.RegisterRequest
+	}
+	mock.lockRegister.RLock()
+	calls = mock.calls.Register
+	mock.lockRegister.RUnlock()
+	return calls
+}
 
 // Ensure that IdentityEncoder does implement identitycontroller.IdentityEncoder.
 // If this is not the case, regenerate this file with mockery.

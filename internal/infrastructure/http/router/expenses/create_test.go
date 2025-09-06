@@ -1,4 +1,4 @@
-package ledgers_test
+package expenses_test
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
 	v1 "github.com/sonalys/goshare/internal/application/v1"
 	"github.com/sonalys/goshare/internal/domain"
+	"github.com/sonalys/goshare/internal/infrastructure/http/router/testutils"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
 	"github.com/sonalys/goshare/pkg/testfixtures"
 	"github.com/stretchr/testify/assert"
@@ -73,7 +74,7 @@ func Test_ExpenseCreate(t *testing.T) {
 		ctx := t.Context()
 
 		identity := testfixtures.Identity(t)
-		router, mocks := setup(t, withIdentity(identity))
+		router, mocks := testutils.Setup(t, testutils.WithIdentity(identity))
 
 		td := getTestData(t)
 
@@ -101,7 +102,7 @@ func Test_ExpenseCreate(t *testing.T) {
 		ctx := t.Context()
 
 		identity := testfixtures.Identity(t)
-		router, mocks := setup(t, withIdentity(identity))
+		router, mocks := testutils.Setup(t, testutils.WithIdentity(identity))
 
 		td := getTestData(t)
 
@@ -119,7 +120,7 @@ func Test_ExpenseCreate(t *testing.T) {
 		t.Parallel()
 		ctx := t.Context()
 
-		router, _ := setup(t, unauthenticated())
+		router, _ := testutils.Setup(t, testutils.WithIdentity(nil))
 		td := getTestData(t)
 
 		_, err := router.LedgerExpenseCreate(ctx, td.expense, td.params)
@@ -131,7 +132,7 @@ func Test_ExpenseCreate(t *testing.T) {
 		ctx := t.Context()
 
 		identity := testfixtures.Identity(t)
-		router, _ := setup(t, withIdentity(identity))
+		router, _ := testutils.Setup(t, testutils.WithIdentity(identity))
 		td := getTestData(t)
 		td.expense.Records[0].Type = "invalid"
 

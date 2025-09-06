@@ -21,7 +21,7 @@ type (
 	}
 )
 
-func (c *Controller) Login(ctx context.Context, req LoginRequest) (*LoginResponse, error) {
+func (c *controller) Login(ctx context.Context, req LoginRequest) (*LoginResponse, error) {
 	ctx, span := c.tracer.Start(ctx, "login")
 	defer span.End()
 
