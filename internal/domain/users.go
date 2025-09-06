@@ -5,11 +5,15 @@ import (
 	"net/mail"
 	"time"
 
+	"github.com/sonalys/goshare/internal/domain/aggregates"
+	"github.com/sonalys/goshare/internal/domain/events"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type (
 	User struct {
+		*aggregates.Base
+
 		CreatedAt       time.Time
 		Email           string
 		FirstName       string
@@ -57,6 +61,18 @@ func (req *NewUserRequest) validate() error {
 	return form.Close()
 }
 
+func NewUserAggregate() *User {
+	user := &User{}
+
+	base := &aggregates.Base{
+		Handler: user,
+	}
+
+	user.Base = base
+
+	return user
+}
+
 func NewUser(req NewUserRequest) (*User, error) {
 	if err := req.validate(); err != nil {
 		return nil, err
@@ -77,6 +93,10 @@ func NewUser(req NewUserRequest) (*User, error) {
 		LedgersCount:    0,
 		CreatedAt:       Now(),
 	}, nil
+}
+
+func (u *User) When(event events.Event) error {
+	return nil
 }
 
 func (user *User) CreateLedger(name string) (*Ledger, error) {
