@@ -46,23 +46,14 @@ func watcher(cid string) {
 	}
 }
 
-func Postgres(t *testing.T) postgres.Connection {
-	lock.Lock()
-	defer lock.Unlock()
-
-	if conn != nil {
-		return conn
-	}
-
+func initializeContainer(t *testing.T) string {
 	ctx := context.Background()
 
+	t.Setenv("TESTCONTAINERS_RYUK_DISABLED", "true")
 	dbName := "users"
 	dbUser := "user"
 	dbPassword := "password"
 
-	t.Setenv("TESTCONTAINERS_RYUK_DISABLED", "true")
-
-	var err error
 	container, err := module.Run(ctx,
 		"postgres:17-alpine",
 		module.WithDatabase(dbName),
@@ -78,14 +69,34 @@ func Postgres(t *testing.T) postgres.Connection {
 	require.NoError(t, err)
 
 	slog.Debug(ctx, "postgres started", slog.WithString("connStr", connStr))
+	watcher(container.GetContainerID())
 
+	return connStr
+}
+
+func Postgres(t *testing.T) postgres.Connection {
+	lock.Lock()
+	defer lock.Unlock()
+
+	if conn != nil {
+		return conn
+	}
+
+	ctx := context.Background()
+	connStr := os.Getenv("POSTGRES_CONN_STR")
+
+	if connStr == "" {
+		connStr = initializeContainer(t)
+	}
+
+	slog.Info(ctx, "waiting for postgres test container")
+
+	var err error
 	conn, err = postgres.New(ctx, connStr)
 	require.NoError(t, err)
 
 	err = migrations.MigrateUp(ctx, connStr)
 	require.NoError(t, err)
-
-	watcher(container.GetContainerID())
 
 	return conn
 }
