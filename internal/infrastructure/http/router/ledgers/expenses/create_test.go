@@ -47,7 +47,7 @@ func Test_LedgerExpenseCreate(t *testing.T) {
 		}
 	}
 
-	assertCreateFunc := func(t *testing.T, identity *application.Identity, td testData, got usercontroller.CreateExpenseRequest) {
+	assertController := func(t *testing.T, identity *application.Identity, td testData, got usercontroller.CreateExpenseRequest) {
 		expense := td.expense
 		params := td.params
 
@@ -82,7 +82,7 @@ func Test_LedgerExpenseCreate(t *testing.T) {
 		params := td.params
 
 		mocks.ExpenseController.CreateFunc = func(ctx context.Context, got usercontroller.CreateExpenseRequest) (*usercontroller.CreateExpenseResponse, error) {
-			assertCreateFunc(t, identity, td, got)
+			assertController(t, identity, td, got)
 
 			return &usercontroller.CreateExpenseResponse{
 				ID: domain.ConvertID(td.params.LedgerID),
@@ -105,7 +105,7 @@ func Test_LedgerExpenseCreate(t *testing.T) {
 		td := getTestData(t)
 
 		mocks.ExpenseController.CreateFunc = func(ctx context.Context, got usercontroller.CreateExpenseRequest) (*usercontroller.CreateExpenseResponse, error) {
-			assertCreateFunc(t, identity, td, got)
+			assertController(t, identity, td, got)
 
 			return nil, assert.AnError
 		}
