@@ -34,7 +34,7 @@ func Expense(t *testing.T, ledger *domain.Ledger, from, to domain.ID) *domain.Ex
 	currentMembers := kset.HashMapKey(slices.Collect(maps.Keys(ledger.Members))...)
 	newMembers := kset.HashMapKey(from, to)
 
-	err := ledger.AddMember(ledger.CreatedBy, newMembers.Difference(currentMembers).ToSlice()...)
+	err := ledger.AddMember(ledger.CreatedBy, newMembers.Difference(currentMembers).Slice()...)
 	require.NoError(t, err)
 
 	expense, err := ledger.CreateExpense(domain.CreateExpenseRequest{
