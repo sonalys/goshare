@@ -27,7 +27,7 @@ func (a *Router) AuthenticationLogin(ctx context.Context, req *server.Authentica
 			StatusCode: http.StatusUnauthorized,
 			Response: server.ErrorResponse{
 				Errors: []server.Error{
-					server.Error{
+					{
 						Code:    server.ErrorCodeEmailPasswordMismatch,
 						Message: "username or password invalid",
 						Metadata: server.NewOptErrorMetadata(server.ErrorMetadata{
