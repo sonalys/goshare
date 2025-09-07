@@ -13,9 +13,9 @@ import (
 	"github.com/sonalys/goshare/internal/application/controllers/usercontroller"
 	"github.com/sonalys/goshare/internal/infrastructure/http/middlewares"
 	"github.com/sonalys/goshare/internal/infrastructure/http/router"
-	"github.com/sonalys/goshare/pkg/otel"
-	"github.com/sonalys/goshare/pkg/secrets"
-	"github.com/sonalys/goshare/pkg/slog"
+	"github.com/sonalys/goshare/internal/pkg/otel"
+	"github.com/sonalys/goshare/internal/pkg/secrets"
+	"github.com/sonalys/goshare/internal/pkg/slog"
 )
 
 var version string = "dev"

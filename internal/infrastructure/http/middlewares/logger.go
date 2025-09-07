@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/ogen-go/ogen/middleware"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
-	"github.com/sonalys/goshare/pkg/slog"
+	"github.com/sonalys/goshare/internal/pkg/slog"
 	"go.opentelemetry.io/otel/trace"
 )
 

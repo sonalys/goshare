@@ -12,7 +12,7 @@ import (
 
 	"github.com/sonalys/goshare/internal/infrastructure/postgres"
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/migrations"
-	"github.com/sonalys/goshare/pkg/slog"
+	"github.com/sonalys/goshare/internal/pkg/slog"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	module "github.com/testcontainers/testcontainers-go/modules/postgres"

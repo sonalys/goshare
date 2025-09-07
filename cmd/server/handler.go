@@ -7,8 +7,8 @@ import (
 
 	"github.com/sonalys/goshare/internal/infrastructure/http/middlewares"
 	"github.com/sonalys/goshare/internal/infrastructure/http/server"
-	"github.com/sonalys/goshare/pkg/otel"
-	"github.com/sonalys/goshare/pkg/slog"
+	"github.com/sonalys/goshare/internal/pkg/otel"
+	"github.com/sonalys/goshare/internal/pkg/slog"
 )
 
 func setupHandler(ctx context.Context, securityHandler server.SecurityHandler, client server.Handler) http.Handler {

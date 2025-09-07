@@ -3,8 +3,8 @@ package identitycontroller
 import (
 	"context"
 
+	"github.com/sonalys/goshare/internal/pkg/otel"
 	"github.com/sonalys/goshare/internal/ports"
-	"github.com/sonalys/goshare/pkg/otel"
 	"go.opentelemetry.io/otel/trace"
 )
 

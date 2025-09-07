@@ -6,8 +6,8 @@ import (
 	"os/signal"
 
 	"github.com/sonalys/goshare/internal/infrastructure/postgres/migrations"
-	"github.com/sonalys/goshare/pkg/secrets"
-	"github.com/sonalys/goshare/pkg/slog"
+	"github.com/sonalys/goshare/internal/pkg/secrets"
+	"github.com/sonalys/goshare/internal/pkg/slog"
 )
 
 func main() {

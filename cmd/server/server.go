@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/sonalys/goshare/pkg/slog"
+	"github.com/sonalys/goshare/internal/pkg/slog"
 )
 
 type Server struct {

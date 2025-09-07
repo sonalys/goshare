@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/sonalys/goshare/internal/domain"
+	"github.com/sonalys/goshare/internal/pkg/testfixtures"
 	"github.com/sonalys/goshare/internal/ports"
-	"github.com/sonalys/goshare/pkg/testfixtures"
 	"github.com/stretchr/testify/require"
 )
 

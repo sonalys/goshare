@@ -1,7 +1,7 @@
 package usercontroller
 
 import (
-	"github.com/sonalys/goshare/pkg/otel"
+	"github.com/sonalys/goshare/internal/pkg/otel"
 )
 
 type (
